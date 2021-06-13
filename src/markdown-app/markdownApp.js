@@ -64,28 +64,32 @@ export class MarkdownApp {
     // Initialize the global application state
     init() {
         this.windowHashChangeArgs = ['hashchange', () => this.render(), false];
-        window.addEventListener(...this.windowHashChangeArgs);
+        this.window.addEventListener(...this.windowHashChangeArgs);
     }
 
     // Uninitialize the global application state
     uninit() {
         if (this.windowHashChangeArgs !== null) {
-            window.removeEventListener(...this.windowHashChangeArgs);
+            this.window.removeEventListener(...this.windowHashChangeArgs);
             this.windowHashChangeArgs = null;
         }
     }
 
     // Helper function to parse and validate the hash parameters
-    updateParams(params = null) {
+    updateParams(paramStr = null) {
         // Clear, then validate the hash parameters (may throw)
         this.params = null;
-        this.params = validateType(markdownAppTypes, 'MarkdownApp', decodeQueryString(params));
+
+        // Decode the params string
+        const paramStrActual = paramStr !== null ? paramStr : this.window.location.hash.substring(1);
+        const params = decodeQueryString(paramStrActual);
+
+        // Validate the params
+        this.params = validateType(markdownAppTypes, 'MarkdownApp', params);
     }
 
-    /**
-     * Render the Markdown application
-     */
-    render() {
+    // Render the Markdown application
+    async render() {
         // Validate hash parameters
         try {
             const paramsPrev = this.params;
@@ -101,59 +105,45 @@ export class MarkdownApp {
         }
 
         // Clear the page
+        this.window.document.title = 'MarkdownApp';
         renderElements(this.window.document.body);
 
         // Type model URL provided?
-        const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
         if ('cmd' in this.params) {
             // 'help' in this.params.cmd
-            this.window.document.title = 'MarkdownApp';
-            renderElements(this.window.document.body, (new UserTypeElements(this.params)).getElements(markdownAppTypes, 'MarkdownApp'));
+            const helpElements = (new UserTypeElements(this.params)).getElements(markdownAppTypes, 'MarkdownApp');
+            renderElements(this.window.document.body, helpElements);
         } else {
             // Load the Markdown resource
-            window.fetch(markdownURL).
-                then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`Could not fetch '${markdownURL}': ${response.statusText}`);
-                    }
-                    return response.text();
-                }).then((markdownText) => {
-                    this.renderMarkdownPage(markdownText, markdownURL);
-                }).catch(({message}) => {
-                    this.renderErrorPage(message);
-                });
-        }
-    }
+            const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
+            const response = await this.window.fetch(markdownURL);
+            const markdownText = await response.text();
 
-    // Helper function to render a Markdown page
-    renderMarkdownPage(markdownText, markdownURL) {
-        const model = parseMarkdown(markdownText);
+            // Render the Markdown
+            const markdownModel = parseMarkdown(markdownText);
+            const markdownElem = markdownElements(markdownModel, markdownURL);
+            renderElements(this.window.document.body, markdownElem);
 
-        // Determine the page title
-        let title = 'MarkdownApp';
-        for (const part of model.parts) {
-            if ('paragraph' in part && 'style' in part.paragraph) {
-                title = part.paragraph.spans.map((span) => ('text' in span ? span.text : '')).join('');
-                break;
+            // Set the Markdown title, if any
+            const markdownTitle = MarkdownApp.getMarkdownTitle(markdownModel);
+            if (markdownTitle !== null) {
+                this.window.document.title = markdownTitle;
             }
         }
-
-        // Render the Markdown page
-        this.window.document.title = title;
-        renderElements(this.window.document.body, markdownElements(model, markdownURL));
     }
 
-    // Helper function to render an error page
-    renderErrorPage(message) {
-        this.window.document.title = 'Error';
-        renderElements(this.window.document.body, MarkdownApp.errorPage(message));
-    }
-
-    // Helper function to generate the error page's element hierarchy model
-    static errorPage(message) {
-        return {
-            'html': 'p',
-            'elem': {'text': `Error: ${message}`}
-        };
+    /**
+     * Get a Markdown model's title. Returns null if no title is found.
+     *
+     * @param {Object} markdownModel - The markdown model
+     * @returns {?string}
+     */
+    static getMarkdownTitle(markdownModel) {
+        for (const part of markdownModel.parts) {
+            if ('paragraph' in part && 'style' in part.paragraph) {
+                return part.paragraph.spans.map((span) => ('text' in span ? span.text : '')).join('');
+            }
+        }
+        return null;
     }
 }
