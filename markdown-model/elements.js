@@ -86,7 +86,7 @@ function paragraphSpanElements(spans, url) {
         // Link span?
         } else if ('link' in span) {
             const {link} = span;
-            const href = url !== null && !isAbsoluteURL(link.href) ? `${getBaseURL(url)}${link.href}` : link.href;
+            const href = url !== null && isRelativeURL(link.href) ? `${getBaseURL(url)}${link.href}` : link.href;
             const linkElements = {
                 'html': 'a',
                 'attr': {'href': href},
@@ -100,7 +100,7 @@ function paragraphSpanElements(spans, url) {
         // Image span?
         } else if ('image' in span) {
             const {image} = span;
-            const src = url !== null && !isAbsoluteURL(image.src) ? `${getBaseURL(url)}${image.src}` : image.src;
+            const src = url !== null && isRelativeURL(image.src) ? `${getBaseURL(url)}${image.src}` : image.src;
             const imageElement = {
                 'html': 'img',
                 'attr': {'src': src, 'alt': image.alt}
@@ -115,9 +115,9 @@ function paragraphSpanElements(spans, url) {
 }
 
 
-// Helper function to check if a URL is absolute
-function isAbsoluteURL(url) {
-    return rAbsoluteURL.test(url);
+// Helper function to check if a URL is relative
+function isRelativeURL(url) {
+    return !url.startsWith('#') && !rAbsoluteURL.test(url);
 }
 
 const rAbsoluteURL = /^[a-z]{3,5}:/;
