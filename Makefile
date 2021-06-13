@@ -27,6 +27,10 @@ JSDOC_ARGS := $(JSDOC_ARGS) README.md
 clean:
 	rm -rf Makefile.base jsdoc.json .eslintrc.cjs
 
+.PHONY: run
+run: app
+	python3 -m http.server --directory build/app
+
 .PHONY: app
 commit: app
 app: build/npm.build
@@ -44,7 +48,3 @@ app: build/npm.build
 		sed -E "s/from '(element-model|markdown-model|schema-markdown)/from '..\/\1/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
-
-.PHONY: run
-run: app
-	python3 -m http.server --directory build/app
