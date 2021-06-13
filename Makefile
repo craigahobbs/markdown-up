@@ -28,6 +28,7 @@ clean:
 	rm -rf Makefile.base jsdoc.json .eslintrc.cjs
 
 .PHONY: app
+commit: app
 app: build/npm.build
 	rm -rf build/app/
 	mkdir -p build/app/
