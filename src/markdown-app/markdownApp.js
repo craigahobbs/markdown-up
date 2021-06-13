@@ -139,14 +139,6 @@ export class MarkdownApp {
     // Helper function to render an error page
     renderErrorPage(message) {
         this.window.document.title = 'Error';
-        renderElements(this.window.document.body, MarkdownApp.errorPage(message));
-    }
-
-    // Helper function to generate the error page's element hierarchy model
-    static errorPage(message) {
-        return {
-            'html': 'p',
-            'elem': {'text': `Error: ${message}`}
-        };
+        renderElements(this.window.document.body, {'html': 'p', 'elem': {'text': `Error: ${message}`}});
     }
 }
