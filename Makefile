@@ -1,5 +1,5 @@
 # Licensed under the MIT License
-# https://github.com/craigahobbs/markdown-app/blob/main/LICENSE
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 # Download JavaScript Build
 define WGET
@@ -41,7 +41,7 @@ app: build/npm.build
 	cp -R \
 		app/* \
 		README.md \
-		src/markdown-app \
+		src/markdown-up \
 		node_modules/element-model/src/element-model \
 		node_modules/markdown-model/src/markdown-model \
 		node_modules/schema-markdown/src/schema-markdown \

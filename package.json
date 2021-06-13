@@ -1,11 +1,11 @@
 {
     "type": "module",
-    "name": "markdown-app",
-    "version": "0.9.1",
+    "name": "markdown-up",
+    "version": "0.9.0",
     "description": "JavaScript Markdown viewer application",
     "keywords": "markdown viewer application",
-    "homepage": "https://github.com/craigahobbs/markdown-app#readme",
-    "bugs": "https://github.com/craigahobbs/markdown-app/issues",
+    "homepage": "https://github.com/craigahobbs/markdown-up#readme",
+    "bugs": "https://github.com/craigahobbs/markdown-up/issues",
     "license": "MIT",
     "author": {
         "name": "Craig A. Hobbs",
@@ -14,7 +14,7 @@
     },
     "files": [
         "index.js",
-        "src/markdown-app/**/*"
+        "src/markdown-up/**/*"
     ],
     "scripts": {
         "test": "ava -v 'src/tests/**/*.js'"

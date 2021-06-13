@@ -1,9 +1,9 @@
 // Licensed under the MIT License
-// https://github.com/craigahobbs/markdown-app/blob/main/LICENSE
+// https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 /* eslint-disable id-length */
 
-import {MarkdownApp} from '../markdown-app/markdownApp.js';
+import {MarkdownApp} from '../markdown-up/markdownApp.js';
 import Window from 'window';
 import test from 'ava';
 

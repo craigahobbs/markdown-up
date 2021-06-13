@@ -1,4 +1,4 @@
 // Licensed under the MIT License
-// https://github.com/craigahobbs/markdown-app/blob/main/LICENSE
+// https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-export * from './src/markdown-app/index.js';
+export * from './src/markdown-up/index.js';
