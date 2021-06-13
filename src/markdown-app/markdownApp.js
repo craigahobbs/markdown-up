@@ -2,7 +2,7 @@
 // https://github.com/craigahobbs/markdown-app/blob/main/LICENSE
 
 import {SchemaMarkdownParser, UserTypeElements, decodeQueryString, validateType} from 'schema-markdown/index.js';
-import {markdownElements, parseMarkdown} from 'markdown-model/index.js';
+import {getMarkdownTitle, markdownElements, parseMarkdown} from 'markdown-model/index.js';
 import {renderElements} from 'element-model/index.js';
 
 
@@ -117,33 +117,36 @@ export class MarkdownApp {
             // Load the Markdown resource
             const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
             const response = await this.window.fetch(markdownURL);
-            const markdownText = await response.text();
+            if (!response.ok) {
+                this.renderErrorPage(`Could not fetch '${markdownURL}' - ${response.statusText}`);
+            } else {
+                const markdownText = await response.text();
 
-            // Render the Markdown
-            const markdownModel = parseMarkdown(markdownText);
-            const markdownElem = markdownElements(markdownModel, markdownURL);
-            renderElements(this.window.document.body, markdownElem);
+                // Render the Markdown
+                const markdownModel = parseMarkdown(markdownText);
+                const markdownElem = markdownElements(markdownModel, markdownURL);
+                renderElements(this.window.document.body, markdownElem);
 
-            // Set the Markdown title, if any
-            const markdownTitle = MarkdownApp.getMarkdownTitle(markdownModel);
-            if (markdownTitle !== null) {
-                this.window.document.title = markdownTitle;
+                // Set the Markdown title, if any
+                const markdownTitle = getMarkdownTitle(markdownModel);
+                if (markdownTitle !== null) {
+                    this.window.document.title = markdownTitle;
+                }
             }
         }
     }
 
-    /**
-     * Get a Markdown model's title. Returns null if no title is found.
-     *
-     * @param {Object} markdownModel - The markdown model
-     * @returns {?string}
-     */
-    static getMarkdownTitle(markdownModel) {
-        for (const part of markdownModel.parts) {
-            if ('paragraph' in part && 'style' in part.paragraph) {
-                return part.paragraph.spans.map((span) => ('text' in span ? span.text : '')).join('');
-            }
-        }
-        return null;
+    // Helper function to render an error page
+    renderErrorPage(message) {
+        this.window.document.title = 'Error';
+        renderElements(this.window.document.body, MarkdownApp.errorPage(message));
+    }
+
+    // Helper function to generate the error page's element hierarchy model
+    static errorPage(message) {
+        return {
+            'html': 'p',
+            'elem': {'text': `Error: ${message}`}
+        };
     }
 }
