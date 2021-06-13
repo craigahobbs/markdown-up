@@ -15,6 +15,35 @@ export function validateMarkdownModel(markdown) {
 }
 
 
+/**
+ * Get a Markdown model's title. Returns null if no title is found.
+ *
+ * @param {Object} markdown - The markdown model
+ * @returns {string|null}
+ */
+export function getMarkdownTitle(markdown) {
+    for (const part of markdown.parts) {
+        if ('paragraph' in part && 'style' in part.paragraph) {
+            return part.paragraph.spans.map(getSpanText).join('');
+        }
+    }
+    return null;
+}
+
+
+// Helpter function to get a Markdown span object's text
+function getSpanText(span) {
+    if ('image' in span) {
+        return span.image.alt;
+    } else if ('link' in span) {
+        return span.link.spans.map(getSpanText).join('');
+    } else if ('style' in span) {
+        return span.style.spans.map(getSpanText).join('');
+    }
+    return span.text;
+}
+
+
 // The Mardown model defined as Schema Markdown
 const markdownModelSmd = `\
 # Markdown document struct
