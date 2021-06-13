@@ -36,6 +36,8 @@ commit: app
 app: build/npm.build
 	rm -rf build/app/
 	mkdir -p build/app/
+
+    # Copy dependencies
 	cp -R \
 		app/* \
 		README.md \
@@ -44,6 +46,8 @@ app: build/npm.build
 		node_modules/markdown-model/src/markdown-model \
 		node_modules/schema-markdown/src/schema-markdown \
 		build/app/
+
+    # Fix imports
 	for FILE in `find build/app/* -name '*.js'`; do \
 		sed -E "s/from '(element-model|markdown-model|schema-markdown)/from '..\/\1/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
