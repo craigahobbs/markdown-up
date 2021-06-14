@@ -74,8 +74,10 @@ export class MarkdownApp {
 
     // Render the Markdown application
     async render() {
-        // Validate hash parameters
+        let appTitle = 'MarkdownUp';
+        let appElements = null;
         try {
+            // Validate hash parameters
             const paramsPrev = this.params;
             this.updateParams();
 
@@ -83,46 +85,43 @@ export class MarkdownApp {
             if (paramsPrev !== null && JSON.stringify(paramsPrev) === JSON.stringify(this.params)) {
                 return;
             }
+
+            // Render the application elements
+            [appTitle, appElements] = await this.appElements(appTitle);
         } catch ({message}) {
-            this.renderErrorPage(message);
-            return;
+            appElements = MarkdownApp.errorElements(message);
         }
 
-        // Clear the page
-        this.window.document.title = 'MarkdownApp';
-        renderElements(this.window.document.body);
-
-        // Type model URL provided?
-        if ('cmd' in this.params) {
-            // 'help' in this.params.cmd
-            const helpElements = (new UserTypeElements(this.params)).getElements(markdownAppTypes, 'MarkdownApp');
-            renderElements(this.window.document.body, helpElements);
-        } else {
-            // Load the Markdown resource
-            const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
-            const response = await this.window.fetch(markdownURL);
-            if (!response.ok) {
-                this.renderErrorPage(`Could not fetch '${markdownURL}' - ${response.statusText}`);
-            } else {
-                const markdownText = await response.text();
-
-                // Render the Markdown
-                const markdownModel = parseMarkdown(markdownText);
-                const markdownElem = markdownElements(markdownModel, markdownURL);
-                renderElements(this.window.document.body, markdownElem);
-
-                // Set the Markdown title, if any
-                const markdownTitle = getMarkdownTitle(markdownModel);
-                if (markdownTitle !== null) {
-                    this.window.document.title = markdownTitle;
-                }
-            }
-        }
+        // Render the application
+        this.window.document.title = appTitle;
+        renderElements(this.window.document.body, appElements);
     }
 
-    // Helper function to render an error page
-    renderErrorPage(message) {
-        this.window.document.title = 'Error';
-        renderElements(this.window.document.body, {'html': 'p', 'elem': {'text': `Error: ${message}`}});
+    // Generate the Markdown application's element model
+    async appElements(appTitle) {
+        // Application command?
+        if ('cmd' in this.params) {
+            // 'help' in this.params.cmd
+            return [appTitle, (new UserTypeElements(this.params)).getElements(markdownAppTypes, 'MarkdownApp')];
+        }
+
+        // Load the Markdown resource
+        const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
+        const response = await this.window.fetch(markdownURL);
+        if (!response.ok) {
+            // Fetch error
+            return [appTitle, MarkdownApp.errorElements(`Could not fetch '${markdownURL}' - ${response.statusText}`)];
+        }
+
+        // Render the Markdown
+        const markdownText = await response.text();
+        const markdownModel = parseMarkdown(markdownText);
+        const markdownTitle = getMarkdownTitle(markdownModel);
+        return [markdownTitle !== null ? markdownTitle : appTitle, markdownElements(markdownModel, markdownURL)];
+    }
+
+    // Generate an error page's elements
+    static errorElements(message) {
+        return {'html': 'p', 'elem': {'text': `Error: ${message}`}};
     }
 }

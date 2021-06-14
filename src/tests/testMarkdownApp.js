@@ -17,10 +17,10 @@ test('MarkdownApp, constructor', (t) => {
 });
 
 
-test('MarkdownApp.run, help command', (t) => {
+test('MarkdownApp.run, help command', async (t) => {
     const window = new Window();
     window.location.hash = '#cmd.help=1';
-    const markdownApp = MarkdownApp.run(window, 'README.md');
+    const markdownApp = await MarkdownApp.run(window, 'README.md');
     t.is(markdownApp.window, window);
     t.is(markdownApp.defaultMarkdownURL, 'README.md');
     t.deepEqual(markdownApp.params, {'cmd': {'help': 1}});
