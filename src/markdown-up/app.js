@@ -1,8 +1,9 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-import {SchemaMarkdownParser, UserTypeElements, decodeQueryString, validateType} from 'schema-markdown/index.js';
+import {SchemaMarkdownParser, decodeQueryString, validateType} from 'schema-markdown/index.js';
 import {getMarkdownTitle, markdownElements, parseMarkdown} from 'markdown-model/index.js';
+import {UserTypeElements} from 'schema-markdown-doc/index.js';
 import {renderElements} from 'element-model/index.js';
 
 
