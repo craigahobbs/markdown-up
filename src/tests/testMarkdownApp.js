@@ -66,3 +66,74 @@ test('MarkdownApp.appElements', async (t) => {
         ]
     );
 });
+
+
+test('MarkdownApp.appElements, no title', async (t) => {
+    const window = new Window();
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('No title');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const markdownApp = new MarkdownApp(window, 'README.md');
+    markdownApp.updateParams('#');
+    t.deepEqual(
+        await markdownApp.appElements('MarkdownUp'),
+        [
+            'MarkdownUp',
+            [
+                {'html': 'p', 'elem': [{'text': 'No title'}]}
+            ]
+        ]
+    );
+});
+
+
+test('MarkdownApp.appElements, url', async (t) => {
+    const window = new Window();
+    const fetchResolve = (url) => {
+        t.is(url, 'other.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const markdownApp = new MarkdownApp(window, 'README.md');
+    markdownApp.updateParams('url=other.md');
+    t.deepEqual(
+        await markdownApp.appElements('MarkdownUp'),
+        [
+            'Hello',
+            [
+                {'html': 'h1', 'elem': [{'text': 'Hello'}]}
+            ]
+        ]
+    );
+});
+
+
+test('MarkdownApp.appElements, fetch error', async (t) => {
+    const window = new Window();
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': false};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const markdownApp = new MarkdownApp(window, 'README.md');
+    markdownApp.updateParams('#');
+    t.deepEqual(
+        await markdownApp.appElements('MarkdownUp'),
+        [
+            'MarkdownUp',
+            {'html': 'p', 'elem': {'text': "Error: Could not fetch 'README.md' - undefined"}}
+        ]
+    );
+});
