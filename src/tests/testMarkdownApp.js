@@ -3,7 +3,7 @@
 
 /* eslint-disable id-length */
 
-import {MarkdownApp} from '../markdown-up/markdownApp.js';
+import {MarkdownApp} from '../markdown-up/index.js';
 import Window from 'window';
 import test from 'ava';
 
