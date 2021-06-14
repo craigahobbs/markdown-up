@@ -45,6 +45,7 @@ app: build/npm.build
 		node_modules/element-model/src/element-model \
 		node_modules/markdown-model/src/markdown-model \
 		node_modules/schema-markdown/src/schema-markdown \
+		node_modules/schema-markdown-doc/src/schema-markdown-doc \
 		build/app/
 
     # Fix imports
