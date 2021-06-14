@@ -1,3 +1,7 @@
+## 0.9.3 (2021-06-14)
+
+- [d40beb4](https://github.com/craigahobbs/markdown-app/commit/d40beb4) - simplify error logic
+
 ## 0.9.2 (2021-06-14)
 
 - [8b670a4](https://github.com/craigahobbs/markdown-app/commit/8b670a4) - rename markdownApp.js to app.js
