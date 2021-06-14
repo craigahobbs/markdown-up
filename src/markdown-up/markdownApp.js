@@ -30,7 +30,6 @@ union Command
  *
  * @property {Object} window - The web browser window object
  * @property {string} defaultMarkdownURL - The default Markdown resource URL
- * @property {Array} windowHashChangeArgs - The arguments for the window.addEventListener for "hashchange"
  * @property {Object} params - The validated hash parameters object
  */
 export class MarkdownApp {
@@ -43,7 +42,6 @@ export class MarkdownApp {
     constructor(window, defaultMarkdownURL) {
         this.window = window;
         this.defaultMarkdownURL = defaultMarkdownURL;
-        this.windowHashChangeArgs = null;
         this.params = null;
     }
 
@@ -56,23 +54,9 @@ export class MarkdownApp {
      */
     static run(window, defaultMarkdownURL) {
         const app = new MarkdownApp(window, defaultMarkdownURL);
-        app.init();
         app.render();
+        window.addEventListener('hashchange', () => app.render(), false);
         return app;
-    }
-
-    // Initialize the global application state
-    init() {
-        this.windowHashChangeArgs = ['hashchange', () => this.render(), false];
-        this.window.addEventListener(...this.windowHashChangeArgs);
-    }
-
-    // Uninitialize the global application state
-    uninit() {
-        if (this.windowHashChangeArgs !== null) {
-            this.window.removeEventListener(...this.windowHashChangeArgs);
-            this.windowHashChangeArgs = null;
-        }
     }
 
     // Helper function to parse and validate the hash parameters
