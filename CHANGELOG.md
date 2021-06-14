@@ -1,3 +1,7 @@
+## 0.9.4 (2021-06-14)
+
+- [d14f944](https://github.com/craigahobbs/markdown-app/commit/d14f944) - add schema-markdown-doc dependency
+
 ## 0.9.3 (2021-06-14)
 
 - [d40beb4](https://github.com/craigahobbs/markdown-app/commit/d40beb4) - simplify error logic
