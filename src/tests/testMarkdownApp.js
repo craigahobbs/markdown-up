@@ -24,6 +24,7 @@ test('MarkdownApp.run, help command', async (t) => {
     t.is(markdownApp.window, window);
     t.is(markdownApp.defaultMarkdownURL, 'README.md');
     t.deepEqual(markdownApp.params, {'cmd': {'help': 1}});
+    t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
         '<h1 id="cmd.help=1&amp;type_MarkdownApp"><a class="linktarget">MarkdownApp</a></h1>'
     ));
@@ -37,5 +38,31 @@ test('MarkdownApp.run, hash parameter error', async (t) => {
     t.is(markdownApp.window, window);
     t.is(markdownApp.defaultMarkdownURL, 'README.md');
     t.is(markdownApp.params, null);
+    t.is(window.document.title, 'MarkdownUp');
     t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
+});
+
+
+test('MarkdownApp.appElements', async (t) => {
+    const window = new Window();
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const markdownApp = new MarkdownApp(window, 'README.md');
+    markdownApp.updateParams('#');
+    t.deepEqual(
+        await markdownApp.appElements('MarkdownUp'),
+        [
+            'Hello',
+            [
+                {'html': 'h1', 'elem': [{'text': 'Hello'}]}
+            ]
+        ]
+    );
 });
