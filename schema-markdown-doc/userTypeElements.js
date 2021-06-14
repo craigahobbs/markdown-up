@@ -1,12 +1,9 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/schema-markdown/blob/main/LICENSE
 
-/** @module doc */
-
-import {getEnumValues, getReferencedTypes, getStructMembers} from './schema.js';
-import {markdownElements, markdownParse} from './markdown.js';
-import {encodeQueryString} from './encode.js';
-import {nbsp} from './element.js';
+import {encodeQueryString, getEnumValues, getReferencedTypes, getStructMembers} from '../schema-markdown/index.js';
+import {markdownElements, parseMarkdown} from '../markdown-model/index.js';
+import {nbsp} from '../element-model/index.js';
 
 
 /**
@@ -86,7 +83,7 @@ export class UserTypeElements {
         if (text === null) {
             return null;
         }
-        return markdownElements(markdownParse(text));
+        return markdownElements(parseMarkdown(text));
     }
 
     // Helper method to get a user type href (target)
