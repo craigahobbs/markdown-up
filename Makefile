@@ -24,6 +24,9 @@ JSDOC_ARGS := $(JSDOC_ARGS) README.md
 clean:
 	rm -rf Makefile.base jsdoc.json .eslintrc.cjs
 
+help:
+	@echo '            [app|run|'
+
 .PHONY: run
 run: app
 	python3 -m http.server --directory build/app
