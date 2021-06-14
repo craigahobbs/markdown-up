@@ -28,3 +28,14 @@ test('MarkdownApp.run, help command', async (t) => {
         '<h1 id="cmd.help=1&amp;type_MarkdownApp"><a class="linktarget">MarkdownApp</a></h1>'
     ));
 });
+
+
+test('MarkdownApp.run, hash parameter error', async (t) => {
+    const window = new Window();
+    window.location.hash = '#foo=bar';
+    const markdownApp = await MarkdownApp.run(window, 'README.md');
+    t.is(markdownApp.window, window);
+    t.is(markdownApp.defaultMarkdownURL, 'README.md');
+    t.is(markdownApp.params, null);
+    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
+});

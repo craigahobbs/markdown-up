@@ -19,7 +19,7 @@ GHPAGES_SRC := build/app/
 include Makefile.base
 
 # Exclude external code from coverage
-C8_ARGS := $(C8_ARGS) --branches 80 --lines 83.54
+C8_ARGS := $(C8_ARGS) --branches 76.19 --lines 93.45
 
 # Add README.md to jsdoc args
 JSDOC_ARGS := $(JSDOC_ARGS) README.md
