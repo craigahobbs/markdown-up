@@ -122,18 +122,18 @@ test('MarkdownApp.appElements, fetch error', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
-        return {'ok': false};
+        return {'ok': false, 'statusText': 'Not Found'};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
     const markdownApp = new MarkdownApp(window, 'README.md');
     markdownApp.updateParams('#');
-    t.deepEqual(
-        await markdownApp.appElements('MarkdownUp'),
-        [
-            'MarkdownUp',
-            {'html': 'p', 'elem': {'text': "Error: Could not fetch 'README.md' - undefined"}}
-        ]
-    );
+    let errorMessage = null;
+    try {
+        await markdownApp.appElements('MarkdownUp');
+    } catch ({message}) { /* c8 ignore next */
+        errorMessage = message;
+    }
+    t.is(errorMessage, "Could not fetch 'README.md', 'Not Found'");
 });

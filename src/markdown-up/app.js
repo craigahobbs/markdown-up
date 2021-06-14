@@ -52,9 +52,9 @@ export class MarkdownApp {
      * @property {string} defaultMarkdownURL - The default Markdown resource URL
      * @returns {MarkdownApp}
      */
-    static run(window, defaultMarkdownURL) {
+    static async run(window, defaultMarkdownURL) {
         const app = new MarkdownApp(window, defaultMarkdownURL);
-        app.render();
+        await app.render();
         window.addEventListener('hashchange', () => app.render(), false);
         return app;
     }
@@ -89,7 +89,7 @@ export class MarkdownApp {
             // Render the application elements
             [appTitle, appElements] = await this.appElements(appTitle);
         } catch ({message}) {
-            appElements = MarkdownApp.errorElements(message);
+            appElements = {'html': 'p', 'elem': {'text': `Error: ${message}`}};
         }
 
         // Render the application
@@ -109,8 +109,7 @@ export class MarkdownApp {
         const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
         const response = await this.window.fetch(markdownURL);
         if (!response.ok) {
-            // Fetch error
-            return [appTitle, MarkdownApp.errorElements(`Could not fetch '${markdownURL}' - ${response.statusText}`)];
+            throw new Error(`Could not fetch '${markdownURL}', '${response.statusText}'`);
         }
 
         // Render the Markdown
@@ -118,10 +117,5 @@ export class MarkdownApp {
         const markdownModel = parseMarkdown(markdownText);
         const markdownTitle = getMarkdownTitle(markdownModel);
         return [markdownTitle !== null ? markdownTitle : appTitle, markdownElements(markdownModel, markdownURL)];
-    }
-
-    // Generate an error page's elements
-    static errorElements(message) {
-        return {'html': 'p', 'elem': {'text': `Error: ${message}`}};
     }
 }
