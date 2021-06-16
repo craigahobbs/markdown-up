@@ -1,3 +1,7 @@
+## 0.9.5 (2021-06-16)
+
+- [7619826](https://github.com/craigahobbs/markdown-app/commit/7619826) - update to schema-markdown 1.0
+
 ## 0.9.4 (2021-06-14)
 
 - [d14f944](https://github.com/craigahobbs/markdown-app/commit/d14f944) - add schema-markdown-doc dependency
