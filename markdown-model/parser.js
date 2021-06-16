@@ -9,16 +9,6 @@ const rHeadingAlt = /^\s*(?<heading>=+|-+)\s*$/;
 const rHorizontal = /^(?:(?:\s*\*){3,}|(?:\s*-){3,}|(?:\s*_){3,})\s*$/;
 const rFenced = /^(?<fence>\s*(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
 const rList = /^(?<indent>\s*(?<mark>-|\*|\+|[0-9]\.|[1-9][0-9]+\.)\s+)(?<line>.*?)\s*$/;
-const rSpans = new RegExp(
-    '(?<br>\\s{2}$)|' +
-        '(?<link>!?\\[)(?<linkText>[\\s\\S]*?)\\]\\((?<linkHref>[^\\s]+?)(?:\\s*"(?<linkTitle>[\\s\\S]*?)"\\s*)?\\)|' +
-        '(?<linkAlt><)(?<linkAltHref>[[a-z]+:[^\\s]*?)>|' +
-        '(?<boldItalic>\\*{3})(?!\\s)(?<boldItalicText>[\\s\\S]*?[^\\s]\\**)\\*{3}|' +
-        '(?<bold>\\*{2})(?!\\s)(?<boldText>[\\s\\S]*?[^\\s]\\**)\\*{2}|' +
-        '(?<italic>\\*)(?!\\s)(?<italicText>[\\s\\S]*?[^\\s]\\**)\\*',
-    'mg'
-);
-const rEscape = /\\(\\|\*|_|\{|\}|\[|\]|\(|\)|#|\+|-|\.|!)/g;
 
 
 /**
@@ -221,10 +211,18 @@ export function parseMarkdown(markdown) {
 }
 
 
-// Helper function to remove escapes from a string
-function removeEscapes(text) {
-    return text.replace(rEscape, '$1');
-}
+// Markdown span regex
+const rEscape = /\\(\\|\*|_|\{|\}|\[|\]|\(|\)|#|\+|-|\.|!)/g;
+const rSpans = new RegExp(
+    '(?<br>\\s{2}$)|' +
+        '(?<linkImg>\\[!\\[)(?<linkImgText>[\\s\\S]*?)\\]\\((?<linkImgHrefImg>[\\s\\S]*?)\\)\\]\\((?<linkImgHref>[^\\s]+?)\\)|' +
+        '(?<link>!?\\[)(?<linkText>[\\s\\S]*?)\\]\\((?<linkHref>[^\\s]+?)(?:\\s*"(?<linkTitle>[\\s\\S]*?)"\\s*)?\\)|' +
+        '(?<linkAlt><)(?<linkAltHref>[[a-z]+:[^\\s]*?)>|' +
+        '(?<boldItalic>\\*{3})(?!\\s)(?<boldItalicText>[\\s\\S]*?[^\\s]\\**)\\*{3}|' +
+        '(?<bold>\\*{2})(?!\\s)(?<boldText>[\\s\\S]*?[^\\s]\\**)\\*{2}|' +
+        '(?<italic>\\*)(?!\\s)(?<italicText>[\\s\\S]*?[^\\s]\\**)\\*',
+    'mg'
+);
 
 
 // Helper function to translate markdown paragraph text to a markdown paragraph span model array
@@ -242,6 +240,12 @@ function paragraphSpans(text) {
         // Line break?
         if (typeof match.groups.br !== 'undefined') {
             spans.push({'br': null});
+
+        // Link-image span?
+        } else if (typeof match.groups.linkImg !== 'undefined') {
+            const imgSpan = {'image': {'src': removeEscapes(match.groups.linkImgHrefImg), 'alt': removeEscapes(match.groups.linkImgText)}};
+            const span = {'link': {'href': removeEscapes(match.groups.linkImgHref), 'spans': [imgSpan]}};
+            spans.push(span);
 
         // Link span?
         } else if (match.groups.link === '[') {
@@ -287,4 +291,10 @@ function paragraphSpans(text) {
     }
 
     return spans;
+}
+
+
+// Helper function to remove escapes from a string
+function removeEscapes(text) {
+    return text.replace(rEscape, '$1');
 }

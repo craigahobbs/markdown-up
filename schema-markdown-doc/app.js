@@ -195,7 +195,7 @@ export class SchemaMarkdownDoc {
             },
 
             // The user type elements
-            (new smd.UserTypeElements(this.params)).getElements(typeModel.types, typeName)
+            (new UserTypeElements(this.params)).getElements(typeModel.types, typeName)
         ];
     }
 }
