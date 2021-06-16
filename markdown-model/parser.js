@@ -239,7 +239,6 @@ function paragraphSpans(text) {
             spans.push({'text': removeEscapes(text.slice(ixSearch, match.index))});
         }
 
-
         // Line break?
         if (typeof match.groups.br !== 'undefined') {
             spans.push({'br': null});

@@ -163,11 +163,11 @@ const compareTuple =
 
 
 /**
- * Schema Markdown parser exception
+ * Schema Markdown parser error
  *
  * @property {string[]} errors - The list of error strings
  */
-class SchemaMarkdownParserError extends Error {
+export class SchemaMarkdownParserError extends Error {
     /**
      * Create a Schema Markdown parser error instance
      *
