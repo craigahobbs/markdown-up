@@ -3,41 +3,41 @@
 
 /* eslint-disable id-length */
 
-import {MarkdownApp} from '../markdown-up/index.js';
+import {MarkdownUp} from '../markdown-up/index.js';
 import Window from 'window';
 import test from 'ava';
 
 
-test('MarkdownApp, constructor', (t) => {
+test('MarkdownUp, constructor', (t) => {
     const window = new Window();
-    const markdownApp = new MarkdownApp(window, 'README.md');
-    t.is(markdownApp.window, window);
-    t.is(markdownApp.defaultMarkdownURL, 'README.md');
-    t.is(markdownApp.params, null);
+    const app = new MarkdownUp(window, 'README.md');
+    t.is(app.window, window);
+    t.is(app.defaultMarkdownURL, 'README.md');
+    t.is(app.params, null);
 });
 
 
-test('MarkdownApp.run, help command', async (t) => {
+test('MarkdownUp.run, help command', async (t) => {
     const window = new Window();
     window.location.hash = '#cmd.help=1';
-    const markdownApp = await MarkdownApp.run(window, 'README.md');
-    t.is(markdownApp.window, window);
-    t.is(markdownApp.defaultMarkdownURL, 'README.md');
-    t.deepEqual(markdownApp.params, {'cmd': {'help': 1}});
+    const app = await MarkdownUp.run(window, 'README.md');
+    t.is(app.window, window);
+    t.is(app.defaultMarkdownURL, 'README.md');
+    t.deepEqual(app.params, {'cmd': {'help': 1}});
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;type_MarkdownApp"><a class="linktarget">MarkdownApp</a></h1>'
+        '<h1 id="cmd.help=1&amp;type_MarkdownUp"><a class="linktarget">MarkdownUp</a></h1>'
     ));
 });
 
 
-test('MarkdownApp.run, hash parameter error', async (t) => {
+test('MarkdownUp.run, hash parameter error', async (t) => {
     const window = new Window();
     window.location.hash = '#foo=bar';
-    const markdownApp = await MarkdownApp.run(window, 'README.md');
-    t.is(markdownApp.window, window);
-    t.is(markdownApp.defaultMarkdownURL, 'README.md');
-    t.is(markdownApp.params, null);
+    const app = await MarkdownUp.run(window, 'README.md');
+    t.is(app.window, window);
+    t.is(app.defaultMarkdownURL, 'README.md');
+    t.is(app.params, null);
     t.is(window.document.title, 'MarkdownUp');
     t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
 });
@@ -54,10 +54,10 @@ test('MarkdownApp.appElements', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const markdownApp = new MarkdownApp(window, 'README.md');
-    markdownApp.updateParams('#');
+    const app = new MarkdownUp(window, 'README.md');
+    app.updateParams('#');
     t.deepEqual(
-        await markdownApp.appElements('MarkdownUp'),
+        await app.appElements('MarkdownUp'),
         [
             'Hello',
             [
@@ -79,10 +79,10 @@ test('MarkdownApp.appElements, no title', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const markdownApp = new MarkdownApp(window, 'README.md');
-    markdownApp.updateParams('#');
+    const app = new MarkdownUp(window, 'README.md');
+    app.updateParams('#');
     t.deepEqual(
-        await markdownApp.appElements('MarkdownUp'),
+        await app.appElements('MarkdownUp'),
         [
             'MarkdownUp',
             [
@@ -104,10 +104,10 @@ test('MarkdownApp.appElements, url', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const markdownApp = new MarkdownApp(window, 'README.md');
-    markdownApp.updateParams('url=other.md');
+    const app = new MarkdownUp(window, 'README.md');
+    app.updateParams('url=other.md');
     t.deepEqual(
-        await markdownApp.appElements('MarkdownUp'),
+        await app.appElements('MarkdownUp'),
         [
             'Hello',
             [
@@ -127,11 +127,11 @@ test('MarkdownApp.appElements, fetch error', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const markdownApp = new MarkdownApp(window, 'README.md');
-    markdownApp.updateParams('#');
+    const app = new MarkdownUp(window, 'README.md');
+    app.updateParams('#');
     let errorMessage = null;
     try {
-        await markdownApp.appElements('MarkdownUp');
+        await app.appElements('MarkdownUp');
     } catch ({message}) { /* c8 ignore next */
         errorMessage = message;
     }

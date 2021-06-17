@@ -1,41 +1,41 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-import {SchemaMarkdownParser, decodeQueryString, validateType} from 'schema-markdown/index.js';
+import * as smd from 'schema-markdown/index.js';
 import {getMarkdownTitle, markdownElements, parseMarkdown} from 'markdown-model/index.js';
 import {UserTypeElements} from 'schema-markdown-doc/index.js';
 import {renderElements} from 'element-model/index.js';
 
 
-// The Markdown application's hash parameter type model
-const markdownAppTypes = (new SchemaMarkdownParser(`\
-# The Markdown application hash parameters struct
-struct MarkdownApp
+// The application's hash parameter type model
+const appHashTypes = (new smd.SchemaMarkdownParser(`\
+# The MarkdownUp application hash parameters struct
+struct MarkdownUp
 
     # The Markdown resource URL
     optional string(len > 0) url
 
-    # Optional application command
+    # Optional command
     optional Command cmd
 
 # Application command union
 union Command
 
-    # Render the application's hash parameter struct documentation
+    # Render the application's hash parameter documentation
     int(==1) help
 `).types);
 
 
 /**
- * The Markdown application
+ * The MarkdownUp application
  *
  * @property {Object} window - The web browser window object
  * @property {string} defaultMarkdownURL - The default Markdown resource URL
  * @property {Object} params - The validated hash parameters object
  */
-export class MarkdownApp {
+export class MarkdownUp {
     /**
-     * Create a Markdown application instance
+     * Create an application instance
      *
      * @property {Object} window - The web browser window object
      * @property {string} defaultMarkdownURL - The default Markdown resource URL
@@ -47,14 +47,14 @@ export class MarkdownApp {
     }
 
     /**
-     * Run the Markdown application
+     * Run the application
      *
      * @property {Object} window - The web browser window object
      * @property {string} defaultMarkdownURL - The default Markdown resource URL
-     * @returns {MarkdownApp}
+     * @returns {MarkdownUp}
      */
     static async run(window, defaultMarkdownURL) {
-        const app = new MarkdownApp(window, defaultMarkdownURL);
+        const app = new MarkdownUp(window, defaultMarkdownURL);
         await app.render();
         window.addEventListener('hashchange', () => app.render(), false);
         return app;
@@ -67,10 +67,10 @@ export class MarkdownApp {
 
         // Decode the params string
         const paramStrActual = paramStr !== null ? paramStr : this.window.location.hash.substring(1);
-        const params = decodeQueryString(paramStrActual);
+        const params = smd.decodeQueryString(paramStrActual);
 
         // Validate the params
-        this.params = validateType(markdownAppTypes, 'MarkdownApp', params);
+        this.params = smd.validateType(appHashTypes, 'MarkdownUp', params);
     }
 
     // Render the Markdown application
@@ -103,7 +103,7 @@ export class MarkdownApp {
         // Application command?
         if ('cmd' in this.params) {
             // 'help' in this.params.cmd
-            return [appTitle, (new UserTypeElements(this.params)).getElements(markdownAppTypes, 'MarkdownApp')];
+            return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp')];
         }
 
         // Load the Markdown resource

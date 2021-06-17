@@ -50,6 +50,6 @@ app: build/npm.build
 
     # Fix imports
 	for FILE in `find build/app/* -name '*.js'`; do \
-		sed -E "s/from '(element-model|markdown-model|schema-markdown)/from '..\/\1/g" $$FILE > $$FILE.tmp && \
+		sed -E "s/from '([^\.])/from '..\/\1/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
