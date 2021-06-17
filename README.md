@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/markdown-up)](https://www.npmjs.com/package/markdown-up)
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up)](https://github.com/craigahobbs/markdown-up/blob/main/LICENSE)
 
-[Markdown Application](https://craigahobbs.github.io/markdown-up/)
+[MarkdownUp Application](https://craigahobbs.github.io/markdown-up/)
 
 Coming soon!
 
