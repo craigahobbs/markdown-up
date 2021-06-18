@@ -1,5 +1,5 @@
 // Licensed under the MIT License
-// https://github.com/craigahobbs/schema-markdown/blob/main/LICENSE
+// https://github.com/craigahobbs/schema-markdown-doc/blob/main/LICENSE
 
 import * as smd from '../schema-markdown/index.js';
 import {UserTypeElements} from './userTypeElements.js';
@@ -7,8 +7,8 @@ import {renderElements} from '../element-model/index.js';
 
 
 // The application's hash parameter type model
-const schemaMarkdownDocTypes = (new smd.SchemaMarkdownParser(`\
-# The Schema Markdown documentation application hash parameters struct
+const appHashTypes = (new smd.SchemaMarkdownParser(`\
+# The SchemaMarkdownDoc application hash parameters struct
 struct SchemaMarkdownDoc
 
     # The type name. If not provided, the index is displayed.
@@ -20,25 +20,24 @@ struct SchemaMarkdownDoc
     # Optional command
     optional Command cmd
 
-# Schema Markdown documentation application command union
+# Application command union
 union Command
 
-    # Render the application's hash parameter model documentation
+    # Render the application's hash parameter documentation
     int(==1) help
 `).types);
 
 
 /**
- * The Schema Markdown documentation application
+ * The SchemaMarkdownDoc application
  *
  * @property {Object} window - The web browser window object
  * @property {?string} defaultTypeModelURL - The default JSON type model resource URL
  * @property {Object} params - The validated hash parameters object
- * @private
  */
 export class SchemaMarkdownDoc {
     /**
-     * Create a documentation application instance
+     * Create an application instance
      *
      * @property {Object} window - The web browser window object
      * @param {?string} [defaultTypeModelURL=null] - Optional default JSON type model resource URL
@@ -73,7 +72,7 @@ export class SchemaMarkdownDoc {
         const params = smd.decodeQueryString(paramStrActual);
 
         // Validate the params
-        this.params = smd.validateType(schemaMarkdownDocTypes, 'SchemaMarkdownDoc', params);
+        this.params = smd.validateType(appHashTypes, 'SchemaMarkdownDoc', params);
     }
 
     // Render the Markdown application
@@ -106,7 +105,7 @@ export class SchemaMarkdownDoc {
         // Application command?
         if ('cmd' in this.params) {
             // 'help' in this.params.cmd
-            return [appTitle, (new UserTypeElements(this.params)).getElements(schemaMarkdownDocTypes, 'SchemaMarkdownDoc')];
+            return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')];
         }
 
         // Load the type model JSON resource
