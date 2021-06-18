@@ -55,7 +55,7 @@ test('MarkdownApp.appElements', async (t) => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window, 'README.md');
-    app.updateParams('#');
+    app.updateParams('');
     t.deepEqual(
         await app.appElements('MarkdownUp'),
         [
@@ -80,7 +80,7 @@ test('MarkdownApp.appElements, no title', async (t) => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window, 'README.md');
-    app.updateParams('#');
+    app.updateParams('');
     t.deepEqual(
         await app.appElements('MarkdownUp'),
         [
@@ -128,7 +128,7 @@ test('MarkdownApp.appElements, fetch error', async (t) => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window, 'README.md');
-    app.updateParams('#');
+    app.updateParams('');
     let errorMessage = null;
     try {
         await app.appElements('MarkdownUp');
