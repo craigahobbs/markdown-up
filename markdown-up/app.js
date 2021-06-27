@@ -12,7 +12,7 @@ const appHashTypes = (new smd.SchemaMarkdownParser(`\
 # The MarkdownUp application hash parameters struct
 struct MarkdownUp
 
-    # The Markdown resource URL
+    # The resource URL
     optional string(len > 0) url
 
     # Optional command
@@ -30,7 +30,7 @@ union Command
  * The MarkdownUp application
  *
  * @property {Object} window - The web browser window object
- * @property {string} defaultMarkdownURL - The default Markdown resource URL
+ * @property {string} defaultURL - The default resource URL
  * @property {Object} params - The validated hash parameters object
  */
 export class MarkdownUp {
@@ -38,11 +38,11 @@ export class MarkdownUp {
      * Create an application instance
      *
      * @property {Object} window - The web browser window object
-     * @property {string} defaultMarkdownURL - The default Markdown resource URL
+     * @property {string} defaultURL - The default resource URL
      */
-    constructor(window, defaultMarkdownURL) {
+    constructor(window, defaultURL) {
         this.window = window;
-        this.defaultMarkdownURL = defaultMarkdownURL;
+        this.defaultURL = defaultURL;
         this.params = null;
     }
 
@@ -50,11 +50,11 @@ export class MarkdownUp {
      * Run the application
      *
      * @property {Object} window - The web browser window object
-     * @property {string} defaultMarkdownURL - The default Markdown resource URL
+     * @property {string} [defaultURL='README.md'] - The default resource URL
      * @returns {MarkdownUp}
      */
-    static async run(window, defaultMarkdownURL) {
-        const app = new MarkdownUp(window, defaultMarkdownURL);
+    static async run(window, defaultURL = 'README.md') {
+        const app = new MarkdownUp(window, defaultURL);
         await app.render();
         window.addEventListener('hashchange', () => app.render(), false);
         return app;
@@ -106,17 +106,18 @@ export class MarkdownUp {
             return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp')];
         }
 
-        // Load the Markdown resource
-        const markdownURL = 'url' in this.params ? this.params.url : this.defaultMarkdownURL;
-        const response = await this.window.fetch(markdownURL);
+        // Load the resource
+        const url = 'url' in this.params ? this.params.url : this.defaultURL;
+        const response = await this.window.fetch(url);
         if (!response.ok) {
-            throw new Error(`Could not fetch '${markdownURL}', '${response.statusText}'`);
+            const status = response.statusText;
+            throw new Error(`Could not fetch "${url}"${status === '' ? '' : `, ${JSON.stringify(status)}`}`);
         }
 
-        // Render the Markdown
-        const markdownText = await response.text();
-        const markdownModel = parseMarkdown(markdownText);
+        // Render the text as Markdown
+        const text = await response.text();
+        const markdownModel = parseMarkdown(text);
         const markdownTitle = getMarkdownTitle(markdownModel);
-        return [markdownTitle !== null ? markdownTitle : appTitle, markdownElements(markdownModel, markdownURL)];
+        return [markdownTitle !== null ? markdownTitle : appTitle, markdownElements(markdownModel, url)];
     }
 }
