@@ -10,8 +10,9 @@ import test from 'ava';
 
 test('MarkdownUp, constructor', (t) => {
     const window = new Window();
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, 'README.md');
     t.is(app.window, window);
+    t.is(app.defaultURL, 'README.md');
     t.is(app.params, null);
 });
 
@@ -43,7 +44,7 @@ test('MarkdownUp.run, hash parameter error', async (t) => {
 test('MarkdownUp.appElements', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
-        t.is(url, 'index.html');
+        t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
         })};
@@ -51,7 +52,7 @@ test('MarkdownUp.appElements', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, 'index.html');
+    const app = new MarkdownUp(window, 'README.md');
     app.updateParams('');
     t.deepEqual(
         await app.appElements('MarkdownUp'),
@@ -135,7 +136,7 @@ test('MarkdownUp.appElements, fetch error no status text', async (t) => {
 test('MarkdownUp.appElements, no title', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
-        t.is(url, 'index.html');
+        t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('Hello');
         })};
@@ -143,7 +144,7 @@ test('MarkdownUp.appElements, no title', async (t) => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, 'index.html');
+    const app = new MarkdownUp(window, 'README.md');
     app.updateParams('');
     t.deepEqual(
         await app.appElements('MarkdownUp'),
