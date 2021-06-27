@@ -1,3 +1,7 @@
+## 0.9.7 (2021-06-27)
+
+- [d0dd823](https://github.com/craigahobbs/markdown-app/commit/d0dd823) - updates from javascript-app template
+
 ## 0.9.6 (2021-06-17)
 
 - [a7b16c1](https://github.com/craigahobbs/markdown-app/commit/a7b16c1) - updates from javascript-app template
