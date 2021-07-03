@@ -18,9 +18,6 @@ GHPAGES_SRC := build/app/
 # Include JavaScript Build
 include Makefile.base
 
-# Add README.md to jsdoc args
-JSDOC_ARGS := $(JSDOC_ARGS) README.md
-
 clean:
 	rm -rf Makefile.base jsdoc.json .eslintrc.cjs
 
