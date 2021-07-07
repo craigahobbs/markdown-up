@@ -172,7 +172,6 @@ test('MarkdownUp.main, no title', async (t) => {
     t.deepEqual(
         await app.main(),
         {
-            'title': null,
             'elements': [
                 {'html': 'p', 'elem': [{'text': 'Hello'}]}
             ]
