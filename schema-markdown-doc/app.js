@@ -11,11 +11,11 @@ const appHashTypes = (new smd.SchemaMarkdownParser(`\
 # The SchemaMarkdownDoc application hash parameters struct
 struct SchemaMarkdownDoc
 
+    # The resource URL
+    optional string(len > 0) url
+
     # The type name. If not provided, the index is displayed.
     optional string(len > 0) name
-
-    # The JSON type model resource URL
-    optional string(len > 0) url
 
     # Optional command
     optional Command cmd
@@ -32,7 +32,7 @@ union Command
  * The SchemaMarkdownDoc application
  *
  * @property {Object} window - The web browser window object
- * @property {?string} defaultTypeModelURL - The default JSON type model resource URL
+ * @property {?string} defaultURL - The default resource URL
  * @property {Object} params - The validated hash parameters object
  */
 export class SchemaMarkdownDoc {
@@ -40,11 +40,11 @@ export class SchemaMarkdownDoc {
      * Create an application instance
      *
      * @property {Object} window - The web browser window object
-     * @param {?string} [defaultTypeModelURL=null] - Optional default JSON type model resource URL
+     * @property {?string} defaultURL - The default resource URL
      */
-    constructor(window, defaultTypeModelURL = null) {
+    constructor(window, defaultURL) {
         this.window = window;
-        this.defaultTypeModelURL = defaultTypeModelURL;
+        this.defaultURL = defaultURL;
         this.params = null;
     }
 
@@ -52,11 +52,11 @@ export class SchemaMarkdownDoc {
      * Run the application
      *
      * @property {Object} window - The web browser window object
-     * @param {?string} [defaultTypeModelURL=null] - Optional default JSON type model resource URL
+     * @property {?string} [defaultURL=null] - The default resource URL
      * @returns {SchemaMarkdownDoc}
      */
-    static async run(window, defaultTypeModelURL = null) {
-        const app = new SchemaMarkdownDoc(window, defaultTypeModelURL);
+    static async run(window, defaultURL = null) {
+        const app = new SchemaMarkdownDoc(window, defaultURL);
         await app.render();
         window.addEventListener('hashchange', () => app.render(), false);
         return app;
@@ -108,14 +108,17 @@ export class SchemaMarkdownDoc {
             return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')];
         }
 
-        // Load the type model JSON resource
+        // Load the resource
+        const url = 'url' in this.params ? this.params.url : this.defaultURL;
         let {typeModel} = smd;
-        const typeModelURL = 'url' in this.params ? this.params.url : this.defaultTypeModelURL;
-        if (typeModelURL !== null) {
-            const response = await this.window.fetch(typeModelURL);
+        if (url !== null) {
+            const response = await this.window.fetch(url);
             if (!response.ok) {
-                throw new Error(`Could not fetch '${typeModelURL}', '${response.statusText}'`);
+                const status = response.statusText;
+                throw new Error(`Could not fetch "${url}"${status === '' ? '' : `, ${JSON.stringify(status)}`}`);
             }
+
+            // Validate type model JSON
             typeModel = smd.validateTypeModel(await response.json());
         }
 

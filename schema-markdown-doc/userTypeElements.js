@@ -26,7 +26,7 @@ export class UserTypeElements {
      *
      * @param {Object} types - The map of user type name to user type model
      * @param {string} typeName - The type name
-     * @param {string[]} actionUrls - For action types, the action URL override
+     * @param {?string[]} [actionUrls=null] - For action types, the action URL override, or null
      * @returns {Object[]}
      */
     getElements(types, typeName, actionUrls = null) {
