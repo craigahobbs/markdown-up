@@ -22,6 +22,7 @@ test('MarkdownUp.run, help command', async (t) => {
     window.location.hash = '#cmd.help=1';
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
+    t.is(app.defaultURL, 'README.md');
     t.deepEqual(app.params, {'cmd': {'help': 1}});
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
@@ -30,18 +31,40 @@ test('MarkdownUp.run, help command', async (t) => {
 });
 
 
+test('MarkdownUp.run, main', async (t) => {
+    const window = new Window();
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    window.location.hash = '#';
+    const app = await MarkdownUp.run(window);
+    t.is(app.window, window);
+    t.is(app.defaultURL, 'README.md');
+    t.deepEqual(app.params, {});
+    t.is(window.document.title, 'Hello');
+    t.is(window.document.body.innerHTML, '<h1>Hello</h1>');
+});
+
+
 test('MarkdownUp.run, hash parameter error', async (t) => {
     const window = new Window();
     window.location.hash = '#foo=bar';
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
+    t.is(app.defaultURL, 'README.md');
     t.is(app.params, null);
     t.is(window.document.title, 'MarkdownUp');
     t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
 });
 
 
-test('MarkdownUp.appElements', async (t) => {
+test('MarkdownUp.main', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
@@ -55,18 +78,18 @@ test('MarkdownUp.appElements', async (t) => {
     const app = new MarkdownUp(window, 'README.md');
     app.updateParams('');
     t.deepEqual(
-        await app.appElements('MarkdownUp'),
-        [
-            'Hello',
-            [
+        await app.main(),
+        {
+            'title': 'Hello',
+            'elements': [
                 {'html': 'h1', 'elem': [{'text': 'Hello'}]}
             ]
-        ]
+        }
     );
 });
 
 
-test('MarkdownUp.appElements, url', async (t) => {
+test('MarkdownUp.main, url', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'other.md');
@@ -80,18 +103,18 @@ test('MarkdownUp.appElements, url', async (t) => {
     const app = new MarkdownUp(window, 'README.md');
     app.updateParams('url=other.md');
     t.deepEqual(
-        await app.appElements('MarkdownUp'),
-        [
-            'Hello',
-            [
+        await app.main(),
+        {
+            'title': 'Hello',
+            'elements': [
                 {'html': 'h1', 'elem': [{'text': 'Hello'}]}
             ]
-        ]
+        }
     );
 });
 
 
-test('MarkdownUp.appElements, fetch error', async (t) => {
+test('MarkdownUp.main, fetch error', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
@@ -104,7 +127,7 @@ test('MarkdownUp.appElements, fetch error', async (t) => {
     app.updateParams('');
     let errorMessage = null;
     try {
-        await app.appElements('MarkdownUp');
+        await app.main();
     } catch ({message}) { /* c8 ignore next */
         errorMessage = message;
     }
@@ -112,7 +135,7 @@ test('MarkdownUp.appElements, fetch error', async (t) => {
 });
 
 
-test('MarkdownUp.appElements, fetch error no status text', async (t) => {
+test('MarkdownUp.main, fetch error no status text', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
@@ -125,7 +148,7 @@ test('MarkdownUp.appElements, fetch error no status text', async (t) => {
     app.updateParams('');
     let errorMessage = null;
     try {
-        await app.appElements('MarkdownUp');
+        await app.main();
     } catch ({message}) { /* c8 ignore next */
         errorMessage = message;
     }
@@ -133,7 +156,7 @@ test('MarkdownUp.appElements, fetch error no status text', async (t) => {
 });
 
 
-test('MarkdownUp.appElements, no title', async (t) => {
+test('MarkdownUp.main, no title', async (t) => {
     const window = new Window();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
@@ -147,12 +170,12 @@ test('MarkdownUp.appElements, no title', async (t) => {
     const app = new MarkdownUp(window, 'README.md');
     app.updateParams('');
     t.deepEqual(
-        await app.appElements('MarkdownUp'),
-        [
-            'MarkdownUp',
-            [
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
                 {'html': 'p', 'elem': [{'text': 'Hello'}]}
             ]
-        ]
+        }
     );
 });
