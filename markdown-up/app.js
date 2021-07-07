@@ -93,7 +93,7 @@ export class MarkdownUp {
         }
 
         // Render the application
-        this.window.document.title = 'title' in result && result.title !== null ? result.title : 'MarkdownUp';
+        this.window.document.title = 'title' in result ? result.title : 'MarkdownUp';
         renderElements(this.window.document.body, result.elements);
     }
 
@@ -116,9 +116,11 @@ export class MarkdownUp {
         // Render the text as Markdown
         const text = await response.text();
         const markdownModel = parseMarkdown(text);
-        return {
-            'title': getMarkdownTitle(markdownModel),
-            'elements': markdownElements(markdownModel, url)
-        };
+        const markdownTitle = getMarkdownTitle(markdownModel);
+        const result = {'elements': markdownElements(markdownModel, url)};
+        if (markdownTitle !== null) {
+            result.title = markdownTitle;
+        }
+        return result;
     }
 }
