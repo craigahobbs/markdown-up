@@ -75,8 +75,7 @@ export class MarkdownUp {
 
     // Render the Markdown application
     async render() {
-        let appTitle = 'MarkdownUp';
-        let appElements = null;
+        let result;
         try {
             // Validate hash parameters
             const paramsPrev = this.params;
@@ -88,22 +87,22 @@ export class MarkdownUp {
             }
 
             // Render the application elements
-            [appTitle, appElements] = await this.appElements(appTitle);
+            result = await this.main();
         } catch ({message}) {
-            appElements = {'html': 'p', 'elem': {'text': `Error: ${message}`}};
+            result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
         }
 
         // Render the application
-        this.window.document.title = appTitle;
-        renderElements(this.window.document.body, appElements);
+        this.window.document.title = 'title' in result && result.title !== null ? result.title : 'MarkdownUp';
+        renderElements(this.window.document.body, result.elements);
     }
 
     // Generate the Markdown application's element model
-    async appElements(appTitle) {
+    async main() {
         // Application command?
         if ('cmd' in this.params) {
             // 'help' in this.params.cmd
-            return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp')];
+            return {'elements': (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp')};
         }
 
         // Load the resource
@@ -117,7 +116,9 @@ export class MarkdownUp {
         // Render the text as Markdown
         const text = await response.text();
         const markdownModel = parseMarkdown(text);
-        const markdownTitle = getMarkdownTitle(markdownModel);
-        return [markdownTitle !== null ? markdownTitle : appTitle, markdownElements(markdownModel, url)];
+        return {
+            'title': getMarkdownTitle(markdownModel),
+            'elements': markdownElements(markdownModel, url)
+        };
     }
 }
