@@ -36,13 +36,15 @@ app: build/npm.build
 
     # Copy dependencies
 	cp -R \
-		app/* \
 		README.md \
+		static/* \
 		src/markdown-up \
 		node_modules/element-model/src/element-model \
 		node_modules/markdown-model/src/markdown-model \
+		node_modules/markdown-model/static/markdown-model.css \
 		node_modules/schema-markdown/src/schema-markdown \
 		node_modules/schema-markdown-doc/src/schema-markdown-doc \
+		node_modules/schema-markdown-doc/static/schema-markdown-doc.css \
 		build/app/
 
     # Fix imports
