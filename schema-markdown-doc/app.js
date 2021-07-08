@@ -77,8 +77,7 @@ export class SchemaMarkdownDoc {
 
     // Render the Markdown application
     async render() {
-        let appTitle = 'SchemaMarkdownDoc';
-        let appElements = null;
+        let result;
         try {
             // Validate hash parameters
             const paramsPrev = this.params;
@@ -90,22 +89,22 @@ export class SchemaMarkdownDoc {
             }
 
             // Render the application elements
-            [appTitle, appElements] = await this.appElements(appTitle);
+            result = await this.main();
         } catch ({message}) {
-            appElements = {'html': 'p', 'elem': {'text': `Error: ${message}`}};
+            result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
         }
 
         // Render the application
-        this.window.document.title = appTitle;
-        renderElements(this.window.document.body, appElements);
+        this.window.document.title = 'title' in result ? result.title : 'SchemaMarkdownDoc';
+        renderElements(this.window.document.body, result.elements);
     }
 
     // Generate the Markdown application's element model
-    async appElements(appTitle) {
+    async main() {
         // Application command?
         if ('cmd' in this.params) {
             // 'help' in this.params.cmd
-            return [appTitle, (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')];
+            return {'elements': (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')};
         }
 
         // Load the resource
@@ -127,11 +126,11 @@ export class SchemaMarkdownDoc {
             if (!(this.params.name in typeModel.types)) {
                 throw new Error(`Unknown type name '${this.params.name}'`);
             }
-            return [typeModel.title, this.typeElements(typeModel, this.params.name)];
+            return {'title': typeModel.title, 'elements': this.typeElements(typeModel, this.params.name)};
         }
 
         // Index
-        return [typeModel.title, this.indexElements(typeModel)];
+        return {'title': typeModel.title, 'elements': this.indexElements(typeModel)};
     }
 
     // Generate the index page's element hierarchy model
