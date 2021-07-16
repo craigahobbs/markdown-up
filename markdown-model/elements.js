@@ -117,10 +117,10 @@ function paragraphSpanElements(spans, url) {
 
 // Helper function to check if a URL is relative
 function isRelativeURL(url) {
-    return !url.startsWith('#') && !rAbsoluteURL.test(url);
+    return !rAbsoluteURL.test(url);
 }
 
-const rAbsoluteURL = /^(?:[a-z]{3,5}:|\/)/;
+const rAbsoluteURL = /^(?:[a-z]{3,5}:|\/|\?|#)/;
 
 
 // Helper function to get a URL's base URL
