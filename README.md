@@ -31,6 +31,12 @@ Alternatively, you can change the default Markdown file by updating the markdown
 ```
 
 
+## Viewing local Markdown files
+
+To view local Markdown files using markdown-up, try the
+[markdown-up command-line application](https://pypi.org/project/markdown-up/).
+
+
 ## Development
 
 This project is developed using [JavaScript Build](https://github.com/craigahobbs/javascript-build#readme).
