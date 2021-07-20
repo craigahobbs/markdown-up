@@ -1,3 +1,7 @@
+## 1.0.1 (2021-07-19)
+
+- [33f4bb6](https://github.com/craigahobbs/markdown-app/commit/33f4bb6) - update readme
+
 ## 1.0.0 (2021-07-19)
 
 - [39bde46](https://github.com/craigahobbs/markdown-app/commit/39bde46) - update readme
