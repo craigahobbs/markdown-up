@@ -90,7 +90,7 @@ export function parseMarkdown(markdown) {
 
     // Process markdown text line by line
     for (const markdownString of (typeof markdown === 'string' ? [markdown] : markdown)) {
-        for (const line of markdownString.split('\n')) {
+        for (const line of markdownString.split(/\r?\n/)) {
             const matchLine = line.match(rIndent);
             const lineIndent = matchLine.groups.indent.length;
             const emptyLine = matchLine.groups.notIndent === '';
