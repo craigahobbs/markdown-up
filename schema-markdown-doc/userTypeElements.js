@@ -3,7 +3,10 @@
 
 import {encodeQueryString, getEnumValues, getReferencedTypes, getStructMembers} from '../schema-markdown/index.js';
 import {markdownElements, parseMarkdown} from '../markdown-model/index.js';
-import {nbsp} from '../element-model/index.js';
+
+
+// Non-breaking space character
+const nbsp = String.fromCharCode(160);
 
 
 /**

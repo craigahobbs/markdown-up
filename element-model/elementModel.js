@@ -2,10 +2,6 @@
 // https://github.com/craigahobbs/element-model/blob/main/LICENSE
 
 
-/** The non-breaking space character */
-export const nbsp = String.fromCharCode(160);
-
-
 // Set of valid element members
 const elementTagMembers = new Set(['html', 'svg', 'text']);
 const elementMembers = new Set([...elementTagMembers, 'attr', 'elem', 'callback']);
