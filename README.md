@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/markdown-up)](https://www.npmjs.com/package/markdown-up)
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up)](https://github.com/craigahobbs/markdown-up/blob/main/LICENSE)
 
-[MarkdownUp Application](https://craigahobbs.github.io/markdown-up/)
+[markdown-up Application](https://craigahobbs.github.io/markdown-up/)
 
 **markdown-up** is a JavaScript application that renders Markdown files in your web browser. To use markdown-up, first,
 download the markdown-up application stub to the directory containing your Markdown files:
@@ -39,4 +39,9 @@ To view local Markdown files using markdown-up, try the
 
 ## Development
 
-This project is developed using [JavaScript Build](https://github.com/craigahobbs/javascript-build#readme).
+This project is developed using [JavaScript Build](https://github.com/craigahobbs/javascript-build#readme). It was started
+using [javascript-template](https://github.com/craigahobbs/javascript-template#readme) as follows:
+
+```
+template-specialize javascript-template/template/ markdown-up/ -k package markdown-up -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs'
+```
