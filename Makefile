@@ -1,6 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+
 # Download JavaScript Build
 define WGET
 ifeq '$$(wildcard $(notdir $(1)))' ''
@@ -13,21 +14,27 @@ $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-bui
 $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-build/main/jsdoc.json))
 $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-build/main/.eslintrc.cjs))
 
+
 # Set gh-pages source
 GHPAGES_SRC := build/app/
+
 
 # Include JavaScript Build
 include Makefile.base
 
+
 clean:
 	rm -rf Makefile.base jsdoc.json .eslintrc.cjs
+
 
 help:
 	@echo '            [app|run|'
 
+
 .PHONY: run
 run: app
 	python3 -m http.server --directory build/app
+
 
 .PHONY: app
 commit: app
