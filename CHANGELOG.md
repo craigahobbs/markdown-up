@@ -1,3 +1,7 @@
+## 1.0.2 (2021-08-24)
+
+- [6e8bda5](https://github.com/craigahobbs/markdown-app/commit/6e8bda5) - updates from javascript-template
+
 ## 1.0.1 (2021-07-19)
 
 - [33f4bb6](https://github.com/craigahobbs/markdown-app/commit/33f4bb6) - update readme
