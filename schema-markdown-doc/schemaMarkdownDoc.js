@@ -75,7 +75,7 @@ export class SchemaMarkdownDoc {
         this.params = smd.validateType(appHashTypes, 'SchemaMarkdownDoc', params);
     }
 
-    // Render the Markdown application
+    // Render the application
     async render() {
         let result;
         try {
@@ -99,7 +99,7 @@ export class SchemaMarkdownDoc {
         renderElements(this.window.document.body, result.elements);
     }
 
-    // Generate the Markdown application's element model
+    // Generate the application's element model
     async main() {
         // Application command?
         if ('cmd' in this.params) {
@@ -107,7 +107,7 @@ export class SchemaMarkdownDoc {
             return {'elements': (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')};
         }
 
-        // Load the resource
+        // Load the type model JSON resource
         const url = 'url' in this.params ? this.params.url : this.defaultURL;
         let {typeModel} = smd;
         if (url !== null) {
