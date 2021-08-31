@@ -1,3 +1,7 @@
+## 1.0.3 (2021-08-31)
+
+- [da9d82e](https://github.com/craigahobbs/markdown-up/commit/da9d82e) - element-model 1.0
+
 ## 1.0.2 (2021-08-24)
 
 - [6e8bda5](https://github.com/craigahobbs/markdown-app/commit/6e8bda5) - updates from javascript-template
