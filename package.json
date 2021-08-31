@@ -21,7 +21,7 @@
     },
     "dependencies": {
         "element-model": "~1.0",
-        "markdown-model": "~0.9",
+        "markdown-model": "~1.0",
         "schema-markdown": "~1.0",
         "schema-markdown-doc": "~0.9"
     },
