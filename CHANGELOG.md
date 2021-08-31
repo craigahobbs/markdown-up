@@ -1,3 +1,7 @@
+## 1.0.4 (2021-08-31)
+
+- [a4c14aa](https://github.com/craigahobbs/markdown-app/commit/a4c14aa) - markdown-model 1.0
+
 ## 1.0.3 (2021-08-31)
 
 - [da9d82e](https://github.com/craigahobbs/markdown-up/commit/da9d82e) - element-model 1.0
