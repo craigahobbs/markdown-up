@@ -1,3 +1,7 @@
+## 1.0.5 (2021-09-01)
+
+- [fff9bd8](https://github.com/craigahobbs/markdown-app/commit/fff9bd8) - schema-markdown-doc 1.0
+
 ## 1.0.4 (2021-08-31)
 
 - [a4c14aa](https://github.com/craigahobbs/markdown-app/commit/a4c14aa) - markdown-model 1.0
