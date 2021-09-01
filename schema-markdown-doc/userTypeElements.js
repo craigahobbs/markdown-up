@@ -76,12 +76,7 @@ export class UserTypeElements {
         ]};
     }
 
-    /**
-     * Helper function to generate markdown text's element model
-     *
-     * @param {?string} [text=null] - The markdown text
-     * @returns {Array}
-     */
+    // Helper function to generate markdown text's element model
     static markdownElem(text = null) {
         if (text === null) {
             return null;
