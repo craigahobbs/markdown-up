@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
-# Download JavaScript Build
+# Download javascript-build
 define WGET
 ifeq '$$(wildcard $(notdir $(1)))' ''
 $$(info Downloading $(notdir $(1)))
@@ -19,7 +19,7 @@ $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-bui
 GHPAGES_SRC := build/app/
 
 
-# Include JavaScript Build
+# Include javascript-build
 include Makefile.base
 
 
