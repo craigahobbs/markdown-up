@@ -120,7 +120,7 @@ function isRelativeURL(url) {
     return !rAbsoluteURL.test(url);
 }
 
-const rAbsoluteURL = /^(?:[a-z]{3,5}:|\/|\?|#)/;
+const rAbsoluteURL = /^(?:[a-z]+:|\/|\?|#)/;
 
 
 // Helper function to get a URL's base URL
