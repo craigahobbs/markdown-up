@@ -3,7 +3,10 @@
     "name": "markdown-up",
     "version": "1.0.5",
     "description": "JavaScript Markdown viewer application",
-    "keywords": "markdown viewer application",
+    "keywords": [
+        "markdown",
+        "viewer"
+    ],
     "homepage": "https://github.com/craigahobbs/markdown-up#readme",
     "bugs": "https://github.com/craigahobbs/markdown-up/issues",
     "license": "MIT",
