@@ -1,3 +1,7 @@
+## 1.0.6 (2021-09-09)
+
+- [096a433](https://github.com/craigahobbs/markdown-app/commit/096a433) - fix package keywords
+
 ## 1.0.5 (2021-09-01)
 
 - [fff9bd8](https://github.com/craigahobbs/markdown-app/commit/fff9bd8) - schema-markdown-doc 1.0
