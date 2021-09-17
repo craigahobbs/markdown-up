@@ -1,3 +1,7 @@
+## 1.0.9 (2021-09-17)
+
+- [90e38c5](https://github.com/craigahobbs/markdown-app/commit/90e38c5) - add markdownElements hashPrefix option
+
 ## 1.0.8 (2021-09-17)
 
 - [17962c8](https://github.com/craigahobbs/markdown-app/commit/17962c8) - update markdown-model
