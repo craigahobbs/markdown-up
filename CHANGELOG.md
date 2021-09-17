@@ -1,3 +1,7 @@
+## 1.0.7 (2021-09-17)
+
+- [4df1364](https://github.com/craigahobbs/markdown-app/commit/4df1364) - markdown-model 1.1
+
 ## 1.0.6 (2021-09-09)
 
 - [096a433](https://github.com/craigahobbs/markdown-app/commit/096a433) - fix package keywords
