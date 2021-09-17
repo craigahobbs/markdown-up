@@ -53,6 +53,11 @@ function markdownPartElements(parts, options) {
                         headerId = headerIdNew;
                     }
                     options.usedHeaderIds.add(headerId);
+
+                    // Hash prefix fixup?
+                    if ('hashPrefix' in options && options.hashPrefix !== null && options.hashPrefix !== '') {
+                        headerId = `${options.hashPrefix}&${headerId}`;
+                    }
                 }
 
                 partElements.push({
@@ -128,14 +133,14 @@ function paragraphSpanElements(spans, options) {
             let {href} = link;
 
             // Page link (e.g., "#sub-section") fixup?
-            if (href.startsWith('#')) {
-                if ('hashPrefix' in options) {
+            if (href.startsWith('#') && href.indexOf('=') === -1) {
+                if ('hashPrefix' in options && options.hashPrefix !== null && options.hashPrefix !== '') {
                     href = `#${options.hashPrefix}&${href.slice(1)}`;
                 }
 
             // Relative link fixup?
-            } else if ('url' in options && isRelativeURL(link.href)) {
-                href = `${getBaseURL(options.url)}${link.href}`;
+            } else if ('url' in options && options.url !== null && isRelativeURL(href)) {
+                href = `${getBaseURL(options.url)}${href}`;
             }
 
             const linkElements = {
@@ -151,7 +156,13 @@ function paragraphSpanElements(spans, options) {
         // Image span?
         } else if ('image' in span) {
             const {image} = span;
-            const src = 'url' in options && isRelativeURL(image.src) ? `${getBaseURL(options.url)}${image.src}` : image.src;
+            let {src} = image;
+
+            // Relative link fixup?
+            if ('url' in options && options.url !== null && isRelativeURL(src)) {
+                src = `${getBaseURL(options.url)}${src}`;
+            }
+
             const imageElement = {
                 'html': 'img',
                 'attr': {'src': src, 'alt': image.alt}
