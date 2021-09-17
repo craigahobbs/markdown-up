@@ -1,3 +1,7 @@
+## 1.0.8 (2021-09-17)
+
+- [17962c8](https://github.com/craigahobbs/markdown-app/commit/17962c8) - update markdown-model
+
 ## 1.0.7 (2021-09-17)
 
 - [4df1364](https://github.com/craigahobbs/markdown-app/commit/4df1364) - markdown-model 1.1
