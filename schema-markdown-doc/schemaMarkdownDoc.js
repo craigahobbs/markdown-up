@@ -24,7 +24,7 @@ struct SchemaMarkdownDoc
 union Command
 
     # Render the application's hash parameter documentation
-    int(==1) help
+    int(== 1) help
 `).types);
 
 

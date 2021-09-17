@@ -14,13 +14,16 @@ import {getMarkdownParagraphText} from './markdownModel.js';
  * @returns {Array}
  */
 export function markdownElements(markdown, options = {}) {
-    // Generate an element model from the markdown model parts
-    return markdownPartElements(markdown.parts, options);
+    const optionsCopy = {...options, 'headerIds': new Set()};
+    return markdownPartElements(markdown.parts, optionsCopy);
 }
 
 
 // Regex for cleaning-up anchor text
-const rAnchorText = /\s+/g;
+const rHeaderStart = /^[^a-z0-9]+/;
+const rHeaderEnd = /[^a-z0-9]+$/;
+const rHeaderIdRemove = /['"]/g;
+const rHeaderIdDash = /[^a-z0-9]+/g;
 
 
 // Helper function to generate an element model from a markdown part model array
@@ -31,10 +34,25 @@ function markdownPartElements(parts, options) {
         if ('paragraph' in markdownPart) {
             const {paragraph} = markdownPart;
             if ('style' in paragraph) {
-                const anchorId = getMarkdownParagraphText(paragraph).toLowerCase().replace(rAnchorText, '-');
+                let headerId = getMarkdownParagraphText(paragraph).toLowerCase().
+                    replace(rHeaderStart, '').replace(rHeaderEnd, '').
+                    replace(rHeaderIdRemove, '').replace(rHeaderIdDash, '-');
+
+                // Duplicate header ID?
+                if (options.headerIds.has(headerId)) {
+                    let ix = 1;
+                    let headerIdNew;
+                    do {
+                        ix += 1;
+                        headerIdNew = `${headerId}${ix}`;
+                    } while (options.headerIds.has(headerIdNew));
+                    headerId = headerIdNew;
+                }
+                options.headerIds.add(headerId);
+
                 partElements.push({
                     'html': paragraph.style,
-                    'attr': {'id': anchorId},
+                    'attr': {'id': headerId},
                     'elem': paragraphSpanElements(paragraph.spans, options)
                 });
             } else {
