@@ -22,7 +22,7 @@ struct MarkdownUp
 union Command
 
     # Render the application's hash parameter documentation
-    int(==1) help
+    int(== 1) help
 `).types);
 
 
@@ -117,7 +117,7 @@ export class MarkdownUp {
         // Render the text as Markdown
         const markdownModel = parseMarkdown(text);
         const markdownTitle = getMarkdownTitle(markdownModel);
-        const result = {'elements': markdownElements(markdownModel, url)};
+        const result = {'elements': markdownElements(markdownModel, {url})};
         if (markdownTitle !== null) {
             result.title = markdownTitle;
         }

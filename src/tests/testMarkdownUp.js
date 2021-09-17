@@ -48,7 +48,7 @@ test('MarkdownUp.run, main', async (t) => {
     t.is(app.defaultURL, 'README.md');
     t.deepEqual(app.params, {});
     t.is(window.document.title, 'Hello');
-    t.is(window.document.body.innerHTML, '<h1>Hello</h1>');
+    t.is(window.document.body.innerHTML, '<h1 id="hello">Hello</h1>');
 });
 
 
@@ -82,7 +82,7 @@ test('MarkdownUp.main', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                {'html': 'h1', 'elem': [{'text': 'Hello'}]}
+                {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
             ]
         }
     );
@@ -107,7 +107,7 @@ test('MarkdownUp.main, url', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                {'html': 'h1', 'elem': [{'text': 'Hello'}]}
+                {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
             ]
         }
     );
