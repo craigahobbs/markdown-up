@@ -24,21 +24,32 @@ export function validateMarkdownModel(markdown) {
 export function getMarkdownTitle(markdown) {
     for (const part of markdown.parts) {
         if ('paragraph' in part && 'style' in part.paragraph) {
-            return part.paragraph.spans.map(getSpanText).join('');
+            return getMarkdownParagraphText(part.paragraph);
         }
     }
     return null;
 }
 
 
-// Helpter function to get a Markdown span object's text
-function getSpanText(span) {
+/**
+ * Get a Markdown paragraph model's text
+ *
+ * @param {Object} paragraph - The markdown paragraph model
+ * @returns {string}
+ */
+export function getMarkdownParagraphText(paragraph) {
+    return paragraph.spans.map(getMarkdownSpanText).join('');
+}
+
+
+// Helper function to get a Markdown span model's text
+function getMarkdownSpanText(span) {
     if ('image' in span) {
         return span.image.alt;
     } else if ('link' in span) {
-        return span.link.spans.map(getSpanText).join('');
+        return span.link.spans.map(getMarkdownSpanText).join('');
     } else if ('style' in span) {
-        return span.style.spans.map(getSpanText).join('');
+        return span.style.spans.map(getMarkdownSpanText).join('');
     }
     return span.text;
 }

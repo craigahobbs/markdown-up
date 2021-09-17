@@ -1,32 +1,48 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
+import {getMarkdownParagraphText} from './markdownModel.js';
+
 
 /**
  * Generate an element model from a markdown model
  *
  * @param {Object} markdown - The markdown model
- * @param {?string} url - The markdown file's URL
- * @param {?Object} codeBlockLanguages - Optional map of language to code block render function with signature (lines) => elements.
- * @returns {Object[]}
+ * @param {string} [options.url] - Optional markdown file URL
+ * @param {Object} [options.codeBlocks] - Optional map of code block language to render function with signature
+ *     (language, lines) => elements.
+ * @returns {Array}
  */
-export function markdownElements(markdown, url = null, codeBlockLanguages = null) {
+export function markdownElements(markdown, options = {}) {
     // Generate an element model from the markdown model parts
-    return markdownPartElements(markdown.parts, url, codeBlockLanguages);
+    return markdownPartElements(markdown.parts, options);
 }
 
 
+// Regex for cleaning-up anchor text
+const rAnchorText = /\s+/g;
+
+
 // Helper function to generate an element model from a markdown part model array
-function markdownPartElements(parts, url, codeBlockLanguages) {
+function markdownPartElements(parts, options) {
     const partElements = [];
     for (const markdownPart of parts) {
         // Paragraph?
         if ('paragraph' in markdownPart) {
             const {paragraph} = markdownPart;
-            partElements.push({
-                'html': 'style' in paragraph ? paragraph.style : 'p',
-                'elem': paragraphSpanElements(paragraph.spans, url)
-            });
+            if ('style' in paragraph) {
+                const anchorId = getMarkdownParagraphText(paragraph).toLowerCase().replace(rAnchorText, '-');
+                partElements.push({
+                    'html': paragraph.style,
+                    'attr': {'id': anchorId},
+                    'elem': paragraphSpanElements(paragraph.spans, options)
+                });
+            } else {
+                partElements.push({
+                    'html': 'p',
+                    'elem': paragraphSpanElements(paragraph.spans, options)
+                });
+            }
 
         // Horizontal rule?
         } else if ('hr' in markdownPart) {
@@ -40,7 +56,7 @@ function markdownPartElements(parts, url, codeBlockLanguages) {
                 'attr': 'start' in list && list.start > 1 ? {'start': `${list.start}`} : null,
                 'elem': list.items.map((item) => ({
                     'html': 'li',
-                    'elem': markdownPartElements(item.parts, url, codeBlockLanguages)
+                    'elem': markdownPartElements(item.parts, options)
                 }))
             });
 
@@ -49,8 +65,8 @@ function markdownPartElements(parts, url, codeBlockLanguages) {
             const {codeBlock} = markdownPart;
 
             // Render the code block elements
-            if (codeBlockLanguages !== null && 'language' in codeBlock && codeBlock.language in codeBlockLanguages) {
-                partElements.push(codeBlockLanguages[codeBlock.language](codeBlock));
+            if ('codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
+                partElements.push(options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines));
             } else {
                 partElements.push(
                     {'html': 'pre', 'elem': {'html': 'code', 'elem': codeBlock.lines.map((line) => ({'text': `${line}\n`}))}}
@@ -64,7 +80,7 @@ function markdownPartElements(parts, url, codeBlockLanguages) {
 
 
 // Helper function to generate an element model from a markdown span model array
-function paragraphSpanElements(spans, url) {
+function paragraphSpanElements(spans, options) {
     const spanElements = [];
     for (const span of spans) {
         // Text span?
@@ -80,17 +96,17 @@ function paragraphSpanElements(spans, url) {
             const {style} = span;
             spanElements.push({
                 'html': style.style === 'italic' ? 'em' : 'strong',
-                'elem': paragraphSpanElements(style.spans, url)
+                'elem': paragraphSpanElements(style.spans, options)
             });
 
         // Link span?
         } else if ('link' in span) {
             const {link} = span;
-            const href = url !== null && isRelativeURL(link.href) ? `${getBaseURL(url)}${link.href}` : link.href;
+            const href = 'url' in options && isRelativeURL(link.href) ? `${getBaseURL(options.url)}${link.href}` : link.href;
             const linkElements = {
                 'html': 'a',
                 'attr': {'href': href},
-                'elem': paragraphSpanElements(link.spans, url)
+                'elem': paragraphSpanElements(link.spans, options)
             };
             if ('title' in link) {
                 linkElements.attr.title = link.title;
@@ -100,7 +116,7 @@ function paragraphSpanElements(spans, url) {
         // Image span?
         } else if ('image' in span) {
             const {image} = span;
-            const src = url !== null && isRelativeURL(image.src) ? `${getBaseURL(url)}${image.src}` : image.src;
+            const src = 'url' in options && isRelativeURL(image.src) ? `${getBaseURL(options.url)}${image.src}` : image.src;
             const imageElement = {
                 'html': 'img',
                 'attr': {'src': src, 'alt': image.alt}

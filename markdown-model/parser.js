@@ -2,6 +2,19 @@
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
 
+/**
+ * Encode a string for inclusion in Markdown text
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function encodeMarkdownText(text) {
+    return text.replace(rEncodeMarkdownText, '\\$1');
+}
+
+const rEncodeMarkdownText = /([\\[\]()*])/g;
+
+
 // Markdown regex
 const rIndent = /^(?<indent>\s*)(?<notIndent>.*)$/;
 const rHeading = /^\s*(?<heading>#{1,6})\s+(?<text>.*?)\s*$/;

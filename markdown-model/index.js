@@ -2,5 +2,5 @@
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
 export {markdownElements} from './elements.js';
-export {parseMarkdown} from './parser.js';
-export {getMarkdownTitle, validateMarkdownModel} from './markdownModel.js';
+export {encodeMarkdownText, parseMarkdown} from './parser.js';
+export {getMarkdownParagraphText, getMarkdownTitle, validateMarkdownModel} from './markdownModel.js';
