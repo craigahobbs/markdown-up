@@ -117,7 +117,11 @@ export class MarkdownUp {
         // Render the text as Markdown
         const markdownModel = parseMarkdown(text);
         const markdownTitle = getMarkdownTitle(markdownModel);
-        const result = {'elements': markdownElements(markdownModel, {'headerIds': true, url})};
+        const result = {'elements': markdownElements(markdownModel, {
+            'hashPrefix': smd.encodeQueryString(this.params),
+            'headerIds': true,
+            url
+        })};
         if (markdownTitle !== null) {
             result.title = markdownTitle;
         }
