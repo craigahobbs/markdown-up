@@ -107,6 +107,15 @@ function markdownPartElements(parts, options) {
 }
 
 
+// Helper function to split hash params
+function splitHashParams(paramStr) {
+    return paramStr.split('&').map((part) => {
+        const ixEqual = part.indexOf('=');
+        return ixEqual === -1 ? [part, null] : [part.slice(0, ixEqual), part.slice(ixEqual + 1)];
+    });
+}
+
+
 // Helper function to generate an element model from a markdown span model array
 function paragraphSpanElements(spans, options) {
     const spanElements = [];
@@ -132,10 +141,20 @@ function paragraphSpanElements(spans, options) {
             const {link} = span;
             let {href} = link;
 
-            // Page link (e.g., "#sub-section") fixup?
-            if (href.startsWith('#') && href.indexOf('=') === -1) {
+            // Hash-only link?
+            if (href.startsWith('#')) {
                 if ('hashPrefix' in options && options.hashPrefix !== null && options.hashPrefix !== '') {
-                    href = `#${options.hashPrefix}&${href.slice(1)}`;
+                    // Merge the hashPrefix and hash params
+                    const paramsPrefix = splitHashParams(options.hashPrefix).filter(([, value]) => value !== null);
+                    const paramsHref = splitHashParams(href.slice(1)).filter(([, value]) => value !== null);
+                    const params = {...Object.fromEntries(paramsPrefix), ...Object.fromEntries(paramsHref)};
+                    const paramStr = Object.entries(params).map(([key, value]) => `${key}=${value}`).sort().join('&');
+
+                    // Get the last href anchor, if any
+                    const anchors = splitHashParams(href.slice(1)).filter(([, value]) => value === null).slice(-1);
+                    const anchorStr = anchors.map(([anchor]) => anchor).join('&');
+
+                    href = `#${paramStr}${paramStr.length !== 0 && anchorStr.length !== 0 ? '&' : ''}${anchorStr}`;
                 }
 
             // Relative link fixup?
