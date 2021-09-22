@@ -63,6 +63,7 @@ pre {
     border-style: solid;
     border-color: #c0c0c0;
     border-radius: 4px;
+    overflow-x: scroll;
 }
 a {
     color: #005090;
