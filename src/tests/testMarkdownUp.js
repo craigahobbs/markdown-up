@@ -3,13 +3,13 @@
 
 /* eslint-disable id-length */
 
+import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../markdown-up/index.js';
-import Window from 'window';
 import test from 'ava';
 
 
 test('MarkdownUp, constructor', (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const app = new MarkdownUp(window, 'README.md');
     t.is(app.window, window);
     t.is(app.defaultURL, 'README.md');
@@ -18,7 +18,7 @@ test('MarkdownUp, constructor', (t) => {
 
 
 test('MarkdownUp.run, help command', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     window.location.hash = '#cmd.help=1';
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
@@ -32,7 +32,7 @@ test('MarkdownUp.run, help command', async (t) => {
 
 
 test('MarkdownUp.run, main', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -53,7 +53,7 @@ test('MarkdownUp.run, main', async (t) => {
 
 
 test('MarkdownUp.run, hash parameter error', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     window.location.hash = '#foo=bar';
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
@@ -65,7 +65,7 @@ test('MarkdownUp.run, hash parameter error', async (t) => {
 
 
 test('MarkdownUp.main', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -90,7 +90,7 @@ test('MarkdownUp.main', async (t) => {
 
 
 test('MarkdownUp.main, url', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'sub/other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -141,7 +141,7 @@ test('MarkdownUp.main, url', async (t) => {
 
 
 test('MarkdownUp.main, fetch error', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': false, 'statusText': 'Not Found'};
@@ -162,7 +162,7 @@ test('MarkdownUp.main, fetch error', async (t) => {
 
 
 test('MarkdownUp.main, fetch error no status text', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': false, 'statusText': ''};
@@ -183,7 +183,7 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
 
 
 test('MarkdownUp.main, no title', async (t) => {
-    const window = new Window();
+    const {window} = new JSDOM();
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
