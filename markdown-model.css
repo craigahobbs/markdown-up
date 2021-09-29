@@ -4,6 +4,13 @@
  */
 
 
+/* Variables */
+:root {
+    --markdown-model-font-size: 12pt;
+    --markdown-model-line-height: 1.2em;
+}
+
+
 /* CSS reset */
 html, body, div, span, h1, h2, h3, h4, h5, h6, p, hr, pre, code, a, ol, ul, li, table, tr, th, td {
     margin: 0;
@@ -11,13 +18,13 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, hr, pre, code, a, ol, ul, li, 
     border: 0;
     outline: 0;
     font-size: 1em;
-    line-height: 1.2em;
+    line-height: calc(var(--markdown-model-line-height));
     color: black;
     vertical-align: baseline;
 }
 html {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 11pt;
+    font-size: calc(var(--markdown-model-font-size));
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
 }
@@ -104,26 +111,4 @@ td {
 }
 td:last-child {
     padding-right: 0;
-}
-
-/* Documentation page */
-p.smd-note {
-    margin-top: 1em;
-}
-p.smd-note ul {
-    list-style: none;
-    margin-top: 0.4em;
-    margin-left: 0.8em;
-}
-ul.smd-attr-list {
-    list-style: none;
-    margin-top: 0;
-    margin-left: 0;
-}
-ul.smd-attr-list li {
-    margin-top: 0.1em;
-    margin-left: 0;
-}
-ul.smd-attr-list li:first-child {
-    margin-top: 0em;
 }
