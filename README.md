@@ -9,7 +9,7 @@
 download the markdown-up application stub to the directory containing your Markdown files:
 
 ```
-curl -O https://craigahobbs.github.io/markdown-up/index.html
+curl -O https://craigahobbs.github.io/markdown-up/static/index.html
 ```
 
 To host your Markdown files locally, start a local static web server:
