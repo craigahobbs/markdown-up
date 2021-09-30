@@ -1,3 +1,7 @@
+## 1.0.10 (2021-09-30)
+
+- [4b6783f](https://github.com/craigahobbs/markdown-up/commit/4b6783f) - - Add title and description tags - Make index.html style and script references relative - Add separate application stub and host in "static" directory
+
 ## 1.0.9 (2021-09-17)
 
 - [90e38c5](https://github.com/craigahobbs/markdown-app/commit/90e38c5) - add markdownElements hashPrefix option
