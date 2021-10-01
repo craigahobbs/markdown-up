@@ -184,7 +184,7 @@ export class UserTypeElements {
         const titleElem = (titleDefault) => ({
             'html': titleTag,
             'attr': {'id': this.typeHref(typeName)},
-            'elem': {'html': 'a', 'attr': {'class': 'linktarget'}, 'elem': {'text': title !== null ? title : titleDefault}}
+            'elem': {'text': title !== null ? title : titleDefault}
         });
 
         // Struct?
