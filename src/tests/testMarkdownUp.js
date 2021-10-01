@@ -26,7 +26,7 @@ test('MarkdownUp.run, help command', async (t) => {
     t.deepEqual(app.params, {'cmd': {'help': 1}});
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;type_MarkdownUp"><a class="linktarget">MarkdownUp</a></h1>'
+        '<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
 });
 
