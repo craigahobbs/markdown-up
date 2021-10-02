@@ -32,6 +32,12 @@
 .menu > a:last-child {
     margin-bottom: 20px;
 }
+@media print
+{
+    .menu, .menu-burger {
+        display: none;
+    }
+}
 
 
 /* Markdown text */

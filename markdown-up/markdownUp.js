@@ -18,7 +18,16 @@ export const defaultLineHeight = 1.2;
 
 // The application's hash parameter type model
 const appHashTypes = (new smd.SchemaMarkdownParser(`\
-# The MarkdownUp application hash parameters struct
+#
+# **markdown-up** is a JavaScript application that renders Markdown files in your web browser. Click
+# the following link to learn more.
+#
+# [markdown-up](https://github.com/craigahobbs/markdown-up#readme)
+#
+# ## Hash Parameters
+#
+# The markdown-up application recognizes the following hash parameters:
+#
 struct MarkdownUp
 
     # The resource URL
