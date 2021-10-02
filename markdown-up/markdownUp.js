@@ -19,8 +19,7 @@ export const defaultLineHeight = 1.2;
 // The application's hash parameter type model
 const appHashTypes = (new smd.SchemaMarkdownParser(`\
 #
-# **markdown-up** is a JavaScript application that renders Markdown files in your web browser. Click
-# the following link to learn more.
+# **markdown-up** is a Markdown viewer application. Click the following link to learn more.
 #
 # [markdown-up](https://github.com/craigahobbs/markdown-up#readme)
 #
