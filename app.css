@@ -41,7 +41,7 @@
 
 /* Markdown text */
 .markdown {
-    font-size: calc(var(--markdown-model-font-size) - 2pt);
+    font-size: calc(var(--markdown-model-font-size) - 1.5pt);
     font-family: monospace;
     white-space: pre;
 }
