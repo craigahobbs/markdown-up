@@ -8,14 +8,6 @@ import {encodeQueryString} from '../schema-markdown/index.js';
 import {renderElements} from '../element-model/index.js';
 
 
-// The default font size
-export const defaultFontSize = 12;
-
-
-// The default line height
-export const defaultLineHeight = 1.2;
-
-
 // The application's hash parameter type model
 const appHashTypes = (new smd.SchemaMarkdownParser(`\
 #
@@ -38,10 +30,10 @@ struct MarkdownUp
     # The menu visibility (default is hidden)
     optional int(== 1) menu
 
-    # The font size (default is ${defaultFontSize}pt)
+    # The font size
     optional int(>= 8, <= 18) fontSize
 
-    # The line height (default is ${defaultLineHeight}em)
+    # The line height
     optional int(>= 1, <= 2) lineHeight
 
 # Application command union
@@ -59,7 +51,10 @@ union Command
  * The MarkdownUp application
  *
  * @property {Object} window - The web browser window object
- * @property {string} defaultURL - The default resource URL
+ * @property {string} menu - If true, show the menu
+ * @property {string} url - The resource URL
+ * @property {string} fontSize - The font size, in points
+ * @property {string} lineHeight - The line height, in em
  * @property {Object} params - The validated hash parameters object
  */
 export class MarkdownUp {
@@ -67,11 +62,23 @@ export class MarkdownUp {
      * Create an application instance
      *
      * @property {Object} window - The web browser window object
-     * @property {string} defaultURL - The default resource URL
+     * @property {Object} [options] - The application options
+     * @property {string} [options.menu] - If true, show the menu
+     * @property {string} [options.url] - The resource URL
+     * @property {string} [options.fontSize] - The font size, in points
+     * @property {string} [options.lineHeight] - The line height, in em
      */
-    constructor(window, defaultURL) {
+    constructor(window, {
+        menu = true,
+        url = 'README.md',
+        fontSize = 12,
+        lineHeight = 1.2
+    } = {}) {
         this.window = window;
-        this.defaultURL = defaultURL;
+        this.menu = menu;
+        this.url = url;
+        this.fontSize = fontSize;
+        this.lineHeight = lineHeight;
         this.params = null;
     }
 
@@ -79,11 +86,11 @@ export class MarkdownUp {
      * Run the application
      *
      * @property {Object} window - The web browser window object
-     * @property {string} [defaultURL='README.md'] - The default resource URL
+     * @property {Object} [options = {}] - The application options
      * @returns {MarkdownUp}
      */
-    static async run(window, defaultURL = 'README.md') {
-        const app = new MarkdownUp(window, defaultURL);
+    static async run(window, options = {}) {
+        const app = new MarkdownUp(window, options);
         await app.render();
         window.addEventListener('hashchange', () => app.render(), false);
         return app;
@@ -129,15 +136,15 @@ export class MarkdownUp {
     // Generate the application's element model
     async main() {
         // Set the font size
-        const fontSize = 'fontSize' in this.params ? this.params.fontSize : defaultFontSize;
+        const fontSize = 'fontSize' in this.params ? this.params.fontSize : this.fontSize;
         this.window.document.documentElement.style.setProperty('--markdown-model-font-size', `${fontSize}pt`);
 
         // Set the line height
-        const lineHeight = 'lineHeight' in this.params ? this.params.lineHeight : defaultLineHeight;
+        const lineHeight = 'lineHeight' in this.params ? this.params.lineHeight : this.lineHeight;
         this.window.document.documentElement.style.setProperty('--markdown-model-line-height', `${lineHeight}em`);
 
         // Load the text resource
-        const url = 'url' in this.params ? this.params.url : this.defaultURL;
+        const url = 'url' in this.params ? this.params.url : this.url;
         let text = null;
         let markdownModel = null;
         let markdownTitle = null;
@@ -203,7 +210,7 @@ export class MarkdownUp {
                         'headerIds': true,
                         url
                     }),
-                {
+                !this.menu ? null : {
                     'html': 'div',
                     'attr': {'class': 'menu-burger'},
                     'elem': [
@@ -214,18 +221,18 @@ export class MarkdownUp {
                         }
                     ]
                 },
-                !('menu' in this.params) ? null : {
+                !this.menu || !('menu' in this.params) ? null : {
                     'html': 'div',
                     'attr': {'class': 'menu'},
                     'elem': [
                         {
                             'html': 'a',
-                            'attr': {'href': linkCycle('fontSize', defaultFontSize, 2), 'aria-label': 'Font size'},
+                            'attr': {'href': linkCycle('fontSize', this.fontSize, 2), 'aria-label': 'Font size'},
                             'elem': fontSizeSVGElements
                         },
                         {
                             'html': 'a',
-                            'attr': {'href': linkCycle('lineHeight', defaultLineHeight, 0.2, 1), 'aria-label': 'Line height'},
+                            'attr': {'href': linkCycle('lineHeight', this.lineHeight, 0.2, 1), 'aria-label': 'Line height'},
                             'elem': lineHeightSVGElements
                         },
                         {
