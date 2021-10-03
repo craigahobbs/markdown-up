@@ -44,4 +44,5 @@
     font-size: calc(var(--markdown-model-font-size) - 1pt);
     font-family: monospace;
     white-space: pre;
+    line-height: 1.2em;
 }
