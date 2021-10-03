@@ -6,14 +6,13 @@
 
 /* Menu */
 .menu-burger {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
-    margin-top: 10px;
-    margin-right: 10px;
+    margin: 10px;
 }
 .menu {
-    position: absolute;
+    position: fixed;
     top: 50px;
     right: 0;
     display: flex;
