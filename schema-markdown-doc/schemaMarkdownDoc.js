@@ -39,8 +39,8 @@ export class SchemaMarkdownDoc {
     /**
      * Create an application instance
      *
-     * @property {Object} window - The web browser window object
-     * @property {?string} defaultURL - The default resource URL
+     * @param {Object} window - The web browser window object
+     * @param {?string} defaultURL - The default resource URL
      */
     constructor(window, defaultURL) {
         this.window = window;
@@ -51,8 +51,8 @@ export class SchemaMarkdownDoc {
     /**
      * Run the application
      *
-     * @property {Object} window - The web browser window object
-     * @property {?string} [defaultURL=null] - The default resource URL
+     * @param {Object} window - The web browser window object
+     * @param {?string} [defaultURL=null] - The default resource URL
      * @returns {SchemaMarkdownDoc}
      */
     static async run(window, defaultURL = null) {
