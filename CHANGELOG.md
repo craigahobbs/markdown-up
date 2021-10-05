@@ -1,3 +1,7 @@
+## 1.1.0 (2021-10-05)
+
+- [1449b4d](https://github.com/craigahobbs/markdown-up/commit/1449b4d) - add application menu
+
 ## 1.0.10 (2021-09-30)
 
 - [4b6783f](https://github.com/craigahobbs/markdown-up/commit/4b6783f) - - Add title and description tags - Make index.html style and script references relative - Add separate application stub and host in "static" directory
