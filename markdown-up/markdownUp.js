@@ -51,42 +51,42 @@ union Command
  * The MarkdownUp application
  *
  * @property {Object} window - The web browser window object
- * @property {string} menu - If true, show the menu
+ * @property {number} fontSize - The font size, in points
+ * @property {number} lineHeight - The line height, in em
+ * @property {boolean} menu - If true, show the menu
  * @property {string} url - The resource URL
- * @property {string} fontSize - The font size, in points
- * @property {string} lineHeight - The line height, in em
  * @property {Object} params - The validated hash parameters object
  */
 export class MarkdownUp {
     /**
      * Create an application instance
      *
-     * @property {Object} window - The web browser window object
-     * @property {Object} [options] - The application options
-     * @property {string} [options.menu] - If true, show the menu
-     * @property {string} [options.url] - The resource URL
-     * @property {string} [options.fontSize] - The font size, in points
-     * @property {string} [options.lineHeight] - The line height, in em
+     * @param {Object} window - The web browser window object
+     * @param {Object} [options] - The application options
+     * @param {number} [options.fontSize = 12] - The font size, in points
+     * @param {number} [options.lineHeight = 1.2] - The line height, in em
+     * @param {boolean} [options.menu = true] - If true, show the menu
+     * @param {string} [options.url = 'README.md'] - The resource URL
      */
     constructor(window, {
-        menu = true,
-        url = 'README.md',
         fontSize = 12,
-        lineHeight = 1.2
+        lineHeight = 1.2,
+        menu = true,
+        url = 'README.md'
     } = {}) {
         this.window = window;
-        this.menu = menu;
-        this.url = url;
         this.fontSize = fontSize;
         this.lineHeight = lineHeight;
+        this.menu = menu;
+        this.url = url;
         this.params = null;
     }
 
     /**
      * Run the application
      *
-     * @property {Object} window - The web browser window object
-     * @property {Object} [options = {}] - The application options
+     * @param {Object} window - The web browser window object
+     * @param {Object} [options = {}] - The application options
      * @returns {MarkdownUp}
      */
     static async run(window, options = {}) {
@@ -128,6 +128,14 @@ export class MarkdownUp {
             result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
         }
 
+        // Set the font size
+        const fontSize = this.params !== null && 'fontSize' in this.params ? this.params.fontSize : this.fontSize;
+        this.window.document.documentElement.style.setProperty('--markdown-model-font-size', `${fontSize}pt`);
+
+        // Set the line height
+        const lineHeight = this.params !== null && 'lineHeight' in this.params ? this.params.lineHeight : this.lineHeight;
+        this.window.document.documentElement.style.setProperty('--markdown-model-line-height', `${lineHeight}em`);
+
         // Render the application
         this.window.document.title = 'title' in result ? result.title : 'MarkdownUp';
         renderElements(this.window.document.body, result.elements);
@@ -135,14 +143,6 @@ export class MarkdownUp {
 
     // Generate the application's element model
     async main() {
-        // Set the font size
-        const fontSize = 'fontSize' in this.params ? this.params.fontSize : this.fontSize;
-        this.window.document.documentElement.style.setProperty('--markdown-model-font-size', `${fontSize}pt`);
-
-        // Set the line height
-        const lineHeight = 'lineHeight' in this.params ? this.params.lineHeight : this.lineHeight;
-        this.window.document.documentElement.style.setProperty('--markdown-model-line-height', `${lineHeight}em`);
-
         // Load the text resource
         const url = 'url' in this.params ? this.params.url : this.url;
         let text = null;

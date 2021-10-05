@@ -26,9 +26,19 @@ Alternatively, you can change the default Markdown file by updating the markdown
 ```
     <script type="module">
         import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, 'other.md');
+        MarkdownUp.run(window, {'url': 'other.md'});
     </script>
 ```
+
+The following application options are defined:
+
+- **fontSize** - The default font size, in points
+
+- **lineHeight** - The default line height, in em
+
+- **menu** - If false, the application menu is hidden
+
+- **url** - The default Markdown text resource URL
 
 
 ## Viewing local Markdown files
