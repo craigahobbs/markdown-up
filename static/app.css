@@ -1,0 +1,48 @@
+/*
+ * Licensed under the MIT License
+ * https://github.com/craigahobbs/markdown-book-app/blob/main/LICENSE
+ */
+
+
+/* Menu */
+.menu-burger {
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: 10px;
+}
+.menu {
+    position: fixed;
+    top: 50px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    max-width: max-content;
+    background: whitesmoke;
+    border: 2px solid black;
+}
+.menu > a {
+    margin: 24px 12px 0 12px;
+    line-height: 0;
+}
+.menu > a:first-child {
+    margin-top: 20px;
+}
+.menu > a:last-child {
+    margin-bottom: 20px;
+}
+@media print
+{
+    .menu, .menu-burger {
+        display: none;
+    }
+}
+
+
+/* Markdown text */
+.markdown {
+    font-size: calc(var(--markdown-model-font-size) - 1pt);
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1.2em;
+}
