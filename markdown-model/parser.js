@@ -16,6 +16,7 @@ const rEncodeMarkdownText = /([\\[\]()*])/g;
 
 
 // Markdown regex
+const rLineSplit = /\r?\n/;
 const rIndent = /^(?<indent>\s*)(?<notIndent>.*)$/;
 const rHeading = /^\s*(?<heading>#{1,6})\s+(?<text>.*?)\s*$/;
 const rHeadingAlt = /^\s*(?<heading>=+|-+)\s*$/;
@@ -103,7 +104,8 @@ export function parseMarkdown(markdown) {
 
     // Process markdown text line by line
     for (const markdownString of (typeof markdown === 'string' ? [markdown] : markdown)) {
-        for (const line of markdownString.split(/\r?\n/)) {
+        for (const lineRaw of markdownString.split(rLineSplit)) {
+            const line = lineRaw.replace('\t', '        ');
             const matchLine = line.match(rIndent);
             const lineIndent = matchLine.groups.indent.length;
             const emptyLine = matchLine.groups.notIndent === '';
