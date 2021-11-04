@@ -2,6 +2,7 @@
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 import * as smd from '../schema-markdown/index.js';
+import {barChartCodeBlock, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/index.js';
 import {getMarkdownTitle, markdownElements, parseMarkdown} from '../markdown-model/index.js';
 import {UserTypeElements} from '../schema-markdown-doc/index.js';
 import {encodeQueryString} from '../schema-markdown/index.js';
@@ -197,6 +198,11 @@ export class MarkdownUp {
         };
 
         // Render the text as Markdown
+        const chartOptions = {
+            'fontSize': 0.9 * (this.params !== null && 'fontSize' in this.params ? this.params.fontSize : this.fontSize),
+            'window': this.window,
+            url
+        };
         const result = {
             'elements': [
                 'cmd' in this.params
@@ -208,7 +214,12 @@ export class MarkdownUp {
                     : markdownElements(markdownModel, {
                         'hashPrefix': smd.encodeQueryString(this.params),
                         'headerIds': true,
-                        url
+                        url,
+                        'codeBlocks': {
+                            'bar-chart': (language, lines) => barChartCodeBlock(language, lines, chartOptions),
+                            'data-table': (language, lines) => dataTableCodeBlock(language, lines, chartOptions),
+                            'line-chart': (language, lines) => lineChartCodeBlock(language, lines, chartOptions)
+                        }
                     }),
                 !this.menu ? null : {
                     'html': 'div',

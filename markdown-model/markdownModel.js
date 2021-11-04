@@ -8,7 +8,7 @@ import {SchemaMarkdownParser, validateType} from '../schema-markdown/index.js';
  * Validate a markdown model
  *
  * @param {Object} markdown - The markdown model
- * @returns {Object[]}
+ * @returns {Object}
  */
 export function validateMarkdownModel(markdown) {
     return validateType(markdownModel.types, 'Markdown', markdown);
@@ -55,7 +55,7 @@ function getMarkdownSpanText(span) {
 }
 
 
-// The Mardown model defined as Schema Markdown
+// The Markdown model defined using Schema Markdown
 const markdownModelSmd = `\
 # Markdown document struct
 struct Markdown

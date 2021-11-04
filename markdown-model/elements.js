@@ -196,15 +196,25 @@ function paragraphSpanElements(spans, options) {
 }
 
 
-// Helper function to check if a URL is relative
-function isRelativeURL(url) {
-    return !rAbsoluteURL.test(url);
+/**
+ * Test if a URL is relative
+ *
+ * @param {string} url - The URL
+ * @returns {boolean}
+ */
+export function isRelativeURL(url) {
+    return !rNotRelativeURL.test(url);
 }
 
-const rAbsoluteURL = /^(?:[a-z]+:|\/|\?|#)/;
+const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
 
 
-// Helper function to get a URL's base URL
-function getBaseURL(url) {
+/**
+ * Get a URL's base URL
+ *
+ * @param {string} url - The URL
+ * @returns {string}
+ */
+export function getBaseURL(url) {
     return url.slice(0, url.lastIndexOf('/') + 1);
 }
