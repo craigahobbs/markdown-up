@@ -62,7 +62,7 @@ function formatValue(value, precision) {
     return `${value}`;
 }
 
-const rDateCleanup = /(?:(?:T00:00)?:00)?\.\d\d\dZ$/;
+const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
 
 
 // Helper function to compute a value's parameter
@@ -132,12 +132,11 @@ export async function lineChartElements(lineChart, options = {}) {
     let yMax = null;
     if (colorFields !== null) {
         // Determine the set of color encoding values
-        const [yField] = yFields;
         const colorValueSet = new Set();
         const pointsMap = {};
         for (const row of data) {
-            if (colorFields.every((field) => field in row)) {
-                const rowKey = colorFields.map((field) => formatValue(row[field])).join(', ');
+            for (const yField of yFields) {
+                const rowKey = `${colorFields.map((field) => formatValue(row[field])).join(', ')}, ${yField}`;
                 colorValueSet.add(rowKey);
                 const xRow = xField in row ? row[xField] : null;
                 const yRow = yField in row ? row[yField] : null;
@@ -147,11 +146,11 @@ export async function lineChartElements(lineChart, options = {}) {
                     } else {
                         pointsMap[rowKey] = [[xRow, yRow]];
                     }
-                    xMin = xMin === null ? xRow : xRow < xMin ? xRow : xMin;
-                    yMin = yMin === null ? yRow : yRow < yMin ? yRow : yMin;
-                    xMax = xMax === null ? xRow : xRow > xMax ? xRow : xMax;
-                    yMax = yMax === null ? yRow : yRow > yMax ? yRow : yMax;
                 }
+                xMin = xMin === null ? xRow : xRow < xMin ? xRow : xMin;
+                yMin = yMin === null ? yRow : yRow < yMin ? yRow : yMin;
+                xMax = xMax === null ? xRow : xRow > xMax ? xRow : xMax;
+                yMax = yMax === null ? yRow : yRow > yMax ? yRow : yMax;
             }
         }
 
@@ -227,7 +226,7 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Y-axis calculations
     const axisTitleFontSize = 1 * chartFontSize;
-    const yAxisTitle = 'colorFields' in lineChart ? yFields[0] : null;
+    const yAxisTitle = yFields.length === 1 ? yFields[0] : null;
     const yAxisTitleWidth = yAxisTitle !== null ? 1.8 * axisTitleFontSize : 0;
     const yAxisLabelWidth = yAxisTicks.reduce((labelMax, [, label]) => {
         const labelWidth = label.length * chartFontWidthRatio * chartFontSize;
@@ -254,7 +253,7 @@ export async function lineChartElements(lineChart, options = {}) {
         const labelWidth = label.length * chartFontWidthRatio * chartFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
-    const colorLegendX = Math.max(
+    const colorLegendX = yFields.length === 1 && !('colorFields' in lineChart) ? null : Math.max(
         chartWidth - chartBorderSize - colorLegendLabelWidth - colorLegendSampleWidth,
         0.6 * chartWidth
     );
@@ -263,7 +262,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartTop = chartBorderSize + chartTitleHeight + 0.5 * chartLineWidth;
     const chartLeft = yAxisX + 0.5 * axisLineWidth + 0.5 * chartLineWidth;
     const chartBottom = xAxisY - 0.5 * axisLineWidth - 0.5 * chartLineWidth;
-    const chartRight = colorLegendX - colorLegendGap - 0.5 * chartLineWidth;
+    const chartRight = colorLegendX !== null ? colorLegendX - colorLegendGap : chartWidth - chartBorderSize;
 
     // Helper functions to compute chart coordindate points
     const chartPointX = (xCoord) => parameterValue(valueParameter(xCoord, xMin, xMax), chartLeft, chartRight);
@@ -444,7 +443,7 @@ export async function lineChartElements(lineChart, options = {}) {
             })),
 
             // Color legend
-            linePoints.map(({label, color}, ix) => [
+            colorLegendX === null ? null : linePoints.map(({label, color}, ix) => [
                 {
                     'svg': 'rect',
                     'attr': {

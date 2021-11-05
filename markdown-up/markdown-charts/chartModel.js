@@ -33,14 +33,7 @@ export function validateDataTable(dataTable) {
  * @returns {Object}
  */
 export function validateLineChart(lineChart) {
-    const validatedLineChart = validateType(chartModel.types, 'LineChart', lineChart);
-
-    // If there is a "yFields" color encoding, the "colorFields" member is disallowed
-    if (lineChart.yFields.length > 1 && 'colorFields' in lineChart) {
-        throw new Error('Cannot use "colorFields" with multiple "yFields"');
-    }
-
-    return validatedLineChart;
+    return validateType(chartModel.types, 'LineChart', lineChart);
 }
 
 
