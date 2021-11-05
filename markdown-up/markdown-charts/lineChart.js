@@ -136,7 +136,8 @@ export async function lineChartElements(lineChart, options = {}) {
         const pointsMap = {};
         for (const row of data) {
             for (const yField of yFields) {
-                const rowKey = `${yField}, ${colorFields.map((field) => formatValue(row[field])).join(', ')}`;
+                const rowKeyPrefix = yFields.length === 1 ? '' : `${yField}, `;
+                const rowKey = `${rowKeyPrefix}${colorFields.map((field) => formatValue(row[field])).join(', ')}`;
                 colorValueSet.add(rowKey);
                 const xRow = xField in row ? row[xField] : null;
                 const yRow = yField in row ? row[yField] : null;
