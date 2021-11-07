@@ -61,7 +61,10 @@ struct ChartBase
     optional string title
 
     # Numeric formatting precision (default is 2)
-    optional int(> 0) precision
+    optional int(>= 0) precision
+
+    # The map of variable name to variable value
+    optional FieldValue{len > 0} variables
 
 
 # A bar chart specification
@@ -114,6 +117,35 @@ struct LineChart (ChartBase)
     # The number of Y-axis tick marks, including the beginning and end ticks. The default is 3.
     optional int(>= 0) yTickCount
 
+    # The X-axis tick marks
+    optional AxisTick[len > 0] xTicks
+
+    # The Y-axis tick marks
+    optional AxisTick[len > 0] yTicks
+
+
+# Axis tick specification
+struct AxisTick
+
+    # The axis tick mark's value
+    FieldValue value
+
+    # The axis tick mark's label
+    optional string label
+
+
+# Field value union
+union FieldValue
+
+    # A datetime value
+    datetime datetime
+
+    # A number value
+    float number
+
+    # A string value
+    string string
+
 
 # A data row filter
 union Filter
@@ -134,8 +166,11 @@ struct DatetimeFilter
     # The filter field name
     string field
 
-    # Matches if the field value is in the value array
+    # Matches if the field value is in the value array (or matches "vin")
     optional datetime[len > 0] in
+
+    # Matches if the field value is in the variable array (or matches "in")
+    optional string[len > 0] vin
 
     # Matches if the field value is NOT in the value array
     optional datetime[len > 0] except
@@ -159,8 +194,11 @@ struct NumberFilter
     # The filter field name
     string field
 
-    # Matches if the field value is in the value array
+    # Matches if the field value is in the value array (or matches "vin")
     optional float[len > 0] in
+
+    # Matches if the field value is in the variable array (or matches "in")
+    optional string[len > 0] vin
 
     # Matches if the field value is NOT in the value array
     optional float[len > 0] except
@@ -184,8 +222,11 @@ struct StringFilter
     # The filter field name
     string field
 
-    # Matches if the field value is in the value array
+    # Matches if the field value is in the value array (or matches "vin")
     optional string[len > 0] in
+
+    # Matches if the field value is in the variable array (or matches "in")
+    optional string[len > 0] vin
 
     # Matches if the field value is NOT in the value array
     optional string[len > 0] except
@@ -271,7 +312,12 @@ enum AggregationFunction
 `;
 
 
-// The chart model
+/**
+ * The chart model
+ *
+ * @property {string} title - The type model title
+ * @property {Object} types - The type model's type dictionary
+ */
 export const chartModel = {
     'title': 'The Chart Model',
     'types': (new SchemaMarkdownParser(chartModelSmd)).types

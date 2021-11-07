@@ -5,6 +5,28 @@ import {getBaseURL, isRelativeURL} from '../../markdown-model/index.js';
 
 
 /**
+ * @typedef {Object} ChartOptions
+ * @property {number} [fontSize] - The chart font size
+ * @property {string} [url] - The markdown file URL
+ * @property {ChartVariables} [variables] - The map of variable name to chart variable
+ * @property {Window} [window] - The web browser's Window object
+ */
+
+
+/**
+ * @typedef {Object.<string, ChartVariable>} ChartVariables
+ */
+
+
+/**
+ * @typedef {Object} ChartVariable
+ * @property {Date} [datetime] - The datetime variable value
+ * @property {number} [number] - The number variable value
+ * @property {string} [string] - The string variable value
+ */
+
+
+/**
  * @typedef {Object} LoadChartDataResult
  * @property {Object[]} data - The data row object array
  * @property {Object} types - The map of field name to field type ("datetime", "number", "string")
@@ -15,8 +37,7 @@ import {getBaseURL, isRelativeURL} from '../../markdown-model/index.js';
  * Load the chart's data
  *
  * @param {Object} chart - The chart model
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {LoadChartDataResult}
  */
 export async function loadChartData(chart, options = {}) {
@@ -47,7 +68,11 @@ export async function loadChartData(chart, options = {}) {
 
     // Filter the data
     if ('filters' in chart) {
-        data = filterData(data, types, chart.filters);
+        const variables = {
+            ...('variables' in chart ? chart.variables : {}),
+            ...('variables' in options ? options.variables : {})
+        };
+        data = filterData(data, types, chart.filters, variables);
     }
 
     return {data, types};
@@ -103,15 +128,22 @@ const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\
 
 
 /**
+ * @typedef {Object} ValidateDataOptions
+ * @property {boolean} [csv] - If True, parse number and null strings
+ */
+
+
+/**
  * Determine data field types and parse/validate field values
  *
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
- * @param {boolean} [options.csv = false] - If True, parse numbers and null
+ * @param {ValidateDataOptions} [options = {}] - The validation options
  * @returns {Object} The map of field name to field type ("datetime", "number", "string")
  */
-export function validateData(data, options = {'csv': false}) {
+export function validateData(data, options = {}) {
     // Determine field types
     const types = {};
+    const optionCSV = 'csv' in options && options.csv;
     for (const row of data) {
         for (const [field, value] of Object.entries(row)) {
             if (!(field in types)) {
@@ -119,10 +151,10 @@ export function validateData(data, options = {'csv': false}) {
                     types[field] = 'number';
                 } else if (value instanceof Date) {
                     types[field] = 'datetime';
-                } else if (typeof value === 'string' && (!options.csv || value !== 'null')) {
+                } else if (typeof value === 'string' && (!optionCSV || value !== 'null')) {
                     if (parseCSVDatetime(value) !== null) {
                         types[field] = 'datetime';
-                    } else if (options.csv && parseCSVNumber(value) !== null) {
+                    } else if (optionCSV && parseCSVNumber(value) !== null) {
                         types[field] = 'number';
                     } else {
                         types[field] = 'string';
@@ -141,12 +173,12 @@ export function validateData(data, options = {'csv': false}) {
             const fieldType = field in types ? types[field] : 'string';
 
             // Null string?
-            if (options.csv && value === 'null') {
+            if (optionCSV && value === 'null') {
                 row[field] = null;
 
             // Number field
             } else if (fieldType === 'number') {
-                if (options.csv && typeof value === 'string') {
+                if (optionCSV && typeof value === 'string') {
                     const numberValue = parseCSVNumber(value);
                     if (numberValue === null) {
                         throwFieldError(field, fieldType, value);
@@ -187,9 +219,10 @@ export function validateData(data, options = {'csv': false}) {
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
  * @param {Object} filters - The array of filter specifications
+ * @param {ChartVariables} [variables={}] - The map of variable name to chart variable
  * @returns {Object[]} The filtered data array
  */
-export function filterData(data, types, filters) {
+export function filterData(data, types, filters, variables = {}) {
     const filteredData = [];
     for (const row of data) {
         if (filters.every((filterUnion) => {
@@ -205,7 +238,19 @@ export function filterData(data, types, filters) {
 
             // Test the field value
             const filterValue = row[filter.field];
-            return (!('in' in filter) || filter.in.indexOf(filterValue) !== -1) &&
+            return ((!('in' in filter) && !('vin' in filter)) ||
+                    ('in' in filter && filter.in.indexOf(filterValue) !== -1) ||
+                    ('vin' in filter && filter.vin.some((varName) => {
+                        if (varName in variables) {
+                            if (!(filterType in variables[varName])) {
+                                throw new Error(
+                                    `Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`
+                                );
+                            }
+                            return filterValue === variables[varName][filterType];
+                        }
+                        return false;
+                    }))) &&
                 (!('except' in filter) || filter.except.indexOf(filterValue) === -1) &&
                 (!('lt' in filter) || filterValue < filter.lt) &&
                 (!('lte' in filter) || filterValue <= filter.lte) &&

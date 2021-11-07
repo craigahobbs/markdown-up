@@ -52,6 +52,21 @@ const categoricalColors = [
 ];
 
 
+// Helper function to format the title
+function formatTitle(title, variables, precision) {
+    return title.replace(rVariable, (match, variable) => {
+        if (variable in variables) {
+            const fieldValue = variables[variable];
+            const value = 'datetime' in fieldValue ? fieldValue.datetime : ('number' in fieldValue ? fieldValue.number : fieldValue.string);
+            return formatValue(value, precision);
+        }
+        return match;
+    });
+}
+
+const rVariable = /\{\{(\w+)\}\}/;
+
+
 // Helper function to format labels
 function formatValue(value, precision) {
     if (value instanceof Date) {
@@ -95,9 +110,7 @@ function parameterValue(param, minValue, maxValue) {
  * Render a line chart
  *
  * @param {Object} lineChart - The line chart model
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.fontSize] - Optional font size in points
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The line chart element model
  */
 export async function lineChartElements(lineChart, options = {}) {
@@ -109,11 +122,18 @@ export async function lineChartElements(lineChart, options = {}) {
     for (const [fieldDesc, fields] of [['X-field', [xField]], ['Y-field', yFields]]) {
         for (const field of fields) {
             if (!(field in types)) {
-                throw new Error(`Unknown ${fieldDesc} ${JSON.stringify(field)}`);
+                throw new Error(`Unknown ${fieldDesc} "${field}"`);
             }
             if (types[field] === 'string') {
-                throw new Error(`Invalid type ${JSON.stringify(types[field])} for ${fieldDesc} ${JSON.stringify(field)}`);
+                throw new Error(`Invalid type "${types[field]}" for ${fieldDesc} "${field}"`);
             }
+        }
+    }
+    const xFieldType = types[xField];
+    const yFieldType = types[yFields[0]];
+    for (const field of yFields) {
+        if (types[field] !== yFieldType) {
+            throw new Error(`Invalid type "${types[field]}" for Y-field "${field}"`);
         }
     }
 
@@ -210,6 +230,18 @@ export async function lineChartElements(lineChart, options = {}) {
         const yTickValue = parameterValue(yTickParam, yMin, yMax);
         yAxisTicks.push([yTickValue, formatValue(yTickValue, chartPrecision)]);
     }
+    if ('yTicks' in lineChart) {
+        for (const yTick of lineChart.yTicks) {
+            const yTickType = 'datetime' in yTick.value ? 'datetime' : ('number' in yTick.value ? 'number' : 'string');
+            const yTickValue = yTick.value[yTickType];
+            if (yTickType !== yFieldType) {
+                throw new Error(`invalid yTick value ${JSON.stringify(yTickValue)} (type "${yTickType}") expected "${yFieldType}"`);
+            }
+            yAxisTicks.push([yTickValue, 'label' in yTick ? yTick.label : formatValue(yTickValue, chartPrecision)]);
+            yMin = yTickValue < yMin ? yTickValue : yMin;
+            yMax = yTickValue > yMax ? yTickValue : yMax;
+        }
+    }
 
     // Compute X-axis tick values
     const xAxisTicks = [];
@@ -217,6 +249,18 @@ export async function lineChartElements(lineChart, options = {}) {
         const xTickParam = xAxisTickCount === 1 ? 0 : ixTick / (xAxisTickCount - 1);
         const xTickValue = parameterValue(xTickParam, xMin, xMax);
         xAxisTicks.push([xTickValue, formatValue(xTickValue, chartPrecision)]);
+    }
+    if ('xTicks' in lineChart) {
+        for (const xTick of lineChart.xTicks) {
+            const xTickType = 'datetime' in xTick.value ? 'datetime' : ('number' in xTick.value ? 'number' : 'string');
+            const xTickValue = xTick.value[xTickType];
+            if (xTickType !== xFieldType) {
+                throw new Error(`invalid xTick value ${JSON.stringify(xTickValue)} (type "${xTickType}") expected "${xFieldType}"`);
+            }
+            xAxisTicks.push([xTickValue, 'label' in xTick ? xTick.label : formatValue(xTickValue, chartPrecision)]);
+            xMin = xTickValue < xMin ? xTickValue : xMin;
+            xMax = xTickValue > xMax ? xTickValue : xMax;
+        }
     }
 
     // Chart title calculations
@@ -227,10 +271,11 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Y-axis calculations
     const axisTitleFontSize = 1 * chartFontSize;
+    const axisLabelFontSize = chartFontSize;
     const yAxisTitle = yFields.length === 1 ? yFields[0] : null;
     const yAxisTitleWidth = yAxisTitle !== null ? 1.8 * axisTitleFontSize : 0;
     const yAxisLabelWidth = yAxisTicks.reduce((labelMax, [, label]) => {
-        const labelWidth = label.length * chartFontWidthRatio * chartFontSize;
+        const labelWidth = label.length * chartFontWidthRatio * axisLabelFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
     const yAxisTickGap = 0.75 * axisTickLength;
@@ -243,15 +288,16 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisTitleHeight = 1.8 * axisTitleFontSize;
     const xAxisTickGap = 0.75 * axisTickLength;
     const xAxisY = chartHeight - chartBorderSize - xAxisTitleHeight -
-          (yAxisTicks.length === 0 ? 0 : chartFontSize - xAxisTickGap + axisTickLength);
+          (yAxisTicks.length === 0 ? 0 : axisLabelFontSize - xAxisTickGap + axisTickLength);
 
     // Color legend calculations
-    const colorLegendGap = 0.5 * chartFontSize;
-    const colorLegendLabelHeight = chartFontSize;
+    const colorLegendFontSize = chartFontSize;
+    const colorLegendGap = 0.5 * colorLegendFontSize;
+    const colorLegendLabelHeight = colorLegendFontSize;
     const colorLegendLabelGap = 0.35 * colorLegendLabelHeight;
     const colorLegendSampleWidth = 1.35 * colorLegendLabelHeight;
     const colorLegendLabelWidth = linePoints.reduce((labelMax, {label}) => {
-        const labelWidth = label.length * chartFontWidthRatio * chartFontSize;
+        const labelWidth = label.length * chartFontWidthRatio * colorLegendFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
     const colorLegendX = yFields.length === 1 && !('colorFields' in lineChart) ? null : Math.max(
@@ -264,6 +310,12 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartLeft = yAxisX + 0.5 * axisLineWidth + 0.5 * chartLineWidth;
     const chartBottom = xAxisY - 0.5 * axisLineWidth - 0.5 * chartLineWidth;
     const chartRight = colorLegendX !== null ? colorLegendX - colorLegendGap : chartWidth - chartBorderSize;
+
+    // Axis label limits
+    const xAxisLabelLeft = chartLeft + 0.5 * axisLabelFontSize;
+    const xAxisLabelRight = chartRight - 0.5 * axisLabelFontSize;
+    const yAxisLabelTop = chartTop + 0.5 * axisLabelFontSize;
+    const yAxisLabelBottom = chartBottom - 0.5 * axisLabelFontSize;
 
     // Helper functions to compute chart coordindate points
     const chartPointX = (xCoord) => parameterValue(valueParameter(xCoord, xMin, xMax), chartLeft, chartRight);
@@ -280,6 +332,10 @@ export async function lineChartElements(lineChart, options = {}) {
     };
 
     // Render the chart
+    const variables = {
+        ...('variables' in lineChart ? lineChart.variables : {}),
+        ...('variables' in options ? options.variables : {})
+    };
     return {
         'svg': 'svg',
         'attr': {
@@ -310,7 +366,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     'text-anchor': 'middle',
                     'dominant-baseline': 'hanging'
                 },
-                'elem': {'text': chartTitle}
+                'elem': {'text': formatTitle(chartTitle, variables, chartPrecision)}
             },
 
             // Y-Axis title
@@ -331,41 +387,47 @@ export async function lineChartElements(lineChart, options = {}) {
             },
 
             // Y-axis ticks
-            yAxisTicks.map(([yCoord], ixTick) => [
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': axisColor,
-                        'stroke-width': svgValue(axisTickWidth),
-                        'fill': 'none',
-                        'd': `M ${svgValue(yAxisX)} ${svgValue(chartPointY(yCoord))} H ${svgValue(yAxisX - axisTickLength)}`
+            yAxisTicks.map(([yCoord]) => {
+                const yPoint = chartPointY(yCoord);
+                return [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': axisColor,
+                            'stroke-width': svgValue(axisTickWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(yAxisX)} ${svgValue(yPoint)} H ${svgValue(yAxisX - axisTickLength)}`
+                        }
+                    },
+                    yPoint < yAxisLabelTop || yPoint > yAxisLabelBottom ? null : {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': axisTickLineColor,
+                            'stroke-width': svgValue(axisTickWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(yAxisX)} ${svgValue(yPoint)} H ${svgValue(chartRight)}`
+                        }
                     }
-                },
-                ixTick === 0 || ixTick === yAxisTicks.length - 1 ? null : {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': axisTickLineColor,
-                        'stroke-width': svgValue(axisTickWidth),
-                        'fill': 'none',
-                        'd': `M ${svgValue(yAxisX)} ${svgValue(chartPointY(yCoord))} H ${svgValue(chartRight)}`
-                    }
-                }
-            ]),
+                ];
+            }),
 
             // Y-axis labels
-            yAxisTicks.map(([yCoord, yLabel], ix) => ({
-                'svg': 'text',
-                'attr': {
-                    'font-family': chartFontFamily,
-                    'font-size': `${svgValue(chartFontSize)}px`,
-                    'fill': axisColor,
-                    'x': svgValue(yAxisX - axisTickLength - yAxisTickGap),
-                    'y': svgValue(chartPointY(yCoord)),
-                    'text-anchor': 'end',
-                    'dominant-baseline': ix === 0 ? 'auto' : (ix === yAxisTickCount - 1 ? 'hanging' : 'middle')
-                },
-                'elem': {'text': yLabel}
-            })),
+            yAxisTicks.map(([yCoord, yLabel]) => {
+                const yPoint = chartPointY(yCoord);
+                return {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': chartFontFamily,
+                        'font-size': `${svgValue(axisLabelFontSize)}px`,
+                        'fill': axisColor,
+                        'x': svgValue(yAxisX - axisTickLength - yAxisTickGap),
+                        'y': svgValue(yPoint),
+                        'text-anchor': 'end',
+                        'dominant-baseline': yPoint > yAxisLabelBottom ? 'auto' : (yPoint < yAxisLabelTop ? 'hanging' : 'middle')
+                    },
+                    'elem': {'text': yLabel}
+                };
+            }),
 
             // X-Axis title
             {
@@ -384,41 +446,47 @@ export async function lineChartElements(lineChart, options = {}) {
             },
 
             // X-axis ticks
-            xAxisTicks.map(([xCoord], ixTick) => [
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': axisColor,
-                        'stroke-width': svgValue(axisTickWidth),
-                        'fill': 'none',
-                        'd': `M ${svgValue(chartPointX(xCoord))} ${svgValue(xAxisY)} V ${svgValue(xAxisY + axisTickLength)}`
+            xAxisTicks.map(([xCoord]) => {
+                const xPoint = chartPointX(xCoord);
+                return [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': axisColor,
+                            'stroke-width': svgValue(axisTickWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(xPoint)} ${svgValue(xAxisY)} V ${svgValue(xAxisY + axisTickLength)}`
+                        }
+                    },
+                    xPoint < xAxisLabelLeft || xPoint > xAxisLabelRight ? null : {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': axisTickLineColor,
+                            'stroke-width': svgValue(axisTickWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(xPoint)} ${svgValue(xAxisY)} V ${svgValue(chartTop)}`
+                        }
                     }
-                },
-                ixTick === 0 || ixTick === xAxisTicks.length - 1 ? null : {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': axisTickLineColor,
-                        'stroke-width': svgValue(axisTickWidth),
-                        'fill': 'none',
-                        'd': `M ${svgValue(chartPointX(xCoord))} ${svgValue(xAxisY)} V ${svgValue(chartTop)}`
-                    }
-                }
-            ]),
+                ];
+            }),
 
             // X-axis labels
-            xAxisTicks.map(([xCoord, xLabel], ix) => ({
-                'svg': 'text',
-                'attr': {
-                    'font-family': chartFontFamily,
-                    'font-size': `${svgValue(chartFontSize)}px`,
-                    'fill': axisColor,
-                    'x': svgValue(chartPointX(xCoord)),
-                    'y': svgValue(xAxisY + axisTickLength + xAxisTickGap),
-                    'text-anchor': ix === 0 ? 'start' : (ix === xAxisTickCount - 1 ? 'end' : 'middle'),
-                    'dominant-baseline': 'hanging'
-                },
-                'elem': {'text': xLabel}
-            })),
+            xAxisTicks.map(([xCoord, xLabel]) => {
+                const xPoint = chartPointX(xCoord);
+                return {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': chartFontFamily,
+                        'font-size': `${svgValue(axisLabelFontSize)}px`,
+                        'fill': axisColor,
+                        'x': svgValue(xPoint),
+                        'y': svgValue(xAxisY + axisTickLength + xAxisTickGap),
+                        'text-anchor': xPoint < xAxisLabelLeft ? 'start' : (xPoint > xAxisLabelRight ? 'end' : 'middle'),
+                        'dominant-baseline': 'hanging'
+                    },
+                    'elem': {'text': xLabel}
+                };
+            }),
 
             // Axis lines
             {
@@ -460,7 +528,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     'svg': 'text',
                     'attr': {
                         'font-family': chartFontFamily,
-                        'font-size': `${svgValue(chartFontSize)}px`,
+                        'font-size': `${svgValue(colorLegendFontSize)}px`,
                         'fill': axisColor,
                         'x': svgValue(colorLegendX + colorLegendSampleWidth),
                         'y': svgValue(chartTop + ix * (colorLegendLabelHeight + colorLegendLabelGap) + 0.5 * colorLegendLabelHeight),

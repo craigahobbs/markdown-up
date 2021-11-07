@@ -8,8 +8,7 @@ import {loadChartData} from './data.js';
  * Render a data table
  *
  * @param {Object} dataTable - The data table model
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The data table element model
  */
 export async function dataTableElements(dataTable, options = {}) {

@@ -14,8 +14,7 @@ import {renderElements} from '../../element-model/index.js';
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The bar chart element model
  */
 export function barChartCodeBlock(language, lines, options = {}) {
@@ -28,8 +27,7 @@ export function barChartCodeBlock(language, lines, options = {}) {
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The data table element model
  */
 export function dataTableCodeBlock(language, lines, options = {}) {
@@ -42,8 +40,7 @@ export function dataTableCodeBlock(language, lines, options = {}) {
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The line chart element model
  */
 export function lineChartCodeBlock(language, lines, options = {}) {
@@ -64,6 +61,13 @@ function chartCodeBlock(language, lines, options, validationFn, renderFn) {
     // Render the chart asynchronously
     return {
         'html': 'p',
+        'elem': {
+            'svg': 'svg',
+            'attr': {
+                'width': chartModel.width,
+                'height': chartModel.height
+            }
+        },
         'callback': (parent) => {
             renderFn(chartModel, options).
                 then((elements) => {

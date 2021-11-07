@@ -8,8 +8,7 @@ import {loadChartData} from './data.js';
  * Render a bar chart
  *
  * @param {Object} barChart - The bar chart model
- * @param {Object} options.window - The web browser window object
- * @param {string} [options.url] - Optional markdown file URL
+ * @param {ChartOptions} [options={}] - Chart options object
  * @returns {Object} The bar chart element model
  */
 export async function barChartElements(barChart, options = {}) {

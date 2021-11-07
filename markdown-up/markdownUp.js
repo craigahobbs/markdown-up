@@ -2,7 +2,7 @@
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 import * as smd from '../schema-markdown/index.js';
-import {barChartCodeBlock, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/index.js';
+import {barChartCodeBlock, chartModel, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/index.js';
 import {getMarkdownTitle, markdownElements, parseMarkdown} from '../markdown-model/index.js';
 import {UserTypeElements} from '../schema-markdown-doc/index.js';
 import {encodeQueryString} from '../schema-markdown/index.js';
@@ -15,6 +15,14 @@ const appHashTypes = (new smd.SchemaMarkdownParser(`\
 # **markdown-up** is a Markdown viewer application. Click the following link to learn more.
 #
 # [markdown-up](https://github.com/craigahobbs/markdown-up#readme)
+#
+# ## markdown-charts
+#
+# [bar-chart](#cmd.help=Bar)
+#
+# [data-table](#cmd.help=Table)
+#
+# [line-chart](#cmd.help=Line)
 #
 # ## Hash Parameters
 #
@@ -37,14 +45,39 @@ struct MarkdownUp
     # The line height
     optional int(>= 1, <= 2) lineHeight
 
+    # Variable collection
+    optional FieldValue{len > 0} variables
+
+
+# Field value union
+union FieldValue
+
+    # A datetime value
+    datetime datetime
+
+    # A number value
+    float number
+
+    # A string value
+    string string
+
+
 # Application command union
 union Command
 
     # Render the application's hash parameter documentation
-    int(== 1) help
+    HelpType help
 
     # Show the URL's Markdown text
     int(== 1) markdown
+
+
+# Help type enum
+enum HelpType
+    Help
+    Bar
+    Line
+    Table
 `).types);
 
 
@@ -149,7 +182,7 @@ export class MarkdownUp {
         let text = null;
         let markdownModel = null;
         let markdownTitle = null;
-        if (!('cmd' in this.params) || !('help' in this.params.cmd)) {
+        if (!('cmd' in this.params) || 'markdown' in this.params.cmd) {
             const response = await this.window.fetch(url);
             if (!response.ok) {
                 const status = response.statusText;
@@ -200,27 +233,32 @@ export class MarkdownUp {
         // Render the text as Markdown
         const chartOptions = {
             'fontSize': 0.9 * (this.params !== null && 'fontSize' in this.params ? this.params.fontSize : this.fontSize),
-            'window': this.window,
-            url
+            url,
+            'variables': 'variables' in this.params ? this.params.variables : {},
+            'window': this.window
         };
         const result = {
             'elements': [
-                'cmd' in this.params
-                    ? (
-                        'markdown' in this.params.cmd
-                            ? {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': text}}
-                            : (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp')
-                    )
-                    : markdownElements(markdownModel, {
-                        'hashPrefix': smd.encodeQueryString(this.params),
-                        'headerIds': true,
-                        url,
-                        'codeBlocks': {
-                            'bar-chart': (language, lines) => barChartCodeBlock(language, lines, chartOptions),
-                            'data-table': (language, lines) => dataTableCodeBlock(language, lines, chartOptions),
-                            'line-chart': (language, lines) => lineChartCodeBlock(language, lines, chartOptions)
-                        }
-                    }),
+                !('cmd' in this.params && 'help' in this.params.cmd && this.params.cmd.help === 'Help')
+                    ? null : (new UserTypeElements(this.params)).getElements(appHashTypes, 'MarkdownUp'),
+                !('cmd' in this.params && 'help' in this.params.cmd && this.params.cmd.help === 'Bar')
+                    ? null : (new UserTypeElements(this.params)).getElements(chartModel.types, 'BarChart'),
+                !('cmd' in this.params && 'help' in this.params.cmd && this.params.cmd.help === 'Line')
+                    ? null : (new UserTypeElements(this.params)).getElements(chartModel.types, 'LineChart'),
+                !('cmd' in this.params && 'help' in this.params.cmd && this.params.cmd.help === 'Table')
+                    ? null : (new UserTypeElements(this.params)).getElements(chartModel.types, 'DataTable'),
+                !('cmd' in this.params && 'markdown' in this.params.cmd)
+                    ? null : {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': text}},
+                'cmd' in this.params ? null : markdownElements(markdownModel, {
+                    'hashPrefix': smd.encodeQueryString(this.params),
+                    'headerIds': true,
+                    url,
+                    'codeBlocks': {
+                        'bar-chart': (language, lines) => barChartCodeBlock(language, lines, chartOptions),
+                        'data-table': (language, lines) => dataTableCodeBlock(language, lines, chartOptions),
+                        'line-chart': (language, lines) => lineChartCodeBlock(language, lines, chartOptions)
+                    }
+                }),
                 !this.menu ? null : {
                     'html': 'div',
                     'attr': {'class': 'menu-burger'},
@@ -253,7 +291,7 @@ export class MarkdownUp {
                         },
                         {
                             'html': 'a',
-                            'attr': {'href': linkCommandToggle('help', 1), 'aria-label': 'Help'},
+                            'attr': {'href': linkCommandToggle('help', 'Help'), 'aria-label': 'Help'},
                             'elem': helpSVGElements
                         }
                     ]
