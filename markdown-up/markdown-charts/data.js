@@ -236,26 +236,52 @@ export function filterData(data, types, filters, variables = {}) {
                 throw new Error(`Filter type "${filterType}" does not match "${filter.field}" field type "${types[filter.field]}"`);
             }
 
+            // Validate variable types
+            if ('vlt' in filter && filter.vlt in variables && !(filterType in variables[filter.vlt])) {
+                throw new Error(`Invalid "${filter.vlt}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+            }
+            if ('vlte' in filter && filter.vlte in variables && !(filterType in variables[filter.vlte])) {
+                throw new Error(`Invalid "${filter.vlte}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+            }
+            if ('vgt' in filter && filter.vgt in variables && !(filterType in variables[filter.vgt])) {
+                throw new Error(`Invalid "${filter.vgt}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+            }
+            if ('vgte' in filter && filter.vgte in variables && !(filterType in variables[filter.vgte])) {
+                throw new Error(`Invalid "${filter.vgte}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+            }
+
             // Test the field value
             const filterValue = row[filter.field];
-            return ((!('in' in filter) && !('vin' in filter)) ||
-                    ('in' in filter && filter.in.indexOf(filterValue) !== -1) ||
-                    ('vin' in filter && filter.vin.some((varName) => {
-                        if (varName in variables) {
-                            if (!(filterType in variables[varName])) {
-                                throw new Error(
-                                    `Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`
-                                );
-                            }
-                            return filterValue === variables[varName][filterType];
-                        }
-                        return false;
-                    }))) &&
-                (!('except' in filter) || filter.except.indexOf(filterValue) === -1) &&
-                (!('lt' in filter) || filterValue < filter.lt) &&
+            return (!('lt' in filter) || filterValue < filter.lt) &&
                 (!('lte' in filter) || filterValue <= filter.lte) &&
                 (!('gt' in filter) || filterValue > filter.gt) &&
-                (!('gte' in filter) || filterValue >= filter.gte);
+                (!('gte' in filter) || filterValue >= filter.gte) &&
+                (!('vlt' in filter) || !(filter.vlt in variables) || filterValue < variables[filter.vlt][filterType]) &&
+                (!('vlte' in filter) || !(filter.vlte in variables) || filterValue <= variables[filter.vlte][filterType]) &&
+                (!('vgt' in filter) || !(filter.vgt in variables) || filterValue > variables[filter.vgt][filterType]) &&
+                (!('vgte' in filter) || !(filter.vgte in variables) || filterValue >= variables[filter.vgte][filterType]) &&
+                ((!('in' in filter) && !('vin' in filter)) ||
+                 ('in' in filter && filter.in.indexOf(filterValue) !== -1) ||
+                 ('vin' in filter && filter.vin.some((varName) => {
+                     if (!(varName in variables)) {
+                         return false;
+                     }
+                     if (!(filterType in variables[varName])) {
+                         throw new Error(`Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+                     }
+                     return filterValue === variables[varName][filterType];
+                 }))) &&
+                ((!('except' in filter) && !('vexcept' in filter)) ||
+                 ('except' in filter && filter.except.indexOf(filterValue) === -1) ||
+                 ('vexcept' in filter && !filter.vexcept.some((varName) => {
+                     if (!(varName in variables)) {
+                         return false;
+                     }
+                     if (!(filterType in variables[varName])) {
+                         throw new Error(`Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`);
+                     }
+                     return filterValue === variables[varName][filterType];
+                 })));
         })) {
             filteredData.push(row);
         }

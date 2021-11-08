@@ -193,19 +193,38 @@ union Filter
     StringFilter string
 
 
-# A datetime field filter. All members present must match for the filter to match.
-struct DatetimeFilter
+# The typed filter base structure
+struct FilterBase
 
     # The filter field name
     string field
 
-    # Matches if the field value is in the value array (or matches "vin")
-    optional datetime[len > 0] in
-
     # Matches if the field value is in the variable array (or matches "in")
     optional string[len > 0] vin
 
-    # Matches if the field value is NOT in the value array
+    # Matches if the field value is NOT in the variable array (or matches "except")
+    optional string[len > 0] vexcept
+
+    # Matches if the field value is less than the variable value
+    optional string vlt
+
+    # Matches if the field value is less than or equal to the variable value
+    optional string vlte
+
+    # Matches if the field value is greater than the variable value
+    optional string vgt
+
+    # Matches if the field value is greater than or equal to the variable value
+    optional string vgte
+
+
+# A datetime field filter. All members present must match for the filter to match.
+struct DatetimeFilter (FilterBase)
+
+    # Matches if the field value is in the value array (or matches "vin")
+    optional datetime[len > 0] in
+
+    # Matches if the field value is NOT in the value array (or matches "vexcept")
     optional datetime[len > 0] except
 
     # Matches if the field value is less than the value
@@ -222,18 +241,12 @@ struct DatetimeFilter
 
 
 # A number field filter. All members present must match for the filter to match.
-struct NumberFilter
-
-    # The filter field name
-    string field
+struct NumberFilter (FilterBase)
 
     # Matches if the field value is in the value array (or matches "vin")
     optional float[len > 0] in
 
-    # Matches if the field value is in the variable array (or matches "in")
-    optional string[len > 0] vin
-
-    # Matches if the field value is NOT in the value array
+    # Matches if the field value is NOT in the value array (or matches "vexcept")
     optional float[len > 0] except
 
     # Matches if the field value is less than the value
@@ -250,18 +263,12 @@ struct NumberFilter
 
 
 # A string field filter. All members present must match for the filter to match.
-struct StringFilter
-
-    # The filter field name
-    string field
+struct StringFilter (FilterBase)
 
     # Matches if the field value is in the value array (or matches "vin")
     optional string[len > 0] in
 
-    # Matches if the field value is in the variable array (or matches "in")
-    optional string[len > 0] vin
-
-    # Matches if the field value is NOT in the value array
+    # Matches if the field value is NOT in the value array (or matches "vexcept")
     optional string[len > 0] except
 
     # Matches if the field value is less than the value
