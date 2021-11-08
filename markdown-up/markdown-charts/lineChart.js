@@ -53,12 +53,16 @@ const categoricalColors = [
 
 
 // Helper function to format the title
-function formatTitle(title, variables, precision) {
-    return title.replace(rVariable, (match, variable) => {
+function formatTitle(chart, options) {
+    const variables = {
+        ...('variables' in chart ? chart.variables : {}),
+        ...('variables' in options ? options.variables : {})
+    };
+    return chart.title.replace(rVariable, (match, variable) => {
         if (variable in variables) {
             const fieldValue = variables[variable];
             const value = 'datetime' in fieldValue ? fieldValue.datetime : ('number' in fieldValue ? fieldValue.number : fieldValue.string);
-            return formatValue(value, precision);
+            return formatValue(value, chart);
         }
         return match;
     });
@@ -68,11 +72,15 @@ const rVariable = /\{\{(\w+)\}\}/;
 
 
 // Helper function to format labels
-function formatValue(value, precision) {
+function formatValue(value, chart) {
     if (value instanceof Date) {
-        return value.toISOString().replace(rDateCleanup, '');
+        const isoFormat = value.toISOString();
+        if ('datetime' in chart && chart.datetime === 'Day') {
+            return isoFormat.slice(0, isoFormat.indexOf('T'));
+        }
+        return isoFormat.replace(rDateCleanup, '');
     } else if (typeof value === 'number') {
-        return value.toFixed(precision);
+        return value.toFixed('precision' in chart ? chart.precision : defaultPrecision);
     }
     return `${value}`;
 }
@@ -157,7 +165,7 @@ export async function lineChartElements(lineChart, options = {}) {
         for (const row of data) {
             for (const yField of yFields) {
                 const rowKeyPrefix = yFields.length === 1 ? '' : `${yField}, `;
-                const rowKey = `${rowKeyPrefix}${colorFields.map((field) => formatValue(row[field])).join(', ')}`;
+                const rowKey = `${rowKeyPrefix}${colorFields.map((field) => formatValue(row[field], lineChart)).join(', ')}`;
                 colorValueSet.add(rowKey);
                 const xRow = xField in row ? row[xField] : null;
                 const yRow = yField in row ? row[yField] : null;
@@ -218,7 +226,6 @@ export async function lineChartElements(lineChart, options = {}) {
     // Override-able properties
     const chartWidth = 'width' in lineChart ? lineChart.width : defaultWidth;
     const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
-    const chartPrecision = 'precision' in lineChart ? lineChart.precision : defaultPrecision;
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
     // Compute Y-axis tick values
@@ -230,7 +237,7 @@ export async function lineChartElements(lineChart, options = {}) {
             if (yTickType !== yFieldType) {
                 throw new Error(`invalid yTick value ${JSON.stringify(yTickValue)} (type "${yTickType}") expected "${yFieldType}"`);
             }
-            yAxisTicks.push([yTickValue, 'label' in yTick ? yTick.label : formatValue(yTickValue, chartPrecision)]);
+            yAxisTicks.push([yTickValue, 'label' in yTick ? yTick.label : formatValue(yTickValue, lineChart)]);
             yMin = yTickValue < yMin ? yTickValue : yMin;
             yMax = yTickValue > yMax ? yTickValue : yMax;
         }
@@ -241,7 +248,7 @@ export async function lineChartElements(lineChart, options = {}) {
         for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
             const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
             const yTickValue = parameterValue(yTickParam, yMin, yMax);
-            yAxisTicks.push([yTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(yTickValue, chartPrecision)]);
+            yAxisTicks.push([yTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(yTickValue, lineChart)]);
         }
     }
 
@@ -254,7 +261,7 @@ export async function lineChartElements(lineChart, options = {}) {
             if (xTickType !== xFieldType) {
                 throw new Error(`invalid xTick value ${JSON.stringify(xTickValue)} (type "${xTickType}") expected "${xFieldType}"`);
             }
-            xAxisTicks.push([xTickValue, 'label' in xTick ? xTick.label : formatValue(xTickValue, chartPrecision)]);
+            xAxisTicks.push([xTickValue, 'label' in xTick ? xTick.label : formatValue(xTickValue, lineChart)]);
             xMin = xTickValue < xMin ? xTickValue : xMin;
             xMax = xTickValue > xMax ? xTickValue : xMax;
         }
@@ -264,7 +271,7 @@ export async function lineChartElements(lineChart, options = {}) {
         for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
             const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
             const xTickValue = parameterValue(xTickParam, xMin, xMax);
-            xAxisTicks.push([xTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(xTickValue, chartPrecision)]);
+            xAxisTicks.push([xTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(xTickValue, lineChart)]);
         }
     }
 
@@ -337,10 +344,6 @@ export async function lineChartElements(lineChart, options = {}) {
     };
 
     // Render the chart
-    const variables = {
-        ...('variables' in lineChart ? lineChart.variables : {}),
-        ...('variables' in options ? options.variables : {})
-    };
     return {
         'svg': 'svg',
         'attr': {
@@ -371,7 +374,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     'text-anchor': 'middle',
                     'dominant-baseline': 'hanging'
                 },
-                'elem': {'text': formatTitle(chartTitle, variables, chartPrecision)}
+                'elem': {'text': formatTitle(lineChart, options)}
             },
 
             // Y-Axis title

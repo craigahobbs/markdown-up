@@ -63,6 +63,9 @@ struct ChartBase
     # Numeric formatting precision (default is 2)
     optional int(>= 0) precision
 
+    # Datetime format (default is "Auto")
+    optional DatetimeFormat datetime
+
     # The map of variable name to variable value
     optional FieldValue{len > 0} variables
 
@@ -122,6 +125,16 @@ struct LineChart (ChartBase)
 
     # The Y-axis tick mark specification
     optional AxisTicks yTicks
+
+
+# Datetime format enumeration
+enum DatetimeFormat
+
+    # ISO datetime format with automatic trimming
+    Auto
+
+    # ISO datetime day format
+    Day
 
 
 # An axis tick mark specification
