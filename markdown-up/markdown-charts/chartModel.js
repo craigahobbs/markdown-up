@@ -117,20 +117,40 @@ struct LineChart (ChartBase)
     # The number of Y-axis tick marks, including the beginning and end ticks. The default is 3.
     optional int(>= 0) yTickCount
 
-    # The X-axis tick marks
-    optional AxisTick[len > 0] xTicks
+    # The X-axis tick mark specification
+    optional AxisTicks xTicks
 
-    # The Y-axis tick marks
-    optional AxisTick[len > 0] yTicks
+    # The Y-axis tick mark specification
+    optional AxisTicks yTicks
 
 
-# Axis tick specification
-struct AxisTick
+# An axis tick mark specification
+union AxisTicks
 
-    # The axis tick mark's value
+    # Automatically-generated, evenly-spaced tick marks
+    AxisTicksAuto auto
+
+    # The array of tick mark field values
+    AxisTickValue[] values
+
+
+# Automatically-generated, evenly-spaced tick marks specification
+struct AxisTicksAuto
+
+    # The number of tick marks
+    int count
+
+    # The number of tick mark labels to skip after a rendered label
+    optional int(> 0) skip
+
+
+# A tick mark value
+struct AxisTickValue
+
+    # The tick mark field value
     FieldValue value
 
-    # The axis tick mark's label
+    # The tick mark's label
     optional string label
 
 

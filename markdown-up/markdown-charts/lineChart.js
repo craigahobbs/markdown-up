@@ -220,18 +220,11 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
     const chartPrecision = 'precision' in lineChart ? lineChart.precision : defaultPrecision;
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
-    const xAxisTickCount = xMin === xMax ? 1 : ('xTickCount' in lineChart ? lineChart.xTickCount : defaultXAxisTickCount);
-    const yAxisTickCount = yMin === yMax ? 1 : ('yTickCount' in lineChart ? lineChart.yTickCount : defaultYAxisTickCount);
 
     // Compute Y-axis tick values
     const yAxisTicks = [];
-    for (let ixTick = 0; ixTick < yAxisTickCount; ixTick++) {
-        const yTickParam = yAxisTickCount === 1 ? 0 : ixTick / (yAxisTickCount - 1);
-        const yTickValue = parameterValue(yTickParam, yMin, yMax);
-        yAxisTicks.push([yTickValue, formatValue(yTickValue, chartPrecision)]);
-    }
-    if ('yTicks' in lineChart) {
-        for (const yTick of lineChart.yTicks) {
+    if ('yTicks' in lineChart && 'values' in lineChart.yTicks) {
+        for (const yTick of lineChart.yTicks.values) {
             const yTickType = 'datetime' in yTick.value ? 'datetime' : ('number' in yTick.value ? 'number' : 'string');
             const yTickValue = yTick.value[yTickType];
             if (yTickType !== yFieldType) {
@@ -241,17 +234,21 @@ export async function lineChartElements(lineChart, options = {}) {
             yMin = yTickValue < yMin ? yTickValue : yMin;
             yMax = yTickValue > yMax ? yTickValue : yMax;
         }
+    } else {
+        // Automatically-generated, evenly spaced Y-axis tick marks
+        const yTickCount = 'yTicks' in lineChart ? lineChart.yTicks.auto.count : defaultYAxisTickCount;
+        const skipCount = 'yTicks' in lineChart && 'skip' in lineChart.yTicks.auto ? lineChart.yTicks.auto.skip + 1 : 1;
+        for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
+            const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
+            const yTickValue = parameterValue(yTickParam, yMin, yMax);
+            yAxisTicks.push([yTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(yTickValue, chartPrecision)]);
+        }
     }
 
     // Compute X-axis tick values
     const xAxisTicks = [];
-    for (let ixTick = 0; ixTick < xAxisTickCount; ixTick++) {
-        const xTickParam = xAxisTickCount === 1 ? 0 : ixTick / (xAxisTickCount - 1);
-        const xTickValue = parameterValue(xTickParam, xMin, xMax);
-        xAxisTicks.push([xTickValue, formatValue(xTickValue, chartPrecision)]);
-    }
-    if ('xTicks' in lineChart) {
-        for (const xTick of lineChart.xTicks) {
+    if ('xTicks' in lineChart && 'values' in lineChart.xTicks) {
+        for (const xTick of lineChart.xTicks.values) {
             const xTickType = 'datetime' in xTick.value ? 'datetime' : ('number' in xTick.value ? 'number' : 'string');
             const xTickValue = xTick.value[xTickType];
             if (xTickType !== xFieldType) {
@@ -260,6 +257,14 @@ export async function lineChartElements(lineChart, options = {}) {
             xAxisTicks.push([xTickValue, 'label' in xTick ? xTick.label : formatValue(xTickValue, chartPrecision)]);
             xMin = xTickValue < xMin ? xTickValue : xMin;
             xMax = xTickValue > xMax ? xTickValue : xMax;
+        }
+    } else {
+        const xTickCount = 'xTicks' in lineChart ? lineChart.xTicks.auto.count : defaultXAxisTickCount;
+        const skipCount = 'xTicks' in lineChart && 'skip' in lineChart.xTicks.auto ? lineChart.xTicks.auto.skip + 1 : 1;
+        for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
+            const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
+            const xTickValue = parameterValue(xTickParam, xMin, xMax);
+            xAxisTicks.push([xTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(xTickValue, chartPrecision)]);
         }
     }
 
