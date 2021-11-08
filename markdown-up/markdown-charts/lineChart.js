@@ -280,7 +280,7 @@ export async function lineChartElements(lineChart, options = {}) {
     }, 0);
     const yAxisTickGap = 0.75 * axisTickLength;
     const yAxisX = Math.min(
-        chartBorderSize + yAxisTitleWidth + (xAxisTicks.length === 0 ? 0 : yAxisLabelWidth + yAxisTickGap + axisTickLength),
+        chartBorderSize + yAxisTitleWidth + (yAxisTicks.length === 0 ? 0 : yAxisLabelWidth + yAxisTickGap + axisTickLength),
         0.4 * chartWidth
     );
 
@@ -288,7 +288,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisTitleHeight = 1.8 * axisTitleFontSize;
     const xAxisTickGap = 0.75 * axisTickLength;
     const xAxisY = chartHeight - chartBorderSize - xAxisTitleHeight -
-          (yAxisTicks.length === 0 ? 0 : axisLabelFontSize - xAxisTickGap + axisTickLength);
+          (xAxisTicks.length === 0 ? 0 : axisLabelFontSize - xAxisTickGap + axisTickLength);
 
     // Color legend calculations
     const colorLegendFontSize = chartFontSize;
