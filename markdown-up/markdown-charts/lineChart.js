@@ -395,10 +395,12 @@ export async function lineChartElements(lineChart, options = {}) {
             },
 
             // Y-axis ticks
-            yAxisTicks.map(([yCoord]) => {
+            yAxisTicks.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
+                const hasLabel = yLabel !== '';
+                const hasLine = !hasLabel || (yPoint > yAxisLabelTop && yPoint < yAxisLabelBottom);
                 return [
-                    {
+                    !hasLabel ? null : {
                         'svg': 'path',
                         'attr': {
                             'stroke': axisColor,
@@ -407,7 +409,7 @@ export async function lineChartElements(lineChart, options = {}) {
                             'd': `M ${svgValue(yAxisX)} ${svgValue(yPoint)} H ${svgValue(yAxisX - axisTickLength)}`
                         }
                     },
-                    yPoint < yAxisLabelTop || yPoint > yAxisLabelBottom ? null : {
+                    !hasLine ? null : {
                         'svg': 'path',
                         'attr': {
                             'stroke': axisTickLineColor,
@@ -422,7 +424,8 @@ export async function lineChartElements(lineChart, options = {}) {
             // Y-axis labels
             yAxisTicks.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
-                return {
+                const hasLabel = yLabel !== '';
+                return !hasLabel ? null : {
                     'svg': 'text',
                     'attr': {
                         'font-family': chartFontFamily,
@@ -454,10 +457,12 @@ export async function lineChartElements(lineChart, options = {}) {
             },
 
             // X-axis ticks
-            xAxisTicks.map(([xCoord]) => {
+            xAxisTicks.map(([xCoord, xLabel]) => {
                 const xPoint = chartPointX(xCoord);
+                const hasLabel = xLabel !== '';
+                const hasLine = !hasLabel || (xPoint > xAxisLabelLeft && xPoint < xAxisLabelRight);
                 return [
-                    {
+                    !hasLabel ? null : {
                         'svg': 'path',
                         'attr': {
                             'stroke': axisColor,
@@ -466,7 +471,7 @@ export async function lineChartElements(lineChart, options = {}) {
                             'd': `M ${svgValue(xPoint)} ${svgValue(xAxisY)} V ${svgValue(xAxisY + axisTickLength)}`
                         }
                     },
-                    xPoint < xAxisLabelLeft || xPoint > xAxisLabelRight ? null : {
+                    !hasLine ? null : {
                         'svg': 'path',
                         'attr': {
                             'stroke': axisTickLineColor,
@@ -481,7 +486,8 @@ export async function lineChartElements(lineChart, options = {}) {
             // X-axis labels
             xAxisTicks.map(([xCoord, xLabel]) => {
                 const xPoint = chartPointX(xCoord);
-                return {
+                const hasLabel = xLabel !== '';
+                return !hasLabel ? null : {
                     'svg': 'text',
                     'attr': {
                         'font-family': chartFontFamily,
