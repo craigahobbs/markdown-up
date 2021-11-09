@@ -225,63 +225,47 @@ export function validateData(data, options = {}) {
 export function filterData(data, types, filters, variables = {}) {
     const filteredData = [];
     for (const row of data) {
-        if (filters.every((filterUnion) => {
-            // Validate the filter type
-            const filterType = 'datetime' in filterUnion ? 'datetime' : ('number' in filterUnion ? 'number' : 'string');
-            const filter = filterUnion[filterType];
+        if (filters.every((filter) => {
+            // Get the filter field value - skip nulls
             if (!(filter.field in types)) {
                 throw new Error(`Unknown filter field "${filter.field}"`);
             }
-            if (filterType !== types[filter.field]) {
-                throw new Error(`Filter type "${filterType}" does not match "${filter.field}" field type "${types[filter.field]}"`);
+            const fieldType = types[filter.field];
+            const filterValue = filter.field in row ? row[filter.field] : null;
+            if (filterValue === null) {
+                return true;
             }
 
-            // Validate variable types
-            if ('vlt' in filter && filter.vlt in variables && !(filterType in variables[filter.vlt])) {
-                throw new Error(`Invalid "${filter.vlt}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-            }
-            if ('vlte' in filter && filter.vlte in variables && !(filterType in variables[filter.vlte])) {
-                throw new Error(`Invalid "${filter.vlte}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-            }
-            if ('vgt' in filter && filter.vgt in variables && !(filterType in variables[filter.vgt])) {
-                throw new Error(`Invalid "${filter.vgt}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-            }
-            if ('vgte' in filter && filter.vgte in variables && !(filterType in variables[filter.vgte])) {
-                throw new Error(`Invalid "${filter.vgte}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-            }
+            // Helper function to match value filters
+            const matchValue = (fieldValue, fnMatch) => {
+                const filterType = 'datetime' in fieldValue ? 'datetime' : ('number' in fieldValue ? 'number' : 'string');
+                const value = fieldValue[filterType];
+                if (filterType !== fieldType) {
+                    throw new Error(`Invalid filter value ${JSON.stringify(value)} (type "${filterType}") ` +
+                                    `for filter field "${filter.field}" (type "${fieldType}")`);
+                }
+                return fnMatch(filterValue, value);
+            };
 
             // Test the field value
-            const filterValue = row[filter.field];
-            return (!('lt' in filter) || filterValue < filter.lt) &&
-                (!('lte' in filter) || filterValue <= filter.lte) &&
-                (!('gt' in filter) || filterValue > filter.gt) &&
-                (!('gte' in filter) || filterValue >= filter.gte) &&
-                (!('vlt' in filter) || !(filter.vlt in variables) || filterValue < variables[filter.vlt][filterType]) &&
-                (!('vlte' in filter) || !(filter.vlte in variables) || filterValue <= variables[filter.vlte][filterType]) &&
-                (!('vgt' in filter) || !(filter.vgt in variables) || filterValue > variables[filter.vgt][filterType]) &&
-                (!('vgte' in filter) || !(filter.vgte in variables) || filterValue >= variables[filter.vgte][filterType]) &&
+            return (!('lt' in filter) || matchValue(filter.lt, (v1, v2) => v1 < v2)) &&
+                (!('lte' in filter) || matchValue(filter.lte, (v1, v2) => v1 <= v2)) &&
+                (!('gt' in filter) || matchValue(filter.gt, (v1, v2) => v1 > v2)) &&
+                (!('gte' in filter) || matchValue(filter.gte, (v1, v2) => v1 >= v2)) &&
+                (!('vlt' in filter) || !(filter.vlt in variables) || matchValue(variables[filter.vlt], (v1, v2) => v1 < v2)) &&
+                (!('vlte' in filter) || !(filter.vlte in variables) || matchValue(variables[filter.vlte], (v1, v2) => v1 <= v2)) &&
+                (!('vgt' in filter) || !(filter.vgt in variables) || matchValue(variables[filter.vgt], (v1, v2) => v1 > v2)) &&
+                (!('vgte' in filter) || !(filter.vgte in variables) || matchValue(variables[filter.vgte], (v1, v2) => v1 >= v2)) &&
                 ((!('in' in filter) && !('vin' in filter)) ||
-                 ('in' in filter && filter.in.indexOf(filterValue) !== -1) ||
-                 ('vin' in filter && filter.vin.some((varName) => {
-                     if (!(varName in variables)) {
-                         return false;
-                     }
-                     if (!(filterType in variables[varName])) {
-                         throw new Error(`Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-                     }
-                     return filterValue === variables[varName][filterType];
-                 }))) &&
+                 (('in' in filter && filter.in.some((fieldValue) => matchValue(fieldValue, (v1, v2) => v1 === v2))) ||
+                  ('vin' in filter && filter.vin.some(
+                      (varName) => varName in variables && matchValue(variables[varName], (v1, v2) => v1 === v2)
+                  )))) &&
                 ((!('except' in filter) && !('vexcept' in filter)) ||
-                 ('except' in filter && filter.except.indexOf(filterValue) === -1) ||
-                 ('vexcept' in filter && !filter.vexcept.some((varName) => {
-                     if (!(varName in variables)) {
-                         return false;
-                     }
-                     if (!(filterType in variables[varName])) {
-                         throw new Error(`Invalid "${varName}" variable type for filter field "${filter.field}" (type "${filterType}")`);
-                     }
-                     return filterValue === variables[varName][filterType];
-                 })));
+                 (('except' in filter && !filter.except.some((fieldValue) => matchValue(fieldValue, (v1, v2) => v1 === v2))) ||
+                  ('vexcept' in filter && !filter.vexcept.some(
+                      (varName) => varName in variables && matchValue(variables[varName], (v1, v2) => v1 === v2)
+                  ))));
         })) {
             filteredData.push(row);
         }
