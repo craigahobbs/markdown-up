@@ -75,6 +75,11 @@ export async function loadChartData(chart, options = {}) {
         data = filterData(data, types, chart.filters, variables);
     }
 
+    // Aggregate the data
+    if ('aggregation' in chart) {
+        data = aggregateData(data, types, chart.aggregation);
+    }
+
     return {data, types};
 }
 
@@ -273,10 +278,22 @@ export function filterData(data, types, filters, variables = {}) {
 // Helper function to validate filter values
 function validateFilterValue(filterValue, fieldName, fieldType) {
     const filterType = 'datetime' in filterValue ? 'datetime' : ('number' in filterValue ? 'number' : 'string');
-    const value = filterValue[filterType];
     if (filterType !== fieldType) {
-        throw new Error(`Invalid filter value ${JSON.stringify(value)} (type "${filterType}") ` +
+        throw new Error(`Invalid filter value ${JSON.stringify(filterValue[filterType])} (type "${filterType}") ` +
                         `for filter field "${fieldName}" (type "${fieldType}")`);
     }
-    return value;
+    return filterValue[filterType];
+}
+
+
+/**
+ * Aggregate data rows
+ *
+ * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
+ * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
+ * @param {Object} filters - The array of filter specifications
+ * @returns {Object[]} The filtered data array
+ */
+export function aggregateData(data, types, filters) {
+    return types !== null && filters !== null ? data : data;
 }

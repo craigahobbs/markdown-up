@@ -42,6 +42,9 @@ const chartModelSmd = `\
 # Base struct for all chart types
 struct ChartBase
 
+    # Chart title
+    optional string title
+
     # The chart width
     optional int(> 0) width
 
@@ -56,9 +59,6 @@ struct ChartBase
 
     # Optional data aggregation
     optional Aggregation aggregation
-
-    # Chart title
-    optional string title
 
     # Numeric formatting precision (default is 2)
     optional int(>= 0) precision
@@ -113,12 +113,6 @@ struct LineChart (ChartBase)
 
     # The color encoding fields. Render a colored line for each of the fields' values.
     optional string[len > 0] colorFields
-
-    # The number of X-axis tick marks, including the beginning and end ticks. The default is 3.
-    optional int(>= 0) xTickCount
-
-    # The number of Y-axis tick marks, including the beginning and end ticks. The default is 3.
-    optional int(>= 0) yTickCount
 
     # The X-axis tick mark specification
     optional AxisTicks xTicks
@@ -242,7 +236,7 @@ struct AggregationCategory
     string field
 
     # The aggregation category's categorization
-    AggregationCategorization categorization
+    AggregationCategorization by
 
 
 # The aggregation category type
