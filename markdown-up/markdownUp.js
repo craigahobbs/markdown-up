@@ -17,14 +17,6 @@ const appHashTypes = (new smd.SchemaMarkdownParser(`\
 #
 # [markdown-up](https://github.com/craigahobbs/markdown-up#readme)
 #
-# ## markdown-charts
-#
-# [bar-chart](#cmd.help=Bar)
-#
-# [data-table](#cmd.help=Table)
-#
-# [line-chart](#cmd.help=Line)
-#
 # ## Hash Parameters
 #
 # The markdown-up application recognizes the following hash parameters:
