@@ -1,7 +1,9 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-charts/blob/main/LICENSE
 
-import {SchemaMarkdownParser, validateType} from '../../schema-markdown/index.js';
+/** @module lib/model */
+
+import {SchemaMarkdownParser, validateType} from '../../../schema-markdown/index.js';
 
 
 /**
@@ -289,7 +291,7 @@ enum AggregationFunction
  * The chart model
  *
  * @property {string} title - The type model title
- * @property {Object} types - The type model's type dictionary
+ * @property {Object} types - The chart model's referenced types dictionary
  */
 export const chartModel = {
     'title': 'The Chart Model',

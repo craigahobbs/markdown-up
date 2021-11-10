@@ -1,12 +1,14 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-charts/blob/main/LICENSE
 
-import {validateBarChart, validateDataTable, validateLineChart} from './chartModel.js';
+/** @module lib/codeBlock */
+
+import {validateBarChart, validateDataTable, validateLineChart} from './model.js';
 import {barChartElements} from './barChart.js';
 import {dataTableElements} from './dataTable.js';
-import {decodeQueryString} from '../../schema-markdown/index.js';
+import {decodeQueryString} from '../../../schema-markdown/index.js';
 import {lineChartElements} from './lineChart.js';
-import {renderElements} from '../../element-model/index.js';
+import {renderElements} from '../../../element-model/index.js';
 
 
 /**
@@ -14,7 +16,7 @@ import {renderElements} from '../../element-model/index.js';
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The bar chart element model
  */
 export function barChartCodeBlock(language, lines, options = {}) {
@@ -27,7 +29,7 @@ export function barChartCodeBlock(language, lines, options = {}) {
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The data table element model
  */
 export function dataTableCodeBlock(language, lines, options = {}) {
@@ -40,7 +42,7 @@ export function dataTableCodeBlock(language, lines, options = {}) {
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The line chart element model
  */
 export function lineChartCodeBlock(language, lines, options = {}) {

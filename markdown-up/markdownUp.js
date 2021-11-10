@@ -2,9 +2,10 @@
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 import * as smd from '../schema-markdown/index.js';
-import {barChartCodeBlock, chartModel, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/index.js';
+import {barChartCodeBlock, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/lib/codeBlock.js';
 import {getMarkdownTitle, markdownElements, parseMarkdown} from '../markdown-model/index.js';
 import {UserTypeElements} from '../schema-markdown-doc/index.js';
+import {chartModel} from './markdown-charts/lib/model.js';
 import {encodeQueryString} from '../schema-markdown/index.js';
 import {renderElements} from '../element-model/index.js';
 

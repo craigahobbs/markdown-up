@@ -1,6 +1,8 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-charts/blob/main/LICENSE
 
+/** @module lib/dataTable */
+
 import {loadChartData} from './data.js';
 
 
@@ -8,7 +10,7 @@ import {loadChartData} from './data.js';
  * Render a data table
  *
  * @param {Object} dataTable - The data table model
- * @param {ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The data table element model
  */
 export async function dataTableElements(dataTable, options = {}) {

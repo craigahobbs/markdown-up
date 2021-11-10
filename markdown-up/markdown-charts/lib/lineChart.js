@@ -1,6 +1,8 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-charts/blob/main/LICENSE
 
+/** @module lib/lineChart */
+
 import {loadChartData} from './data.js';
 
 
@@ -118,7 +120,7 @@ function parameterValue(param, minValue, maxValue) {
  * Render a line chart
  *
  * @param {Object} lineChart - The line chart model
- * @param {ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The line chart element model
  */
 export async function lineChartElements(lineChart, options = {}) {

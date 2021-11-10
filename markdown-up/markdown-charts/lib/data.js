@@ -1,29 +1,9 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-charts/blob/main/LICENSE
 
-import {getBaseURL, isRelativeURL} from '../../markdown-model/index.js';
+/** @module lib/data */
 
-
-/**
- * @typedef {Object} ChartOptions
- * @property {number} [fontSize] - The chart font size
- * @property {string} [url] - The markdown file URL
- * @property {ChartVariables} [variables] - The map of variable name to chart variable
- * @property {Window} [window] - The web browser's Window object
- */
-
-
-/**
- * @typedef {Object.<string, ChartVariable>} ChartVariables
- */
-
-
-/**
- * @typedef {Object} ChartVariable
- * @property {Date} [datetime] - The datetime variable value
- * @property {number} [number] - The number variable value
- * @property {string} [string] - The string variable value
- */
+import {getBaseURL, isRelativeURL} from '../../../markdown-model/index.js';
 
 
 /**
@@ -37,8 +17,8 @@ import {getBaseURL, isRelativeURL} from '../../markdown-model/index.js';
  * Load the chart's data
  *
  * @param {Object} chart - The chart model
- * @param {ChartOptions} [options={}] - Chart options object
- * @returns {LoadChartDataResult}
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @returns {module:lib/data~LoadChartDataResult}
  */
 export async function loadChartData(chart, options = {}) {
     // Fixup the data URL, if necessary
@@ -111,22 +91,15 @@ const rCSVFieldSplit = /"?,"?/;
 
 
 /**
- * @typedef {Object} ValidateDataOptions
- * @property {boolean} [csv] - If True, parse number and null strings
- */
-
-
-/**
  * Determine data field types and parse/validate field values
  *
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
- * @param {ValidateDataOptions} [options = {}] - The validation options
+ * @param {boolean} [csv=false] - If true, parse number and null strings
  * @returns {Object} The map of field name to field type ("datetime", "number", "string")
  */
-export function validateData(data, options = {}) {
+export function validateData(data, csv = false) {
     // Determine field types
     const types = {};
-    const optionCSV = 'csv' in options && options.csv;
     for (const row of data) {
         for (const [field, value] of Object.entries(row)) {
             if (!(field in types)) {
@@ -134,10 +107,10 @@ export function validateData(data, options = {}) {
                     types[field] = 'number';
                 } else if (value instanceof Date) {
                     types[field] = 'datetime';
-                } else if (typeof value === 'string' && (!optionCSV || value !== 'null')) {
+                } else if (typeof value === 'string' && (!csv || value !== 'null')) {
                     if (parseCSVDatetime(value) !== null) {
                         types[field] = 'datetime';
-                    } else if (optionCSV && parseCSVNumber(value) !== null) {
+                    } else if (csv && parseCSVNumber(value) !== null) {
                         types[field] = 'number';
                     } else {
                         types[field] = 'string';
@@ -156,12 +129,12 @@ export function validateData(data, options = {}) {
             const fieldType = field in types ? types[field] : 'string';
 
             // Null string?
-            if (optionCSV && value === 'null') {
+            if (csv && value === 'null') {
                 row[field] = null;
 
             // Number field
             } else if (fieldType === 'number') {
-                if (optionCSV && typeof value === 'string') {
+                if (csv && typeof value === 'string') {
                     const numberValue = parseCSVNumber(value);
                     if (numberValue === null) {
                         throwFieldError(field, fieldType, value);
@@ -224,7 +197,7 @@ const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
  * @param {Object} filters - The array of filter specifications
- * @param {ChartVariables} [variables={}] - The map of variable name to chart variable
+ * @param {module:lib/util~ChartVariables} [variables={}] - The map of variable name to chart variable
  * @returns {Object[]} The filtered data array
  */
 export function filterData(data, types, filters, variables = {}) {
@@ -283,11 +256,11 @@ function validateFilterValue(filterValue, fieldName, fieldType) {
 /**
  * Aggregate data rows
  *
- * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
+ * @param {Object[]} data - The data array
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
- * @param {Object} filters - The array of filter specifications
+ * @param {Object} aggregation - The aggregation specification
  * @returns {Object[]} The filtered data array
  */
-export function aggregateData(data, types, filters) {
-    return types !== null && filters !== null ? data : data;
+export function aggregateData(data, types, aggregation) {
+    return types !== null && aggregation !== null ? data : data;
 }
