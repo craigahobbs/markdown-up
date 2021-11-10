@@ -230,45 +230,53 @@ export function filterData(data, types, filters, variables = {}) {
             if (!(filter.field in types)) {
                 throw new Error(`Unknown filter field "${filter.field}"`);
             }
-            const fieldType = types[filter.field];
-            const filterValue = filter.field in row ? row[filter.field] : null;
-            if (filterValue === null) {
+            const fieldName = filter.field;
+            const fieldType = types[fieldName];
+            const fieldValue = fieldName in row ? row[fieldName] : null;
+            if (fieldValue === null) {
                 return true;
             }
 
-            // Helper function to validate filter values
-            const validateValue = (fieldValue) => {
-                const filterType = 'datetime' in fieldValue ? 'datetime' : ('number' in fieldValue ? 'number' : 'string');
-                const value = fieldValue[filterType];
-                if (filterType !== fieldType) {
-                    throw new Error(`Invalid filter value ${JSON.stringify(value)} (type "${filterType}") ` +
-                                    `for filter field "${filter.field}" (type "${fieldType}")`);
-                }
-                return value;
-            };
-
             // Test the field value
-            return (!('lt' in filter) || filterValue < validateValue(filter.lt)) &&
-                (!('lte' in filter) || filterValue <= validateValue(filter.lte)) &&
-                (!('gt' in filter) || filterValue > validateValue(filter.gt)) &&
-                (!('gte' in filter) || filterValue >= validateValue(filter.gte)) &&
-                (!('vlt' in filter) || !(filter.vlt in variables) || filterValue < validateValue(variables[filter.vlt])) &&
-                (!('vlte' in filter) || !(filter.vlte in variables) || filterValue <= validateValue(variables[filter.vlte])) &&
-                (!('vgt' in filter) || !(filter.vgt in variables) || filterValue > validateValue(variables[filter.vgt])) &&
-                (!('vgte' in filter) || !(filter.vgte in variables) || filterValue >= validateValue(variables[filter.vgte])) &&
+            return (!('lt' in filter) || fieldValue < validateFilterValue(filter.lt, fieldName, fieldType)) &&
+                (!('lte' in filter) || fieldValue <= validateFilterValue(filter.lte, fieldName, fieldType)) &&
+                (!('gt' in filter) || fieldValue > validateFilterValue(filter.gt, fieldName, fieldType)) &&
+                (!('gte' in filter) || fieldValue >= validateFilterValue(filter.gte, fieldName, fieldType)) &&
+                (!('vlt' in filter) || !(filter.vlt in variables) ||
+                 fieldValue < validateFilterValue(variables[filter.vlt], fieldName, fieldType)) &&
+                (!('vlte' in filter) || !(filter.vlte in variables) ||
+                 fieldValue <= validateFilterValue(variables[filter.vlte], fieldName, fieldType)) &&
+                (!('vgt' in filter) || !(filter.vgt in variables) ||
+                 fieldValue > validateFilterValue(variables[filter.vgt], fieldName, fieldType)) &&
+                (!('vgte' in filter) || !(filter.vgte in variables) ||
+                 fieldValue >= validateFilterValue(variables[filter.vgte], fieldName, fieldType)) &&
                 ((!('in' in filter) && !('vin' in filter)) ||
-                 (('in' in filter && filter.in.some((fieldValue) => filterValue === validateValue(fieldValue))) ||
-                  ('vin' in filter && filter.vin.some(
-                      (varName) => varName in variables && filterValue === validateValue(variables[varName])
-                  )))) &&
+                 (('in' in filter && filter.in.some(
+                     (filterValue) => fieldValue === validateFilterValue(filterValue, fieldName, fieldType)
+                 )) || ('vin' in filter && filter.vin.some(
+                     (varName) => varName in variables && fieldValue === validateFilterValue(variables[varName], fieldName, fieldType)
+                 )))) &&
                 ((!('except' in filter) && !('vexcept' in filter)) ||
-                 (('except' in filter && !filter.except.some((fieldValue) => filterValue === validateValue(fieldValue))) ||
-                  ('vexcept' in filter && !filter.vexcept.some(
-                      (varName) => varName in variables && filterValue === validateValue(variables[varName])
-                  ))));
+                 (('except' in filter && !filter.except.some(
+                     (filterValue) => fieldValue === validateFilterValue(filterValue, fieldName, fieldType)
+                 )) || ('vexcept' in filter && !filter.vexcept.some(
+                     (varName) => varName in variables && fieldValue === validateFilterValue(variables[varName], fieldName, fieldType)
+                 ))));
         })) {
             filteredData.push(row);
         }
     }
     return filteredData;
+}
+
+
+// Helper function to validate filter values
+function validateFilterValue(filterValue, fieldName, fieldType) {
+    const filterType = 'datetime' in filterValue ? 'datetime' : ('number' in filterValue ? 'number' : 'string');
+    const value = filterValue[filterType];
+    if (filterType !== fieldType) {
+        throw new Error(`Invalid filter value ${JSON.stringify(value)} (type "${filterType}") ` +
+                        `for filter field "${fieldName}" (type "${fieldType}")`);
+    }
+    return value;
 }
