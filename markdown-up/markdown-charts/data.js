@@ -110,28 +110,6 @@ const rCSVLineScrub = /^"?(.*?)"?$/;
 const rCSVFieldSplit = /"?,"?/;
 
 
-// Helper function to parse a CSV number
-function parseCSVNumber(text) {
-    const value = Number.parseFloat(text);
-    if (Number.isNaN(value) || !Number.isFinite(value)) {
-        return null;
-    }
-    return value;
-}
-
-
-// Helper function to parse a CSV datetime
-function parseCSVDatetime(text) {
-    if (!rCSVDate.test(text) && !rCSVDatetime.test(text)) {
-        return null;
-    }
-    return new Date(text);
-}
-
-const rCSVDate = /^\d{4}-\d{2}-\d{2}$/;
-const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/;
-
-
 /**
  * @typedef {Object} ValidateDataOptions
  * @property {boolean} [csv] - If True, parse number and null strings
@@ -216,6 +194,28 @@ export function validateData(data, options = {}) {
 
     return types;
 }
+
+
+// Helper function to parse a CSV number
+function parseCSVNumber(text) {
+    const value = Number.parseFloat(text);
+    if (Number.isNaN(value) || !Number.isFinite(value)) {
+        return null;
+    }
+    return value;
+}
+
+
+// Helper function to parse a CSV datetime
+function parseCSVDatetime(text) {
+    if (!rCSVDate.test(text) && !rCSVDatetime.test(text)) {
+        return null;
+    }
+    return new Date(text);
+}
+
+const rCSVDate = /^\d{4}-\d{2}-\d{2}$/;
+const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 
 /**
