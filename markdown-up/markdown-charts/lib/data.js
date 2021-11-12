@@ -44,20 +44,16 @@ export async function loadChartData(chart, options = {}) {
     }
 
     // Validate the data
-    const types = validateData(data, {csv});
+    let types = validateData(data, {csv});
 
     // Filter the data
     if ('filters' in chart) {
-        const variables = {
-            ...('variables' in chart ? chart.variables : {}),
-            ...('variables' in options ? options.variables : {})
-        };
-        data = filterData(data, types, chart.filters, variables);
+        data = filterData(chart, data, types, options);
     }
 
     // Aggregate the data
     if ('aggregation' in chart) {
-        data = aggregateData(data, types, chart.aggregation);
+        ({data, types} = aggregateData(chart, data, types));
     }
 
     return {data, types};
@@ -194,13 +190,20 @@ const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\
 /**
  * Filter data rows
  *
+ * @param {Object} chart - The chart model
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
- * @param {Object} filters - The array of filter specifications
- * @param {module:lib/util~ChartVariables} [variables={}] - The map of variable name to chart variable
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object[]} The filtered data array
  */
-export function filterData(data, types, filters, variables = {}) {
+export function filterData(chart, data, types, options = {}) {
+    const {filters} = chart;
+    const variables = {
+        ...('variables' in chart ? chart.variables : {}),
+        ...('variables' in options ? options.variables : {})
+    };
+
+    // Filter the rows
     return data.filter((row) => filters.every((filter) => {
         // Get the filter field value - skip nulls
         if (!(filter.field in types)) {
@@ -256,11 +259,110 @@ function validateFilterValue(filterValue, fieldName, fieldType) {
 /**
  * Aggregate data rows
  *
+ * @param {Object} chart - The chart model
  * @param {Object[]} data - The data array
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
- * @param {Object} aggregation - The aggregation specification
- * @returns {Object[]} The filtered data array
+ * @returns {module:lib/data~LoadChartDataResult}
  */
-export function aggregateData(data, types, aggregation) {
-    return types !== null && aggregation !== null ? data : data;
+export function aggregateData(chart, data, types) {
+    const {aggregation} = chart;
+
+    // Compute the aggregate field types
+    const aggregateTypes = {};
+    for (const category of aggregation.categories) {
+        if (!(category.field in types)) {
+            throw new Error(`Unknown aggregation category field "${category.field}"`);
+        }
+        aggregateTypes[getCategoryFieldName(category)] = types[category.field];
+    }
+    for (const measure of aggregation.measures) {
+        if (!(measure.field in types)) {
+            throw new Error(`Unknown aggregation category field "${measure.field}"`);
+        }
+        aggregateTypes[getMeasureFieldName(measure)] = types[measure.field];
+    }
+
+    // Create the aggregate rows
+    const measureRows = {};
+    for (const row of data) {
+        // Compute the category values
+        const categoryValues = aggregation.categories.map((category) => {
+            const value = row[category.field];
+            if (category.by === 'Year') {
+                return new Date(value.getFullYear(), 1, 1);
+            } else if (category.by === 'Month') {
+                return new Date(value.getFullYear(), value.getMonth(), 1);
+            } else if (category.by === 'Day') {
+                return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+            } else if (category.by === 'Hour') {
+                return new Date(value.getFullYear(), value.getMonth(), value.getDate(), value.getHours());
+            }
+            return value;
+        });
+
+        // Get or create the aggregate row
+        let aggregateRow;
+        const rowKey = categoryValues.join(', ');
+        if (rowKey in measureRows) {
+            aggregateRow = measureRows[rowKey];
+        } else {
+            aggregateRow = {};
+            measureRows[rowKey] = aggregateRow;
+            for (let ixCategory = 0; ixCategory < aggregation.categories.length; ixCategory++) {
+                aggregateRow[getCategoryFieldName(aggregation.categories[ixCategory])] = categoryValues[ixCategory];
+            }
+        }
+
+        // Add to the aggregate measure values
+        for (const measure of aggregation.measures) {
+            const measureFieldName = getMeasureFieldName(measure);
+            const value = measure.field in row ? row[measure.field] : null;
+            if (value !== null) {
+                if (!(measureFieldName in aggregateRow)) {
+                    aggregateRow[measureFieldName] = [];
+                }
+                aggregateRow[measureFieldName].push(value);
+            }
+        }
+    }
+
+    // Compute the measure values aggregate function value
+    const aggregateRows = Object.values(measureRows);
+    for (const aggregateRow of aggregateRows) {
+        for (const measure of aggregation.measures) {
+            const measureFieldName = getMeasureFieldName(measure);
+            const measureValues = measureFieldName in aggregateRow ? aggregateRow[measureFieldName] : null;
+            const measureFunction = measure.function;
+            if (measureValues === null) {
+                aggregateRow[measureFieldName] = null;
+            } else if (measureFunction === 'Average') {
+                aggregateRow[measureFieldName] = measureValues.reduce((sum, val) => sum + val) / measureValues.length;
+            } else if (measureFunction === 'Count') {
+                aggregateRow[measureFieldName] = measureValues.length;
+            } else if (measureFunction === 'Max') {
+                aggregateRow[measureFieldName] = measureValues.reduce((max, val) => (val > max ? val : max));
+            } else if (measureFunction === 'Min') {
+                aggregateRow[measureFieldName] = measureValues.reduce((min, val) => (val < min ? val : min));
+            } else if (measureFunction === 'Sum') {
+                aggregateRow[measureFieldName] = measureValues.reduce((sum, val) => sum + val);
+            }
+        }
+    }
+
+    return {'data': aggregateRows, 'types': aggregateTypes};
+}
+
+
+// Helper function to compute aggregation category field names
+function getCategoryFieldName(category) {
+    if ('by' in category) {
+        return `${category.by.toUpperCase()}(${category.field})`;
+    }
+    return category.field;
+}
+
+
+// Helper function to compute aggregation measure field names
+function getMeasureFieldName(measure) {
+    return `${measure.function.toUpperCase()}(${measure.field})`;
 }

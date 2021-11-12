@@ -238,14 +238,14 @@ struct AggregationCategory
     string field
 
     # The aggregation category's categorization
-    AggregationCategorization by
+    optional AggregationCategorization by
 
 
 # The aggregation category type
 enum AggregationCategorization
 
-    # Aggregate on the values of a field
-    Field
+    # Aggregate on the year values of a datetime field
+    Year
 
     # Aggregate on the month values of a datetime field
     Month
