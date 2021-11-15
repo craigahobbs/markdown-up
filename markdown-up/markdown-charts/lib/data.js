@@ -177,10 +177,13 @@ function parseCSVNumber(text) {
 
 // Helper function to parse a CSV datetime
 function parseCSVDatetime(text) {
-    if (!rCSVDate.test(text) && !rCSVDatetime.test(text)) {
-        return null;
+    if (rCSVDate.test(text)) {
+        const localDate = new Date(text);
+        return new Date(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate());
+    } else if (rCSVDatetime.test(text)) {
+        return new Date(text);
     }
-    return new Date(text);
+    return null;
 }
 
 const rCSVDate = /^\d{4}-\d{2}-\d{2}$/;
@@ -272,6 +275,11 @@ export function aggregateData(chart, data, types) {
     for (const category of aggregation.categories) {
         if (!(category.field in types)) {
             throw new Error(`Unknown aggregation category field "${category.field}"`);
+        }
+        if ('by' in category && types[category.field] !== 'datetime') {
+            throw new Error(
+                `Invalid aggregation categorization "${category.by}" for field "${category.field}" (type "${types[category.field]}")`
+            );
         }
         aggregateTypes[getCategoryFieldName(category)] = types[category.field];
     }
