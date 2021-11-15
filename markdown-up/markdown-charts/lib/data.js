@@ -300,7 +300,7 @@ export function aggregateData(chart, data, types) {
         const categoryValues = aggregation.categories.map((category) => {
             const value = row[category.field];
             if (category.by === 'Year') {
-                return new Date(value.getFullYear(), 1, 1);
+                return new Date(value.getFullYear(), 0, 1);
             } else if (category.by === 'Month') {
                 return new Date(value.getFullYear(), value.getMonth(), 1);
             } else if (category.by === 'Day') {

@@ -106,6 +106,19 @@ struct DataTable (ChartBase)
     # The data table's measure field names
     string[len > 0] measureFields
 
+    # The data table's sort specification
+    optional SortField[len > 0] sort
+
+
+# A sort field specification
+struct SortField
+
+    # The field name to sort by
+    string field
+
+    # If true, sort this field in descending order
+    optional bool desc
+
 
 # A line chart specification
 struct LineChart (ChartCommon, ChartBase)
