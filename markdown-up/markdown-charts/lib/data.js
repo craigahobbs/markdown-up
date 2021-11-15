@@ -277,15 +277,18 @@ export function aggregateData(chart, data, types) {
             throw new Error(`Unknown aggregation category field "${category.field}"`);
         }
         if ('by' in category && types[category.field] !== 'datetime') {
-            throw new Error(
-                `Invalid aggregation categorization "${category.by}" for field "${category.field}" (type "${types[category.field]}")`
-            );
+            throw new Error(`Invalid aggregation categorization "${category.by}" ` +
+                            `for field "${category.field}" (type "${types[category.field]}")`);
         }
         aggregateTypes[getCategoryFieldName(category)] = types[category.field];
     }
     for (const measure of aggregation.measures) {
         if (!(measure.field in types)) {
             throw new Error(`Unknown aggregation category field "${measure.field}"`);
+        }
+        if ((measure.function === 'Average' || measure.function === 'Sum') && types[measure.field] !== 'number') {
+            throw new Error(`Invalid aggregation measure function "${measure.function}" ` +
+                            `for field "${measure.field}" (type "${types[measure.field]}")`);
         }
         aggregateTypes[getMeasureFieldName(measure)] = types[measure.field];
     }
@@ -310,7 +313,7 @@ export function aggregateData(chart, data, types) {
 
         // Get or create the aggregate row
         let aggregateRow;
-        const rowKey = categoryValues.join(', ');
+        const rowKey = JSON.stringify(categoryValues);
         if (rowKey in measureRows) {
             aggregateRow = measureRows[rowKey];
         } else {
