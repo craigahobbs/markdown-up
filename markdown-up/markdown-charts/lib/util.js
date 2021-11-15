@@ -74,7 +74,11 @@ const rVariable = /\{\{(\w+)\}\}/;
 export function formatValue(value, chart) {
     if (value instanceof Date) {
         const isoFormat = value.toISOString();
-        if ('datetime' in chart && chart.datetime === 'Day') {
+        if ('datetime' in chart && chart.datetime === 'Year') {
+            return isoFormat.slice(0, isoFormat.indexOf('T') - 6);
+        } else if ('datetime' in chart && chart.datetime === 'Month') {
+            return isoFormat.slice(0, isoFormat.indexOf('T') - 3);
+        } else if ('datetime' in chart && chart.datetime === 'Day') {
             return isoFormat.slice(0, isoFormat.indexOf('T'));
         }
         return isoFormat.replace(rDateCleanup, '');
@@ -86,6 +90,21 @@ export function formatValue(value, chart) {
 
 const defaultPrecision = 2;
 const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
+
+
+// Helper function to compare values
+export function compareValues(value1, value2) {
+    if (value1 === null) {
+        return value2 === null ? 0 : 1;
+    } else if (value2 === null) {
+        return value1 === null ? 0 : -1;
+    } else if (value1 instanceof Date) {
+        const time1 = value1.getTime();
+        const time2 = value2.getTime();
+        return time1 < time2 ? -1 : (time1 === time2 ? 0 : 1);
+    }
+    return value1 < value2 ? -1 : (value1 === value2 ? 0 : 1);
+}
 
 
 // Helper function to compute a value's parameter

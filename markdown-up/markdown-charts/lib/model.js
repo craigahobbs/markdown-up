@@ -146,6 +146,12 @@ enum DatetimeFormat
     # ISO datetime format with automatic trimming
     Auto
 
+    # ISO datetime year format
+    Year
+
+    # ISO datetime month format
+    Month
+
     # ISO datetime day format
     Day
 
