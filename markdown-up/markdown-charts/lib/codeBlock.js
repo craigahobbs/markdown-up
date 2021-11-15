@@ -63,7 +63,7 @@ function chartCodeBlock(language, lines, options, validationFn, renderFn) {
     // Render the chart asynchronously
     return {
         'html': 'p',
-        'elem': {
+        'elem': !('width' in chartModel) ? null : {
             'svg': 'svg',
             'attr': {
                 'width': chartModel.width,

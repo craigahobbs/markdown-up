@@ -44,15 +44,6 @@ const chartModelSmd = `\
 # Base struct for all chart types
 struct ChartBase
 
-    # Chart title
-    optional string title
-
-    # The chart width
-    optional int(> 0) width
-
-    # The chart height
-    optional int(> 0) height
-
     # The data resource URL. The data resource is formatted as a JSON array of row objects.
     string dataURL
 
@@ -72,8 +63,21 @@ struct ChartBase
     optional FieldValue{len > 0} variables
 
 
+# Base struct for line and bar charts
+struct ChartCommon
+
+    # Chart title
+    optional string title
+
+    # The chart width
+    optional int(> 0) width
+
+    # The chart height
+    optional int(> 0) height
+
+
 # A bar chart specification
-struct BarChart (ChartBase)
+struct BarChart (ChartCommon, ChartBase)
 
     # The bar chart's category fields. If there is more than one category field, the chart is
     # color-encoded by category value, and the "colorFields" member must not be present.
@@ -97,14 +101,14 @@ struct BarChart (ChartBase)
 struct DataTable (ChartBase)
 
     # The data table's category field names
-    string[len > 0] categories
+    string[len > 0] categoryFields
 
     # The data table's measure field names
-    string[len > 0] measures
+    string[len > 0] measureFields
 
 
 # A line chart specification
-struct LineChart (ChartBase)
+struct LineChart (ChartCommon, ChartBase)
 
     # The line chart's X-axis field
     string xField
