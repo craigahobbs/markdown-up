@@ -203,7 +203,10 @@ export class UserTypeElements {
                 titleElem('union' in struct && struct.union ? `union ${typeName}` : `struct ${typeName}`),
                 !('bases' in struct) ? null : {'html': 'p', 'elem': [
                     {'text': 'Bases: '},
-                    struct.bases.map((base) => ({'html': 'a', 'attr': {'href': `#${this.typeHref(base)}`}, 'elem': {'text': base}}))
+                    struct.bases.map((base, ixBase) => [
+                        ixBase === 0 ? null : {'text': ', '},
+                        {'html': 'a', 'attr': {'href': `#${this.typeHref(base)}`}, 'elem': {'text': base}}
+                    ])
                 ]},
                 UserTypeElements.markdownElem(struct.doc),
 
