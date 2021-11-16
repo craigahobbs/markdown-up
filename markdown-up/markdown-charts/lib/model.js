@@ -44,19 +44,19 @@ const chartModelSmd = `\
 # Base struct for all chart types
 struct ChartBase
 
-    # The data resource URL. The data resource is formatted as a JSON array of row objects.
+    # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
     string dataURL
 
-    # Optional array of filters. Omit any row that does not match all filters.
+    # The data row filters. Omit any row that does not match all filters.
     optional Filter[len > 0] filters
 
-    # Optional data aggregation
+    # The data aggregation specification
     optional Aggregation aggregation
 
-    # Numeric formatting precision (default is 2)
+    # The numeric formatting precision (default is 2)
     optional int(>= 0) precision
 
-    # Datetime format (default is "Auto")
+    # The datetime format
     optional DatetimeFormat datetime
 
     # The map of variable name to variable value
@@ -66,7 +66,7 @@ struct ChartBase
 # Base struct for line and bar charts
 struct ChartCommon
 
-    # Chart title
+    # The chart title
     optional string title
 
     # The chart width
@@ -79,19 +79,17 @@ struct ChartCommon
 # A bar chart specification
 struct BarChart (ChartCommon, ChartBase)
 
-    # The bar chart's category fields. If there is more than one category field, the chart is
-    # color-encoded by category value, and the "colorFields" member must not be present.
-    optional string[len > 0] categoryFields
-
-    # The bar chart's measure fields
+    # The bar measure fields
     string[len > 0] measureFields
 
-    # The color encoding fields. Color encode based on the color fields' values.
-    optional string[len > 0] colorFields
+    # The bar category fields
+    optional string[len > 0] barFields
 
-    # If true, render the color encoding using a stacked bar chart. Otherwise, render the color
-    # encoding using separate colored bars.
-    optional bool stacked
+    # The category fields
+    optional string[len > 0] categoryFields
+
+    # The color encoding fields
+    optional string[len > 0] colorFields
 
     # If true, the bar chart is rendered "reversed". The default is false.
     optional bool reversed
@@ -100,20 +98,20 @@ struct BarChart (ChartCommon, ChartBase)
 # A data table specification
 struct DataTable (ChartBase)
 
-    # The data table's category field names
-    string[len > 0] categoryFields
+    # The table's category fields
+    optional string[len > 0] categoryFields
 
-    # The data table's measure field names
-    string[len > 0] measureFields
+    # The table's fields
+    string[len > 0] fields
 
-    # The data table's sort specification
+    # The table's sort specification
     optional SortField[len > 0] sort
 
 
-# A sort field specification
+# A sort's field specification
 struct SortField
 
-    # The field name to sort by
+    # The field to sort by
     string field
 
     # If true, sort this field in descending order
@@ -126,8 +124,7 @@ struct LineChart (ChartCommon, ChartBase)
     # The line chart's X-axis field
     string xField
 
-    # The line chart's Y-axis fields. If there is more than one Y-axis field, the chart is
-    # color-encoded by field name, and the "colorFields" member must not be present.
+    # The line chart's Y-axis fields
     string[len > 0] yFields
 
     # The color encoding fields. Render a colored line for each of the fields' values.
@@ -140,11 +137,8 @@ struct LineChart (ChartCommon, ChartBase)
     optional AxisTicks yTicks
 
 
-# Datetime format enumeration
+# A datetime format
 enum DatetimeFormat
-
-    # ISO datetime format with automatic trimming
-    Auto
 
     # ISO datetime year format
     Year
@@ -186,7 +180,7 @@ struct AxisTickValue
     optional string label
 
 
-# Field value union
+# A field value
 union FieldValue
 
     # A datetime value
@@ -202,7 +196,7 @@ union FieldValue
 # A data row filter specification
 struct Filter
 
-    # The filter field name
+    # The filter field
     string field
 
     # Matches if the field value is in the value array (or matches "vin")
@@ -223,10 +217,10 @@ struct Filter
     # Matches if the field value is greater than or equal to the value
     optional FieldValue gte
 
-    # Matches if the field value is in the variable array (or matches "in")
+    # Matches if the field value is in the variable value array (or matches "in")
     optional string[len > 0] vin
 
-    # Matches if the field value is NOT in the variable array (or matches "except")
+    # Matches if the field value is NOT in the variable value array (or matches "except")
     optional string[len > 0] vexcept
 
     # Matches if the field value is less than the variable value
@@ -242,9 +236,8 @@ struct Filter
     optional string vgte
 
 
-# A data aggregation specification. The aggregation operation drops all fields other than the
-# category fields, the color fields (if any), and the aggregated measure fields (e.g.,
-# "SUM(measure)").
+# A data aggregation specification. The aggregated data rows are comprised of the generated
+# aggregation category and measure fields (e.g. "SUM(measure)").
 struct Aggregation
 
     # The aggregation categories
@@ -264,7 +257,7 @@ struct AggregationCategory
     optional AggregationCategorization by
 
 
-# The aggregation category type
+# An aggregation category type
 enum AggregationCategorization
 
     # Aggregate on the year values of a datetime field
@@ -290,7 +283,7 @@ struct AggregationMeasure
     AggregationFunction function
 
 
-# The aggregation function
+# An aggregation function
 enum AggregationFunction
 
     # The average of the measure's values

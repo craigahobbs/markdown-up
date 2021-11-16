@@ -38,32 +38,33 @@ export async function dataTableElements(dataTable, options = {}) {
             {
                 'html': 'tr',
                 'elem': [
-                    dataTable.categoryFields.map((field) => ({'html': 'th', 'elem': {'text': field}})),
-                    dataTable.measureFields.map((field) => ({'html': 'th', 'elem': {'text': field}}))
+                    !('categoryFields' in dataTable) ? null
+                        : dataTable.categoryFields.map((field) => ({'html': 'th', 'elem': {'text': field}})),
+                    dataTable.fields.map((field) => ({'html': 'th', 'elem': {'text': field}}))
                 ]
             },
 
             // Table data
             data.map((row, ixRow) => {
                 const rowPrev = ixRow > 0 ? data[ixRow - 1] : null;
+                let skip = rowPrev !== null;
                 return {
                     'html': 'tr',
                     'elem': [
-                        dataTable.categoryFields.map((field, ixField) => {
-                            const value = field in row ? row[field] : null;
+                        !('categoryFields' in dataTable) ? null
+                            : dataTable.categoryFields.map((field) => {
+                                const value = field in row ? row[field] : null;
 
-                            // Skip this value?
-                            let skip = rowPrev !== null;
-                            for (let ixSkip = 0; skip && ixSkip <= ixField; ixSkip++) {
-                                const skipField = dataTable.categoryFields[ixSkip];
-                                const skipValue = skipField in row ? row[skipField] : null;
-                                const skipValuePrev = skipField in rowPrev ? rowPrev[skipField] : null;
-                                skip = (compareValues(skipValue, skipValuePrev) === 0);
-                            }
+                                // Skip this value?
+                                if (skip) {
+                                    const skipValue = field in row ? row[field] : null;
+                                    const skipValuePrev = field in rowPrev ? rowPrev[field] : null;
+                                    skip = (compareValues(skipValue, skipValuePrev) === 0);
+                                }
 
-                            return {'html': 'td', 'elem': skip ? null : {'text': formatValue(value, dataTable)}};
-                        }),
-                        dataTable.measureFields.map((field) => {
+                                return {'html': 'td', 'elem': skip ? null : {'text': formatValue(value, dataTable)}};
+                            }),
+                        dataTable.fields.map((field) => {
                             const value = field in row ? row[field] : null;
                             return {'html': 'td', 'elem': field === null ? null : {'text': formatValue(value, dataTable)}};
                         })
