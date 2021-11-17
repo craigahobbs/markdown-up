@@ -150,34 +150,20 @@ enum DatetimeFormat
     Day
 
 
-# An axis tick mark specification
-union AxisTicks
-
-    # Automatically-generated, evenly-spaced tick marks
-    AxisTicksAuto auto
-
-    # The array of tick mark field values
-    AxisTickValue[] values
-
-
 # Automatically-generated, evenly-spaced tick marks specification
-struct AxisTicksAuto
+struct AxisTicks
 
-    # The number of tick marks
-    int count
+    # The number of tick marks. Default is 3.
+    optional int count
+
+    # The field value of the first tick mark. Default is the minimum field value.
+    optional FieldValue start
+
+    # The field value of the last tick mark. Default is the maximum field value.
+    optional FieldValue end
 
     # The number of tick mark labels to skip after a rendered label
     optional int(> 0) skip
-
-
-# A tick mark value
-struct AxisTickValue
-
-    # The tick mark field value
-    FieldValue value
-
-    # The tick mark's label
-    optional string label
 
 
 # A field value

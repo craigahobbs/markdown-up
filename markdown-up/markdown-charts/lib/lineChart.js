@@ -3,7 +3,7 @@
 
 /** @module lib/lineChart */
 
-import {categoricalColors, formatTitle, formatValue, parameterValue, valueParameter} from './util.js';
+import {categoricalColors, compareValues, formatTitle, formatValue, parameterValue, valueParameter} from './util.js';
 import {loadChartData} from './data.js';
 
 
@@ -62,9 +62,9 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Sort the rows by the X field
     data.sort((row1, row2) => {
-        const x1 = row1[xField];
-        const x2 = row2[xField];
-        return x1 < x2 ? -1 : (x1 === x2 ? 0 : 1);
+        const x1 = xField in row1 ? row1[xField] : null;
+        const x2 = xField in row2 ? row2[xField] : null;
+        return compareValues(x1, x2);
     });
 
     // Generate the line points - [(label, color, points), ...]
@@ -143,51 +143,47 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
+    // Helper function to validate axis tick start/end values
+    const validateTickValue = (ticksKey, valueKey, fieldType, defaultValue) => {
+        if (!(ticksKey in lineChart) || !(valueKey in lineChart[ticksKey])) {
+            return defaultValue;
+        }
+        const fieldValue = lineChart[ticksKey][valueKey];
+        const valueType = 'datetime' in fieldValue ? 'datetime' : ('number' in fieldValue ? 'number' : 'string');
+        const value = fieldValue[valueType];
+        if (valueType !== fieldType) {
+            throw new Error(`Invalid ${ticksKey} ${valueKey} value ${JSON.stringify(value)} (type "${valueType}"}, ` +
+                            `expected type "${fieldType}"`);
+        }
+        return value;
+    };
+
     // Compute Y-axis tick values
     const yAxisTicks = [];
-    if ('yTicks' in lineChart && 'values' in lineChart.yTicks) {
-        for (const yTick of lineChart.yTicks.values) {
-            const yTickType = 'datetime' in yTick.value ? 'datetime' : ('number' in yTick.value ? 'number' : 'string');
-            const yTickValue = yTick.value[yTickType];
-            if (yTickType !== yFieldType) {
-                throw new Error(`invalid yTick value ${JSON.stringify(yTickValue)} (type "${yTickType}") expected "${yFieldType}"`);
-            }
-            yAxisTicks.push([yTickValue, 'label' in yTick ? yTick.label : formatValue(yTickValue, lineChart)]);
-            yMin = yTickValue < yMin ? yTickValue : yMin;
-            yMax = yTickValue > yMax ? yTickValue : yMax;
-        }
-    } else {
-        // Automatically-generated, evenly spaced Y-axis tick marks
-        const yTickCount = 'yTicks' in lineChart ? lineChart.yTicks.auto.count : defaultYAxisTickCount;
-        const skipCount = 'yTicks' in lineChart && 'skip' in lineChart.yTicks.auto ? lineChart.yTicks.auto.skip + 1 : 1;
-        for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
-            const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
-            const yTickValue = parameterValue(yTickParam, yMin, yMax);
-            yAxisTicks.push([yTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(yTickValue, lineChart)]);
-        }
+    const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount;
+    const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
+    const yTickStart = validateTickValue('yTicks', 'start', yFieldType, yMin);
+    const yTickEnd = validateTickValue('yTicks', 'end', yFieldType, yMax);
+    for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
+        const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
+        const yTickValue = parameterValue(yTickParam, yTickStart, yTickEnd);
+        yAxisTicks.push([yTickValue, (ixTick % yTickSkip) !== 0 ? '' : formatValue(yTickValue, lineChart)]);
+        yMin = yTickValue < yMin ? yTickValue : yMin;
+        yMax = yTickValue > yMax ? yTickValue : yMax;
     }
 
     // Compute X-axis tick values
     const xAxisTicks = [];
-    if ('xTicks' in lineChart && 'values' in lineChart.xTicks) {
-        for (const xTick of lineChart.xTicks.values) {
-            const xTickType = 'datetime' in xTick.value ? 'datetime' : ('number' in xTick.value ? 'number' : 'string');
-            const xTickValue = xTick.value[xTickType];
-            if (xTickType !== xFieldType) {
-                throw new Error(`invalid xTick value ${JSON.stringify(xTickValue)} (type "${xTickType}") expected "${xFieldType}"`);
-            }
-            xAxisTicks.push([xTickValue, 'label' in xTick ? xTick.label : formatValue(xTickValue, lineChart)]);
-            xMin = xTickValue < xMin ? xTickValue : xMin;
-            xMax = xTickValue > xMax ? xTickValue : xMax;
-        }
-    } else {
-        const xTickCount = 'xTicks' in lineChart ? lineChart.xTicks.auto.count : defaultXAxisTickCount;
-        const skipCount = 'xTicks' in lineChart && 'skip' in lineChart.xTicks.auto ? lineChart.xTicks.auto.skip + 1 : 1;
-        for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
-            const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
-            const xTickValue = parameterValue(xTickParam, xMin, xMax);
-            xAxisTicks.push([xTickValue, (ixTick % skipCount) !== 0 ? '' : formatValue(xTickValue, lineChart)]);
-        }
+    const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount;
+    const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
+    const xTickStart = validateTickValue('xTicks', 'start', xFieldType, xMin);
+    const xTickEnd = validateTickValue('xTicks', 'end', xFieldType, xMax);
+    for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
+        const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
+        const xTickValue = parameterValue(xTickParam, xTickStart, xTickEnd);
+        xAxisTicks.push([xTickValue, (ixTick % xTickSkip) !== 0 ? '' : formatValue(xTickValue, lineChart)]);
+        xMin = xTickValue < xMin ? xTickValue : xMin;
+        xMax = xTickValue > xMax ? xTickValue : xMax;
     }
 
     // Chart title calculations
