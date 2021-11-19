@@ -3,6 +3,7 @@
 
 /** @module lib/data */
 
+import {compareValues, getFieldValue} from './util.js';
 import {getBaseURL, isRelativeURL} from '../../../markdown-model/index.js';
 
 
@@ -220,42 +221,18 @@ export function filterData(chart, data, types, options = {}) {
         }
 
         // Test the field value
-        return (!('lt' in filter) || fieldValue < validateFilterValue(filter.lt, fieldName, fieldType)) &&
-            (!('lte' in filter) || fieldValue <= validateFilterValue(filter.lte, fieldName, fieldType)) &&
-            (!('gt' in filter) || fieldValue > validateFilterValue(filter.gt, fieldName, fieldType)) &&
-            (!('gte' in filter) || fieldValue >= validateFilterValue(filter.gte, fieldName, fieldType)) &&
-            (!('vlt' in filter) || !(filter.vlt in variables) ||
-             fieldValue < validateFilterValue(variables[filter.vlt], fieldName, fieldType)) &&
-            (!('vlte' in filter) || !(filter.vlte in variables) ||
-             fieldValue <= validateFilterValue(variables[filter.vlte], fieldName, fieldType)) &&
-            (!('vgt' in filter) || !(filter.vgt in variables) ||
-             fieldValue > validateFilterValue(variables[filter.vgt], fieldName, fieldType)) &&
-            (!('vgte' in filter) || !(filter.vgte in variables) ||
-             fieldValue >= validateFilterValue(variables[filter.vgte], fieldName, fieldType)) &&
-            ((!('in' in filter) && !('vin' in filter)) ||
-             (('in' in filter && filter.in.some(
-                 (filterValue) => fieldValue === validateFilterValue(filterValue, fieldName, fieldType)
-             )) || ('vin' in filter && filter.vin.some(
-                 (varName) => varName in variables && fieldValue === validateFilterValue(variables[varName], fieldName, fieldType)
-             )))) &&
-            ((!('except' in filter) && !('vexcept' in filter)) ||
-             (('except' in filter && !filter.except.some(
-                 (filterValue) => fieldValue === validateFilterValue(filterValue, fieldName, fieldType)
-             )) || ('vexcept' in filter && !filter.vexcept.some(
-                 (varName) => varName in variables && fieldValue === validateFilterValue(variables[varName], fieldName, fieldType)
-             ))));
+        const filterDesc = `"${fieldName}" field filter value`;
+        return (!('lt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lt, fieldType, filterDesc)) < 0) &&
+            (!('lte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lte, fieldType, filterDesc)) <= 0) &&
+            (!('gt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gt, fieldType, filterDesc)) > 0) &&
+            (!('gte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gte, fieldType, filterDesc)) >= 0) &&
+            (!('include' in filter) || filter.include.some(
+                (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
+            )) &&
+            (!('exclude' in filter) || !filter.exclude.some(
+                (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
+            ));
     }));
-}
-
-
-// Helper function to validate filter values
-function validateFilterValue(filterValue, fieldName, fieldType) {
-    const filterType = 'datetime' in filterValue ? 'datetime' : ('number' in filterValue ? 'number' : 'string');
-    if (filterType !== fieldType) {
-        throw new Error(`Invalid filter value ${JSON.stringify(filterValue[filterType])} (type "${filterType}") ` +
-                        `for filter field "${fieldName}" (type "${fieldType}")`);
-    }
-    return filterValue[filterType];
 }
 
 

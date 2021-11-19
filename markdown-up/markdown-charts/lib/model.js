@@ -157,10 +157,10 @@ struct AxisTicks
     optional int count
 
     # The field value of the first tick mark. Default is the minimum field value.
-    optional FieldValue start
+    optional FieldValueEx start
 
     # The field value of the last tick mark. Default is the maximum field value.
-    optional FieldValue end
+    optional FieldValueEx end
 
     # The number of tick mark labels to skip after a rendered label
     optional int(> 0) skip
@@ -178,6 +178,42 @@ union FieldValue
     # A string value
     string string
 
+    # A live-computed value
+    LiveValue live
+
+
+# A field value with variable value
+union FieldValueEx (FieldValue)
+
+    # The variable name
+    string variable
+
+
+# A live-computed value
+struct LiveValue
+
+    # The live value type
+    LiveValueType value
+
+    # The live value index (i.e. -1 for "Year" means last year)
+    optional int index
+
+
+# The live-computed value type
+enum LiveValueType
+
+    # Return the current datetime
+    Now
+
+    # Return today's datetime
+    Today
+
+    # Return this month's datetime
+    Month
+
+    # Return this year's datetime
+    Year
+
 
 # A data row filter specification
 struct Filter
@@ -185,41 +221,23 @@ struct Filter
     # The filter field
     string field
 
-    # Matches if the field value is in the value array (or matches "vin")
-    optional FieldValue[len > 0] in
+    # Matches if the field value is in the value array
+    optional FieldValueEx[len > 0] include
 
-    # Matches if the field value is NOT in the value array (or matches "vexcept")
-    optional FieldValue[len > 0] except
+    # Matches if the field value is NOT in the value array
+    optional FieldValueEx[len > 0] exclude
 
     # Matches if the field value is less than the value
-    optional FieldValue lt
+    optional FieldValueEx lt
 
     # Matches if the field value is less than or equal to the value
-    optional FieldValue lte
+    optional FieldValueEx lte
 
     # Matches if the field value is greater than the value
-    optional FieldValue gt
+    optional FieldValueEx gt
 
     # Matches if the field value is greater than or equal to the value
-    optional FieldValue gte
-
-    # Matches if the field value is in the variable value array (or matches "in")
-    optional string[len > 0] vin
-
-    # Matches if the field value is NOT in the variable value array (or matches "except")
-    optional string[len > 0] vexcept
-
-    # Matches if the field value is less than the variable value
-    optional string vlt
-
-    # Matches if the field value is less than or equal to the variable value
-    optional string vlte
-
-    # Matches if the field value is greater than the variable value
-    optional string vgt
-
-    # Matches if the field value is greater than or equal to the variable value
-    optional string vgte
+    optional FieldValueEx gte
 
 
 # A data aggregation specification. The aggregated data rows are comprised of the generated

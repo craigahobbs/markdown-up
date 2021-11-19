@@ -51,13 +51,9 @@ export const categoricalColors = [
 ];
 
 
-// Helper function to format the title
-export function formatTitle(chart, options) {
-    const variables = {
-        ...('variables' in chart ? chart.variables : {}),
-        ...('variables' in options ? options.variables : {})
-    };
-    return chart.title.replace(rVariable, (match, variable) => {
+// Helper function to replace variable tokens (e.g. "{{name}}") in a string
+export function formatVariables(chart, variables, text) {
+    return text.replace(rVariable, (match, variable) => {
         if (variable in variables) {
             const fieldValue = variables[variable];
             const value = 'datetime' in fieldValue ? fieldValue.datetime : ('number' in fieldValue ? fieldValue.number : fieldValue.string);
@@ -68,6 +64,52 @@ export function formatTitle(chart, options) {
 }
 
 const rVariable = /\{\{(\w+)\}\}/;
+
+
+// Helper function to get and validate field values
+export function getFieldValue(variables, fieldValue, matchType, matchDesc) {
+    // Get the value
+    let value;
+    let type = null;
+    if ('live' in fieldValue) {
+        const liveValue = fieldValue.live.value;
+        const liveIndex = 'index' in fieldValue.live ? fieldValue.live.index : 0;
+        if (liveValue === 'Today') {
+            const now = new Date();
+            value = new Date(now.getFullYear(), now.getMonth(), now.getDate() + liveIndex, 0, 0, 0, 0);
+            type = 'datetime';
+        } else if (liveValue === 'Month') {
+            const now = new Date();
+            value = new Date(now.getFullYear(), now.getMonth() + liveIndex, 1, 0, 0, 0, 0);
+            type = 'datetime';
+        } else if (liveValue === 'Year') {
+            const now = new Date();
+            value = new Date(now.getFullYear() + liveIndex, 0, 1, 0, 0, 0, 0);
+            type = 'datetime';
+        } else {
+            value = new Date();
+            type = 'datetime';
+        }
+    } else if ('variable' in fieldValue) {
+        value = fieldValue.variable in variables ? getFieldValue(variables, variables[fieldValue.variable], matchType, matchDesc) : null;
+    } else if ('datetime' in fieldValue) {
+        value = fieldValue.datetime;
+        type = 'datetime';
+    } else if ('number' in fieldValue) {
+        value = fieldValue.number;
+        type = 'number';
+    } else {
+        value = fieldValue.string;
+        type = 'string';
+    }
+
+    // Validate the value
+    if (value !== null && type !== null && type !== matchType) {
+        throw new Error(`Invalid ${matchDesc} ${JSON.stringify(value)} (type "${type}"), expected type "${matchType}"`);
+    }
+
+    return value;
+}
 
 
 // Helper function to format labels

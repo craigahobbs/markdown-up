@@ -3,7 +3,7 @@
 
 /** @module lib/lineChart */
 
-import {categoricalColors, compareValues, formatTitle, formatValue, parameterValue, valueParameter} from './util.js';
+import {categoricalColors, compareValues, formatValue, formatVariables, getFieldValue, parameterValue, valueParameter} from './util.js';
 import {loadChartData} from './data.js';
 
 
@@ -143,27 +143,22 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
-    // Helper function to validate axis tick start/end values
-    const validateTickValue = (ticksKey, valueKey, fieldType, defaultValue) => {
-        if (!(ticksKey in lineChart) || !(valueKey in lineChart[ticksKey])) {
-            return defaultValue;
-        }
-        const fieldValue = lineChart[ticksKey][valueKey];
-        const valueType = 'datetime' in fieldValue ? 'datetime' : ('number' in fieldValue ? 'number' : 'string');
-        const value = fieldValue[valueType];
-        if (valueType !== fieldType) {
-            throw new Error(`Invalid ${ticksKey} ${valueKey} value ${JSON.stringify(value)} (type "${valueType}"}, ` +
-                            `expected type "${fieldType}"`);
-        }
-        return value;
+    // Compute the variables
+    const variables = {
+        ...('variables' in lineChart ? lineChart.variables : {}),
+        ...('variables' in options ? options.variables : {})
     };
 
     // Compute Y-axis tick values
     const yAxisTicks = [];
     const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount;
     const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
-    const yTickStart = validateTickValue('yTicks', 'start', yFieldType, yMin);
-    const yTickEnd = validateTickValue('yTicks', 'end', yFieldType, yMax);
+    const yTickStart = 'yTicks' in lineChart && 'start' in lineChart.yTicks
+        ? getFieldValue(variables, lineChart.yTicks.start, yFieldType, 'Y-axis start value')
+        : yMin;
+    const yTickEnd = 'yTicks' in lineChart && 'end' in lineChart.yTicks
+        ? getFieldValue(variables, lineChart.yTicks.end, yFieldType, 'Y-axis end value')
+        : yMax;
     for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
         const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
         const yTickValue = parameterValue(yTickParam, yTickStart, yTickEnd);
@@ -176,8 +171,12 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisTicks = [];
     const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount;
     const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
-    const xTickStart = validateTickValue('xTicks', 'start', xFieldType, xMin);
-    const xTickEnd = validateTickValue('xTicks', 'end', xFieldType, xMax);
+    const xTickStart = 'xTicks' in lineChart && 'start' in lineChart.xTicks
+        ? getFieldValue(variables, lineChart.xTicks.start, xFieldType, 'X-axis start value')
+        : xMin;
+    const xTickEnd = 'xTicks' in lineChart && 'end' in lineChart.xTicks
+        ? getFieldValue(variables, lineChart.xTicks.end, xFieldType, 'X-axis end value')
+        : xMax;
     for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
         const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
         const xTickValue = parameterValue(xTickParam, xTickStart, xTickEnd);
@@ -285,7 +284,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     'text-anchor': 'middle',
                     'dominant-baseline': 'hanging'
                 },
-                'elem': {'text': formatTitle(lineChart, options)}
+                'elem': {'text': formatVariables(lineChart, variables, lineChart.title)}
             },
 
             // Y-Axis title
