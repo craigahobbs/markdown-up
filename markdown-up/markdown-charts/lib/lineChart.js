@@ -462,6 +462,17 @@ export async function lineChartElements(lineChart, options = {}) {
                 }
             },
 
+            // Lines
+            linePoints.map(({color, points}) => ({
+                'svg': 'path',
+                'attr': {
+                    'stroke': color,
+                    'stroke-width': svgValue(chartLineWidth),
+                    'fill': 'none',
+                    'd': points.map(chartPathPoint).join(' ')
+                }
+            })),
+
             // Y-axis annotations
             yAxisAnnotations.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
@@ -545,17 +556,6 @@ export async function lineChartElements(lineChart, options = {}) {
                     }
                 ];
             }),
-
-            // Lines
-            linePoints.map(({color, points}) => ({
-                'svg': 'path',
-                'attr': {
-                    'stroke': color,
-                    'stroke-width': svgValue(chartLineWidth),
-                    'fill': 'none',
-                    'd': points.map(chartPathPoint).join(' ')
-                }
-            })),
 
             // Color legend
             colorLegendX === null ? null : linePoints.map(({label, color}, ix) => [
