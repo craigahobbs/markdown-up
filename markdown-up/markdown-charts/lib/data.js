@@ -202,13 +202,16 @@ const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\
  */
 export function filterData(chart, data, types, options = {}) {
     const {filters} = chart;
+
+    // Compute the variables
     const variables = {
         ...('variables' in chart ? chart.variables : {}),
         ...('variables' in options ? options.variables : {})
     };
 
     // Filter the rows
-    return data.filter((row) => filters.every((filter) => {
+    const filterDescs = filters.map((filter) => `"${filter.field}" field filter value`);
+    return data.filter((row) => filters.every((filter, ixFilter) => {
         // Get the filter field value - skip nulls
         if (!(filter.field in types)) {
             throw new Error(`Unknown filter field "${filter.field}"`);
@@ -221,7 +224,7 @@ export function filterData(chart, data, types, options = {}) {
         }
 
         // Test the field value
-        const filterDesc = `"${fieldName}" field filter value`;
+        const filterDesc = filterDescs[ixFilter];
         return (!('lt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lt, fieldType, filterDesc)) < 0) &&
             (!('lte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lte, fieldType, filterDesc)) <= 0) &&
             (!('gt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gt, fieldType, filterDesc)) > 0) &&
