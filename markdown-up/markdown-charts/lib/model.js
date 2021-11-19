@@ -136,6 +136,22 @@ struct LineChart (ChartCommon, ChartBase)
     # The Y-axis tick mark specification
     optional AxisTicks yTicks
 
+    # The X-axis annotations
+    optional AxisAnnotation[len > 0] xAnnotations
+
+    # The Y-axis annotations
+    optional AxisAnnotation[len > 0] yAnnotations
+
+
+# An axis annotation
+struct AxisAnnotation
+
+    # The axis field value
+    FieldValueEx value
+
+    # The annotation label
+    optional string label
+
 
 # A datetime format
 enum DatetimeFormat

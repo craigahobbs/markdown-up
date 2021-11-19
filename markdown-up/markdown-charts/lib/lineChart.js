@@ -26,6 +26,10 @@ const axisTickLineColor = 'lightgray';
 const axisLineWidth = 1;
 const axisTickWidth = 1;
 const axisTickLength = 5;
+const annotationBackgroundColor = '#ffffffa0';
+const annotationTextColor = 'black';
+const annotationLineColor = 'black';
+const annotationLineWidth = 2;
 const chartLineWidth = 3;
 
 
@@ -185,6 +189,28 @@ export async function lineChartElements(lineChart, options = {}) {
         xMax = xTickValue > xMax ? xTickValue : xMax;
     }
 
+    // Compute Y-axis annotations
+    const yAxisAnnotations = [];
+    if ('yAnnotations' in lineChart) {
+        for (const annotation of lineChart.yAnnotations) {
+            const yAnnotationValue = getFieldValue(variables, annotation.value, yFieldType, 'Y-axis annotation value');
+            yAxisAnnotations.push([yAnnotationValue, 'label' in annotation ? annotation.label : formatValue(yAnnotationValue, lineChart)]);
+            yMin = yAnnotationValue < yMin ? yAnnotationValue : yMin;
+            yMax = yAnnotationValue > yMax ? yAnnotationValue : yMax;
+        }
+    }
+
+    // Compute X-axis annotations
+    const xAxisAnnotations = [];
+    if ('xAnnotations' in lineChart) {
+        for (const annotation of lineChart.xAnnotations) {
+            const xAnnotationValue = getFieldValue(variables, annotation.value, xFieldType, 'X-axis annotation value');
+            xAxisAnnotations.push([xAnnotationValue, 'label' in annotation ? annotation.label : formatValue(xAnnotationValue, lineChart)]);
+            xMin = xAnnotationValue < xMin ? xAnnotationValue : xMin;
+            xMax = xAnnotationValue > xMax ? xAnnotationValue : xMax;
+        }
+    }
+
     // Chart title calculations
     const chartBorderSize = chartFontSize;
     const chartTitleFontSize = 1.1 * chartFontSize;
@@ -211,6 +237,18 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisTickGap = 0.75 * axisTickLength;
     const xAxisY = chartHeight - chartBorderSize - xAxisTitleHeight -
           (xAxisTicks.length === 0 ? 0 : axisLabelFontSize - xAxisTickGap + axisTickLength);
+
+    // Y-axis annotation calculations
+    const annotationLabelFontSize = axisLabelFontSize;
+    const annotationLabelHeight = 1.5 * annotationLabelFontSize;
+    const annotationLabelMargin = 0.25 * annotationLabelFontSize;
+    const annotationLabelWidthRatio = 1.2;
+    const yAnnotationLabelOffsetX = 0.1 * annotationLabelFontSize;
+    const yAnnotationLabelOffsetY = 0.2 * annotationLabelFontSize;
+
+    // Y-axis annotation calculations
+    const xAnnotationLabelOffsetX = 0.4 * annotationLabelFontSize;
+    const xAnnotationLabelOffsetY = 0.1 * annotationLabelFontSize;
 
     // Color legend calculations
     const colorLegendFontSize = chartFontSize;
@@ -423,6 +461,90 @@ export async function lineChartElements(lineChart, options = {}) {
                         `V ${svgValue(xAxisY)} H ${svgValue(chartRight + 0.5 * axisTickWidth)}`
                 }
             },
+
+            // Y-axis annotations
+            yAxisAnnotations.map(([yCoord, yLabel]) => {
+                const yPoint = chartPointY(yCoord);
+                const isUnder = yPoint < 0.5 * (chartLeft + chartRight);
+                const labelWidth = annotationLabelWidthRatio * yLabel.length * chartFontWidthRatio * annotationLabelFontSize;
+                const labelY = isUnder ? yPoint + yAnnotationLabelOffsetY : yPoint - yAnnotationLabelOffsetY;
+                return [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': svgValue(chartLeft + yAnnotationLabelOffsetX),
+                            'y': svgValue(labelY),
+                            'width': svgValue(labelWidth),
+                            'height': svgValue(annotationLabelHeight),
+                            'fill': annotationBackgroundColor
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': chartFontFamily,
+                            'font-size': `${svgValue(annotationLabelFontSize)}px`,
+                            'fill': annotationTextColor,
+                            'x': svgValue(chartLeft + yAnnotationLabelOffsetX + annotationLabelMargin),
+                            'y': svgValue(labelY + annotationLabelMargin + 0.5 * annotationLabelFontSize),
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {'text': yLabel}
+                    },
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': annotationLineColor,
+                            'stroke-width': svgValue(annotationLineWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(yAxisX)} ${svgValue(yPoint)} H ${svgValue(chartRight)}`
+                        }
+                    }
+                ];
+            }),
+
+            // X-axis annotations
+            xAxisAnnotations.map(([xCoord, xLabel]) => {
+                const xPoint = chartPointX(xCoord);
+                const isRight = xPoint < 0.5 * (chartLeft + chartRight);
+                const labelWidth = annotationLabelWidthRatio * xLabel.length * chartFontWidthRatio * annotationLabelFontSize;
+                const labelY = xAxisY - xAnnotationLabelOffsetY - annotationLabelHeight;
+                return [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': svgValue(isRight ? xPoint : xPoint - labelWidth),
+                            'y': svgValue(labelY),
+                            'width': svgValue(labelWidth),
+                            'height': svgValue(annotationLabelHeight),
+                            'fill': annotationBackgroundColor
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': chartFontFamily,
+                            'font-size': `${svgValue(annotationLabelFontSize)}px`,
+                            'fill': annotationTextColor,
+                            'x': svgValue(isRight ? xPoint + xAnnotationLabelOffsetX : xPoint - xAnnotationLabelOffsetX),
+                            'y': svgValue(labelY + annotationLabelMargin + 0.5 * annotationLabelFontSize),
+                            'text-anchor': isRight ? 'start' : 'end',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {'text': xLabel}
+                    },
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': annotationLineColor,
+                            'stroke-width': svgValue(annotationLineWidth),
+                            'fill': 'none',
+                            'd': `M ${svgValue(xPoint)} ${svgValue(xAxisY)} V ${svgValue(chartTop)}`
+                        }
+                    }
+                ];
+            }),
 
             // Lines
             linePoints.map(({color, points}) => ({
