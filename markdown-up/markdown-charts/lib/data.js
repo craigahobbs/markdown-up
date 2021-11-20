@@ -57,6 +57,11 @@ export async function loadChartData(chart, options = {}) {
         ({data, types} = aggregateData(chart, data, types));
     }
 
+    // Sort the data
+    if ('sort' in chart) {
+        data = sortData(chart, data);
+    }
+
     return {data, types};
 }
 
@@ -356,4 +361,25 @@ function getCategoryFieldName(category) {
 // Helper function to compute aggregation measure field names
 function getMeasureFieldName(measure) {
     return `${measure.function.toUpperCase()}(${measure.field})`;
+}
+
+
+/**
+ * Sort data rows
+ *
+ * @param {Object} chart - The chart model
+ * @param {Object[]} data - The data array
+ * @returns {Object[]} The sorted data array
+ */
+export function sortData(chart, data) {
+    data.sort((row1, row2) => chart.sort.reduce((result, sort) => {
+        if (result !== 0) {
+            return result;
+        }
+        const value1 = sort.field in row1 ? row1[sort.field] : null;
+        const value2 = sort.field in row2 ? row2[sort.field] : null;
+        const compare = compareValues(value1, value2);
+        return 'desc' in sort && sort.desc ? -compare : compare;
+    }, 0));
+    return data;
 }

@@ -240,14 +240,13 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Y-axis annotation calculations
     const annotationLabelFontSize = axisLabelFontSize;
-    const annotationLabelHeight = 1.5 * annotationLabelFontSize;
     const annotationLabelMargin = 0.25 * annotationLabelFontSize;
-    const annotationLabelWidthRatio = 1.2;
-    const yAnnotationLabelOffsetX = 0.1 * annotationLabelFontSize;
-    const yAnnotationLabelOffsetY = 0.2 * annotationLabelFontSize;
+    const annotationLabelHeight = annotationLabelFontSize + 2 * annotationLabelMargin;
+    const yAnnotationLabelOffsetX = 0.2 * annotationLabelFontSize;
+    const yAnnotationLabelOffsetY = 0.1 * annotationLabelFontSize;
 
     // Y-axis annotation calculations
-    const xAnnotationLabelOffsetX = 0.4 * annotationLabelFontSize;
+    const xAnnotationLabelOffsetX = 0.2 * annotationLabelFontSize;
     const xAnnotationLabelOffsetY = 0.1 * annotationLabelFontSize;
 
     // Color legend calculations
@@ -476,9 +475,11 @@ export async function lineChartElements(lineChart, options = {}) {
             // Y-axis annotations
             yAxisAnnotations.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
-                const isUnder = yPoint < 0.5 * (chartLeft + chartRight);
-                const labelWidth = annotationLabelWidthRatio * yLabel.length * chartFontWidthRatio * annotationLabelFontSize;
-                const labelY = isUnder ? yPoint + yAnnotationLabelOffsetY : yPoint - yAnnotationLabelOffsetY;
+                const isUnder = yPoint < 0.5 * (chartTop + chartBottom);
+                const labelWidth = 2 * annotationLabelMargin + yLabel.length * chartFontWidthRatio * annotationLabelFontSize;
+                const labelY = isUnder
+                    ? yPoint + annotationLineWidth + yAnnotationLabelOffsetY
+                    : yPoint - annotationLineWidth - yAnnotationLabelOffsetY - annotationLabelHeight;
                 return [
                     {
                         'svg': 'rect',
@@ -518,14 +519,16 @@ export async function lineChartElements(lineChart, options = {}) {
             // X-axis annotations
             xAxisAnnotations.map(([xCoord, xLabel]) => {
                 const xPoint = chartPointX(xCoord);
-                const isRight = xPoint < 0.5 * (chartLeft + chartRight);
-                const labelWidth = annotationLabelWidthRatio * xLabel.length * chartFontWidthRatio * annotationLabelFontSize;
-                const labelY = xAxisY - xAnnotationLabelOffsetY - annotationLabelHeight;
+                const isLeft = xPoint > 0.5 * (chartLeft + chartRight);
+                const labelWidth = 2 * annotationLabelMargin + xLabel.length * chartFontWidthRatio * annotationLabelFontSize;
+                const labelY = chartBottom - xAnnotationLabelOffsetY - annotationLabelHeight;
                 return [
                     {
                         'svg': 'rect',
                         'attr': {
-                            'x': svgValue(isRight ? xPoint : xPoint - labelWidth),
+                            'x': svgValue(isLeft
+                                ? xPoint - 0.5 * annotationLineWidth - xAnnotationLabelOffsetX - labelWidth
+                                : xPoint + 0.5 * annotationLineWidth + xAnnotationLabelOffsetX),
                             'y': svgValue(labelY),
                             'width': svgValue(labelWidth),
                             'height': svgValue(annotationLabelHeight),
@@ -538,9 +541,11 @@ export async function lineChartElements(lineChart, options = {}) {
                             'font-family': chartFontFamily,
                             'font-size': `${svgValue(annotationLabelFontSize)}px`,
                             'fill': annotationTextColor,
-                            'x': svgValue(isRight ? xPoint + xAnnotationLabelOffsetX : xPoint - xAnnotationLabelOffsetX),
+                            'x': svgValue(isLeft
+                                ? xPoint - 0.5 * annotationLineWidth - xAnnotationLabelOffsetX - annotationLabelMargin
+                                : xPoint + 0.5 * annotationLineWidth + xAnnotationLabelOffsetX + annotationLabelMargin),
                             'y': svgValue(labelY + annotationLabelMargin + 0.5 * annotationLabelFontSize),
-                            'text-anchor': isRight ? 'start' : 'end',
+                            'text-anchor': isLeft ? 'end' : 'start',
                             'dominant-baseline': 'middle'
                         },
                         'elem': {'text': xLabel}

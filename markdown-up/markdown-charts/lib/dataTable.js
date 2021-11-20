@@ -17,19 +17,6 @@ import {loadChartData} from './data.js';
 export async function dataTableElements(dataTable, options = {}) {
     const {data} = await loadChartData(dataTable, options);
 
-    // Sort?
-    if ('sort' in dataTable) {
-        data.sort((row1, row2) => dataTable.sort.reduce((result, sort) => {
-            if (result !== 0) {
-                return result;
-            }
-            const value1 = sort.field in row1 ? row1[sort.field] : null;
-            const value2 = sort.field in row2 ? row2[sort.field] : null;
-            const compare = compareValues(value1, value2);
-            return 'desc' in sort && sort.desc ? -compare : compare;
-        }, 0));
-    }
-
     // Generate the data table's element model
     return {
         'html': 'table',

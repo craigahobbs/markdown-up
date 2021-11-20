@@ -47,20 +47,23 @@ struct ChartBase
     # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
     string dataURL
 
+    # The map of variable name to variable value
+    optional FieldValue{len > 0} variables
+
     # The data row filters. Omit any row that does not match all filters.
     optional Filter[len > 0] filters
 
     # The data aggregation specification
     optional Aggregation aggregation
 
+    # The data's sort specification
+    optional SortField[len > 0] sort
+
     # The numeric formatting precision (default is 2)
     optional int(>= 0) precision
 
     # The datetime format
     optional DatetimeFormat datetime
-
-    # The map of variable name to variable value
-    optional FieldValue{len > 0} variables
 
 
 # Base struct for line and bar charts
@@ -103,19 +106,6 @@ struct DataTable (ChartBase)
 
     # The table's fields
     string[len > 0] fields
-
-    # The table's sort specification
-    optional SortField[len > 0] sort
-
-
-# A sort's field specification
-struct SortField
-
-    # The field to sort by
-    string field
-
-    # If true, sort this field in descending order
-    optional bool desc
 
 
 # A line chart specification
@@ -320,6 +310,19 @@ enum AggregationFunction
 
     # The sum of the measure's values
     Sum
+
+
+# A sort's field specification
+struct SortField
+
+    # The field to sort by
+    string field
+
+    # If true, sort this field in descending order
+    optional bool desc
+
+    # The maximum number of rows to keep
+    optional int(> 0) top
 `;
 
 
