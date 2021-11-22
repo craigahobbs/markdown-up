@@ -15,9 +15,13 @@ import {loadChartData} from './data.js';
  * @returns {Object} The data table element model
  */
 export async function dataTableElements(dataTable, options = {}) {
-    const {data} = await loadChartData(dataTable, options);
+    const {data, types} = await loadChartData(dataTable, options);
 
     // Generate the data table's element model
+    const categoryFields = 'categoryFields' in dataTable ? dataTable.categoryFields : [];
+    const fields = 'fields' in dataTable
+        ? dataTable.fields
+        : Object.keys(types).filter((key) => categoryFields.indexOf(key) === -1);
     return {
         'html': 'table',
         'elem': [
@@ -25,9 +29,8 @@ export async function dataTableElements(dataTable, options = {}) {
             {
                 'html': 'tr',
                 'elem': [
-                    !('categoryFields' in dataTable) ? null
-                        : dataTable.categoryFields.map((field) => ({'html': 'th', 'elem': {'text': field}})),
-                    dataTable.fields.map((field) => ({'html': 'th', 'elem': {'text': field}}))
+                    categoryFields.map((field) => ({'html': 'th', 'elem': {'text': field}})),
+                    fields.map((field) => ({'html': 'th', 'elem': {'text': field}}))
                 ]
             },
 
@@ -38,20 +41,19 @@ export async function dataTableElements(dataTable, options = {}) {
                 return {
                     'html': 'tr',
                     'elem': [
-                        !('categoryFields' in dataTable) ? null
-                            : dataTable.categoryFields.map((field) => {
-                                const value = field in row ? row[field] : null;
+                        categoryFields.map((field) => {
+                            const value = field in row ? row[field] : null;
 
-                                // Skip this value?
-                                if (skip) {
-                                    const skipValue = field in row ? row[field] : null;
-                                    const skipValuePrev = field in rowPrev ? rowPrev[field] : null;
-                                    skip = (compareValues(skipValue, skipValuePrev) === 0);
-                                }
+                            // Skip this value?
+                            if (skip) {
+                                const skipValue = field in row ? row[field] : null;
+                                const skipValuePrev = field in rowPrev ? rowPrev[field] : null;
+                                skip = (compareValues(skipValue, skipValuePrev) === 0);
+                            }
 
-                                return {'html': 'td', 'elem': skip ? null : {'text': formatValue(value, dataTable)}};
-                            }),
-                        dataTable.fields.map((field) => {
+                            return {'html': 'td', 'elem': skip ? null : {'text': formatValue(value, dataTable)}};
+                        }),
+                        fields.map((field) => {
                             const value = field in row ? row[field] : null;
                             return {'html': 'td', 'elem': field === null ? null : {'text': formatValue(value, dataTable)}};
                         })

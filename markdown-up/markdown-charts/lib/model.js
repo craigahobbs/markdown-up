@@ -108,7 +108,7 @@ struct DataTable (ChartBase)
     optional string[len > 0] categoryFields
 
     # The table's fields
-    string[len > 0] fields
+    optional string[len > 0] fields
 
 
 # A line chart specification
