@@ -59,6 +59,9 @@ struct ChartBase
     # The data's sort specification
     optional SortField[len > 0] sort
 
+    # The data's top specification
+    optional Top top
+
     # The numeric formatting precision (default is 2)
     optional int(>= 0) precision
 
@@ -321,8 +324,15 @@ struct SortField
     # If true, sort this field in descending order
     optional bool desc
 
-    # The maximum number of rows to keep
-    optional int(> 0) top
+
+# A data top specification
+struct Top
+
+    # The maximum number of rows to keep per category
+    optional int(> 0) count
+
+    # The category fields
+    optional string[len > 0] categoryFields
 `;
 
 

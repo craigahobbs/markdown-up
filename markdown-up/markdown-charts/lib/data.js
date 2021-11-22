@@ -59,7 +59,12 @@ export async function loadChartData(chart, options = {}) {
 
     // Sort the data
     if ('sort' in chart) {
-        data = sortData(chart, data);
+        sortData(chart, data);
+    }
+
+    // Top the data
+    if ('top' in chart) {
+        data = topData(chart, data);
     }
 
     return {data, types};
@@ -369,7 +374,6 @@ function getMeasureFieldName(measure) {
  *
  * @param {Object} chart - The chart model
  * @param {Object[]} data - The data array
- * @returns {Object[]} The sorted data array
  */
 export function sortData(chart, data) {
     data.sort((row1, row2) => chart.sort.reduce((result, sort) => {
@@ -381,5 +385,38 @@ export function sortData(chart, data) {
         const compare = compareValues(value1, value2);
         return 'desc' in sort && sort.desc ? -compare : compare;
     }, 0));
-    return data;
+}
+
+
+/**
+ * Top data rows
+ *
+ * @param {Object} chart - The chart model
+ * @param {Object[]} data - The data array
+ * @returns {Object[]} The top data array
+ */
+export function topData(chart, data) {
+    // Bucket rows by category uniqueness
+    const categoryRows = {};
+    const categoryFields = 'categoryFields' in chart.top ? chart.top.categoryFields : [];
+    for (const row of data) {
+        const categoryKey = JSON.stringify(categoryFields.map((field) => (field in row ? row[field] : null)));
+        if (!(categoryKey in categoryRows)) {
+            categoryRows[categoryKey] = [];
+        }
+        categoryRows[categoryKey].push(row);
+    }
+
+    // Take only the top rows
+    const dataTop = [];
+    const topCount = chart.top.count;
+    for (const categoryKey of Object.keys(categoryRows)) {
+        const categoryKeyRows = categoryRows[categoryKey];
+        const categoryKeyLength = categoryKeyRows.length;
+        for (let ixRow = 0; ixRow < topCount && ixRow < categoryKeyLength; ixRow++) {
+            dataTop.push(categoryKeyRows[ixRow]);
+        }
+    }
+
+    return dataTop;
 }
