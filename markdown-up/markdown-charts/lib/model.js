@@ -44,8 +44,8 @@ const chartModelSmd = `\
 # Base struct for all chart types
 struct ChartBase
 
-    # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
-    string dataURL
+    # The data specification
+    Data data
 
     # The map of variable name to variable value
     optional FieldValue{len > 0} variables
@@ -57,7 +57,7 @@ struct ChartBase
     optional Aggregation aggregation
 
     # The data's sort specification
-    optional SortField[len > 0] sort
+    optional SortField[len > 0] sorts
 
     # The data's top specification
     optional Top top
@@ -67,6 +67,29 @@ struct ChartBase
 
     # The datetime format
     optional DatetimeFormat datetime
+
+
+# A chart data specification
+struct Data
+
+    # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
+    string url
+
+    # Data joins
+    optional DataJoin[len > 0] joins
+
+
+# A data join specification
+struct DataJoin
+
+    # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
+    string url
+
+    # The left field of the join
+    string[len > 0] leftFields
+
+    # The right field of the join
+    optional string[len > 0] rightFields
 
 
 # Base struct for line and bar charts
@@ -231,10 +254,10 @@ struct Filter
     string field
 
     # Matches if the field value is in the value array
-    optional FieldValueEx[len > 0] include
+    optional FieldValueEx[len > 0] includes
 
     # Matches if the field value is NOT in the value array
-    optional FieldValueEx[len > 0] exclude
+    optional FieldValueEx[len > 0] excludes
 
     # Matches if the field value is less than the value
     optional FieldValueEx lt

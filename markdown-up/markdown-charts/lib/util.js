@@ -125,12 +125,14 @@ export function formatValue(value, chart) {
         }
         return isoFormat.replace(rDateCleanup, '');
     } else if (typeof value === 'number') {
-        return value.toFixed('precision' in chart ? chart.precision : defaultPrecision);
+        const numberFormat = value.toFixed('precision' in chart ? chart.precision : defaultPrecision);
+        return numberFormat.replace(rNumberCleanup, '');
     }
     return `${value}`;
 }
 
 const defaultPrecision = 2;
+const rNumberCleanup = /\.0*$/;
 const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
 
 

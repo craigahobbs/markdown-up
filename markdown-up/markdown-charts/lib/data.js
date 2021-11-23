@@ -22,30 +22,104 @@ import {getBaseURL, isRelativeURL} from '../../../markdown-model/index.js';
  * @returns {module:lib/data~LoadChartDataResult}
  */
 export async function loadChartData(chart, options = {}) {
-    // Fixup the data URL, if necessary
-    let {dataURL} = chart;
-    if ('url' in options && options.url !== null && isRelativeURL(dataURL)) {
-        dataURL = `${getBaseURL(options.url)}${dataURL}`;
-    }
+    // Load the data resources
+    const fixDataURL = (url) => {
+        if ('url' in options && options.url !== null && isRelativeURL(url)) {
+            return `${getBaseURL(options.url)}${url}`;
+        }
+        return url;
+    };
+    const dataURLs = [
+        fixDataURL(chart.data.url),
+        ...('joins' in chart.data ? chart.data.joins.map((join) => fixDataURL(join.url)) : [])
+    ];
+    const dataResponses = await Promise.all(dataURLs.map((joinURL) => options.window.fetch(joinURL)));
+    const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
+    let [{data, types}] = dataTypes;
 
-    // Fetch the data file
-    const dataResponse = await options.window.fetch(dataURL);
-    if (!dataResponse.ok) {
-        const status = dataResponse.statusText;
-        throw new Error(`Could not fetch "${dataURL}"${status === '' ? '' : `, ${JSON.stringify(status)}`}`);
-    }
+    // Join the data
+    if (dataResponses.length > 1) {
+        // Helper function to compute a unique field name
+        const mapFieldName = (field) => {
+            let unique = field;
+            let ixUnique = 2;
+            while (unique in types) {
+                unique = `${field}${ixUnique}`;
+                ixUnique += 1;
+            }
+            return [field, unique];
+        };
 
-    // CSV?
-    let data;
-    const csv = dataURL.endsWith('.csv');
-    if (csv) {
-        data = parseCSV(await dataResponse.text());
-    } else {
-        data = await dataResponse.json();
-    }
+        // Perform each join in sequence
+        let leftData;
+        for (let ixJoin = 0; ixJoin < chart.data.joins.length; ixJoin++) {
+            const join = chart.data.joins[ixJoin];
+            const {leftFields} = join;
+            const rightFields = 'rightFields' in join ? join.rightFields : leftFields;
+            const rightData = dataTypes[ixJoin + 1].data;
+            const rightTypes = dataTypes[ixJoin + 1].types;
 
-    // Validate the data
-    let types = validateData(data, {csv});
+            // Validate left and right field names
+            if (leftFields.length !== rightFields.length) {
+                throw new Error(
+                    `Join "${join.url}" has left-field count ${leftFields.length} and right-field count ${rightFields.length}`
+                );
+            }
+            for (let ixJoinField = 0; ixJoinField < leftFields.length; ixJoinField++) {
+                const leftField = leftFields[ixJoinField];
+                const rightField = rightFields[ixJoinField];
+                if (!(leftField in types)) {
+                    throw new Error(`Unknown "${join.url}" join left-field "${leftField}`);
+                }
+                if (!(rightField in rightTypes)) {
+                    throw new Error(`Unknown "${join.url}" join right-field "${rightField}`);
+                }
+                if (types[leftField] !== rightTypes[rightField]) {
+                    throw new Error(
+                        `Join "${join.url}" has left-field type "${types[leftField]}" and right-field type "${rightTypes[rightField]}`
+                    );
+                }
+            }
+
+            // Bucket rows by category
+            const rightCategoryRows = {};
+            for (const row of rightData) {
+                const categoryKey = JSON.stringify(rightFields.map((field) => (field in row ? row[field] : null)));
+                if (!(categoryKey in rightCategoryRows)) {
+                    rightCategoryRows[categoryKey] = [];
+                }
+                rightCategoryRows[categoryKey].push(row);
+            }
+
+            // Compute the right column names
+            const rightFieldMap = Object.fromEntries(Object.keys(rightTypes).map(mapFieldName));
+
+            // Update types
+            for (const rightField of Object.keys(rightTypes)) {
+                types[rightFieldMap[rightField]] = rightTypes[rightField];
+            }
+
+            // Join the left with the right
+            leftData = data;
+            data = [];
+            for (const row of leftData) {
+                const categoryKey = JSON.stringify(leftFields.map((field) => (field in row ? row[field] : null)));
+                if (categoryKey in rightCategoryRows) {
+                    for (const rightRow of rightCategoryRows[categoryKey]) {
+                        const joinRow = {...row};
+                        for (const rightField of Object.keys(rightTypes)) {
+                            if (rightField in rightRow) {
+                                joinRow[rightFieldMap[rightField]] = rightRow[rightField];
+                            }
+                        }
+                        data.push(joinRow);
+                    }
+                } else {
+                    data.push(row);
+                }
+            }
+        }
+    }
 
     // Filter the data
     if ('filters' in chart) {
@@ -58,7 +132,7 @@ export async function loadChartData(chart, options = {}) {
     }
 
     // Sort the data
-    if ('sort' in chart) {
+    if ('sorts' in chart) {
         sortData(chart, data);
     }
 
@@ -66,6 +140,30 @@ export async function loadChartData(chart, options = {}) {
     if ('top' in chart) {
         data = topData(chart, data);
     }
+
+    return {data, types};
+}
+
+
+// Helper function to handle data fetch responses
+async function dataResponseHandler(url, response) {
+    // Fetch error?
+    if (!response.ok) {
+        const status = response.statusText;
+        throw new Error(`Could not fetch "${url}"${status === '' ? '' : `, ${JSON.stringify(status)}`}`);
+    }
+
+    // CSV?
+    let data;
+    const csv = url.endsWith('.csv');
+    if (csv) {
+        data = parseCSV(await response.text());
+    } else {
+        data = await response.json();
+    }
+
+    // Validate the data
+    const types = validateData(data, {csv});
 
     return {data, types};
 }
@@ -239,10 +337,10 @@ export function filterData(chart, data, types, options = {}) {
             (!('lte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lte, fieldType, filterDesc)) <= 0) &&
             (!('gt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gt, fieldType, filterDesc)) > 0) &&
             (!('gte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gte, fieldType, filterDesc)) >= 0) &&
-            (!('include' in filter) || filter.include.some(
+            (!('includes' in filter) || filter.includes.some(
                 (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
             )) &&
-            (!('exclude' in filter) || !filter.exclude.some(
+            (!('excludes' in filter) || !filter.excludes.some(
                 (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
             ));
     }));
@@ -376,7 +474,7 @@ function getMeasureFieldName(measure) {
  * @param {Object[]} data - The data array
  */
 export function sortData(chart, data) {
-    data.sort((row1, row2) => chart.sort.reduce((result, sort) => {
+    data.sort((row1, row2) => chart.sorts.reduce((result, sort) => {
         if (result !== 0) {
             return result;
         }
@@ -396,13 +494,15 @@ export function sortData(chart, data) {
  * @returns {Object[]} The top data array
  */
 export function topData(chart, data) {
-    // Bucket rows by category uniqueness
+    // Bucket rows by category
     const categoryRows = {};
+    const categoryOrder = [];
     const categoryFields = 'categoryFields' in chart.top ? chart.top.categoryFields : [];
     for (const row of data) {
         const categoryKey = JSON.stringify(categoryFields.map((field) => (field in row ? row[field] : null)));
         if (!(categoryKey in categoryRows)) {
             categoryRows[categoryKey] = [];
+            categoryOrder.push(categoryKey);
         }
         categoryRows[categoryKey].push(row);
     }
@@ -410,7 +510,7 @@ export function topData(chart, data) {
     // Take only the top rows
     const dataTop = [];
     const topCount = chart.top.count;
-    for (const categoryKey of Object.keys(categoryRows)) {
+    for (const categoryKey of categoryOrder) {
         const categoryKeyRows = categoryRows[categoryKey];
         const categoryKeyLength = categoryKeyRows.length;
         for (let ixRow = 0; ixRow < topCount && ixRow < categoryKeyLength; ixRow++) {
