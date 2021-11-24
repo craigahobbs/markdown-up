@@ -17,6 +17,12 @@ import {loadChartData} from './data.js';
 export async function dataTableElements(dataTable, options = {}) {
     const {data, types} = await loadChartData(dataTable, options);
 
+    // Compute the variables
+    const variables = {
+        ...('variables' in dataTable ? dataTable.variables : {}),
+        ...('variables' in options ? options.variables : {})
+    };
+
     // Generate the data table's element model
     const categoryFields = 'categoryFields' in dataTable ? dataTable.categoryFields : [];
     const fields = 'fields' in dataTable
@@ -43,7 +49,8 @@ export async function dataTableElements(dataTable, options = {}) {
                 const linkElements = {};
                 const getLinkText = (link, linkText) => {
                     if ('string' in linkText) {
-                        return formatVariables(dataTable, row, linkText.string, false);
+                        const textRow = formatVariables(dataTable, row, linkText.string, false);
+                        return formatVariables(dataTable, variables, textRow);
                     }
                     if (!(linkText.field in types)) {
                         throw new Error(`Unknown link "${link.name}" field "${linkText.field}"`);
