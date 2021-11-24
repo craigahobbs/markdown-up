@@ -52,18 +52,23 @@ export const categoricalColors = [
 
 
 // Helper function to replace variable tokens (e.g. "{{name}}") in a string
-export function formatVariables(chart, variables, text) {
+export function formatVariables(chart, variables, text, fieldValues = true) {
     return text.replace(rVariable, (match, variable) => {
         if (variable in variables) {
-            const fieldValue = variables[variable];
-            const value = 'datetime' in fieldValue ? fieldValue.datetime : ('number' in fieldValue ? fieldValue.number : fieldValue.string);
+            let value;
+            if (fieldValues) {
+                const fieldValue = variables[variable];
+                value = 'datetime' in fieldValue ? fieldValue.datetime : ('number' in fieldValue ? fieldValue.number : fieldValue.string);
+            } else {
+                value = variables[variable];
+            }
             return formatValue(value, chart);
         }
         return match;
     });
 }
 
-const rVariable = /\{\{(\w+)\}\}/;
+const rVariable = /\{\{(\w+)\}\}/g;
 
 
 // Helper function to get and validate field values

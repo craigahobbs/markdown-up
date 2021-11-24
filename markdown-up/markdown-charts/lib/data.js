@@ -69,10 +69,10 @@ export async function loadChartData(chart, options = {}) {
                 const leftField = leftFields[ixJoinField];
                 const rightField = rightFields[ixJoinField];
                 if (!(leftField in types)) {
-                    throw new Error(`Unknown "${join.url}" join left-field "${leftField}`);
+                    throw new Error(`Unknown "${join.url}" join left-field "${leftField}"`);
                 }
                 if (!(rightField in rightTypes)) {
-                    throw new Error(`Unknown "${join.url}" join right-field "${rightField}`);
+                    throw new Error(`Unknown "${join.url}" join right-field "${rightField}"`);
                 }
                 if (types[leftField] !== rightTypes[rightField]) {
                     throw new Error(
@@ -114,8 +114,6 @@ export async function loadChartData(chart, options = {}) {
                         }
                         data.push(joinRow);
                     }
-                } else {
-                    data.push(row);
                 }
             }
         }
@@ -348,8 +346,11 @@ export function filterData(chart, data, types, options = {}) {
         getFilterValue(filter, ixFilter, valueFilter, 'gte');
         getFilterValues(filter, ixFilter, valueFilter, 'includes');
         getFilterValues(filter, ixFilter, valueFilter, 'excludes');
+        if (Object.keys(valueFilter).length === 1) {
+            return null;
+        }
         return valueFilter;
-    });
+    }).filter((valueFilter) => valueFilter !== null);
 
     // Filter the rows
     return data.filter((row) => valueFilters.every((valueFilter) => {

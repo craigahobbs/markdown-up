@@ -3,7 +3,7 @@
 
 /** @module lib/dataTable */
 
-import {compareValues, formatValue} from './util.js';
+import {compareValues, formatValue, formatVariables} from './util.js';
 import {loadChartData} from './data.js';
 
 
@@ -38,6 +38,33 @@ export async function dataTableElements(dataTable, options = {}) {
             data.map((row, ixRow) => {
                 const rowPrev = ixRow > 0 ? data[ixRow - 1] : null;
                 let skip = rowPrev !== null;
+
+                // Compute the link field element models
+                const linkElements = {};
+                const getLinkText = (link, linkText) => {
+                    if ('string' in linkText) {
+                        return formatVariables(dataTable, row, linkText.string, false);
+                    }
+                    if (!(linkText.field in types)) {
+                        throw new Error(`Unknown link "${link.name}" field "${linkText.field}"`);
+                    }
+                    return row[linkText.field];
+                };
+                if ('links' in dataTable) {
+                    for (const link of dataTable.links) {
+                        const linkText = getLinkText(link, link.text);
+                        if (link.name in types) {
+                            throw new Error(`Duplicate link name "${link.name}"`);
+                        }
+                        row[link.name] = linkText;
+                        linkElements[link.name] = {
+                            'html': 'a',
+                            'attr': {'href': getLinkText(link, link.url)},
+                            'elem': {'text': linkText}
+                        };
+                    }
+                }
+
                 return {
                     'html': 'tr',
                     'elem': [
@@ -51,11 +78,13 @@ export async function dataTableElements(dataTable, options = {}) {
                                 skip = (compareValues(skipValue, skipValuePrev) === 0);
                             }
 
-                            return {'html': 'td', 'elem': skip ? null : {'text': formatValue(value, dataTable)}};
+                            const fieldElements = field in linkElements ? linkElements[field] : {'text': formatValue(value, dataTable)};
+                            return {'html': 'td', 'elem': skip ? null : fieldElements};
                         }),
                         fields.map((field) => {
                             const value = field in row ? row[field] : null;
-                            return {'html': 'td', 'elem': field === null ? null : {'text': formatValue(value, dataTable)}};
+                            const fieldElements = field in linkElements ? linkElements[field] : {'text': formatValue(value, dataTable)};
+                            return {'html': 'td', 'elem': field === null ? null : fieldElements};
                         })
                     ]
                 };

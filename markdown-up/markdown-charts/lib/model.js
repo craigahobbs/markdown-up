@@ -133,6 +133,32 @@ struct DataTable (ChartBase)
     # The table's fields
     optional string[len > 0] fields
 
+    # The table's links
+    optional Link[len > 0] links
+
+
+# A link specification
+struct Link
+
+    # The link name
+    string name
+
+    # The link text
+    optional LinkText text
+
+    # The link URL
+    optional LinkText url
+
+
+# A link text specification
+union LinkText
+
+    # A row-field-formatted string
+    string string
+
+    # A row field value
+    string field
+
 
 # A line chart specification
 struct LineChart (ChartCommon, ChartBase)
