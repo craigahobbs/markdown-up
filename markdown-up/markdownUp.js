@@ -39,7 +39,7 @@ struct MarkdownUp
     optional int(>= 1, <= 2) lineHeight
 
     # Variable collection
-    optional FieldValue{len > 0} variables
+    optional FieldValue{} variables
 
 
 # Field value union
