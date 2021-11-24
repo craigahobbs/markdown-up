@@ -144,10 +144,10 @@ struct Link
     string name
 
     # The link text
-    optional LinkText text
+    LinkText text
 
     # The link URL
-    optional LinkText url
+    LinkText url
 
 
 # A link text specification
