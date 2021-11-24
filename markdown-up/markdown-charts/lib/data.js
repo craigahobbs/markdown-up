@@ -317,32 +317,55 @@ export function filterData(chart, data, types, options = {}) {
         ...('variables' in options ? options.variables : {})
     };
 
-    // Filter the rows
+    // Get the filter values - remove null filters
     const filterDescs = filters.map((filter) => `"${filter.field}" field filter value`);
-    return data.filter((row) => filters.every((filter, ixFilter) => {
-        // Get the filter field value - skip nulls
+    const getFilterValue = (filter, ixFilter, valueFilter, member) => {
+        if (member in filter) {
+            const value = getFieldValue(variables, filter[member], types[filter.field], filterDescs[ixFilter]);
+            if (value !== null) {
+                valueFilter[member] = value;
+            }
+        }
+    };
+    const getFilterValues = (filter, ixFilter, valueFilter, member) => {
+        if (member in filter) {
+            const values = filter[member].map(
+                (filterFieldValue) => getFieldValue(variables, filterFieldValue, types[filter.field], filterDescs[ixFilter])
+            ).filter((value) => value !== null);
+            if (values.length > 0) {
+                valueFilter[member] = values;
+            }
+        }
+    };
+    const valueFilters = filters.map((filter, ixFilter) => {
         if (!(filter.field in types)) {
             throw new Error(`Unknown filter field "${filter.field}"`);
         }
-        const fieldName = filter.field;
-        const fieldType = types[fieldName];
+        const valueFilter = {'field': filter.field};
+        getFilterValue(filter, ixFilter, valueFilter, 'lt');
+        getFilterValue(filter, ixFilter, valueFilter, 'lte');
+        getFilterValue(filter, ixFilter, valueFilter, 'gt');
+        getFilterValue(filter, ixFilter, valueFilter, 'gte');
+        getFilterValues(filter, ixFilter, valueFilter, 'includes');
+        getFilterValues(filter, ixFilter, valueFilter, 'excludes');
+        return valueFilter;
+    });
+
+    // Filter the rows
+    return data.filter((row) => valueFilters.every((valueFilter) => {
+        const fieldName = valueFilter.field;
         const fieldValue = fieldName in row ? row[fieldName] : null;
         if (fieldValue === null) {
-            return true;
+            return false;
         }
 
         // Test the field value
-        const filterDesc = filterDescs[ixFilter];
-        return (!('lt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lt, fieldType, filterDesc)) < 0) &&
-            (!('lte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.lte, fieldType, filterDesc)) <= 0) &&
-            (!('gt' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gt, fieldType, filterDesc)) > 0) &&
-            (!('gte' in filter) || compareValues(fieldValue, getFieldValue(variables, filter.gte, fieldType, filterDesc)) >= 0) &&
-            (!('includes' in filter) || filter.includes.some(
-                (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
-            )) &&
-            (!('excludes' in filter) || !filter.excludes.some(
-                (filterValue) => compareValues(fieldValue, getFieldValue(variables, filterValue, fieldType, filterDesc)) === 0
-            ));
+        return (!('lt' in valueFilter) || compareValues(fieldValue, valueFilter.lt) < 0) &&
+            (!('lte' in valueFilter) || compareValues(fieldValue, valueFilter.lte) <= 0) &&
+            (!('gt' in valueFilter) || compareValues(fieldValue, valueFilter.gt) > 0) &&
+            (!('gte' in valueFilter) || compareValues(fieldValue, valueFilter.gte) >= 0) &&
+            (!('includes' in valueFilter) || valueFilter.includes.some((filterValue) => compareValues(fieldValue, filterValue) === 0)) &&
+            (!('excludes' in valueFilter) || !valueFilter.excludes.some((filterValue) => compareValues(fieldValue, filterValue) === 0));
     }));
 }
 

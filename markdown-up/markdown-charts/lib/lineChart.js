@@ -89,16 +89,15 @@ export async function lineChartElements(lineChart, options = {}) {
                 const xRow = xField in row ? row[xField] : null;
                 const yRow = yField in row ? row[yField] : null;
                 if (xRow !== null && yRow !== null) {
-                    if (rowKey in pointsMap) {
-                        pointsMap[rowKey].push([xRow, yRow]);
-                    } else {
-                        pointsMap[rowKey] = [[xRow, yRow]];
+                    if (!(rowKey in pointsMap)) {
+                        pointsMap[rowKey] = [];
                     }
+                    pointsMap[rowKey].push([xRow, yRow]);
+                    xMin = xMin === null ? xRow : xRow < xMin ? xRow : xMin;
+                    yMin = yMin === null ? yRow : yRow < yMin ? yRow : yMin;
+                    xMax = xMax === null ? xRow : xRow > xMax ? xRow : xMax;
+                    yMax = yMax === null ? yRow : yRow > yMax ? yRow : yMax;
                 }
-                xMin = xMin === null ? xRow : xRow < xMin ? xRow : xMin;
-                yMin = yMin === null ? yRow : yRow < yMin ? yRow : yMin;
-                xMax = xMax === null ? xRow : xRow > xMax ? xRow : xMax;
-                yMax = yMax === null ? yRow : yRow > yMax ? yRow : yMax;
             }
         }
 

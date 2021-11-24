@@ -132,7 +132,7 @@ export function formatValue(value, chart) {
 }
 
 const defaultPrecision = 2;
-const rNumberCleanup = /\.0*$/;
+const rNumberCleanup = /\.?0*$/;
 const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
 
 
