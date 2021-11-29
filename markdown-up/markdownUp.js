@@ -1,17 +1,16 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-import * as smd from '../schema-markdown/index.js';
+import {SchemaMarkdownParser, decodeQueryString, encodeQueryString, validateType} from '../schema-markdown/index.js';
 import {barChartCodeBlock, dataTableCodeBlock, lineChartCodeBlock} from './markdown-charts/lib/codeBlock.js';
-import {getMarkdownTitle, markdownElements, parseMarkdown} from '../markdown-model/index.js';
+import {getBaseURL, getMarkdownTitle, isRelativeURL, markdownElements, parseMarkdown} from '../markdown-model/index.js';
 import {UserTypeElements} from '../schema-markdown-doc/index.js';
 import {chartModel} from './markdown-charts/lib/model.js';
-import {encodeQueryString} from '../schema-markdown/index.js';
 import {renderElements} from '../element-model/index.js';
 
 
 // The application's hash parameter type model
-const appHashTypes = (new smd.SchemaMarkdownParser(`\
+const appHashTypes = (new SchemaMarkdownParser(`\
 #
 # **markdown-up** is a Markdown viewer application. Click the following link to learn more.
 #
@@ -129,16 +128,16 @@ export class MarkdownUp {
         this.params = null;
 
         // Decode the params string
-        const paramStrActual = paramStr !== null ? paramStr : this.window.location.hash.substring(1);
-        const params = smd.decodeQueryString(paramStrActual);
+        const params = decodeQueryString(paramStr !== null ? paramStr : this.window.location.hash.slice(1));
 
         // Validate the params
-        this.params = smd.validateType(appHashTypes, 'MarkdownUp', params);
+        this.params = validateType(appHashTypes, 'MarkdownUp', params);
     }
 
     // Render the application
     async render() {
         let result;
+        let isError = false;
         try {
             // Validate hash parameters
             const paramsPrev = this.params;
@@ -153,6 +152,7 @@ export class MarkdownUp {
             result = await this.main();
         } catch ({message}) {
             result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
+            isError = true;
         }
 
         // Set the font size
@@ -166,6 +166,12 @@ export class MarkdownUp {
         // Render the application
         this.window.document.title = 'title' in result ? result.title : 'MarkdownUp';
         renderElements(this.window.document.body, result.elements);
+
+        // If there is a URL hash ID, re-navigate to go there since it was just rendered. After the
+        // first render, re-render is short-circuited by the unchanged hash param check above.
+        if (!isError && getUrlHashID(this.window.location.hash) !== null) {
+            this.window.location.href = this.window.location.hash;
+        }
     }
 
     // Generate the application's element model
@@ -242,16 +248,39 @@ export class MarkdownUp {
                     ? null : (new UserTypeElements(this.params)).getElements(chartModel.types, 'DataTable'),
                 !('cmd' in this.params && 'markdown' in this.params.cmd)
                     ? null : {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': text}},
+
+                // Add a top hash ID, if necessary
+                'cmd' in this.params || Object.keys(this.params).length === 0
+                    ? null : {'html': 'div', 'attr': {'id': encodeQueryString(this.params), 'style': 'display=none'}},
+
+                // Render the markdown
                 'cmd' in this.params ? null : markdownElements(markdownModel, {
-                    'hashPrefix': smd.encodeQueryString(this.params),
-                    'headerIds': true,
-                    url,
                     'codeBlocks': {
                         'bar-chart': (language, lines) => barChartCodeBlock(language, lines, chartOptions),
                         'data-table': (language, lines) => dataTableCodeBlock(language, lines, chartOptions),
                         'line-chart': (language, lines) => lineChartCodeBlock(language, lines, chartOptions)
-                    }
+                    },
+                    'hashFn': (hashURL) => {
+                        // Decode the hash params
+                        const hashParams = decodeQueryString(hashURL.slice(1));
+
+                        // Fixup the "url" param if its relative
+                        if ('url' in hashParams && isRelativeURL(hashParams.url)) {
+                            hashParams.url = `${getBaseURL(url)}${hashParams.url}`;
+                        }
+
+                        // Combine the application params and the hash URL params
+                        const hashParamStr = encodeQueryString({...this.params, ...hashParams});
+
+                        // Return the combined hash URL
+                        const hashId = getUrlHashID(hashURL);
+                        return `#${hashParamStr}${hashId !== null && hashParamStr !== '' ? '&' : ''}${hashId !== null ? hashId : ''}`;
+                    },
+                    'headerIds': true,
+                    url
                 }),
+
+                // Popup menu burger
                 !this.menu ? null : {
                     'html': 'div',
                     'attr': {'class': 'menu-burger'},
@@ -263,6 +292,8 @@ export class MarkdownUp {
                         }
                     ]
                 },
+
+                // Popup menu
                 !this.menu || !('menu' in this.params) ? null : {
                     'html': 'div',
                     'attr': {'class': 'menu'},
@@ -291,12 +322,24 @@ export class MarkdownUp {
                 }
             ]
         };
+
+        // Set the page title
         if (markdownTitle !== null) {
             result.title = markdownTitle;
         }
+
         return result;
     }
 }
+
+
+// Helper function to get a URL's hash ID
+function getUrlHashID(url) {
+    const matchId = url.match(rUrlHashId);
+    return matchId !== null ? matchId[1] : null;
+}
+
+const rUrlHashId = /[#&]([^=]+)$/;
 
 
 // Icon sizes
