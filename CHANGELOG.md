@@ -1,3 +1,7 @@
+## 1.2.0 (2021-11-29)
+
+- [c39af57](https://github.com/craigahobbs/markdown-up/commit/c39af57) - markdown-model 1.2.0
+
 ## 1.1.0 (2021-10-05)
 
 - [1449b4d](https://github.com/craigahobbs/markdown-up/commit/1449b4d) - add application menu
