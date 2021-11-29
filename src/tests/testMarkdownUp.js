@@ -121,6 +121,23 @@ function menuElements({
 }
 
 
+// Helper class to mock window.location instances
+class MockLocation {
+    constructor(href, hash) {
+        this._href = [href];
+        this.hash = hash;
+    }
+
+    get href() {
+        return this._href[this._href.length - 1];
+    }
+
+    set href(href) {
+        this._href.push(href);
+    }
+}
+
+
 test('MarkdownUp, constructor', (t) => {
     const {window} = new JSDOM();
     const app = new MarkdownUp(window);
@@ -156,7 +173,10 @@ test('MarkdownUp.run, help command', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#cmd.help=1';
+    delete window.location;
+    Object.assign(window, {'location': new MockLocation('http://localhost/#cmd.help=1', '#cmd.help=1')});
+    t.is(window.location.href, 'http://localhost/#cmd.help=1');
+
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
     t.is(app.fontSize, 12);
@@ -169,6 +189,7 @@ test('MarkdownUp.run, help command', async (t) => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
+    t.deepEqual(window.location._href, ['http://localhost/#cmd.help=1']);
 });
 
 
@@ -178,7 +199,15 @@ test('MarkdownUp.run, font size and line height', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
+    delete window.location;
+    Object.assign(window, {
+        'location': new MockLocation(
+            'http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4',
+            '#cmd.help=1&fontSize=14&lineHeight=1.4'
+        )
+    });
+    t.is(window.location.href, 'http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4');
+
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
     t.is(app.fontSize, 12);
@@ -193,6 +222,7 @@ test('MarkdownUp.run, font size and line height', async (t) => {
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
     ]);
+    t.deepEqual(window.location._href, ['http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4']);
 });
 
 
@@ -211,9 +241,11 @@ test('MarkdownUp.run, main', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#';
+    delete window.location;
+    Object.assign(window, {'location': new MockLocation('http://localhost/', '#')});
+    t.is(window.location.href, 'http://localhost/');
+
     const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
     t.is(app.window, window);
     t.is(app.fontSize, 12);
     t.is(app.lineHeight, 1.2);
@@ -225,6 +257,41 @@ test('MarkdownUp.run, main', async (t) => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
+    t.deepEqual(window.location._href, ['http://localhost/']);
+
+    // Ensure no re-render on subsequent calls with the same hash params
+    window.document.body.innerHTML = '';
+    app.render();
+    t.true(window.document.body.innerHTML.startsWith(''));
+    t.deepEqual(window.location._href, ['http://localhost/']);
+});
+
+
+test('MarkdownUp.run, main hash ID', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+
+    delete window.location;
+    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#hash-id')});
+    t.is(window.location.href, 'http://localhost/#hash-id');
+
+    const app = await MarkdownUp.run(window);
+    t.is(app.window, window);
+    t.is(app.fontSize, 12);
+    t.is(app.lineHeight, 1.2);
+    t.is(app.menu, true);
+    t.deepEqual(app.params, {});
+    t.is(window.document.title, 'Hello');
+    t.true(window.document.body.innerHTML.startsWith('<h1 id="hello">Hello</h1>'));
+    t.deepEqual(window.location._href, ['http://localhost/#hash-id', '#hash-id']);
 });
 
 
@@ -234,7 +301,10 @@ test('MarkdownUp.run, hash parameter error', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#foo=bar';
+    delete window.location;
+    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#foo=bar')});
+    t.is(window.location.href, 'http://localhost/#hash-id');
+
     const app = await MarkdownUp.run(window);
     t.is(app.window, window);
     t.is(app.params, null);
@@ -244,6 +314,30 @@ test('MarkdownUp.run, hash parameter error', async (t) => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
+    t.deepEqual(window.location._href, ['http://localhost/#hash-id']);
+});
+
+
+test('MarkdownUp.run, hash parameter error hash ID', async (t) => {
+    const {window} = new JSDOM();
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    delete window.location;
+    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#foo=bar&hash-id')});
+    t.is(window.location.href, 'http://localhost/#hash-id');
+
+    const app = await MarkdownUp.run(window);
+    t.is(app.window, window);
+    t.is(app.params, null);
+    t.is(window.document.title, 'MarkdownUp');
+    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.deepEqual(window.location._href, ['http://localhost/#hash-id']);
 });
 
 
@@ -265,6 +359,9 @@ test('MarkdownUp.main', async (t) => {
         {
             'title': 'Hello',
             'elements': [
+                null,
+                null,
+                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
                 ],
@@ -284,9 +381,17 @@ test('MarkdownUp.main, url', async (t) => {
             resolve(`\
 # Hello
 
-[A relative link](foo.html)
+[Relative link](foo.html)
 
-[A page link](#hello)
+[Hash-id link](#hello)
+
+[Hash link with relative URL](#url=file.md)
+
+[Hash link with relative URL and hash-id](#url=file.md&hash-id)
+
+[Hash link with absolute URL](#url=http://file.com)
+
+[Hash link with absolute URL and hash-id](#url=http://file.com&hash-id)
 `);
         })};
     };
@@ -300,6 +405,9 @@ test('MarkdownUp.main, url', async (t) => {
         {
             'title': 'Hello',
             'elements': [
+                null,
+                null,
+                {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'url=sub%2Fother.md&hello'}, 'elem': [{'text': 'Hello'}]},
                     {
@@ -308,7 +416,7 @@ test('MarkdownUp.main, url', async (t) => {
                             {
                                 'html': 'a',
                                 'attr': {'href': 'sub/foo.html'},
-                                'elem': [{'text': 'A relative link'}]
+                                'elem': [{'text': 'Relative link'}]
                             }
                         ]
                     },
@@ -318,7 +426,47 @@ test('MarkdownUp.main, url', async (t) => {
                             {
                                 'html': 'a',
                                 'attr': {'href': '#url=sub%2Fother.md&hello'},
-                                'elem': [{'text': 'A page link'}]
+                                'elem': [{'text': 'Hash-id link'}]
+                            }
+                        ]
+                    },
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': '#url=sub%2Ffile.md'},
+                                'elem': [{'text': 'Hash link with relative URL'}]
+                            }
+                        ]
+                    },
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': '#url=sub%2Ffile.md&hash-id'},
+                                'elem': [{'text': 'Hash link with relative URL and hash-id'}]
+                            }
+                        ]
+                    },
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': '#url=http%3A%2F%2Ffile.com'},
+                                'elem': [{'text': 'Hash link with absolute URL'}]
+                            }
+                        ]
+                    },
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': '#url=http%3A%2F%2Ffile.com&hash-id'},
+                                'elem': [{'text': 'Hash link with absolute URL and hash-id'}]
                             }
                         ]
                     }
@@ -390,6 +538,9 @@ test('MarkdownUp.main, no title', async (t) => {
         await app.main(),
         {
             'elements': [
+                null,
+                null,
+                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
@@ -418,6 +569,9 @@ test('MarkdownUp.main, menu', async (t) => {
         await app.main(),
         {
             'elements': [
+                null,
+                null,
+                {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
@@ -446,6 +600,9 @@ test('MarkdownUp.main, no menu', async (t) => {
         await app.main(),
         {
             'elements': [
+                null,
+                null,
+                {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
@@ -474,7 +631,10 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
         await app.main(),
         {
             'elements': [
+                null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
+                null,
+                null,
                 menuBurgerElements({'menuURL': '#cmd.markdown=1&fontSize=18'}),
                 menuElements({
                     'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
@@ -505,7 +665,10 @@ test('MarkdownUp.main, markdown', async (t) => {
         await app.main(),
         {
             'elements': [
+                null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
+                null,
+                null,
                 menuBurgerElements({'menuURL': '#cmd.markdown=1&menu=1'}),
                 null
             ]
