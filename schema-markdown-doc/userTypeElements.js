@@ -86,7 +86,8 @@ export class UserTypeElements {
 
     // Helper method to get a user type href (target)
     typeHref(typeName) {
-        return `${encodeQueryString(this.params)}&type_${typeName}`;
+        const paramString = `${encodeQueryString(this.params)}`;
+        return paramString !== '' ? `${paramString}&type_${typeName}` : `type_${typeName}`;
     }
 
     // Helper method to generate a member/typedef type's element model
