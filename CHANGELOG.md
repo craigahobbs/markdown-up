@@ -1,3 +1,7 @@
+## 1.3.0 (2021-12-01)
+
+- [1231306](https://github.com/craigahobbs/markdown-up/commit/1231306) - use element-app
+
 ## 1.2.0 (2021-11-29)
 
 - [c39af57](https://github.com/craigahobbs/markdown-up/commit/c39af57) - markdown-model 1.2.0
