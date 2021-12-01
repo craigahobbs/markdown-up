@@ -4,7 +4,7 @@
 /* eslint-disable id-length */
 
 import {JSDOM} from 'jsdom/lib/api.js';
-import {MarkdownUp} from '../markdown-up/index.js';
+import {MarkdownUp} from '../lib/app.js';
 import test from 'ava';
 
 
@@ -121,32 +121,15 @@ function menuElements({
 }
 
 
-// Helper class to mock window.location instances
-class MockLocation {
-    constructor(href, hash) {
-        this._href = [href];
-        this.hash = hash;
-    }
-
-    get href() {
-        return this._href[this._href.length - 1];
-    }
-
-    set href(href) {
-        this._href.push(href);
-    }
-}
-
-
 test('MarkdownUp, constructor', (t) => {
     const {window} = new JSDOM();
     const app = new MarkdownUp(window);
     t.is(app.window, window);
+    t.is(app.params, null);
     t.is(app.fontSize, 12);
     t.is(app.lineHeight, 1.2);
     t.is(app.menu, true);
     t.is(app.url, 'README.md');
-    t.is(app.params, null);
 });
 
 
@@ -159,62 +142,36 @@ test('MarkdownUp, constructor options', (t) => {
         'url': 'CHANGELOG.md'
     });
     t.is(app.window, window);
+    t.is(app.params, null);
     t.is(app.fontSize, 14);
     t.is(app.lineHeight, 1.6);
     t.is(app.menu, false);
     t.is(app.url, 'CHANGELOG.md');
-    t.is(app.params, null);
 });
 
 
-test('MarkdownUp.run, help command', async (t) => {
+test('MarkdownUp.preRender', async (t) => {
     const {window} = new JSDOM();
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    delete window.location;
-    Object.assign(window, {'location': new MockLocation('http://localhost/#cmd.help=1', '#cmd.help=1')});
-    t.is(window.location.href, 'http://localhost/#cmd.help=1');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.fontSize, 12);
-    t.is(app.lineHeight, 1.2);
-    t.is(app.menu, true);
-    t.deepEqual(app.params, {'cmd': {'help': 1}});
-    t.is(window.document.title, 'MarkdownUp');
-    t.true(window.document.body.innerHTML.startsWith('<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'));
+    window.location.hash = '#cmd.help=1';
+    const app = new MarkdownUp(window);
+    await app.render();
+    t.is(window.document.title, 'markdown-up');
+    t.true(window.document.body.innerHTML.startsWith(
+        '<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'
+    ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.deepEqual(window.location._href, ['http://localhost/#cmd.help=1']);
-});
 
-
-test('MarkdownUp.run, font size and line height', async (t) => {
-    const {window} = new JSDOM();
-
-    const documentElementStyleSetPropertyCalls = [];
-    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    delete window.location;
-    Object.assign(window, {
-        'location': new MockLocation(
-            'http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4',
-            '#cmd.help=1&fontSize=14&lineHeight=1.4'
-        )
-    });
-    t.is(window.location.href, 'http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.fontSize, 12);
-    t.is(app.lineHeight, 1.2);
-    t.is(app.menu, true);
-    t.deepEqual(app.params, {'cmd': {'help': 1}, 'fontSize': 14, 'lineHeight': 1.4});
-    t.is(window.document.title, 'MarkdownUp');
+    window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
+    documentElementStyleSetPropertyCalls.length = 0;
+    await app.render();
+    t.is(window.document.title, 'markdown-up');
     t.true(window.document.body.innerHTML.startsWith(
         '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
@@ -222,122 +179,21 @@ test('MarkdownUp.run, font size and line height', async (t) => {
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
     ]);
-    t.deepEqual(window.location._href, ['http://localhost/#cmd.help=1&fontSize=14&lineHeight=1.4']);
 });
 
 
-test('MarkdownUp.run, main', async (t) => {
+test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM();
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('# Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
+    const app = new MarkdownUp(window);
+    app.updateParams('cmd.help=1');
+    const main = await app.main();
+    t.deepEqual(Object.keys(main).sort(), ['elements', 'title']);
+    t.is(main.title, null);
+    t.deepEqual(main.elements[0][0][0], {
+        'html': 'h1',
+        'attr': {'id': 'cmd.help=1&type_MarkdownUp'},
+        'elem': {'text': 'MarkdownUp'}
     });
-
-    const documentElementStyleSetPropertyCalls = [];
-    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    delete window.location;
-    Object.assign(window, {'location': new MockLocation('http://localhost/', '#')});
-    t.is(window.location.href, 'http://localhost/');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.fontSize, 12);
-    t.is(app.lineHeight, 1.2);
-    t.is(app.menu, true);
-    t.deepEqual(app.params, {});
-    t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.startsWith('<h1 id="hello">Hello</h1>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
-    ]);
-    t.deepEqual(window.location._href, ['http://localhost/']);
-
-    // Ensure no re-render on subsequent calls with the same hash params
-    window.document.body.innerHTML = '';
-    app.render();
-    t.true(window.document.body.innerHTML.startsWith(''));
-    t.deepEqual(window.location._href, ['http://localhost/']);
-});
-
-
-test('MarkdownUp.run, main hash ID', async (t) => {
-    const {window} = new JSDOM();
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('# Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-
-    delete window.location;
-    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#hash-id')});
-    t.is(window.location.href, 'http://localhost/#hash-id');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.fontSize, 12);
-    t.is(app.lineHeight, 1.2);
-    t.is(app.menu, true);
-    t.deepEqual(app.params, {});
-    t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.startsWith('<h1 id="hello">Hello</h1>'));
-    t.deepEqual(window.location._href, ['http://localhost/#hash-id', '#hash-id']);
-});
-
-
-test('MarkdownUp.run, hash parameter error', async (t) => {
-    const {window} = new JSDOM();
-
-    const documentElementStyleSetPropertyCalls = [];
-    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    delete window.location;
-    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#foo=bar')});
-    t.is(window.location.href, 'http://localhost/#hash-id');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.params, null);
-    t.is(window.document.title, 'MarkdownUp');
-    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
-    ]);
-    t.deepEqual(window.location._href, ['http://localhost/#hash-id']);
-});
-
-
-test('MarkdownUp.run, hash parameter error hash ID', async (t) => {
-    const {window} = new JSDOM();
-
-    const documentElementStyleSetPropertyCalls = [];
-    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    delete window.location;
-    Object.assign(window, {'location': new MockLocation('http://localhost/#hash-id', '#foo=bar&hash-id')});
-    t.is(window.location.href, 'http://localhost/#hash-id');
-
-    const app = await MarkdownUp.run(window);
-    t.is(app.window, window);
-    t.is(app.params, null);
-    t.is(window.document.title, 'MarkdownUp');
-    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'foo'</p>");
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
-    ]);
-    t.deepEqual(window.location._href, ['http://localhost/#hash-id']);
 });
 
 
@@ -537,6 +393,7 @@ test('MarkdownUp.main, no title', async (t) => {
     t.deepEqual(
         await app.main(),
         {
+            'title': null,
             'elements': [
                 null,
                 null,
@@ -568,6 +425,7 @@ test('MarkdownUp.main, menu', async (t) => {
     t.deepEqual(
         await app.main(),
         {
+            'title': null,
             'elements': [
                 null,
                 null,
@@ -599,6 +457,7 @@ test('MarkdownUp.main, no menu', async (t) => {
     t.deepEqual(
         await app.main(),
         {
+            'title': null,
             'elements': [
                 null,
                 null,
@@ -630,6 +489,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
     t.deepEqual(
         await app.main(),
         {
+            'title': null,
             'elements': [
                 null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
@@ -664,6 +524,7 @@ test('MarkdownUp.main, markdown', async (t) => {
     t.deepEqual(
         await app.main(),
         {
+            'title': null,
             'elements': [
                 null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},

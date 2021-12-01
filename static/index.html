@@ -12,7 +12,8 @@
     <body>
     </body>
     <script type="module">
-        import {MarkdownUp} from './markdown-up/index.js';
-        MarkdownUp.run(window);
+        import {MarkdownUp} from './lib/app.js';
+        const app = new MarkdownUp(window);
+        app.run();
     </script>
 </html>
