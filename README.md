@@ -25,8 +25,9 @@ Alternatively, you can change the default Markdown file by updating the markdown
 
 ```
     <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, {'url': 'other.md'});
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
+        const app = new MarkdownUp(window, {'url': 'other.md'});
+        app.run();
     </script>
 ```
 
