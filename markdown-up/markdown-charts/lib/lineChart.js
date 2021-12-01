@@ -480,7 +480,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     ? yPoint + annotationLineWidth + yAnnotationLabelOffsetY
                     : yPoint - annotationLineWidth - yAnnotationLabelOffsetY - annotationLabelHeight;
                 return [
-                    {
+                    yLabel === '' ? null : {
                         'svg': 'rect',
                         'attr': {
                             'x': svgValue(chartLeft + yAnnotationLabelOffsetX),
@@ -490,7 +490,7 @@ export async function lineChartElements(lineChart, options = {}) {
                             'fill': annotationBackgroundColor
                         }
                     },
-                    {
+                    yLabel === '' ? null : {
                         'svg': 'text',
                         'attr': {
                             'font-family': chartFontFamily,
@@ -522,7 +522,7 @@ export async function lineChartElements(lineChart, options = {}) {
                 const labelWidth = 2 * annotationLabelMargin + xLabel.length * chartFontWidthRatio * annotationLabelFontSize;
                 const labelY = chartBottom - xAnnotationLabelOffsetY - annotationLabelHeight;
                 return [
-                    {
+                    xLabel === '' ? null : {
                         'svg': 'rect',
                         'attr': {
                             'x': svgValue(isLeft
@@ -534,7 +534,7 @@ export async function lineChartElements(lineChart, options = {}) {
                             'fill': annotationBackgroundColor
                         }
                     },
-                    {
+                    xLabel === '' ? null : {
                         'svg': 'text',
                         'attr': {
                             'font-family': chartFontFamily,
