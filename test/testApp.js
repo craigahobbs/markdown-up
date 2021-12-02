@@ -5,6 +5,7 @@
 
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
+import {UserTypeElements} from 'schema-markdown-doc/lib/userTypeElements.js';
 import test from 'ava';
 
 
@@ -186,14 +187,7 @@ test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM();
     const app = new MarkdownUp(window);
     app.updateParams('cmd.help=1');
-    const main = await app.main();
-    t.deepEqual(Object.keys(main).sort(), ['elements', 'title']);
-    t.is(main.title, null);
-    t.deepEqual(main.elements[0][0][0], {
-        'html': 'h1',
-        'attr': {'id': 'cmd.help=1&type_MarkdownUp'},
-        'elem': {'text': 'MarkdownUp'}
-    });
+    t.deepEqual(await app.main(), {'elements': new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType)});
 });
 
 
@@ -215,7 +209,6 @@ test('MarkdownUp.main', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                null,
                 null,
                 null,
                 [
@@ -261,7 +254,6 @@ test('MarkdownUp.main, url', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                null,
                 null,
                 {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md', 'style': 'display=none'}},
                 [
@@ -397,7 +389,6 @@ test('MarkdownUp.main, no title', async (t) => {
             'elements': [
                 null,
                 null,
-                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
@@ -427,7 +418,6 @@ test('MarkdownUp.main, menu', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
                 null,
                 {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
@@ -460,7 +450,6 @@ test('MarkdownUp.main, no menu', async (t) => {
             'title': null,
             'elements': [
                 null,
-                null,
                 {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
@@ -491,7 +480,6 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 null,
                 null,
@@ -526,7 +514,6 @@ test('MarkdownUp.main, markdown', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 null,
                 null,
