@@ -1,14 +1,24 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/schema-markdown-doc/blob/main/LICENSE
 
-import * as smd from '../schema-markdown/index.js';
+/** @module lib/app */
+
+import {encodeQueryString, typeModel as smdTypeModel, validateTypeModel} from '../../schema-markdown/index.js';
+import {ElementApplication} from '../../element-app/lib/app.js';
 import {UserTypeElements} from './userTypeElements.js';
-import {renderElements} from '../element-model/index.js';
 
 
 // The application's hash parameter type model
-const appHashTypes = (new smd.SchemaMarkdownParser(`\
-# The SchemaMarkdownDoc application hash parameters struct
+const schemaMarkdownDocHashTypes = `\
+#
+# This is the schema-markdown-doc application:
+#
+# [schema-markdown-doc](https://github.com/craigahobbs/schema-markdown-doc#readme)
+#
+# ## Hash Parameters
+#
+# The schema-markdown-doc application recognizes the following hash parameters:
+#
 struct SchemaMarkdownDoc
 
     # The resource URL
@@ -17,99 +27,49 @@ struct SchemaMarkdownDoc
     # The type name. If not provided, the index is displayed.
     optional string(len > 0) name
 
-    # Optional command
-    optional Command cmd
-
-# Application command union
-union Command
-
-    # Render the application's hash parameter documentation
-    int(== 1) help
-`).types);
+    # Display the application's hash parameter documentation
+    optional int(== 1) help
+`;
 
 
 /**
- * The SchemaMarkdownDoc application
+ * The SchemaMarkdownDoc application. The SchemaMarkdownDoc class extends the element-app
+ * [ElementApplication]{@link https://craigahobbs.github.io/element-app/module-lib_app.ElementApplication.html}
+ * class.
  *
- * @property {Object} window - The web browser window object
+ * @extends ElementApplication
  * @property {?string} defaultURL - The default resource URL
- * @property {Object} params - The validated hash parameters object
  */
-export class SchemaMarkdownDoc {
+export class SchemaMarkdownDoc extends ElementApplication {
     /**
      * Create an application instance
      *
      * @param {Object} window - The web browser window object
-     * @param {?string} defaultURL - The default resource URL
+     * @param {?string} [defaultURL = null] - The default resource URL
      */
-    constructor(window, defaultURL) {
-        this.window = window;
+    constructor(window, defaultURL = null) {
+        super(window, 'schema-markdown-doc', 'SchemaMarkdownDoc', schemaMarkdownDocHashTypes);
         this.defaultURL = defaultURL;
-        this.params = null;
     }
 
     /**
-     * Run the application
+     * The [Element Application main entry point]{@link
+     * https://craigahobbs.github.io/element-app/module-lib_app.ElementApplication.html#main}.
      *
-     * @param {Object} window - The web browser window object
-     * @param {?string} [defaultURL=null] - The default resource URL
-     * @returns {SchemaMarkdownDoc}
+     * @override
+     * @returns {Object} [MainResult]{@link https://craigahobbs.github.io/element-app/module-lib_app.html#~MainResult}
      */
-    static async run(window, defaultURL = null) {
-        const app = new SchemaMarkdownDoc(window, defaultURL);
-        await app.render();
-        window.addEventListener('hashchange', () => app.render(), false);
-        return app;
-    }
-
-    // Helper function to parse and validate the hash parameters
-    updateParams(paramStr = null) {
-        // Clear, then validate the hash parameters (may throw)
-        this.params = null;
-
-        // Decode the params string
-        const paramStrActual = paramStr !== null ? paramStr : this.window.location.hash.substring(1);
-        const params = smd.decodeQueryString(paramStrActual);
-
-        // Validate the params
-        this.params = smd.validateType(appHashTypes, 'SchemaMarkdownDoc', params);
-    }
-
-    // Render the application
-    async render() {
-        let result;
-        try {
-            // Validate hash parameters
-            const paramsPrev = this.params;
-            this.updateParams();
-
-            // Skip the render if the page params haven't changed
-            if (paramsPrev !== null && JSON.stringify(paramsPrev) === JSON.stringify(this.params)) {
-                return;
-            }
-
-            // Render the application elements
-            result = await this.main();
-        } catch ({message}) {
-            result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
-        }
-
-        // Render the application
-        this.window.document.title = 'title' in result ? result.title : 'SchemaMarkdownDoc';
-        renderElements(this.window.document.body, result.elements);
-    }
-
-    // Generate the application's element model
     async main() {
-        // Application command?
-        if ('cmd' in this.params) {
-            // 'help' in this.params.cmd
-            return {'elements': (new UserTypeElements(this.params)).getElements(appHashTypes, 'SchemaMarkdownDoc')};
+        // Help?
+        if ('help' in this.params) {
+            return {
+                'elements': new UserTypeElements(this.params).getElements(this.hashTypes, this.hashType)
+            };
         }
 
         // Load the type model JSON resource
         const url = 'url' in this.params ? this.params.url : this.defaultURL;
-        let {typeModel} = smd;
+        let typeModel = smdTypeModel;
         if (url !== null) {
             const response = await this.window.fetch(url);
             if (!response.ok) {
@@ -118,7 +78,7 @@ export class SchemaMarkdownDoc {
             }
 
             // Validate type model JSON
-            typeModel = smd.validateTypeModel(await response.json());
+            typeModel = validateTypeModel(await response.json());
         }
 
         // Type name specified?
@@ -170,7 +130,7 @@ export class SchemaMarkdownDoc {
                             'html': 'li',
                             'elem': {
                                 'html': 'a',
-                                'attr': {'href': `#${smd.encodeQueryString({...this.params, 'name': name})}`},
+                                'attr': {'href': `#${encodeQueryString({...this.params, 'name': name})}`},
                                 'elem': {'text': name}
                             }
                         })
@@ -190,7 +150,7 @@ export class SchemaMarkdownDoc {
                 'html': 'p',
                 'elem': {
                     'html': 'a',
-                    'attr': {'href': `#${smd.encodeQueryString(indexParams)}`},
+                    'attr': {'href': `#${encodeQueryString(indexParams)}`},
                     'elem': {'text': 'Back to documentation index'}
                 }
             },

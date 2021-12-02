@@ -1,15 +1,14 @@
 {
     "type": "module",
-    "name": "element-app",
-    "version": "1.0.2",
-    "description": "Lightweight, pure-JavaScript, client-rendered web applications",
+    "name": "schema-markdown-doc",
+    "version": "1.1.0",
+    "description": "Schema Markdown type model documentation application",
     "keywords": [
-        "lightweight",
-        "client-rendered",
-        "web application framework"
+        "schema",
+        "documentation"
     ],
-    "homepage": "https://github.com/craigahobbs/element-app#readme",
-    "bugs": "https://github.com/craigahobbs/element-app/issues",
+    "homepage": "https://github.com/craigahobbs/schema-markdown-doc#readme",
+    "bugs": "https://github.com/craigahobbs/schema-markdown-doc/issues",
     "license": "MIT",
     "author": {
         "name": "Craig A. Hobbs",
@@ -17,13 +16,15 @@
         "url": "https://github.com/craigahobbs"
     },
     "files": [
-        "lib/**/*"
+        "lib/**/*",
+        "static/schema-markdown-doc.css"
     ],
     "scripts": {
         "test": "ava -v test/"
     },
     "dependencies": {
-        "element-model": "~1.0",
+        "element-app": "~1.0",
+        "markdown-model": "~1.1",
         "schema-markdown": "~1.0"
     },
     "devDependencies": {

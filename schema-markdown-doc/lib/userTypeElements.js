@@ -1,8 +1,10 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/schema-markdown-doc/blob/main/LICENSE
 
-import {encodeQueryString, getEnumValues, getReferencedTypes, getStructMembers} from '../schema-markdown/index.js';
-import {markdownElements, parseMarkdown} from '../markdown-model/index.js';
+/** @module lib/userTypeElements */
+
+import {encodeQueryString, getEnumValues, getReferencedTypes, getStructMembers} from '../../schema-markdown/index.js';
+import {markdownElements, parseMarkdown} from '../../markdown-model/index.js';
 
 
 // Non-breaking space character

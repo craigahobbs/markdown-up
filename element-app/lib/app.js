@@ -4,8 +4,7 @@
 /** @module lib/app */
 
 import {SchemaMarkdownParser, decodeQueryString, encodeQueryString, validateType} from '../../schema-markdown/index.js';
-import {UserTypeElements} from '../../schema-markdown-doc/index.js';
-import {renderElements} from '../../element-model/index.js';
+import {renderElements, validateElements} from '../../element-model/index.js';
 
 
 /**
@@ -66,6 +65,12 @@ export class ElementApplication {
 
             // Render the application elements
             result = await this.main();
+
+            // Validate the elements
+            if (!('elements' in result)) {
+                throw new Error('No elements');
+            }
+            validateElements(result.elements);
         } catch ({message}) {
             result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
             isError = true;
@@ -84,10 +89,7 @@ export class ElementApplication {
         this.preRender();
 
         // Render the element model
-        renderElements(
-            this.window.document.body,
-            'elements' in result ? result.elements : {'html': 'p', 'elem': {'text': 'No elements'}}
-        );
+        renderElements(this.window.document.body, result.elements);
 
         // If there is a URL hash ID, re-navigate to go there since it was just rendered. After the
         // first render, re-render is short-circuited by the unchanged hash param check above.
@@ -139,15 +141,6 @@ export class ElementApplication {
     // eslint-disable-next-line class-methods-use-this
     preRender() {
         // Default implementation does nothing
-    }
-
-    /**
-     * Get the hash parameter schema documentation element model
-     *
-     * @returns {Object} The hash parameter schema documentation element model
-     */
-    helpElements() {
-        return (new UserTypeElements(this.params)).getElements(this.hashTypes, this.hashType);
     }
 }
 
