@@ -1,3 +1,7 @@
+## 1.3.2 (2021-12-02)
+
+- [0a632f6](https://github.com/craigahobbs/markdown-up/commit/0a632f6) - schema-markdown-doc 1.1
+
 ## 1.3.1 (2021-12-01)
 
 - [2b2a7f7](https://github.com/craigahobbs/markdown-up/commit/2b2a7f7) - updates from javascript-template
