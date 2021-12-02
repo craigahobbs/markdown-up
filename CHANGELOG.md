@@ -1,3 +1,7 @@
+## 1.3.1 (2021-12-01)
+
+- [2b2a7f7](https://github.com/craigahobbs/markdown-up/commit/2b2a7f7) - updates from javascript-template
+
 ## 1.3.0 (2021-12-01)
 
 - [1231306](https://github.com/craigahobbs/markdown-up/commit/1231306) - use element-app
