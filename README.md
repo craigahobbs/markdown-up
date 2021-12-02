@@ -50,8 +50,9 @@ To view local Markdown files using markdown-up, try the
 
 ## Development
 
-This project is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme). It was started
-using [javascript-template](https://github.com/craigahobbs/javascript-template#readme) as follows:
+markdown-up is an [Element Application](https://github.com/craigahobbs/element-app#readme).
+It is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
+and it was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme):
 
 ```
 template-specialize javascript-template/template/ markdown-up/ -k package markdown-up -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs'
