@@ -6,9 +6,9 @@
 import {validateBarChart, validateDataTable, validateLineChart} from './model.js';
 import {barChartElements} from './barChart.js';
 import {dataTableElements} from './dataTable.js';
-import {decodeQueryString} from '../../../schema-markdown/lib/encode.js';
+import {decodeQueryString} from '../../schema-markdown/lib/encode.js';
 import {lineChartElements} from './lineChart.js';
-import {renderElements} from '../../../element-model/lib/elementModel.js';
+import {renderElements} from '../../element-model/lib/elementModel.js';
 
 
 /**

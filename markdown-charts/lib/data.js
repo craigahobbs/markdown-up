@@ -4,7 +4,7 @@
 /** @module lib/data */
 
 import {compareValues, getFieldValue} from './util.js';
-import {getBaseURL, isRelativeURL} from '../../../markdown-model/lib/elements.js';
+import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
 
 
 /**

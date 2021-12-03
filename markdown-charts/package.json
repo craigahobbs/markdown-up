@@ -1,0 +1,35 @@
+{
+    "type": "module",
+    "name": "markdown-charts",
+    "version": "0.9.0",
+    "description": "markdown-charts",
+    "keywords": [
+        "markdown-charts"
+    ],
+    "homepage": "https://github.com/craigahobbs/markdown-charts#readme",
+    "bugs": "https://github.com/craigahobbs/markdown-charts/issues",
+    "license": "MIT",
+    "author": {
+        "name": "Craig A. Hobbs",
+        "email": "craigahobbs@gmail.com",
+        "url": "https://github.com/craigahobbs"
+    },
+    "files": [
+        "lib/**/*"
+    ],
+    "scripts": {
+        "test": "ava -v test/"
+    },
+    "dependencies": {
+        "element-model": "~1.1",
+        "markdown-model": "~1.3",
+        "schema-markdown": "~1.1"
+    },
+    "devDependencies": {
+        "ava": "^4.0.0-rc.1",
+        "c8": "~7.10",
+        "eslint": "~8.3",
+        "jsdoc": "~3.6",
+        "jsdom": "~18.1"
+    }
+}

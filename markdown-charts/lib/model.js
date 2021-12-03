@@ -3,8 +3,8 @@
 
 /** @module lib/model */
 
-import {SchemaMarkdownParser} from '../../../schema-markdown/lib/parser.js';
-import {validateType} from '../../../schema-markdown/lib/schema.js';
+import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**
