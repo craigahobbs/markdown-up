@@ -3,6 +3,7 @@
 
 /* eslint-disable id-length */
 
+import {ElementApplication} from 'element-app/lib/app.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {UserTypeElements} from 'schema-markdown-doc/lib/userTypeElements.js';
@@ -187,7 +188,12 @@ test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM();
     const app = new MarkdownUp(window);
     app.updateParams('cmd.help=1');
-    t.deepEqual(await app.main(), {'elements': new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType)});
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'elements': new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType)
+        }
+    );
 });
 
 
@@ -205,7 +211,7 @@ test('MarkdownUp.main', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': 'Hello',
             'elements': [
@@ -250,7 +256,7 @@ test('MarkdownUp.main, url', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('url=sub%2Fother.md');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': 'Hello',
             'elements': [
@@ -383,7 +389,7 @@ test('MarkdownUp.main, no title', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': null,
             'elements': [
@@ -414,7 +420,7 @@ test('MarkdownUp.main, menu', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('menu=1');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': null,
             'elements': [
@@ -445,7 +451,7 @@ test('MarkdownUp.main, no menu', async (t) => {
     const app = new MarkdownUp(window, {'menu': false});
     app.updateParams('menu=1');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': null,
             'elements': [
@@ -476,7 +482,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('menu=1&fontSize=18&cmd.markdown=1');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': null,
             'elements': [
@@ -510,7 +516,7 @@ test('MarkdownUp.main, markdown', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('cmd.markdown=1');
     t.deepEqual(
-        await app.main(),
+        ElementApplication.validateMain(await app.main()),
         {
             'title': null,
             'elements': [
