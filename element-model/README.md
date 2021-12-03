@@ -42,7 +42,7 @@ const elements = [
 ```
 
 An element model is rendered to the web browser using the
-[renderElement](https://craigahobbs.github.io/element-model/global.html#renderElements)
+[renderElement](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
 function.
 
 ``` javascript
@@ -53,7 +53,7 @@ renderElements(document.body, elements);
 
 If the element model comes from an un-trusted source, you'll want to verify it before rendering
 using the
-[validateElements](https://craigahobbs.github.io/element-model/global.html#validateElements)
+[validateElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.validateElements)
 function.
 
 ``` javascript

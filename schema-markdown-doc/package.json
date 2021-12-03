@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown-doc",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Schema Markdown type model documentation application",
     "keywords": [
         "schema",

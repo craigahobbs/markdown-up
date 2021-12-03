@@ -11,7 +11,7 @@ functionality is the
 an abstract model of a Markdown document.
 
 To parse a Markdown document and produce a Markdown model, use the
-[parseMarkdown](https://craigahobbs.github.io/markdown-model/global.html#parseMarkdown)
+[parseMarkdown](https://craigahobbs.github.io/markdown-model/module-lib_parser.html#.parseMarkdown)
 function:
 
 ``` javascript
@@ -21,9 +21,9 @@ const markdownModel = parseMarkdown(markdownText);
 ```
 
 To render the Markdown model in a web browser, use the
-[markdownElements](https://craigahobbs.github.io/markdown-model/global.html#markdownElements)
+[markdownElements](https://craigahobbs.github.io/markdown-model/module-lib_elements.html#.markdownElements)
 component function with the
-[renderElements](https://craigahobbs.github.io/element-model/global.html#renderElements)
+[renderElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
 function from the
 [element-model](https://www.npmjs.com/package/element-model)
 package:
@@ -37,7 +37,7 @@ renderElements(document.body, markdownElements(markdownModel));
 ```
 
 You can compute the title of a Markdown document from the Markdown model using the
-[getMarkdownTitle](https://craigahobbs.github.io/markdown-model/global.html#getMarkdownTitle)
+[getMarkdownTitle](https://craigahobbs.github.io/markdown-model/module-lib_markdownModel.html#.getMarkdownTitle)
 function:
 
 ``` javascript
@@ -47,7 +47,7 @@ const markdownTitle = getMarkdownTitle(markdownModel);
 ```
 
 The
-[validateMarkdownModel](https://craigahobbs.github.io/markdown-model/global.html#validateMarkdownModel)
+[validateMarkdownModel](https://craigahobbs.github.io/markdown-model/module-lib_markdownModel.html#.validateMarkdownModel)
 function is used to validate Markdown models from untrusted sources or for testing the validity of any code that produces a Markdown model:
 
 ``` javascript

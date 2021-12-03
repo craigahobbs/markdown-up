@@ -59,9 +59,9 @@ application stub. For example:
 ## The Schema Markdown Documentation Component
 
 The schema-markdown-doc package contains the
-[UserTypeElements](https://craigahobbs.github.io/schema-markdown-doc/doc/UserTypeElements.html)
+[UserTypeElements](https://craigahobbs.github.io/schema-markdown-doc/doc/module-lib_userTypeElements.UserTypeElements.html)
 component class for use with the
-[renderElements](https://craigahobbs.github.io/element-model/global.html#renderElements)
+[renderElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
 function from the
 [element-model](https://www.npmjs.com/package/element-model)
 package. For example:
