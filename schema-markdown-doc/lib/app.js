@@ -3,9 +3,11 @@
 
 /** @module lib/app */
 
-import {encodeQueryString, typeModel as smdTypeModel, validateTypeModel} from '../../schema-markdown/index.js';
 import {ElementApplication} from '../../element-app/lib/app.js';
 import {UserTypeElements} from './userTypeElements.js';
+import {encodeQueryString} from '../../schema-markdown/lib/encode.js';
+import {typeModel as smdTypeModel} from '../../schema-markdown/lib/typeModel.js';
+import {validateTypeModel} from '../../schema-markdown/lib/schema.js';
 
 
 // The application's hash parameter type model

@@ -256,9 +256,9 @@ function validateTypeModelType(errors, types, type, attr, typeName, memberName) 
     // Helper function to push an error tuple
     const error = (message) => {
         if (memberName !== null) {
-            errors.push([typeName, memberName, `${message} from '../${typeName}' member '${memberName}'`]);
+            errors.push([typeName, memberName, `${message} from '../../${typeName}' member '${memberName}'`]);
         } else {
-            errors.push([typeName, null, `${message} from '../${typeName}'`]);
+            errors.push([typeName, null, `${message} from '../../${typeName}'`]);
         }
     };
 

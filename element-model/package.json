@@ -1,15 +1,16 @@
 {
     "type": "module",
-    "name": "element-app",
+    "name": "element-model",
     "version": "1.1.0",
-    "description": "Lightweight, pure-JavaScript, client-rendered web applications",
+    "description": "HTML and SVG element object model and renderer for the browser",
     "keywords": [
-        "lightweight",
-        "client-rendered",
-        "web application framework"
+        "html",
+        "svg",
+        "element",
+        "render"
     ],
-    "homepage": "https://github.com/craigahobbs/element-app#readme",
-    "bugs": "https://github.com/craigahobbs/element-app/issues",
+    "homepage": "https://github.com/craigahobbs/element-model#readme",
+    "bugs": "https://github.com/craigahobbs/element-model/issues",
     "license": "MIT",
     "author": {
         "name": "Craig A. Hobbs",
@@ -21,10 +22,6 @@
     ],
     "scripts": {
         "test": "ava -v test/"
-    },
-    "dependencies": {
-        "element-model": "~1.1",
-        "schema-markdown": "~1.1"
     },
     "devDependencies": {
         "ava": "^4.0.0-rc.1",

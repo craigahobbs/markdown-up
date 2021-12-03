@@ -3,15 +3,17 @@
 
 /** @module lib/app */
 
-import {SchemaMarkdownParser, decodeQueryString, encodeQueryString, validateType} from '../../schema-markdown/index.js';
-import {renderElements, validateElements} from '../../element-model/index.js';
+import {decodeQueryString, encodeQueryString} from '../../schema-markdown/lib/encode.js';
+import {renderElements, validateElements} from '../../element-model/lib/elementModel.js';
+import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**
  * The Element Model Application base class
  *
  * @property {Object} window - The web browser window object
- * @property {string} title - The default application title
+ * @property {?string} title - The default application title
  * @property {string} hashType - The application hash parameters' schema type name (in "hashTypes")
  * @property {Object} hashTypes - The application hash parameters' Schema Markdown type model
  * @property {Object} params - The validated hash parameters object
@@ -21,7 +23,7 @@ export class ElementApplication {
      * Create an application instance
      *
      * @param {Object} window - The web browser window object
-     * @param {string} title - The default application title
+     * @param {?string} title - The default application title
      * @param {string} hashType - The application hash parameters' schema type name (in "hashTypes")
      * @param {Object} hashTypes - The application hash parameters' Schema Markdown type model
      */
@@ -67,10 +69,9 @@ export class ElementApplication {
             result = await this.main();
 
             // Validate the elements
-            if (!('elements' in result)) {
-                throw new Error('No elements');
+            if ('elements' in result) {
+                validateElements(result.elements);
             }
-            validateElements(result.elements);
         } catch ({message}) {
             result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
             isError = true;
@@ -83,13 +84,19 @@ export class ElementApplication {
         }
 
         // Set the window title
-        this.window.document.title = 'title' in result && result.title !== null ? result.title : this.title;
+        const title = 'title' in result && result.title !== null ? result.title : this.title;
+        if (title !== null) {
+            this.window.document.title = title;
+        }
 
         // On-render notification
         this.preRender();
 
         // Render the element model
-        renderElements(this.window.document.body, result.elements);
+        renderElements(
+            this.window.document.body,
+            'elements' in result ? result.elements : {'html': 'p', 'elem': {'text': 'No elements'}}
+        );
 
         // If there is a URL hash ID, re-navigate to go there since it was just rendered. After the
         // first render, re-render is short-circuited by the unchanged hash param check above.

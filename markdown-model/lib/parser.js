@@ -1,6 +1,8 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
+/** @module lib/parser */
+
 
 /**
  * Encode a string for inclusion in Markdown text

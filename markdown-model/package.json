@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-model",
-    "version": "1.1.16",
+    "version": "1.3.0",
     "description": "Markdown object model, parser, and renderer",
     "keywords": [
         "markdown",
@@ -17,22 +17,21 @@
         "url": "https://github.com/craigahobbs"
     },
     "files": [
-        "index.js",
-        "src/markdown-model/**/*",
+        "lib/**/*",
         "static/markdown-model.css"
     ],
     "scripts": {
-        "test": "ava -v 'src/tests/**/*.js'"
+        "test": "ava -v test/"
     },
     "dependencies": {
-        "schema-markdown": "~1.0"
+        "schema-markdown": "~1.1"
     },
     "devDependencies": {
-        "ava": "^4.0.0-alpha.2",
+        "ava": "^4.0.0-rc.1",
         "c8": "~7.10",
-        "element-model": "~1.0",
-        "eslint": "~8.0",
+        "element-model": "~1.1",
+        "eslint": "~8.3",
         "jsdoc": "~3.6",
-        "jsdom": "~18.0"
+        "jsdom": "~18.1"
     }
 }

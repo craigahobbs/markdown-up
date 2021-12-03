@@ -59,8 +59,8 @@ validateMarkdownModel(markdownModel);
 
 ## Development
 
-This project is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme). It was started
-using [javascript-template](https://github.com/craigahobbs/javascript-template#readme) as follows:
+markdown-model is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
+and it was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme):
 
 ```
 template-specialize javascript-template/template/ markdown-model/ -k package markdown-model -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs' -k noapp 1

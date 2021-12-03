@@ -1,7 +1,10 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
-import {SchemaMarkdownParser, validateType} from '../schema-markdown/index.js';
+/** @module lib/markdownModel */
+
+import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**

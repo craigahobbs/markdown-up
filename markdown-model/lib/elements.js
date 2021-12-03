@@ -1,6 +1,8 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
+/** @module lib/elements */
+
 import {getMarkdownParagraphText} from './markdownModel.js';
 
 
@@ -10,7 +12,7 @@ import {getMarkdownParagraphText} from './markdownModel.js';
  * @param {Object} markdown - The markdown model
  * @param {Object} [options.codeBlocks] - Optional map of code block language to render function with signature
  *     (language, lines) => elements.
- * @param {string} [options.hashPrefix] - Optional hash link prefix
+ * @param {string} [options.hashFn] - Optional hash URL modifier function
  * @param {boolean} [options.headerIds] - If true, generate header IDs
  * @param {string} [options.url] - Optional markdown file URL
  * @returns {Array}
@@ -55,8 +57,8 @@ function markdownPartElements(parts, options) {
                     options.usedHeaderIds.add(headerId);
 
                     // Hash prefix fixup?
-                    if ('hashPrefix' in options && options.hashPrefix !== null && options.hashPrefix !== '') {
-                        headerId = `${options.hashPrefix}&${headerId}`;
+                    if ('hashFn' in options) {
+                        headerId = options.hashFn(`#${headerId}`).slice(1);
                     }
                 }
 
@@ -107,15 +109,6 @@ function markdownPartElements(parts, options) {
 }
 
 
-// Helper function to split hash params
-function splitHashParams(paramStr) {
-    return paramStr.split('&').map((part) => {
-        const ixEqual = part.indexOf('=');
-        return ixEqual === -1 ? [part, null] : [part.slice(0, ixEqual), part.slice(ixEqual + 1)];
-    });
-}
-
-
 // Helper function to generate an element model from a markdown span model array
 function paragraphSpanElements(spans, options) {
     const spanElements = [];
@@ -143,22 +136,12 @@ function paragraphSpanElements(spans, options) {
 
             // Hash-only link?
             if (href.startsWith('#')) {
-                if ('hashPrefix' in options && options.hashPrefix !== null && options.hashPrefix !== '') {
-                    // Merge the hashPrefix and hash params
-                    const paramsPrefix = splitHashParams(options.hashPrefix).filter(([, value]) => value !== null);
-                    const paramsHref = splitHashParams(href.slice(1)).filter(([, value]) => value !== null);
-                    const params = {...Object.fromEntries(paramsPrefix), ...Object.fromEntries(paramsHref)};
-                    const paramStr = Object.entries(params).map(([key, value]) => `${key}=${value}`).sort().join('&');
-
-                    // Get the last href anchor, if any
-                    const anchors = splitHashParams(href.slice(1)).filter(([, value]) => value === null).slice(-1);
-                    const anchorStr = anchors.map(([anchor]) => anchor).join('&');
-
-                    href = `#${paramStr}${paramStr.length !== 0 && anchorStr.length !== 0 ? '&' : ''}${anchorStr}`;
+                if ('hashFn' in options) {
+                    href = options.hashFn(href);
                 }
 
             // Relative link fixup?
-            } else if ('url' in options && options.url !== null && isRelativeURL(href)) {
+            } else if ('url' in options && isRelativeURL(href)) {
                 href = `${getBaseURL(options.url)}${href}`;
             }
 
@@ -178,7 +161,7 @@ function paragraphSpanElements(spans, options) {
             let {src} = image;
 
             // Relative link fixup?
-            if ('url' in options && options.url !== null && isRelativeURL(src)) {
+            if ('url' in options && isRelativeURL(src)) {
                 src = `${getBaseURL(options.url)}${src}`;
             }
 

@@ -3,8 +3,10 @@
 
 /** @module lib/userTypeElements */
 
-import {encodeQueryString, getEnumValues, getReferencedTypes, getStructMembers} from '../../schema-markdown/index.js';
-import {markdownElements, parseMarkdown} from '../../markdown-model/index.js';
+import {getEnumValues, getReferencedTypes, getStructMembers} from '../../schema-markdown/lib/schema.js';
+import {encodeQueryString} from '../../schema-markdown/lib/encode.js';
+import {markdownElements} from '../../markdown-model/lib/elements.js';
+import {parseMarkdown} from '../../markdown-model/lib/parser.js';
 
 
 // Non-breaking space character
