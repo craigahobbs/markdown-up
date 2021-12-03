@@ -55,10 +55,10 @@ app: build/npm.build
 		static/* \
 		lib \
 		node_modules/element-app \
-		node_modules/element-model/src/element-model \
-		node_modules/markdown-model/src/markdown-model \
+		node_modules/element-model \
+		node_modules/markdown-model \
 		node_modules/markdown-model/static/markdown-model.css \
-		node_modules/schema-markdown/src/schema-markdown \
+		node_modules/schema-markdown \
 		node_modules/schema-markdown-doc \
 		node_modules/schema-markdown-doc/static/schema-markdown-doc.css \
 		build/app/
