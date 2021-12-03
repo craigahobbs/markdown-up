@@ -21,6 +21,7 @@ function throwValueError(message, value) {
  *
  * @param {?(Object|Array)} elements - The element model.
  *     An element model is either null, an element object, or an array of any of these.
+ * @returns {?(Object|Array)} The element model (unchanged)
  * @throws {Error} Validation error string
  */
 export function validateElements(elements) {
@@ -93,6 +94,8 @@ export function validateElements(elements) {
             throwValueError('Invalid element callback function', elements.callback);
         }
     }
+
+    return elements;
 }
 
 

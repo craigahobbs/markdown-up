@@ -9,6 +9,15 @@ import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
 import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
+// Schema to validate Element Application main results
+const elementApplicationTypes = new SchemaMarkdownParser(`\
+struct ElementApplicationMain
+    optional object(nullable) elements
+    optional string(nullable) title
+    optional string(nullable) location
+`).types;
+
+
 /**
  * The Element Model Application base class
  *
@@ -65,13 +74,8 @@ export class ElementApplication {
                 return;
             }
 
-            // Render the application elements
-            result = await this.main();
-
-            // Validate the elements
-            if ('elements' in result) {
-                validateElements(result.elements);
-            }
+            // Call the application main and validate the result
+            result = ElementApplication.validateMain(await this.main());
         } catch ({message}) {
             result = {'elements': {'html': 'p', 'elem': {'text': `Error: ${message}`}}};
             isError = true;
@@ -123,10 +127,27 @@ export class ElementApplication {
 
     /**
      * @typedef MainResult
-     * @property {string} elements - The application's element model
-     * @property {string} [location] - The URL to navigate to
-     * @property {string} [title] - The window title
+     * @property {?string} [elements] - The application's element model
+     * @property {?string} [location] - The URL to navigate to
+     * @property {?string} [title] - The window title
      */
+
+    /**
+     * Validate a main result object
+     *
+     * @param {module:lib/app~MainResult} result
+     */
+    static validateMain(result) {
+        // Validate to the main result schema
+        validateType(elementApplicationTypes, 'ElementApplicationMain', result);
+
+        // Validate the elements
+        if ('elements' in result) {
+            validateElements(result.elements);
+        }
+
+        return result;
+    }
 
     /**
      * Override-able application main entry point. The default implementation renders nothing.

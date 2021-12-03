@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "element-app",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Lightweight, pure-JavaScript, client-rendered web applications",
     "keywords": [
         "lightweight",
