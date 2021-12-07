@@ -52,9 +52,13 @@ export async function dataTableElements(dataTable, options = {}) {
                         if (!(linkText.field in types)) {
                             throw new Error(`Unknown "${link.name}" link field "${linkText.field}"`);
                         }
-                        return linkText.field in row ? row[linkText.field] : null;
+                        const value = linkText.field in row ? row[linkText.field] : null;
+                        return value !== null ? formatValue(value, dataTable) : null;
                     }
                     const value = getFieldValue(variables, linkText, null, null);
+                    if (value === null) {
+                        return null;
+                    }
                     const valueText = formatValue(value, dataTable);
                     const valueVarText = formatVariables(dataTable, row, valueText, false);
                     return formatVariables(dataTable, variables, valueVarText);
