@@ -109,7 +109,7 @@ export function getFieldValue(variables, fieldValue, matchType, matchDesc) {
     }
 
     // Validate the value
-    if (value !== null && type !== null && type !== matchType) {
+    if (value !== null && type !== null && matchType !== null && type !== matchType) {
         throw new Error(`Invalid ${matchDesc} ${JSON.stringify(value)} (type "${type}"), expected type "${matchType}"`);
     }
 

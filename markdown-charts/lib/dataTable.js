@@ -3,7 +3,7 @@
 
 /** @module lib/dataTable */
 
-import {compareValues, formatValue, formatVariables} from './util.js';
+import {compareValues, formatValue, formatVariables, getFieldValue} from './util.js';
 import {loadChartData} from './data.js';
 
 
@@ -48,14 +48,16 @@ export async function dataTableElements(dataTable, options = {}) {
                 // Compute the link field element models
                 const linkElements = {};
                 const getLinkText = (link, linkText) => {
-                    if ('string' in linkText) {
-                        const textRow = formatVariables(dataTable, row, linkText.string, false);
-                        return formatVariables(dataTable, variables, textRow);
+                    if ('field' in linkText) {
+                        if (!(linkText.field in types)) {
+                            throw new Error(`Unknown link "${link.name}" field "${linkText.field}"`);
+                        }
+                        return linkText.field in row ? row[linkText.field] : null;
                     }
-                    if (!(linkText.field in types)) {
-                        throw new Error(`Unknown link "${link.name}" field "${linkText.field}"`);
-                    }
-                    return row[linkText.field];
+                    const value = getFieldValue(variables, linkText, null, null);
+                    const valueText = formatValue(value, dataTable);
+                    const valueVarText = formatVariables(dataTable, row, valueText, false);
+                    return formatVariables(dataTable, variables, valueVarText);
                 };
                 if ('links' in dataTable) {
                     for (const link of dataTable.links) {
@@ -64,11 +66,15 @@ export async function dataTableElements(dataTable, options = {}) {
                             throw new Error(`Duplicate link name "${link.name}"`);
                         }
                         row[link.name] = linkText;
-                        linkElements[link.name] = {
-                            'html': 'a',
-                            'attr': {'href': getLinkText(link, link.url)},
-                            'elem': {'text': linkText}
-                        };
+                        if ('url' in link) {
+                            linkElements[link.name] = {
+                                'html': 'a',
+                                'attr': {'href': getLinkText(link, link.url)},
+                                'elem': {'text': linkText}
+                            };
+                        } else {
+                            linkElements[link.name] = {'text': linkText};
+                        }
                     }
                 }
 

@@ -148,14 +148,11 @@ struct Link
     LinkText text
 
     # The link URL
-    LinkText url
+    optional LinkText url
 
 
 # A link text specification
-union LinkText
-
-    # A row-field-formatted string
-    string string
+union LinkText (FieldValueEx)
 
     # A row field value
     string field
