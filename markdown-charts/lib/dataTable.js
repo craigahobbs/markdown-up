@@ -50,7 +50,7 @@ export async function dataTableElements(dataTable, options = {}) {
                 const getLinkText = (link, linkText) => {
                     if ('field' in linkText) {
                         if (!(linkText.field in types)) {
-                            throw new Error(`Unknown link "${link.name}" field "${linkText.field}"`);
+                            throw new Error(`Unknown "${link.name}" link field "${linkText.field}"`);
                         }
                         return linkText.field in row ? row[linkText.field] : null;
                     }
@@ -61,19 +61,28 @@ export async function dataTableElements(dataTable, options = {}) {
                 };
                 if ('links' in dataTable) {
                     for (const link of dataTable.links) {
-                        const linkText = getLinkText(link, link.text);
                         if (link.name in types) {
                             throw new Error(`Duplicate link name "${link.name}"`);
                         }
-                        row[link.name] = linkText;
-                        if ('url' in link) {
-                            linkElements[link.name] = {
-                                'html': 'a',
-                                'attr': {'href': getLinkText(link, link.url)},
-                                'elem': {'text': linkText}
-                            };
+                        const linkText = getLinkText(link, link.text);
+                        if (linkText === null) {
+                            linkElements[link.name] = null;
                         } else {
-                            linkElements[link.name] = {'text': linkText};
+                            row[link.name] = linkText;
+                            if (!('url' in link)) {
+                                linkElements[link.name] = {'text': linkText};
+                            } else {
+                                const urlText = getLinkText(link, link.url);
+                                if (urlText === null) {
+                                    linkElements[link.name] = null;
+                                } else {
+                                    linkElements[link.name] = {
+                                        'html': 'a',
+                                        'attr': {'href': urlText},
+                                        'elem': {'text': linkText}
+                                    };
+                                }
+                            }
                         }
                     }
                 }
