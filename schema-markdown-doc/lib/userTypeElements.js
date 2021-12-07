@@ -38,6 +38,9 @@ export class UserTypeElements {
      */
     getElements(types, typeName, actionUrls = null) {
         // Compute the referenced types
+        if (!(typeName in types)) {
+            throw new Error(`Unknown type '${typeName}'`);
+        }
         const userType = types[typeName];
         const action = 'action' in userType ? userType.action : null;
         const referencedTypes = getReferencedTypes(types, typeName);
