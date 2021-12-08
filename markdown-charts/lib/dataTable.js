@@ -60,7 +60,7 @@ export async function dataTableElements(dataTable, options = {}) {
                         return null;
                     }
                     const valueText = formatValue(value, dataTable);
-                    const valueVarText = formatVariables(dataTable, row, valueText, false);
+                    const valueVarText = formatVariables(dataTable, row, valueText, false, false);
                     return formatVariables(dataTable, variables, valueVarText);
                 };
                 if ('links' in dataTable) {

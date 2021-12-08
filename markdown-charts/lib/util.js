@@ -52,7 +52,7 @@ export const categoricalColors = [
 
 
 // Helper function to replace variable tokens (e.g. "{{name}}") in a string
-export function formatVariables(chart, variables, text, fieldValues = true) {
+export function formatVariables(chart, variables, text, fieldValues = true, missingNull = true) {
     return text.replace(rVariable, (match, variable) => {
         if (variable in variables) {
             let value;
@@ -64,7 +64,7 @@ export function formatVariables(chart, variables, text, fieldValues = true) {
             }
             return formatValue(value, chart);
         }
-        return match;
+        return missingNull ? null : match;
     });
 }
 

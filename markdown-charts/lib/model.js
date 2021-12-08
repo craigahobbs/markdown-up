@@ -226,13 +226,13 @@ struct AxisTicks
 union FieldValue
 
     # A datetime value
-    datetime datetime
+    datetime(nullable) datetime
 
     # A number value
-    float number
+    float(nullable) number
 
     # A string value
-    string string
+    string(nullable) string
 
     # A live-computed value
     LiveValue live
