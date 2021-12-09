@@ -49,6 +49,7 @@ app: build/npm.build
 		lib \
 		node_modules/element-app \
 		node_modules/element-model \
+		node_modules/markdown-charts \
 		node_modules/markdown-model \
 		node_modules/markdown-model/static/markdown-model.css \
 		node_modules/schema-markdown \

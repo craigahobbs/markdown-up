@@ -7,6 +7,7 @@ import {ElementApplication} from 'element-app/lib/app.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {UserTypeElements} from 'schema-markdown-doc/lib/userTypeElements.js';
+import {chartModel} from 'markdown-charts/lib/model.js';
 import test from 'ava';
 
 
@@ -43,7 +44,7 @@ function menuElements({
     fontSizeURL = '#fontSize=14&menu=1',
     lineHeightURL = '#lineHeight=1.4&menu=1',
     markdownURL = '#cmd.markdown=1&menu=1',
-    helpURL = '#cmd.help=1&menu=1'
+    helpURL = '#cmd.help=Help&menu=1'
 } = {}) {
     return {
         'html': 'div',
@@ -158,24 +159,24 @@ test('MarkdownUp.preRender', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#cmd.help=1';
+    window.location.hash = '#cmd.help=Help';
     const app = new MarkdownUp(window);
     await app.render();
     t.is(window.document.title, 'markdown-up');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=Help&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
-    window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
+    window.location.hash = '#cmd.help=Help&fontSize=14&lineHeight=1.4';
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render();
     t.is(window.document.title, 'markdown-up');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=Help&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '14pt'],
@@ -187,11 +188,18 @@ test('MarkdownUp.preRender', async (t) => {
 test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM();
     const app = new MarkdownUp(window);
-    app.updateParams('cmd.help=1');
+    app.updateParams('cmd.help=Help');
     t.deepEqual(
         ElementApplication.validateMain(await app.main()),
         {
-            'elements': new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType)
+            'title': null,
+            'elements': [
+                new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType),
+                null,
+                null,
+                menuBurgerElements({'menuURL': '#cmd.help=Help&menu=1'}),
+                null
+            ]
         }
     );
 });
@@ -494,7 +502,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
                     'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
                     'lineHeightURL': '#cmd.markdown=1&fontSize=18&lineHeight=1.4&menu=1',
                     'markdownURL': '#fontSize=18&menu=1',
-                    'helpURL': '#cmd.help=1&fontSize=18&menu=1'
+                    'helpURL': '#cmd.help=Help&fontSize=18&menu=1'
                 })
             ]
         }
@@ -524,6 +532,193 @@ test('MarkdownUp.main, markdown', async (t) => {
                 null,
                 null,
                 menuBurgerElements({'menuURL': '#cmd.markdown=1&menu=1'}),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, help', async (t) => {
+    const {window} = new JSDOM();
+    const app = new MarkdownUp(window);
+
+    app.updateParams('cmd.help=Bar');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': null,
+            'elements': [
+                new UserTypeElements(app.params).getElements(chartModel.types, `BarChart`),
+                null,
+                null,
+                menuBurgerElements({'menuURL': '#cmd.help=Bar&menu=1'}),
+                null
+            ]
+        }
+    );
+
+    app.updateParams('cmd.help=Line');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': null,
+            'elements': [
+                new UserTypeElements(app.params).getElements(chartModel.types, `LineChart`),
+                null,
+                null,
+                menuBurgerElements({'menuURL': '#cmd.help=Line&menu=1'}),
+                null
+            ]
+        }
+    );
+
+    app.updateParams('cmd.help=Table');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': null,
+            'elements': [
+                new UserTypeElements(app.params).getElements(chartModel.types, `DataTable`),
+                null,
+                null,
+                menuBurgerElements({'menuURL': '#cmd.help=Table&menu=1'}),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, bar chart', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# Bar Chart
+
+~~~ bar-chart
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'Bar Chart',
+            'elements': [
+                null,
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'bar-chart'}, 'elem': [{'text': 'Bar Chart'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                menuBurgerElements(),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, line chart', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# Line Chart
+
+~~~ line-chart
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'Line Chart',
+            'elements': [
+                null,
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'line-chart'}, 'elem': [{'text': 'Line Chart'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                menuBurgerElements(),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, data table', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# Data Table
+
+~~~ data-table
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'Data Table',
+            'elements': [
+                null,
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'data-table'}, 'elem': [{'text': 'Data Table'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                menuBurgerElements(),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, variables', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# Data Table
+
+~~~ data-table
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('variables.varName.number=5');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'Data Table',
+            'elements': [
+                null,
+                {'html': 'div', 'attr': {'id': 'variables.varName.number=5', 'style': 'display=none'}},
+                [
+                    {'html': 'h1', 'attr': {'id': 'variables.varName.number=5&data-table'}, 'elem': [{'text': 'Data Table'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                menuBurgerElements({'menuURL': '#menu=1&variables.varName.number=5'}),
                 null
             ]
         }
