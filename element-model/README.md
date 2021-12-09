@@ -46,7 +46,7 @@ An element model is rendered to the web browser using the
 function.
 
 ``` javascript
-import {renderElements} from 'element-model/index.js';
+import {renderElements} from 'element-model/elementModel.js';
 
 renderElements(document.body, elements);
 ```
@@ -57,7 +57,7 @@ using the
 function.
 
 ``` javascript
-import {validateElements} from 'element-model/index.js';
+import {validateElements} from 'element-model/elementModel.js';
 
 validateElements(elements);
 ```

@@ -67,8 +67,8 @@ function from the
 package. For example:
 
 ``` javascript
-import {SchemaMarkdownParser} from 'schema-markdown/index.js';
-import {UserTypeElements} from 'schema-markdown-doc/index.js';
+import {SchemaMarkdownParser} from 'schema-markdown/parser.js';
+import {UserTypeElements} from 'schema-markdown-doc/userTypeElements.js';
 
 const parser = new smd.SchemaMarkdownParser(`\
 # My cool struct

@@ -15,7 +15,7 @@ To parse a Markdown document and produce a Markdown model, use the
 function:
 
 ``` javascript
-import {parseMarkdown} from 'markdown-model/index.js';
+import {parseMarkdown} from 'markdown-model/parser.js';
 
 const markdownModel = parseMarkdown(markdownText);
 ```
@@ -30,8 +30,8 @@ package:
 
 
 ``` javascript
-import {markdownElements} from 'markdown-model/index.js';
-import {renderElements} from 'element-model/index.js';
+import {markdownElements} from 'markdown-model/elements.js';
+import {renderElements} from 'element-model/elementModel.js';
 
 renderElements(document.body, markdownElements(markdownModel));
 ```
@@ -41,7 +41,7 @@ You can compute the title of a Markdown document from the Markdown model using t
 function:
 
 ``` javascript
-import {getMarkdownTitle} from 'markdown-model/index.js';
+import {getMarkdownTitle} from 'markdown-model/markdownModel.js';
 
 const markdownTitle = getMarkdownTitle(markdownModel);
 ```
@@ -51,7 +51,7 @@ The
 function is used to validate Markdown models from untrusted sources or for testing the validity of any code that produces a Markdown model:
 
 ``` javascript
-import {validateMarkdownModel} from 'markdown-model/index.js';
+import {validateMarkdownModel} from 'markdown-model/markdownModel.js';
 
 validateMarkdownModel(markdownModel);
 ```
