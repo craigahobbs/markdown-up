@@ -1,3 +1,7 @@
+## 1.5.0 (2021-12-09)
+
+- [96a252f](https://github.com/craigahobbs/markdown-up/commit/96a252f) - integrate markdown-charts
+
 ## 1.4.0 (2021-12-02)
 
 - [ee6a43f](https://github.com/craigahobbs/markdown-up/commit/ee6a43f) - element-app 1.1, markdown-model 1.3, schema-markdown 1.1, schema-markdown-doc 1.2
