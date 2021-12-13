@@ -4,6 +4,7 @@
 /** @module lib/data */
 
 import {compareValues, getFieldValue} from './util.js';
+import {executeCalculation, parseCalculation} from './calc.js';
 import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
 
 
@@ -113,6 +114,30 @@ export async function loadChartData(chart, options = {}) {
                             }
                         }
                         data.push(joinRow);
+                    }
+                }
+            }
+        }
+    }
+
+    // Add calculated fields
+    if ('calculatedFields' in chart) {
+        // Parse the calculations
+        const expressions = chart.calculatedFields.map((calc) => parseCalculation(calc.expression));
+
+        // Compute the calculated fields for each row
+        for (const row of data) {
+            for (let ixCalc = 0; ixCalc < chart.calculatedFields.length; ixCalc++) {
+                const calcName = chart.calculatedFields[ixCalc].name;
+                const calcValue = executeCalculation(expressions[ixCalc], row);
+                row[calcName] = calcValue;
+                if (calcValue !== null && !(calcName in types)) {
+                    if (typeof calcValue === 'number') {
+                        types[calcName] = 'number';
+                    } else if (calcValue instanceof Date) {
+                        types[calcName] = 'datetime';
+                    } else {
+                        types[calcName] = 'string';
                     }
                 }
             }
@@ -319,7 +344,7 @@ export function filterData(chart, data, types, options = {}) {
     const filterDescs = filters.map((filter) => `"${filter.field}" field filter value`);
     const getFilterValue = (filter, ixFilter, valueFilter, member) => {
         if (member in filter) {
-            const value = getFieldValue(variables, filter[member], types[filter.field], filterDescs[ixFilter]);
+            const value = getFieldValue(filter[member], variables, types[filter.field], filterDescs[ixFilter]);
             if (value !== null) {
                 valueFilter[member] = value;
             }
@@ -328,7 +353,7 @@ export function filterData(chart, data, types, options = {}) {
     const getFilterValues = (filter, ixFilter, valueFilter, member) => {
         if (member in filter) {
             const values = filter[member].map(
-                (filterFieldValue) => getFieldValue(variables, filterFieldValue, types[filter.field], filterDescs[ixFilter])
+                (filterFieldValue) => getFieldValue(filterFieldValue, variables, types[filter.field], filterDescs[ixFilter])
             ).filter((value) => value !== null);
             if (values.length > 0) {
                 valueFilter[member] = values;
@@ -384,15 +409,11 @@ export function aggregateData(chart, data, types) {
 
     // Compute the aggregate field types
     const aggregateTypes = {};
-    for (const category of aggregation.categories) {
-        if (!(category.field in types)) {
-            throw new Error(`Unknown aggregation category field "${category.field}"`);
+    for (const categoryField of aggregation.categoryFields) {
+        if (!(categoryField in types)) {
+            throw new Error(`Unknown aggregation category field "${categoryField}"`);
         }
-        if ('by' in category && types[category.field] !== 'datetime') {
-            throw new Error(`Invalid aggregation categorization "${category.by}" ` +
-                            `for field "${category.field}" (type "${types[category.field]}")`);
-        }
-        aggregateTypes[getCategoryFieldName(category)] = types[category.field];
+        aggregateTypes[categoryField] = types[categoryField];
     }
     for (const measure of aggregation.measures) {
         if (!(measure.field in types)) {
@@ -409,19 +430,7 @@ export function aggregateData(chart, data, types) {
     const measureRows = {};
     for (const row of data) {
         // Compute the category values
-        const categoryValues = aggregation.categories.map((category) => {
-            const value = row[category.field];
-            if (category.by === 'Year') {
-                return new Date(value.getFullYear(), 0, 1);
-            } else if (category.by === 'Month') {
-                return new Date(value.getFullYear(), value.getMonth(), 1);
-            } else if (category.by === 'Day') {
-                return new Date(value.getFullYear(), value.getMonth(), value.getDate());
-            } else if (category.by === 'Hour') {
-                return new Date(value.getFullYear(), value.getMonth(), value.getDate(), value.getHours());
-            }
-            return value;
-        });
+        const categoryValues = aggregation.categoryFields.map((categoryField) => row[categoryField]);
 
         // Get or create the aggregate row
         let aggregateRow;
@@ -431,8 +440,8 @@ export function aggregateData(chart, data, types) {
         } else {
             aggregateRow = {};
             measureRows[rowKey] = aggregateRow;
-            for (let ixCategory = 0; ixCategory < aggregation.categories.length; ixCategory++) {
-                aggregateRow[getCategoryFieldName(aggregation.categories[ixCategory])] = categoryValues[ixCategory];
+            for (let ixCategoryField = 0; ixCategoryField < aggregation.categoryFields.length; ixCategoryField++) {
+                aggregateRow[aggregation.categoryFields[ixCategoryField]] = categoryValues[ixCategoryField];
             }
         }
 
@@ -473,15 +482,6 @@ export function aggregateData(chart, data, types) {
     }
 
     return {'data': aggregateRows, 'types': aggregateTypes};
-}
-
-
-// Helper function to compute aggregation category field names
-function getCategoryFieldName(category) {
-    if ('by' in category) {
-        return `${category.by.toUpperCase()}(${category.field})`;
-    }
-    return category.field;
 }
 
 

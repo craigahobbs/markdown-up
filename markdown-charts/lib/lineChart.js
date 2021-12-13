@@ -157,10 +157,10 @@ export async function lineChartElements(lineChart, options = {}) {
     const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount;
     const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
     const yTickStart = 'yTicks' in lineChart && 'start' in lineChart.yTicks
-        ? getFieldValue(variables, lineChart.yTicks.start, yFieldType, 'Y-axis start value')
+        ? getFieldValue(lineChart.yTicks.start, variables, yFieldType, 'Y-axis start value')
         : yMin;
     const yTickEnd = 'yTicks' in lineChart && 'end' in lineChart.yTicks
-        ? getFieldValue(variables, lineChart.yTicks.end, yFieldType, 'Y-axis end value')
+        ? getFieldValue(lineChart.yTicks.end, variables, yFieldType, 'Y-axis end value')
         : yMax;
     for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
         const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
@@ -175,10 +175,10 @@ export async function lineChartElements(lineChart, options = {}) {
     const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount;
     const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
     const xTickStart = 'xTicks' in lineChart && 'start' in lineChart.xTicks
-        ? getFieldValue(variables, lineChart.xTicks.start, xFieldType, 'X-axis start value')
+        ? getFieldValue(lineChart.xTicks.start, variables, xFieldType, 'X-axis start value')
         : xMin;
     const xTickEnd = 'xTicks' in lineChart && 'end' in lineChart.xTicks
-        ? getFieldValue(variables, lineChart.xTicks.end, xFieldType, 'X-axis end value')
+        ? getFieldValue(lineChart.xTicks.end, variables, xFieldType, 'X-axis end value')
         : xMax;
     for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
         const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
@@ -192,7 +192,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const yAxisAnnotations = [];
     if ('yAnnotations' in lineChart) {
         for (const annotation of lineChart.yAnnotations) {
-            const yAnnotationValue = getFieldValue(variables, annotation.value, yFieldType, 'Y-axis annotation value');
+            const yAnnotationValue = getFieldValue(annotation.value, variables, yFieldType, 'Y-axis annotation value');
             yAxisAnnotations.push([yAnnotationValue, 'label' in annotation ? annotation.label : formatValue(yAnnotationValue, lineChart)]);
             yMin = yAnnotationValue < yMin ? yAnnotationValue : yMin;
             yMax = yAnnotationValue > yMax ? yAnnotationValue : yMax;
@@ -203,7 +203,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisAnnotations = [];
     if ('xAnnotations' in lineChart) {
         for (const annotation of lineChart.xAnnotations) {
-            const xAnnotationValue = getFieldValue(variables, annotation.value, xFieldType, 'X-axis annotation value');
+            const xAnnotationValue = getFieldValue(annotation.value, variables, xFieldType, 'X-axis annotation value');
             xAxisAnnotations.push([xAnnotationValue, 'label' in annotation ? annotation.label : formatValue(xAnnotationValue, lineChart)]);
             xMin = xAnnotationValue < xMin ? xAnnotationValue : xMin;
             xMax = xAnnotationValue > xMax ? xAnnotationValue : xMax;

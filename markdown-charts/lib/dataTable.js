@@ -55,7 +55,7 @@ export async function dataTableElements(dataTable, options = {}) {
                         const value = linkText.field in row ? row[linkText.field] : null;
                         return value !== null ? formatValue(value, dataTable) : null;
                     }
-                    const value = getFieldValue(variables, linkText, null, null);
+                    const value = getFieldValue(linkText, variables);
                     if (value === null) {
                         return null;
                     }

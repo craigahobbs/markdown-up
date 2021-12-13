@@ -40,8 +40,10 @@ export function validateLineChart(lineChart) {
 }
 
 
-// The chart model defined using Schema Markdown
-const chartModelSmd = `\
+/**
+ * The chart model defined using Schema Markdown
+ */
+export const chartModelSmd = `\
 # Base struct for all chart types
 struct ChartBase
 
@@ -50,6 +52,9 @@ struct ChartBase
 
     # The map of variable name to variable value
     optional FieldValue{len > 0} variables
+
+    # The calculated fields
+    optional CalculatedField[len > 0] calculatedFields
 
     # The data row filters. Omit any row that does not match all filters.
     optional Filter[len > 0] filters
@@ -91,6 +96,163 @@ struct DataJoin
 
     # The right field of the join
     optional string[len > 0] rightFields
+
+
+# A field value
+union FieldValue
+
+    # A datetime value
+    datetime(nullable) datetime
+
+    # A number value
+    float(nullable) number
+
+    # A string value
+    string(nullable) string
+
+    # A live-computed value
+    LiveValue live
+
+
+# A live-computed value
+struct LiveValue
+
+    # The live value type
+    LiveValueType value
+
+    # The live value index (i.e. -1 for "Year" means last year)
+    optional int index
+
+
+# The live-computed value type
+enum LiveValueType
+
+    # Return the current datetime
+    Now
+
+    # Return today's datetime
+    Today
+
+    # Return this month's datetime
+    Month
+
+    # Return this year's datetime
+    Year
+
+
+# A field value with variable value
+union FieldValueEx (FieldValue)
+
+    # The variable name
+    string variable
+
+
+# A datetime format
+enum DatetimeFormat
+
+    # ISO datetime year format
+    Year
+
+    # ISO datetime month format
+    Month
+
+    # ISO datetime day format
+    Day
+
+
+# A calculated field specification
+struct CalculatedField
+
+    # The field name
+    string name
+
+    # The calculation expression
+    string expression
+
+
+# A data row filter specification
+struct Filter
+
+    # The filter field
+    string field
+
+    # Matches if the field value is in the value array
+    optional FieldValueEx[len > 0] includes
+
+    # Matches if the field value is NOT in the value array
+    optional FieldValueEx[len > 0] excludes
+
+    # Matches if the field value is less than the value
+    optional FieldValueEx lt
+
+    # Matches if the field value is less than or equal to the value
+    optional FieldValueEx lte
+
+    # Matches if the field value is greater than the value
+    optional FieldValueEx gt
+
+    # Matches if the field value is greater than or equal to the value
+    optional FieldValueEx gte
+
+
+# A data aggregation specification. The aggregated data rows are comprised of the generated
+# aggregation category and measure fields (e.g. "SUM(measure)").
+struct Aggregation
+
+    # The aggregation category fields
+    string[len > 0] categoryFields
+
+    # The aggregation measures
+    AggregationMeasure[len > 0] measures
+
+
+# An aggregation measure specification
+struct AggregationMeasure
+
+    # The aggregation measure field
+    string field
+
+    # The aggregation function
+    AggregationFunction function
+
+
+# An aggregation function
+enum AggregationFunction
+
+    # The average of the measure's values
+    Average
+
+    # The count of the measure's values
+    Count
+
+    # The greatest of the measure's values
+    Max
+
+    # The least of the measure's values
+    Min
+
+    # The sum of the measure's values
+    Sum
+
+
+# A sort's field specification
+struct SortField
+
+    # The field to sort by
+    string field
+
+    # If true, sort this field in descending order
+    optional bool desc
+
+
+# A data top specification
+struct Top
+
+    # The maximum number of rows to keep per category
+    optional int(> 0) count
+
+    # The category fields
+    optional string[len > 0] categoryFields
 
 
 # Base struct for line and bar charts
@@ -193,19 +355,6 @@ struct AxisAnnotation
     optional string label
 
 
-# A datetime format
-enum DatetimeFormat
-
-    # ISO datetime year format
-    Year
-
-    # ISO datetime month format
-    Month
-
-    # ISO datetime day format
-    Day
-
-
 # Automatically-generated, evenly-spaced tick marks specification
 struct AxisTicks
 
@@ -220,174 +369,14 @@ struct AxisTicks
 
     # The number of tick mark labels to skip after a rendered label
     optional int(> 0) skip
-
-
-# A field value
-union FieldValue
-
-    # A datetime value
-    datetime(nullable) datetime
-
-    # A number value
-    float(nullable) number
-
-    # A string value
-    string(nullable) string
-
-    # A live-computed value
-    LiveValue live
-
-
-# A field value with variable value
-union FieldValueEx (FieldValue)
-
-    # The variable name
-    string variable
-
-
-# A live-computed value
-struct LiveValue
-
-    # The live value type
-    LiveValueType value
-
-    # The live value index (i.e. -1 for "Year" means last year)
-    optional int index
-
-
-# The live-computed value type
-enum LiveValueType
-
-    # Return the current datetime
-    Now
-
-    # Return today's datetime
-    Today
-
-    # Return this month's datetime
-    Month
-
-    # Return this year's datetime
-    Year
-
-
-# A data row filter specification
-struct Filter
-
-    # The filter field
-    string field
-
-    # Matches if the field value is in the value array
-    optional FieldValueEx[len > 0] includes
-
-    # Matches if the field value is NOT in the value array
-    optional FieldValueEx[len > 0] excludes
-
-    # Matches if the field value is less than the value
-    optional FieldValueEx lt
-
-    # Matches if the field value is less than or equal to the value
-    optional FieldValueEx lte
-
-    # Matches if the field value is greater than the value
-    optional FieldValueEx gt
-
-    # Matches if the field value is greater than or equal to the value
-    optional FieldValueEx gte
-
-
-# A data aggregation specification. The aggregated data rows are comprised of the generated
-# aggregation category and measure fields (e.g. "SUM(measure)").
-struct Aggregation
-
-    # The aggregation categories
-    AggregationCategory[len > 0] categories
-
-    # The aggregation measures
-    AggregationMeasure[len > 0] measures
-
-
-# An aggregation category specification
-struct AggregationCategory
-
-    # The aggregation category field
-    string field
-
-    # The aggregation category's categorization
-    optional AggregationCategorization by
-
-
-# An aggregation category type
-enum AggregationCategorization
-
-    # Aggregate on the year values of a datetime field
-    Year
-
-    # Aggregate on the month values of a datetime field
-    Month
-
-    # Aggregate on the day values of a datetime field
-    Day
-
-    # Aggregate on the hour values of a datetime field
-    Hour
-
-
-# An aggregation measure specification
-struct AggregationMeasure
-
-    # The aggregation measure field
-    string field
-
-    # The aggregation function
-    AggregationFunction function
-
-
-# An aggregation function
-enum AggregationFunction
-
-    # The average of the measure's values
-    Average
-
-    # The count of the measure's values
-    Count
-
-    # The greatest of the measure's values
-    Max
-
-    # The least of the measure's values
-    Min
-
-    # The sum of the measure's values
-    Sum
-
-
-# A sort's field specification
-struct SortField
-
-    # The field to sort by
-    string field
-
-    # If true, sort this field in descending order
-    optional bool desc
-
-
-# A data top specification
-struct Top
-
-    # The maximum number of rows to keep per category
-    optional int(> 0) count
-
-    # The category fields
-    optional string[len > 0] categoryFields
 `;
 
 
 /**
  * The chart model
  *
- * @property {string} title - The type model title
- * @property {Object} types - The chart model's referenced types dictionary
+ * @property {string} title - The model's title
+ * @property {Object} types - The model's referenced types dictionary
  */
 export const chartModel = {
     'title': 'The Chart Model',

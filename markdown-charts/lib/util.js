@@ -72,7 +72,7 @@ const rVariable = /\{\{(\w+)\}\}/g;
 
 
 // Helper function to get and validate field values
-export function getFieldValue(variables, fieldValue, matchType, matchDesc) {
+export function getFieldValue(fieldValue, variables = null, matchType = null, matchDesc = null) {
     // Get the value
     let value;
     let type = null;
@@ -96,7 +96,9 @@ export function getFieldValue(variables, fieldValue, matchType, matchDesc) {
             type = 'datetime';
         }
     } else if ('variable' in fieldValue) {
-        value = fieldValue.variable in variables ? getFieldValue(variables, variables[fieldValue.variable], matchType, matchDesc) : null;
+        value = variables !== null && fieldValue.variable in variables
+            ? getFieldValue(variables[fieldValue.variable], variables, matchType, matchDesc)
+            : null;
     } else if ('datetime' in fieldValue) {
         value = fieldValue.datetime;
         type = 'datetime';
