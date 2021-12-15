@@ -221,7 +221,7 @@ const rCalcString = /^\s*'((?:\\'|[^'])+)'/;
 const rCalcStringUnescape = /\\([\\'])/g;
 const rCalcStringDouble = /^\s*"((?:\\"|[^"])+)"/;
 const rCalcStringDoubleUnescape = /\\([\\"])/g;
-const rCalcField = /^\s*\[\s*((?:\\\]|[^\\])+)\s*\]/;
+const rCalcField = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
 const rCalcFieldUnescape = /\\([\\\]])/g;
 
 
