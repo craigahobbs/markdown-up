@@ -3,19 +3,14 @@
 
 /** @module lib/calc */
 
-import {getReferencedTypes, validateType} from '../../schema-markdown/lib/schema.js';
 import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
-import {chartModelSmd} from './model.js';
-import {getFieldValue} from './util.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 // The calc model's Schema Markdown
 const calcModelSmd = `\
 # The calculation language expression specification
 union CalcExpr
-
-    # A literal
-    FieldValue literal
 
     # A binary expression
     CalcExprBinary binary
@@ -28,6 +23,12 @@ union CalcExpr
 
     # A field value
     string field
+
+    # A number literal
+    float number
+
+    # A string literal
+    string string
 
 
 # A calculation language binary expression
@@ -133,12 +134,9 @@ enum CalcExprFunctionEnum
  * @property {string} title - The model's title
  * @property {Object} types - The model's referenced types dictionary
  */
-const calcParser = new SchemaMarkdownParser();
-calcParser.parseString(chartModelSmd, 'chartModel.smd', false);
-calcParser.parseString(calcModelSmd, 'calcModel.smd');
 export const calcModel = {
     'title': 'The Calculation Language Model',
-    'types': getReferencedTypes(calcParser.types, 'CalcExpr')
+    'types': new SchemaMarkdownParser(calcModelSmd).types
 };
 
 
@@ -147,35 +145,37 @@ const calcFunctions = {
     'abs': ([number]) => Math.abs(number),
     'ceil': ([number]) => Math.ceil(number),
     'date': ([year, month, day]) => new Date(year, month - 1, day),
-    'day': () => 0,
-    'fixed': () => 0,
+    'day': ([datetime]) => datetime.getDate(),
+    'fixed': ([number, decimals = 2]) => number.toFixed(decimals),
     'floor': ([number]) => Math.floor(number),
-    'hour': () => 0,
+    'hour': ([datetime]) => datetime.getHours(),
     'if': ([condition, valueTrue, valueFalse]) => (condition ? valueTrue : valueFalse),
-    'left': () => 0,
+    'left': ([text, numChars = 1]) => text.slice(0, numChars),
     'len': ([text]) => text.length,
     'lower': ([text]) => text.toLowerCase(),
     'ln': ([number]) => Math.log(number),
-    'log': () => 0,
+    'log': ([number, base = 10]) => Math.log(number) / Math.log(base),
     'log10': ([number]) => Math.log10(number),
     'mid': ([text, startNum, numChars]) => text.slice(startNum, startNum + numChars),
-    'minute': () => 0,
+    'minute': ([datetime]) => datetime.getMinutes(),
     'month': ([datetime]) => datetime.getMonth() + 1,
-    'mround': () => 0,
     'now': () => new Date(),
     'rand': () => Math.random(),
     'replace': () => 0,
     'rept': () => 0,
-    'right': () => 0,
+    'right': ([text, numChars = 1]) => text.slice(numChars),
     'round': () => 0,
-    'second': () => 0,
+    'second': ([datetime]) => datetime.getSeconds(),
     'search': () => 0,
     'sign': ([number]) => Math.sign(number),
     'sqrt': ([number]) => Math.sqrt(number),
     'substitute': () => 0,
     'text': () => 0,
-    'today': () => 0,
-    'trim': () => 0,
+    'today': () => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    },
+    'trim': ([text]) => text.trim(),
     'upper': ([text]) => text.toUpperCase(),
     'value': () => 0,
     'year': ([datetime]) => datetime.getFullYear()
@@ -208,6 +208,23 @@ const unaryOperators = {
 };
 
 
+// Calculation language expression regex
+const rCalcBinaryOp = new RegExp(`^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
+const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).join('|')})`);
+const rCalcFunctionOpen = new RegExp(`^\\s*(${Object.keys(calcFunctions).join('|')})\\s*\\(`);
+const rCalcFunctionSeparator = /^\s*,/;
+const rCalcFunctionClose = /^\s*\)/;
+const rCalcGroupOpen = /^\s*\(/;
+const rCalcGroupClose = /^\s*\)/;
+const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
+const rCalcString = /^\s*'((?:\\'|[^'])+)'/;
+const rCalcStringUnescape = /\\([\\'])/g;
+const rCalcStringDouble = /^\s*"((?:\\"|[^"])+)"/;
+const rCalcStringDoubleUnescape = /\\([\\"])/g;
+const rCalcField = /^\s*\[\s*((?:\\\]|[^\\])+)\s*\]/;
+const rCalcFieldUnescape = /\\([\\\]])/g;
+
+
 /**
  * Validate a calculation language model
  *
@@ -227,32 +244,20 @@ export function validateCalculation(expr) {
  * @returns {string|number|Date|boolean|null} The calculation result
  */
 export function executeCalculation(expr, row = null) {
-    if ('literal' in expr) {
-        return getFieldValue(expr.literal);
-    } else if ('binary' in expr) {
+    if ('binary' in expr) {
         return binaryOperators[expr.binary.operator](executeCalculation(expr.binary.left, row), executeCalculation(expr.binary.right, row));
     } else if ('unary' in expr) {
         return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, row));
     } else if ('function' in expr) {
         return calcFunctions[expr.function.function](expr.function.arguments.map((arg) => executeCalculation(arg, row)));
+    } else if ('field' in expr) {
+        return row !== null && expr.field in row ? row[expr.field] : null;
+    } else if ('number' in expr) {
+        return expr.number;
     }
-    // else if ('field' in expr)
-    return expr.field in row ? row[expr.field] : null;
+    // else if ('string' in expr) {
+    return expr.string;
 }
-
-
-// Calculation language expression regex
-const rCalcBinaryOp = new RegExp(`^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
-const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
-const rCalcFunctionOpen = new RegExp(
-    `^\\s*(${Object.keys(calcFunctions).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\s*\\(`
-);
-const rCalcFunctionSeparator = /^\s*,/;
-const rCalcFunctionClose = /^\s*\)/;
-const rCalcGroupOpen = /^\s*\(/;
-const rCalcGroupClose = /^\s*\)/;
-const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
-const rCalcField = /^\s*\[\s*(.+?)\s*\]/;
 
 
 /**
@@ -280,15 +285,8 @@ function parseExpression(exprText) {
 
 // Helper function to parse an expression NOT including binary operator sub-expressions
 function parseSubExpression(exprText) {
-    // Match a sub-expression
-    const matchGroupOpen = exprText.match(rCalcGroupOpen);
-    const matchUnary = exprText.match(rCalcUnaryOp);
-    const matchFunctionOpen = exprText.match(rCalcFunctionOpen);
-    const matchNumber = exprText.match(rCalcNumber);
-    const matchString = null;
-    const matchField = exprText.match(rCalcField);
-
     // Group open?
+    const matchGroupOpen = exprText.match(rCalcGroupOpen);
     if (matchGroupOpen !== null) {
         const groupText = exprText.slice(matchGroupOpen[0].length);
         const [expr, nextText] = parseExpression(groupText);
@@ -297,9 +295,11 @@ function parseSubExpression(exprText) {
             throw new Error(`Unmatched parenthesis "${exprText}"`);
         }
         return [expr, nextText.slice(matchGroupOpen[0].length)];
+    }
 
     // Unary operator?
-    } else if (matchUnary !== null) {
+    const matchUnary = exprText.match(rCalcUnaryOp);
+    if (matchUnary !== null) {
         const unaryText = exprText.slice(matchUnary[0].length);
         const [expr, nextText] = parseSubExpression(unaryText);
         const unaryExpr = {
@@ -309,9 +309,11 @@ function parseSubExpression(exprText) {
             }
         };
         return [unaryExpr, nextText];
+    }
 
     // Function?
-    } else if (matchFunctionOpen !== null) {
+    const matchFunctionOpen = exprText.match(rCalcFunctionOpen);
+    if (matchFunctionOpen !== null) {
         let argText = exprText.slice(matchFunctionOpen[0].length);
         const args = [];
         // eslint-disable-next-line no-constant-condition
@@ -345,18 +347,37 @@ function parseSubExpression(exprText) {
             }
         };
         return [fnExpr, argText];
+    }
 
     // Number?
-    } else if (matchNumber !== null) {
-        const expr = {'literal': {'number': parseFloat(matchNumber[1])}};
+    const matchNumber = exprText.match(rCalcNumber);
+    if (matchNumber !== null) {
+        const number = parseFloat(matchNumber[1]);
+        const expr = {'number': number};
         return [expr, exprText.slice(matchNumber[0].length)];
+    }
 
     // String?
-    } else if (matchString !== null) {
+    const matchString = exprText.match(rCalcString);
+    if (matchString !== null) {
+        const string = matchString[1].replace(rCalcStringUnescape, '$1');
+        const expr = {'string': string};
+        return [expr, exprText.slice(matchString[0].length)];
+    }
+
+    // String (double quotes)?
+    const matchStringDouble = exprText.match(rCalcStringDouble);
+    if (matchStringDouble !== null) {
+        const string = matchStringDouble[1].replace(rCalcStringDoubleUnescape, '$1');
+        const expr = {'string': string};
+        return [expr, exprText.slice(matchStringDouble[0].length)];
+    }
 
     // Field?
-    } else if (matchField !== null) {
-        const expr = {'field': matchField[1]};
+    const matchField = exprText.match(rCalcField);
+    if (matchField !== null) {
+        const fieldName = matchField[1].replace(rCalcFieldUnescape, '$1');
+        const expr = {'field': fieldName};
         return [expr, exprText.slice(matchField[0].length)];
     }
 
