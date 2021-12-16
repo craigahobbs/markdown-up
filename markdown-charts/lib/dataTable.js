@@ -3,8 +3,10 @@
 
 /** @module lib/dataTable */
 
-import {compareValues, formatValue, formatVariables, getFieldValue} from './util.js';
+import {compareValues, formatValue} from './util.js';
 import {loadChartData} from './data.js';
+import {markdownElements} from '../../markdown-model/lib/elements.js';
+import {parseMarkdown} from '../../markdown-model/lib/parser.js';
 
 
 /**
@@ -16,12 +18,6 @@ import {loadChartData} from './data.js';
  */
 export async function dataTableElements(dataTable, options = {}) {
     const {data, types} = await loadChartData(dataTable, options);
-
-    // Compute the variables
-    const variables = {
-        ...('variables' in dataTable ? dataTable.variables : {}),
-        ...('variables' in options ? options.variables : {})
-    };
 
     // Generate the data table's element model
     const categoryFields = 'categoryFields' in dataTable ? dataTable.categoryFields : [];
@@ -45,52 +41,6 @@ export async function dataTableElements(dataTable, options = {}) {
                 const rowPrev = ixRow > 0 ? data[ixRow - 1] : null;
                 let skip = rowPrev !== null;
 
-                // Compute the link field element models
-                const linkElements = {};
-                const getLinkText = (link, linkText) => {
-                    if ('field' in linkText) {
-                        if (!(linkText.field in types)) {
-                            throw new Error(`Unknown "${link.name}" link field "${linkText.field}"`);
-                        }
-                        const value = linkText.field in row ? row[linkText.field] : null;
-                        return value !== null ? formatValue(value, dataTable) : null;
-                    }
-                    const value = getFieldValue(linkText, variables);
-                    if (value === null) {
-                        return null;
-                    }
-                    const valueText = formatValue(value, dataTable);
-                    const valueVarText = formatVariables(dataTable, row, valueText, false, false);
-                    return formatVariables(dataTable, variables, valueVarText);
-                };
-                if ('links' in dataTable) {
-                    for (const link of dataTable.links) {
-                        if (link.name in types) {
-                            throw new Error(`Duplicate link name "${link.name}"`);
-                        }
-                        const linkText = getLinkText(link, link.text);
-                        if (linkText === null) {
-                            linkElements[link.name] = null;
-                        } else {
-                            row[link.name] = linkText;
-                            if (!('url' in link)) {
-                                linkElements[link.name] = {'text': linkText};
-                            } else {
-                                const urlText = getLinkText(link, link.url);
-                                if (urlText === null) {
-                                    linkElements[link.name] = null;
-                                } else {
-                                    linkElements[link.name] = {
-                                        'html': 'a',
-                                        'attr': {'href': urlText},
-                                        'elem': {'text': linkText}
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-
                 return {
                     'html': 'tr',
                     'elem': [
@@ -104,12 +54,16 @@ export async function dataTableElements(dataTable, options = {}) {
                                 skip = (compareValues(skipValue, skipValuePrev) === 0);
                             }
 
-                            const fieldElements = field in linkElements ? linkElements[field] : {'text': formatValue(value, dataTable)};
+                            const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
+                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)))
+                                : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': skip ? null : fieldElements};
                         }),
                         fields.map((field) => {
                             const value = field in row ? row[field] : null;
-                            const fieldElements = field in linkElements ? linkElements[field] : {'text': formatValue(value, dataTable)};
+                            const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
+                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)))
+                                : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': field === null ? null : fieldElements};
                         })
                     ]

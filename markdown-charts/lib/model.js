@@ -296,28 +296,8 @@ struct DataTable (ChartBase)
     # The table's fields
     optional string[len > 0] fields
 
-    # The table's links
-    optional Link[len > 0] links
-
-
-# A link specification
-struct Link
-
-    # The link name
-    string name
-
-    # The link text
-    LinkText text
-
-    # The link URL
-    optional LinkText url
-
-
-# A link text specification
-union LinkText (FieldValueEx)
-
-    # A row field value
-    string field
+    # The "categoryFields" and "fields" to be rendered as Markdown text
+    optional string[len > 0] markdownFields
 
 
 # A line chart specification

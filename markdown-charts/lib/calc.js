@@ -217,9 +217,9 @@ const rCalcFunctionClose = /^\s*\)/;
 const rCalcGroupOpen = /^\s*\(/;
 const rCalcGroupClose = /^\s*\)/;
 const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
-const rCalcString = /^\s*'((?:\\'|[^'])+)'/;
+const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
 const rCalcStringUnescape = /\\([\\'])/g;
-const rCalcStringDouble = /^\s*"((?:\\"|[^"])+)"/;
+const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
 const rCalcStringDoubleUnescape = /\\([\\"])/g;
 const rCalcField = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
 const rCalcFieldUnescape = /\\([\\\]])/g;
@@ -241,17 +241,26 @@ export function validateCalculation(expr) {
  *
  * @param {Object} expr - The calculation language model
  * @param {Object} [row = null] - The current row (for resolving field expressions)
+ * @param {Object} [rowFallback = null] - If the field is not in "row", look for it here
  * @returns {string|number|Date|boolean|null} The calculation result
  */
-export function executeCalculation(expr, row = null) {
+export function executeCalculation(expr, row = null, rowFallback = null) {
     if ('binary' in expr) {
-        return binaryOperators[expr.binary.operator](executeCalculation(expr.binary.left, row), executeCalculation(expr.binary.right, row));
+        return binaryOperators[expr.binary.operator](
+            executeCalculation(expr.binary.left, row, rowFallback),
+            executeCalculation(expr.binary.right, row, rowFallback)
+        );
     } else if ('unary' in expr) {
-        return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, row));
+        return unaryOperators[expr.unary.operator](
+            executeCalculation(expr.unary.expr, row, rowFallback)
+        );
     } else if ('function' in expr) {
-        return calcFunctions[expr.function.function](expr.function.arguments.map((arg) => executeCalculation(arg, row)));
+        return calcFunctions[expr.function.function](
+            expr.function.arguments.map((arg) => executeCalculation(arg, row, rowFallback))
+        );
     } else if ('field' in expr) {
-        return row !== null && expr.field in row ? row[expr.field] : null;
+        return row !== null && expr.field in row ? row[expr.field]
+            : (rowFallback !== null && expr.field in rowFallback ? rowFallback[expr.field] : null);
     } else if ('number' in expr) {
         return expr.number;
     }

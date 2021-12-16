@@ -125,14 +125,27 @@ export async function loadChartData(chart, options = {}) {
         // Parse the calculations
         const expressions = chart.calculatedFields.map((calc) => parseCalculation(calc.expression));
 
+        // Compute the variable values
+        const variables = {
+            ...('variables' in chart ? chart.variables : {}),
+            ...('variables' in options ? options.variables : {})
+        };
+        const variableValues = Object.fromEntries(
+            Object.entries(variables).map(([varName, varFieldValue]) => [varName, getFieldValue(varFieldValue)])
+        );
+
         // Compute the calculated fields for each row
+        const calcNames = new Set();
         for (const row of data) {
             for (let ixCalc = 0; ixCalc < chart.calculatedFields.length; ixCalc++) {
                 const calcName = chart.calculatedFields[ixCalc].name;
-                const calcValue = executeCalculation(expressions[ixCalc], row);
+                const calcValue = executeCalculation(expressions[ixCalc], row, variableValues);
                 row[calcName] = calcValue;
+                calcNames.add(calcName);
+
+                // Set the calculated field type
                 if (calcValue !== null && !(calcName in types)) {
-                    if (typeof calcValue === 'number') {
+                    if (typeof calcValue === 'number' || typeof calcValue === 'boolean') {
                         types[calcName] = 'number';
                     } else if (calcValue instanceof Date) {
                         types[calcName] = 'datetime';
@@ -140,6 +153,13 @@ export async function loadChartData(chart, options = {}) {
                         types[calcName] = 'string';
                     }
                 }
+            }
+        }
+
+        // Ensure all calculated fields have a type
+        for (const calcName of calcNames.values()) {
+            if (!(calcName in types)) {
+                types[calcName] = 'string';
             }
         }
     }
