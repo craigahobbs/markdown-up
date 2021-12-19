@@ -21,8 +21,8 @@ union CalcExpr
     # A function expression
     CalcExprFunction function
 
-    # A field value
-    string field
+    # A variable value
+    string variable
 
     # A number literal
     float number
@@ -82,49 +82,10 @@ enum CalcExprUnaryOperator
 struct CalcExprFunction
 
     # The function
-    CalcExprFunctionEnum function
+    string function
 
     # The function arguments
     optional CalcExpr[] arguments
-
-
-# A calculation language function
-enum CalcExprFunctionEnum
-    abs
-    ceil
-    date
-    day
-    fixed
-    floor
-    hour
-    if
-    left
-    len
-    lower
-    ln
-    log
-    log10
-    mid
-    minute
-    month
-    mround
-    now
-    rand
-    replace
-    rept
-    right
-    round
-    second
-    search
-    sign
-    sqrt
-    substitute
-    text
-    today
-    trim
-    upper
-    value
-    year
 `;
 
 
@@ -143,9 +104,15 @@ export const calcModel = {
 // Function map (name => fn)
 const calcFunctions = {
     'abs': ([number]) => Math.abs(number),
+    'acos': ([number]) => Math.acos(number),
+    'asin': ([number]) => Math.asin(number),
+    'atan': ([number]) => Math.atan(number),
+    'atan2': ([number]) => Math.atan2(number),
     'ceil': ([number]) => Math.ceil(number),
+    'cos': ([number]) => Math.cos(number),
     'date': ([year, month, day]) => new Date(year, month - 1, day),
     'day': ([datetime]) => datetime.getDate(),
+    'find': ([findText, withinText]) => withinText.indexOf(findText),
     'fixed': ([number, decimals = 2]) => number.toFixed(decimals),
     'floor': ([number]) => Math.floor(number),
     'hour': ([datetime]) => datetime.getHours(),
@@ -161,28 +128,31 @@ const calcFunctions = {
     'month': ([datetime]) => datetime.getMonth() + 1,
     'now': () => new Date(),
     'rand': () => Math.random(),
-    'replace': () => 0,
-    'rept': () => 0,
+    'rept': ([text, count]) => text.repeat(count),
     'right': ([text, numChars = 1]) => text.slice(numChars),
-    'round': () => 0,
+    'round': ([number, digits]) => {
+        const multiplier = 10 ** digits;
+        return Math.round(number * multiplier) / multiplier;
+    },
     'second': ([datetime]) => datetime.getSeconds(),
-    'search': () => 0,
     'sign': ([number]) => Math.sign(number),
+    'sin': ([number]) => Math.sin(number),
     'sqrt': ([number]) => Math.sqrt(number),
-    'substitute': () => 0,
-    'text': () => 0,
+    'substitute': ([text, oldText, newText]) => text.replaceAll(oldText, newText),
+    't': ([value]) => `${value}`,
+    'tan': ([number]) => Math.tan(number),
     'today': () => {
         const now = new Date();
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());
     },
     'trim': ([text]) => text.trim(),
     'upper': ([text]) => text.toUpperCase(),
-    'value': () => 0,
+    'value': ([text]) => parseFloat(text),
     'year': ([datetime]) => datetime.getFullYear()
 };
 
 
-// Binary operator map (str => {op, fn})
+// Binary operator map (op => fn)
 const binaryOperators = {
     '+': (left, right) => left + right,
     '&&': (left, right) => left && right,
@@ -201,7 +171,7 @@ const binaryOperators = {
 };
 
 
-// Unary operator map (str => {op, fn})
+// Unary operator map (op => fn)
 const unaryOperators = {
     '-': (value) => -value,
     '!': (value) => !value
@@ -211,18 +181,18 @@ const unaryOperators = {
 // Calculation language expression regex
 const rCalcBinaryOp = new RegExp(`^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
 const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).join('|')})`);
-const rCalcFunctionOpen = new RegExp(`^\\s*(${Object.keys(calcFunctions).join('|')})\\s*\\(`);
+const rCalcFunctionOpen = /^\s*([A-Za-z_]\w+)\s*\(/;
 const rCalcFunctionSeparator = /^\s*,/;
 const rCalcFunctionClose = /^\s*\)/;
 const rCalcGroupOpen = /^\s*\(/;
 const rCalcGroupClose = /^\s*\)/;
 const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
 const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
-const rCalcStringUnescape = /\\([\\'])/g;
+const rCalcStringEscape = /\\([\\'])/g;
 const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
-const rCalcStringDoubleUnescape = /\\([\\"])/g;
-const rCalcField = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
-const rCalcFieldUnescape = /\\([\\\]])/g;
+const rCalcStringDoubleEscape = /\\([\\"])/g;
+const rCalcVariable = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
+const rCalcVariableEscape = /\\([\\\]])/g;
 
 
 /**
@@ -237,30 +207,43 @@ export function validateCalculation(expr) {
 
 
 /**
+ * A calculation variable getter function
+ *
+ * @callback VariableGetter
+ * @param {string} name - The variable name
+ * @returns The variable value
+ */
+
+
+/**
  * Excecute a calculation language model
  *
  * @param {Object} expr - The calculation language model
- * @param {Object} [row = null] - The current row (for resolving field expressions)
- * @param {Object} [rowFallback = null] - If the field is not in "row", look for it here
- * @returns {string|number|Date|boolean|null} The calculation result
+ * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
+ * @returns The calculation result
  */
-export function executeCalculation(expr, row = null, rowFallback = null) {
+export function executeCalculation(expr, getVariable = null) {
     if ('binary' in expr) {
         return binaryOperators[expr.binary.operator](
-            executeCalculation(expr.binary.left, row, rowFallback),
-            executeCalculation(expr.binary.right, row, rowFallback)
+            executeCalculation(expr.binary.left, getVariable),
+            executeCalculation(expr.binary.right, getVariable)
         );
     } else if ('unary' in expr) {
         return unaryOperators[expr.unary.operator](
-            executeCalculation(expr.unary.expr, row, rowFallback)
+            executeCalculation(expr.unary.expr, getVariable)
         );
     } else if ('function' in expr) {
-        return calcFunctions[expr.function.function](
-            expr.function.arguments.map((arg) => executeCalculation(arg, row, rowFallback))
-        );
-    } else if ('field' in expr) {
-        return row !== null && expr.field in row ? row[expr.field]
-            : (rowFallback !== null && expr.field in rowFallback ? rowFallback[expr.field] : null);
+        const functionName = expr.function.function;
+        let functionValue = getVariable !== null ? getVariable(functionName) : null;
+        if (functionValue === null) {
+            if (!(functionName in calcFunctions)) {
+                throw new Error(`Undefined function "${functionName}"`);
+            }
+            functionValue = calcFunctions[functionName];
+        }
+        return functionValue(expr.function.arguments.map((arg) => executeCalculation(arg, getVariable)));
+    } else if ('variable' in expr) {
+        return getVariable !== null ? getVariable(expr.variable) : null;
     } else if ('number' in expr) {
         return expr.number;
     }
@@ -369,7 +352,7 @@ function parseSubExpression(exprText) {
     // String?
     const matchString = exprText.match(rCalcString);
     if (matchString !== null) {
-        const string = matchString[1].replace(rCalcStringUnescape, '$1');
+        const string = matchString[1].replace(rCalcStringEscape, '$1');
         const expr = {'string': string};
         return [expr, exprText.slice(matchString[0].length)];
     }
@@ -377,17 +360,17 @@ function parseSubExpression(exprText) {
     // String (double quotes)?
     const matchStringDouble = exprText.match(rCalcStringDouble);
     if (matchStringDouble !== null) {
-        const string = matchStringDouble[1].replace(rCalcStringDoubleUnescape, '$1');
+        const string = matchStringDouble[1].replace(rCalcStringDoubleEscape, '$1');
         const expr = {'string': string};
         return [expr, exprText.slice(matchStringDouble[0].length)];
     }
 
-    // Field?
-    const matchField = exprText.match(rCalcField);
-    if (matchField !== null) {
-        const fieldName = matchField[1].replace(rCalcFieldUnescape, '$1');
-        const expr = {'field': fieldName};
-        return [expr, exprText.slice(matchField[0].length)];
+    // Variable?
+    const matchVariable = exprText.match(rCalcVariable);
+    if (matchVariable !== null) {
+        const variableName = matchVariable[1].replace(rCalcVariableEscape, '$1');
+        const expr = {'variable': variableName};
+        return [expr, exprText.slice(matchVariable[0].length)];
     }
 
     throw new Error(`Syntax error "${exprText}"`);

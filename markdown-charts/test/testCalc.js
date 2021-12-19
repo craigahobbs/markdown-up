@@ -20,7 +20,7 @@ test('executeCalculation', (t) => {
                         'function': {
                             'function': 'ceil',
                             'arguments': [
-                                {'field': 'fieldName'}
+                                {'variable': 'varName'}
                             ]
                         }
                     }
@@ -28,7 +28,43 @@ test('executeCalculation', (t) => {
             }
         }
     });
-    t.is(executeCalculation(calc, {'fieldName': 3.5}), 19);
+    const variables = {'varName': 4};
+    const getVariable = (name) => (name in variables ? variables[name] : null);
+    t.is(executeCalculation(calc, getVariable), 19);
+});
+
+
+test('executeCalculation, function variable', (t) => {
+    const calc = validateCalculation({
+        'function': {
+            'function': 'fnName',
+            'arguments': [
+                {'number': 3}
+            ]
+        }
+    });
+    const variables = {'fnName': ([number]) => 2 * number};
+    const getVariable = (name) => (name in variables ? variables[name] : null);
+    t.is(executeCalculation(calc, getVariable), 6);
+});
+
+
+test('executeCalculation, function unknown', (t) => {
+    const calc = validateCalculation({
+        'function': {
+            'function': 'fnUnknown',
+            'arguments': []
+        }
+    });
+    const variables = {};
+    const getVariable = (name) => (name in variables ? variables[name] : null);
+    let errorMessage = null;
+    try {
+        executeCalculation(calc, getVariable);
+    } catch ({message}) {
+        errorMessage = message;
+    }
+    t.is(errorMessage, 'Undefined function "fnUnknown"');
 });
 
 

@@ -126,20 +126,24 @@ export async function loadChartData(chart, options = {}) {
         const expressions = chart.calculatedFields.map((calc) => parseCalculation(calc.expression));
 
         // Compute the variable values
-        const variables = {
-            ...('variables' in chart ? chart.variables : {}),
-            ...('variables' in options ? options.variables : {})
+        let row;
+        const getVariable = (name) => {
+            if (name in row) {
+                return row[name];
+            } else if ('variables' in options && name in options.variables) {
+                return getFieldValue(options.variables[name]);
+            } else if ('variables' in chart && name in chart.variables) {
+                return getFieldValue(chart.variables[name]);
+            }
+            return null;
         };
-        const variableValues = Object.fromEntries(
-            Object.entries(variables).map(([varName, varFieldValue]) => [varName, getFieldValue(varFieldValue)])
-        );
 
         // Compute the calculated fields for each row
         const calcNames = new Set();
-        for (const row of data) {
+        for (row of data) {
             for (let ixCalc = 0; ixCalc < chart.calculatedFields.length; ixCalc++) {
                 const calcName = chart.calculatedFields[ixCalc].name;
-                const calcValue = executeCalculation(expressions[ixCalc], row, variableValues);
+                const calcValue = executeCalculation(expressions[ixCalc], getVariable);
                 row[calcName] = calcValue;
                 calcNames.add(calcName);
 
