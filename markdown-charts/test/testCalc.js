@@ -3,8 +3,38 @@
 
 /* eslint-disable id-length */
 
-import {executeCalculation, parseCalculation, validateCalculation} from '../lib/calc.js';
+import {executeCalculation, executeScript, parseCalculation, validateCalculation, validateScript} from '../lib/calc.js';
 import test from '../ava';
+
+
+test('executeScript', (t) => {
+    const script = validateScript({
+        'statements': [
+            {
+                'assignment': {
+                    'name': 'a',
+                    'expression': {'number': 5}
+                }
+            },
+            {
+                'assignment': {
+                    'name': 'b',
+                    'expression': {'number': 7}
+                }
+            },
+            {
+                'expression': {
+                    'binary': {
+                        'operator': '+',
+                        'left': {'variable': 'a'},
+                        'right': {'variable': 'b'}
+                    }
+                }
+            }
+        ]
+    });
+    t.is(executeScript(script), 12);
+});
 
 
 test('executeCalculation', (t) => {

@@ -3,8 +3,11 @@
 
 /** @module lib/lineChart */
 
-import {categoricalColors, compareValues, formatValue, formatVariables, getFieldValue, parameterValue, valueParameter} from './util.js';
+import {
+    categoricalColors, chartCodeBlock, compareValues, formatValue, formatVariables, getFieldValue, parameterValue, valueParameter
+} from './util.js';
 import {loadChartData} from './data.js';
+import {validateLineChart} from './model.js';
 
 
 // Line chart defaults
@@ -31,6 +34,19 @@ const annotationTextColor = 'black';
 const annotationLineColor = 'black';
 const annotationLineWidth = 2;
 const chartLineWidth = 3;
+
+
+/**
+ * Line chart code block function
+ *
+ * @param {string} language - The code block language
+ * @param {string[]} lines - The code block's text lines
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @returns {Object} The line chart element model
+ */
+export function lineChartCodeBlock(language, lines, options = {}) {
+    return chartCodeBlock(language, lines, options, validateLineChart, lineChartElements);
+}
 
 
 /**

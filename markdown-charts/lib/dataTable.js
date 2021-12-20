@@ -3,10 +3,24 @@
 
 /** @module lib/dataTable */
 
-import {compareValues, formatValue} from './util.js';
+import {chartCodeBlock, compareValues, formatValue} from './util.js';
 import {loadChartData} from './data.js';
 import {markdownElements} from '../../markdown-model/lib/elements.js';
 import {parseMarkdown} from '../../markdown-model/lib/parser.js';
+import {validateDataTable} from './model.js';
+
+
+/**
+ * Data table code block function
+ *
+ * @param {string} language - The code block language
+ * @param {string[]} lines - The code block's text lines
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @returns {Object} The data table element model
+ */
+export function dataTableCodeBlock(language, lines, options = {}) {
+    return chartCodeBlock(language, lines, options, validateDataTable, dataTableElements);
+}
 
 
 /**

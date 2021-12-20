@@ -3,7 +3,22 @@
 
 /** @module lib/barChart */
 
+import {chartCodeBlock} from './util.js';
 import {loadChartData} from './data.js';
+import {validateBarChart} from './model.js';
+
+
+/**
+ * Bar chart code block function
+ *
+ * @param {string} language - The code block language
+ * @param {string[]} lines - The code block's text lines
+ * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @returns {Object} The bar chart element model
+ */
+export function barChartCodeBlock(language, lines, options = {}) {
+    return chartCodeBlock(language, lines, options, validateBarChart, barChartElements);
+}
 
 
 /**

@@ -3,6 +3,9 @@
 
 /** @module lib/util */
 
+import {decodeQueryString} from '../../schema-markdown/lib/encode.js';
+import {renderElements} from '../../element-model/lib/elementModel.js';
+
 
 // JSDoc typedefs
 
@@ -181,4 +184,62 @@ export function parameterValue(param, minValue, maxValue) {
     }
 
     return minValue + param * (maxValue - minValue);
+}
+
+
+// Generic code block helper function
+export function chartCodeBlock(language, lines, options, validationFn, renderFn) {
+    // Decode and validate the chart model
+    let chartModel;
+    try {
+        chartModel = validationFn(decodeChartLines(lines));
+    } catch ({message}) {
+        return {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': `Error: ${message}`}}};
+    }
+
+    // Render the chart asynchronously
+    return {
+        'html': 'p',
+        'elem': !('width' in chartModel) ? null : {
+            'svg': 'svg',
+            'attr': {
+                'width': chartModel.width,
+                'height': chartModel.height
+            }
+        },
+        'callback': (parent) => {
+            renderFn(chartModel, options).
+                then((elements) => {
+                    renderElements(parent, elements);
+                }).
+                catch(({message}) => {
+                    renderElements(parent, {'html': 'pre', 'elem': {'text': `Error: ${message}`}});
+                });
+        }
+    };
+}
+
+
+// Chart code block regular expressions
+const rComment = /^\s*(?:#.*)?$/;
+const rKeyValue = /^\s*(?<key>.+?)\s*(:\s*(?<value>.*?)\s*)?$/;
+
+
+// Helper function to decode chart lines
+function decodeChartLines(lines) {
+    // Parse and URI-encode the chart model key/value pairs
+    const keyValues = [];
+    for (const line of lines) {
+        // Skip comment lines
+        if (line.match(rComment) !== null) {
+            continue;
+        }
+
+        // Split the key/value
+        const {key, value = ''} = line.match(rKeyValue).groups;
+        keyValues.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+    }
+
+    // Decode the chart model
+    return decodeQueryString(keyValues.join('&'));
 }

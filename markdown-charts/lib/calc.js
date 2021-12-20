@@ -9,7 +9,34 @@ import {validateType} from '../../schema-markdown/lib/schema.js';
 
 // The calc model's Schema Markdown
 const calcModelSmd = `\
-# The calculation language expression specification
+# The calculation script model
+struct CalcScript
+
+    # The calculation script's statements
+    CalcStatement[] statements
+
+
+# A calculation language statement
+union CalcStatement
+
+    # A variable assignment
+    CalcVariableAssignment assignment
+
+    # An expression
+    CalcExpr expression
+
+
+# A calculation language variable assignment statement
+struct CalcVariableAssignment
+
+    # The variable name
+    string name
+
+    # The expression to assign to the variable
+    CalcExpr expression
+
+
+# A calculation language expression
 union CalcExpr
 
     # A binary expression
@@ -101,6 +128,54 @@ export const calcModel = {
 };
 
 
+/**
+ * Validate a calculation script model
+ *
+ * @param {Object} script - The calculation script model
+ * @returns {Object} The validated calculation script model
+ */
+export function validateScript(script) {
+    return validateType(calcModel.types, 'CalcScript', script);
+}
+
+
+/**
+ * Validate a calculation expression model
+ *
+ * @param {Object} expr - The calculation expression model
+ * @returns {Object} The validated calculation expression model
+ */
+export function validateCalculation(expr) {
+    return validateType(calcModel.types, 'CalcExpr', expr);
+}
+
+
+// Binary operator map (op => fn)
+const binaryOperators = {
+    '+': (left, right) => left + right,
+    '&&': (left, right) => left && right,
+    '&': (left, right) => left + right,
+    '/': (left, right) => left / right,
+    '==': (left, right) => left === right,
+    '^': (left, right) => left ** right,
+    '>': (left, right) => left > right,
+    '>=': (left, right) => left >= right,
+    '<': (left, right) => left < right,
+    '<=': (left, right) => left <= right,
+    '%': (left, right) => left % right,
+    '*': (left, right) => left * right,
+    '||': (left, right) => left || right,
+    '-': (left, right) => left - right
+};
+
+
+// Unary operator map (op => fn)
+const unaryOperators = {
+    '-': (value) => -value,
+    '!': (value) => !value
+};
+
+
 // Function map (name => fn)
 const calcFunctions = {
     'abs': ([number]) => Math.abs(number),
@@ -152,60 +227,6 @@ const calcFunctions = {
 };
 
 
-// Binary operator map (op => fn)
-const binaryOperators = {
-    '+': (left, right) => left + right,
-    '&&': (left, right) => left && right,
-    '&': (left, right) => left + right,
-    '/': (left, right) => left / right,
-    '==': (left, right) => left === right,
-    '^': (left, right) => left ** right,
-    '>': (left, right) => left > right,
-    '>=': (left, right) => left >= right,
-    '<': (left, right) => left < right,
-    '<=': (left, right) => left <= right,
-    '%': (left, right) => left % right,
-    '*': (left, right) => left * right,
-    '||': (left, right) => left || right,
-    '-': (left, right) => left - right
-};
-
-
-// Unary operator map (op => fn)
-const unaryOperators = {
-    '-': (value) => -value,
-    '!': (value) => !value
-};
-
-
-// Calculation language expression regex
-const rCalcBinaryOp = new RegExp(`^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
-const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).join('|')})`);
-const rCalcFunctionOpen = /^\s*([A-Za-z_]\w+)\s*\(/;
-const rCalcFunctionSeparator = /^\s*,/;
-const rCalcFunctionClose = /^\s*\)/;
-const rCalcGroupOpen = /^\s*\(/;
-const rCalcGroupClose = /^\s*\)/;
-const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
-const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
-const rCalcStringEscape = /\\([\\'])/g;
-const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
-const rCalcStringDoubleEscape = /\\([\\"])/g;
-const rCalcVariable = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
-const rCalcVariableEscape = /\\([\\\]])/g;
-
-
-/**
- * Validate a calculation language model
- *
- * @param {Object} expr - The calculation language model
- * @returns {Object} The validated calculation language model
- */
-export function validateCalculation(expr) {
-    return validateType(calcModel.types, 'CalcExpr', expr);
-}
-
-
 /**
  * A calculation variable getter function
  *
@@ -216,11 +237,67 @@ export function validateCalculation(expr) {
 
 
 /**
+ * A calculation variable setter function
+ *
+ * @callback VariableSetter
+ * @param {string} name - The variable name
+ * @param value - The variable value
+ */
+
+
+/**
+ * Execute a calculation language script
+ *
+ * @param {Object} script - The calculation script model
+ * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
+ * @param {module:lib/calc~VariableSetter} [setVariable = null] - The variable setter function
+ * @returns The calculation script result
+ */
+export function executeScript(script, getVariable = null, setVariable = null) {
+    let result = null;
+
+    // The script variable getter function
+    const variables = {};
+    const getScriptVariable = (name) => {
+        if (name in variables) {
+            return variables[name];
+        } else if (getVariable !== null) {
+            return getVariable(name);
+        }
+        return null;
+    };
+
+    // Iterate each script statement
+    for (const statement of script.statements) {
+        // Assignment?
+        if ('assignment' in statement) {
+            // Compute the assignment expression result
+            result = executeCalculation(statement.assignment.expression, getScriptVariable);
+
+            // Set the variable - store in local scope if no setter provided
+            if (setVariable !== null) {
+                setVariable(statement.assignment.name, result);
+            } else {
+                variables[statement.assignment.name] = result;
+            }
+
+        // Expression
+        } else {
+            // if ('expression' in statement)
+            result = executeCalculation(statement.expression, getScriptVariable);
+        }
+    }
+
+    return result;
+}
+
+
+/**
  * Excecute a calculation language model
  *
- * @param {Object} expr - The calculation language model
+ * @param {Object} expr - The calculation expression model
  * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
- * @returns The calculation result
+ * @returns The calculation expression result
  */
 export function executeCalculation(expr, getVariable = null) {
     if ('binary' in expr) {
@@ -252,11 +329,89 @@ export function executeCalculation(expr, getVariable = null) {
 }
 
 
+// Calculation script regex
+const rScriptLineSplit = /\r?\n/;
+const rScriptContinuation = /\\\s*$/;
+const rScriptComment = /^\s*(?:#.*)?$/;
+const rScriptAssignment = /^\s*(?<name>[A-Za-z_]\w*)\s*=\s*(?<expr>.*)$/;
+
+
+/**
+ * Parse a calculation script
+ *
+ * @param {string|string[]} scriptText - The calculation script text
+ * @returns {Object} The calculation script model
+ */
+export function parseScript(scriptText) {
+    const script = {'statements': []};
+
+    // Process each line
+    const lines = Array.isArray(scriptText) ? scriptText : scriptText.split(rScriptLineSplit);
+    const lineContinuation = [];
+    for (const linePart of lines) {
+        // Line continuation?
+        const linePartNoContinuation = linePart.replace(rScriptContinuation, '');
+        if (lineContinuation.length || linePartNoContinuation !== linePart) {
+            lineContinuation.push(linePartNoContinuation);
+        }
+        if (linePartNoContinuation !== linePart) {
+            continue;
+        }
+        let line;
+        if (lineContinuation.length) {
+            line = lineContinuation.join('');
+            lineContinuation.length = 0;
+        } else {
+            line = linePart;
+        }
+
+        // Comment?
+        if (line.match(rScriptComment) !== null) {
+            continue;
+        }
+
+        // Assignment?
+        const matchAssignment = line.match(rScriptAssignment);
+        if (matchAssignment !== null) {
+            script.statements.push({
+                'assignment': {
+                    'name': matchAssignment.groups.name,
+                    'expression': parseCalculation(matchAssignment.groups.expr)
+                }
+            });
+            continue;
+        }
+
+        // Expression
+        script.statements.push({'expression': parseCalculation(line)});
+    }
+
+    return script;
+}
+
+
+// Calculation language expression regex
+const rCalcBinaryOp = new RegExp(`^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
+const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).join('|')})`);
+const rCalcFunctionOpen = /^\s*([A-Za-z_]\w+)\s*\(/;
+const rCalcFunctionSeparator = /^\s*,/;
+const rCalcFunctionClose = /^\s*\)/;
+const rCalcGroupOpen = /^\s*\(/;
+const rCalcGroupClose = /^\s*\)/;
+const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
+const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
+const rCalcStringEscape = /\\([\\'])/g;
+const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
+const rCalcStringDoubleEscape = /\\([\\"])/g;
+const rCalcVariable = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
+const rCalcVariableEscape = /\\([\\\]])/g;
+
+
 /**
  * Parse a calculation language expression
  *
  * @param {string} exprText - The calculation language expression
- * @returns {Object} The calculation language model
+ * @returns {Object} The calculation expression model
  */
 export function parseCalculation(exprText) {
     const [expr, nextText] = parseExpression(exprText);
