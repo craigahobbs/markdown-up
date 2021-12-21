@@ -22,8 +22,17 @@ union CalcStatement
     # A variable assignment
     CalcVariableAssignment assignment
 
-    # A function
+    # A function definition
     CalcFunction function
+
+    # A label definition
+    string label
+
+    # A jump (to label) statement
+    string jump
+
+    # A jump-if statement
+    CalcJumpIf jumpif
 
     # An expression
     CalcExpr expression
@@ -50,6 +59,16 @@ struct CalcFunction
 
     # The function's statements
     CalcStatement[] statements
+
+
+# A calculation language jump-if statement
+struct CalcJumpIf
+
+    # The label to jump to
+    string label
+
+    # The test expression
+    CalcExpr expression
 
 
 # A calculation language expression
@@ -174,10 +193,10 @@ const binaryOperators = {
     '/': (left, right) => left / right,
     '==': (left, right) => left === right,
     '^': (left, right) => left ** right,
-    '>': (left, right) => left > right,
     '>=': (left, right) => left >= right,
-    '<': (left, right) => left < right,
+    '>': (left, right) => left > right,
     '<=': (left, right) => left <= right,
+    '<': (left, right) => left < right,
     '%': (left, right) => left % right,
     '*': (left, right) => left * right,
     '||': (left, right) => left || right,
@@ -284,7 +303,10 @@ export function executeScript(script, getVariable = null, setVariable = null) {
     };
 
     // Iterate each script statement
-    for (const statement of script.statements) {
+    const {statements} = script;
+    for (let ixStatement = 0; ixStatement < statements.length; ixStatement++) {
+        const statement = statements[ixStatement];
+
         // Assignment?
         if ('assignment' in statement) {
             // Compute the assignment expression result
@@ -328,6 +350,37 @@ export function executeScript(script, getVariable = null, setVariable = null) {
                 setVariable(statement.function.name, userFunction);
             } else {
                 variables[statement.function.name] = userFunction;
+            }
+
+        // Label?
+        } else if ('label' in statement) {
+            // Do nothing
+
+        // Jump?
+        } else if ('jump' in statement) {
+            // Find the label
+            const jumpLabel = statement.jump;
+            const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
+            if (ixJump === -1) {
+                throw new Error(`Jump label "${jumpLabel}" not found`);
+            }
+
+            // Set the new execution statement index
+            ixStatement = ixJump;
+
+        // Jump-if?
+        } else if ('jumpif' in statement) {
+            // Execute the test expression and jump, if true
+            if (executeCalculation(statement.jumpif.expression, getScriptVariable)) {
+                // Find the label
+                const jumpLabel = statement.jumpif.label;
+                const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
+                if (ixJump === -1) {
+                    throw new Error(`Jump label "${jumpLabel}" not found`);
+                }
+
+                // Set the new execution statement index
+                ixStatement = ixJump;
             }
 
         // Expression
@@ -386,6 +439,9 @@ const rScriptAssignment = /^\s*(?<name>[A-Za-z_]\w*)\s*=\s*(?<expr>.*)$/;
 const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)?\s*\)\s*$/;
 const rScriptFunctionArgSplit = /\s*,\s*/;
 const rScriptFunctionEnd = /^endfunction\s*$/;
+const rScriptLabel = /^\s*(?<name>[A-Za-z_]\w*)\s*:\s*$/;
+const rScriptJump = /^\s*jump\s+(?<name>[A-Za-z_]\w*)\s*$/;
+const rScriptJumpIf = /^\s*jumpif\s*\((?<expr>.+)\)\s+(?<name>[A-Za-z_]\w*)\s*$/;
 
 
 /**
@@ -465,6 +521,32 @@ export function parseScript(scriptText) {
                 throw new Error('Invalid function end statement (no matching function definition)');
             }
             functionDef = null;
+            continue;
+        }
+
+        // Label definition?
+        const matchLabel = line.match(rScriptLabel);
+        if (matchLabel !== null) {
+            statements.push({'label': matchLabel.groups.name});
+            continue;
+        }
+
+        // Jump definition?
+        const matchJump = line.match(rScriptJump);
+        if (matchJump !== null) {
+            statements.push({'jump': matchJump.groups.name});
+            continue;
+        }
+
+        // JumpIf definition?
+        const matchJumpIf = line.match(rScriptJumpIf);
+        if (matchJumpIf !== null) {
+            statements.push({
+                'jumpif': {
+                    'label': matchJumpIf.groups.name,
+                    'expression': parseCalculation(matchJumpIf.groups.expr)
+                }
+            });
             continue;
         }
 

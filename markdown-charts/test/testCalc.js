@@ -3,34 +3,16 @@
 
 /* eslint-disable id-length */
 
-import {executeCalculation, executeScript, parseCalculation, validateCalculation, validateScript} from '../lib/calc.js';
+import {executeCalculation, executeScript, parseCalculation, parseScript, validateCalculation, validateScript} from '../lib/calc.js';
 import test from '../ava';
 
 
 test('executeScript', (t) => {
     const script = validateScript({
         'statements': [
-            {
-                'assignment': {
-                    'name': 'a',
-                    'expression': {'number': 5}
-                }
-            },
-            {
-                'assignment': {
-                    'name': 'b',
-                    'expression': {'number': 7}
-                }
-            },
-            {
-                'expression': {
-                    'binary': {
-                        'operator': '+',
-                        'left': {'variable': 'a'},
-                        'right': {'variable': 'b'}
-                    }
-                }
-            }
+            {'assignment': {'name': 'a', 'expression': {'number': 5}}},
+            {'assignment': {'name': 'b', 'expression': {'number': 7}}},
+            {'expression': {'binary': {'operator': '+', 'left': {'variable': 'a'}, 'right': {'variable': 'b'}}}}
         ]
     });
     t.is(executeScript(script), 12);
@@ -45,32 +27,61 @@ test('executeScript, function', (t) => {
                     'name': 'multiplyNumbers',
                     'arguments': ['a', 'b'],
                     'statements': [
-                        {
-                            'expression': {
-                                'binary': {
-                                    'operator': '*',
-                                    'left': {'variable': 'a'},
-                                    'right': {'variable': 'b'}
-                                }
-                            }
-                        }
+                        {'expression': {'binary': {'operator': '*', 'left': {'variable': 'a'}, 'right': {'variable': 'b'}}}}
                     ]
                 }
             },
-            {
-                'expression': {
-                    'function': {
-                        'name': 'multiplyNumbers',
-                        'arguments': [
-                            {'number': 5},
-                            {'number': 7}
-                        ]
-                    }
-                }
-            }
+            {'expression': {'function': {'name': 'multiplyNumbers', 'arguments': [{'number': 5}, {'number': 7}]}}}
         ]
     });
     t.is(executeScript(script), 35);
+});
+
+
+test('executeScript, jump', (t) => {
+    const script = validateScript({
+        'statements': [
+            {'assignment': {'name': 'a', 'expression': {'number': 5}}},
+            {'jump': 'lab2'},
+            {'label': 'lab'},
+            {'assignment': {'name': 'a', 'expression': {'number': 6}}},
+            {'jump': 'lab3'},
+            {'label': 'lab2'},
+            {'assignment': {'name': 'a', 'expression': {'number': 7}}},
+            {'jump': 'lab'},
+            {'label': 'lab3'},
+            {'expression': {'variable': 'a'}}
+        ]
+    });
+    t.is(executeScript(script), 6);
+});
+
+
+test('executeScript, jumpif', (t) => {
+    const script = validateScript({
+        'statements': [
+            {'assignment': {'name': 'n', 'expression': {'number': 10}}},
+            {'assignment': {'name': 'i', 'expression': {'number': 0}}},
+            {'assignment': {'name': 'a', 'expression': {'number': 0}}},
+            {'assignment': {'name': 'b', 'expression': {'number': 1}}},
+            {'label': 'fib'},
+            {'jumpif': {
+                'label': 'fibend',
+                'expression': {'binary': {'operator': '>=', 'left': {'variable': 'i'}, 'right': {'variable': 'n'}}}
+            }},
+            {'assignment': {'name': 'tmp', 'expression': {'variable': 'b'}}},
+            {'assignment': {
+                'name': 'b',
+                'expression': {'binary': {'operator': '+', 'left': {'variable': 'a'}, 'right': {'variable': 'b'}}}
+            }},
+            {'assignment': {'name': 'a', 'expression': {'variable': 'tmp'}}},
+            {'assignment': {'name': 'i', 'expression': {'binary': {'operator': '+', 'left': {'variable': 'i'}, 'right': {'number': 1}}}}},
+            {'jump': 'fib'},
+            {'label': 'fibend'},
+            {'expression': {'variable': 'a'}}
+        ]
+    });
+    t.is(executeScript(script), 55);
 });
 
 
@@ -132,6 +143,60 @@ test('executeCalculation, function unknown', (t) => {
         errorMessage = message;
     }
     t.is(errorMessage, 'Undefined function "fnUnknown"');
+});
+
+
+test('parseScript, jumpif', (t) => {
+    const script = validateScript(parseScript(`
+n = 10
+i = 0
+a = 0
+b = 1
+
+fib:
+    jumpif ([i] >= [n]) fibend
+    tmp = [b]
+    b = [a] + [b]
+    a = [tmp]
+    i = [i] + 1
+    jump fib
+fibend:
+
+[a]
+`));
+    t.deepEqual(script, {
+        'statements': [
+            {'assignment': {'name': 'n', 'expression': {'number': 10}}},
+            {'assignment': {'name': 'i', 'expression': {'number': 0}}},
+            {'assignment': {'name': 'a', 'expression': {'number': 0}}},
+            {'assignment': {'name': 'b', 'expression': {'number': 1}}},
+            {'label': 'fib'},
+            {
+                'jumpif': {
+                    'label': 'fibend',
+                    'expression': {'binary': {'operator': '>=', 'left': {'variable': 'i'}, 'right': {'variable': 'n'}}}
+                }
+            },
+            {'assignment': {'name': 'tmp', 'expression': {'variable': 'b'}}},
+            {
+                'assignment': {
+                    'name': 'b',
+                    'expression': {'binary': {'operator': '+', 'left': {'variable': 'a'}, 'right': {'variable': 'b'}}}
+                }
+            },
+            {'assignment': {'name': 'a', 'expression': {'variable': 'tmp'}}},
+            {
+                'assignment': {
+                    'name': 'i',
+                    'expression': {'binary': {'operator': '+', 'left': {'variable': 'i'}, 'right': {'number': 1}}}
+                }
+            },
+            {'jump': 'fib'},
+            {'label': 'fibend'},
+            {'expression': {'variable': 'a'}}
+        ]
+    });
+    t.is(executeScript(script), 55);
 });
 
 
