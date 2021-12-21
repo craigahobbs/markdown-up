@@ -22,6 +22,9 @@ union CalcStatement
     # A variable assignment
     CalcVariableAssignment assignment
 
+    # A function
+    CalcFunction function
+
     # An expression
     CalcExpr expression
 
@@ -34,6 +37,19 @@ struct CalcVariableAssignment
 
     # The expression to assign to the variable
     CalcExpr expression
+
+
+# A calculation language function statement
+struct CalcFunction
+
+    # The function name
+    string name
+
+    # The function's argument names
+    optional string[len > 0] arguments
+
+    # The function's statements
+    CalcStatement[] statements
 
 
 # A calculation language expression
@@ -108,8 +124,8 @@ enum CalcExprUnaryOperator
 # A calculation language function expression
 struct CalcExprFunction
 
-    # The function
-    string function
+    # The function name
+    string name
 
     # The function arguments
     optional CalcExpr[] arguments
@@ -281,6 +297,39 @@ export function executeScript(script, getVariable = null, setVariable = null) {
                 variables[statement.assignment.name] = result;
             }
 
+        // Function?
+        } else if ('function' in statement) {
+            // Create the user function
+            const userFunction = (args) => {
+                // Create the function variable scope
+                const functionVariables = {};
+                if ('arguments' in statement.function) {
+                    const argNames = statement.function.arguments;
+                    for (let ixArg = 0; ixArg < argNames.length; ixArg++) {
+                        variables[argNames[ixArg]] = ixArg < args.length ? args[ixArg] : null;
+                    }
+                }
+                const getFunctionVariable = (name) => {
+                    if (name in functionVariables) {
+                        return functionVariables[name];
+                    }
+                    return getScriptVariable(name);
+                };
+                const setFunctionVariable = (name, value) => {
+                    functionVariables[name] = value;
+                };
+
+                // Execute the function statements
+                return executeScript(statement.function, getFunctionVariable, setFunctionVariable);
+            };
+
+            // Set the function variable - store in local scope if no setter provided
+            if (setVariable !== null) {
+                setVariable(statement.function.name, userFunction);
+            } else {
+                variables[statement.function.name] = userFunction;
+            }
+
         // Expression
         } else {
             // if ('expression' in statement)
@@ -310,7 +359,7 @@ export function executeCalculation(expr, getVariable = null) {
             executeCalculation(expr.unary.expr, getVariable)
         );
     } else if ('function' in expr) {
-        const functionName = expr.function.function;
+        const functionName = expr.function.name;
         let functionValue = getVariable !== null ? getVariable(functionName) : null;
         if (functionValue === null) {
             if (!(functionName in calcFunctions)) {
@@ -334,6 +383,9 @@ const rScriptLineSplit = /\r?\n/;
 const rScriptContinuation = /\\\s*$/;
 const rScriptComment = /^\s*(?:#.*)?$/;
 const rScriptAssignment = /^\s*(?<name>[A-Za-z_]\w*)\s*=\s*(?<expr>.*)$/;
+const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)\s*\)\s*$/;
+const rScriptFunctionArgSplit = /\s*,\s*/;
+const rScriptFunctionEnd = /^endfunction\s*$/;
 
 
 /**
@@ -348,7 +400,10 @@ export function parseScript(scriptText) {
     // Process each line
     const lines = Array.isArray(scriptText) ? scriptText : scriptText.split(rScriptLineSplit);
     const lineContinuation = [];
+    let functionDef = null;
     for (const linePart of lines) {
+        const statements = (functionDef !== null ? functionDef.function.statements : script.statements);
+
         // Line continuation?
         const linePartNoContinuation = linePart.replace(rScriptContinuation, '');
         if (lineContinuation.length || linePartNoContinuation !== linePart) {
@@ -373,7 +428,7 @@ export function parseScript(scriptText) {
         // Assignment?
         const matchAssignment = line.match(rScriptAssignment);
         if (matchAssignment !== null) {
-            script.statements.push({
+            statements.push({
                 'assignment': {
                     'name': matchAssignment.groups.name,
                     'expression': parseCalculation(matchAssignment.groups.expr)
@@ -382,8 +437,38 @@ export function parseScript(scriptText) {
             continue;
         }
 
+        // Function definition begin?
+        const matchFunctionBegin = line.match(rScriptFunctionBegin);
+        if (matchFunctionBegin !== null) {
+            // Nested function definitions are not allowed
+            if (functionDef !== null) {
+                throw new Error(`Nested function definition "${line}"`);
+            }
+
+            // Add the function definition statement
+            functionDef = {
+                'function': {
+                    'name': matchFunctionBegin.groups.name,
+                    'arguments': matchFunctionBegin.groups.args.split(rScriptFunctionArgSplit),
+                    'statements': []
+                }
+            };
+            statements.push(functionDef);
+            continue;
+        }
+
+        // Function definition end?
+        const matchFunctionEnd = line.match(rScriptFunctionEnd);
+        if (matchFunctionEnd !== null) {
+            if (functionDef === null) {
+                throw new Error('Invalid function end statement (no matching function definition)');
+            }
+            functionDef = null;
+            continue;
+        }
+
         // Expression
-        script.statements.push({'expression': parseCalculation(line)});
+        statements.push({'expression': parseCalculation(line)});
     }
 
     return script;
@@ -441,7 +526,7 @@ function parseSubExpression(exprText) {
         if (matchGroupClose === null) {
             throw new Error(`Unmatched parenthesis "${exprText}"`);
         }
-        return [expr, nextText.slice(matchGroupOpen[0].length)];
+        return [expr, nextText.slice(matchGroupClose[0].length)];
     }
 
     // Unary operator?
@@ -489,7 +574,7 @@ function parseSubExpression(exprText) {
 
         const fnExpr = {
             'function': {
-                'function': matchFunctionOpen[1],
+                'name': matchFunctionOpen[1],
                 'arguments': args
             }
         };

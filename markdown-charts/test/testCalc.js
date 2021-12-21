@@ -37,6 +37,43 @@ test('executeScript', (t) => {
 });
 
 
+test('executeScript, function', (t) => {
+    const script = validateScript({
+        'statements': [
+            {
+                'function': {
+                    'name': 'multiplyNumbers',
+                    'arguments': ['a', 'b'],
+                    'statements': [
+                        {
+                            'expression': {
+                                'binary': {
+                                    'operator': '*',
+                                    'left': {'variable': 'a'},
+                                    'right': {'variable': 'b'}
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                'expression': {
+                    'function': {
+                        'name': 'multiplyNumbers',
+                        'arguments': [
+                            {'number': 5},
+                            {'number': 7}
+                        ]
+                    }
+                }
+            }
+        ]
+    });
+    t.is(executeScript(script), 35);
+});
+
+
 test('executeCalculation', (t) => {
     const calc = validateCalculation({
         'binary': {
@@ -48,7 +85,7 @@ test('executeCalculation', (t) => {
                     'left': {'number': 3},
                     'right': {
                         'function': {
-                            'function': 'ceil',
+                            'name': 'ceil',
                             'arguments': [
                                 {'variable': 'varName'}
                             ]
@@ -67,7 +104,7 @@ test('executeCalculation', (t) => {
 test('executeCalculation, function variable', (t) => {
     const calc = validateCalculation({
         'function': {
-            'function': 'fnName',
+            'name': 'fnName',
             'arguments': [
                 {'number': 3}
             ]
@@ -82,7 +119,7 @@ test('executeCalculation, function variable', (t) => {
 test('executeCalculation, function unknown', (t) => {
     const calc = validateCalculation({
         'function': {
-            'function': 'fnUnknown',
+            'name': 'fnUnknown',
             'arguments': []
         }
     });
@@ -133,6 +170,19 @@ test('parseCalculation, group', (t) => {
         }
     });
     t.is(executeCalculation(expr), 50);
+});
+
+
+test('parseCalculation, group nested', (t) => {
+    const expr = parseCalculation('(1 + (2))');
+    t.deepEqual(validateCalculation(expr), {
+        'binary': {
+            'operator': '+',
+            'left': {'number': 1},
+            'right': {'number': 2}
+        }
+    });
+    t.is(executeCalculation(expr), 3);
 });
 
 
