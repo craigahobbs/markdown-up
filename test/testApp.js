@@ -692,6 +692,47 @@ test('markdown-charts, data table', async (t) => {
 });
 
 
+test('markdown-charts, drawing', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# Drawing
+
+~~~ drawing
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'Drawing',
+            'elements': [
+                null,
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'drawing'}, 'elem': [{'text': 'Drawing'}]},
+                    {'html': 'p', 'elem': {
+                        'svg': 'svg',
+                        'attr': {
+                            'height': 200,
+                            'width': 300
+                        },
+                        'elem': null
+                    }}
+                ],
+                menuBurgerElements(),
+                null
+            ]
+        }
+    );
+});
+
+
 test('markdown-charts, variables', async (t) => {
     const {window} = new JSDOM();
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
