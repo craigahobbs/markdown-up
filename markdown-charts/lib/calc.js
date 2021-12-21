@@ -383,7 +383,7 @@ const rScriptLineSplit = /\r?\n/;
 const rScriptContinuation = /\\\s*$/;
 const rScriptComment = /^\s*(?:#.*)?$/;
 const rScriptAssignment = /^\s*(?<name>[A-Za-z_]\w*)\s*=\s*(?<expr>.*)$/;
-const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)\s*\)\s*$/;
+const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)?\s*\)\s*$/;
 const rScriptFunctionArgSplit = /\s*,\s*/;
 const rScriptFunctionEnd = /^endfunction\s*$/;
 
@@ -449,7 +449,8 @@ export function parseScript(scriptText) {
             functionDef = {
                 'function': {
                     'name': matchFunctionBegin.groups.name,
-                    'arguments': matchFunctionBegin.groups.args.split(rScriptFunctionArgSplit),
+                    'arguments': typeof matchFunctionBegin.groups.args !== 'undefined'
+                        ? matchFunctionBegin.groups.args.split(rScriptFunctionArgSplit) : [],
                     'statements': []
                 }
             };
