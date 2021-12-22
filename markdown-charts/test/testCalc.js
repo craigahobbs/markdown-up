@@ -85,6 +85,26 @@ test('executeScript, jumpif', (t) => {
 });
 
 
+test('executeScript, maxStatements', (t) => {
+    const script = validateScript({
+        'statements': [
+            {'expression': {'variable': 'a'}},
+            {'expression': {'variable': 'b'}},
+            {'expression': {'variable': 'c'}}
+        ]
+    });
+    let errorMessage = null;
+    try {
+        executeScript(script, null, null, 2);
+    } catch ({message}) {
+        errorMessage = message;
+    }
+    t.is(errorMessage, 'Maximum number of script statements exceeded (2)');
+    t.is(executeScript(script, null, null, 3), null);
+    t.is(executeScript(script, null, null, 0), null);
+});
+
+
 test('executeCalculation', (t) => {
     const calc = validateCalculation({
         'binary': {

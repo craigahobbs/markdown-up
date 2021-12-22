@@ -288,71 +288,69 @@ const calcFunctions = {
  * @param {Object} script - The calculation script model
  * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
  * @param {module:lib/calc~VariableSetter} [setVariable = null] - The variable setter function
+ * @param {number} [maxStatements = 1000000] - The maximum number of statements, 0 for no maximum
  * @returns The calculation script result
  */
-export function executeScript(script, getVariable = null, setVariable = null) {
-    let result = null;
-
-    // The script variable getter function
-    const variables = {};
+export function executeScript(script, getVariable = null, setVariable = null, maxStatements = 1000000) {
+    // The script variable getter and setter functions
+    const variables = setVariable === null ? {} : null;
     const getScriptVariable = (name) => {
-        if (name in variables) {
+        if (variables !== null && name in variables) {
             return variables[name];
         } else if (getVariable !== null) {
             return getVariable(name);
         }
         return null;
     };
+    const setScriptVariable = (name, value) => {
+        if (variables !== null) {
+            variables[name] = value;
+        } else {
+            setVariable(name, value);
+        }
+    };
+
+    // The statement counter
+    let statementCount = 0;
+    const statementCounter = () => {
+        statementCount++;
+        if (maxStatements !== 0 && statementCount > maxStatements) {
+            throw new Error(`Maximum number of script statements exceeded (${maxStatements})`);
+        }
+    };
+
+    return executeScriptHelper(script.statements, getScriptVariable, setScriptVariable, statementCounter);
+}
+
+
+export function executeScriptHelper(statements, getVariable, setVariable, statementCounter) {
+    let result = null;
 
     // Iterate each script statement
-    const {statements} = script;
     for (let ixStatement = 0; ixStatement < statements.length; ixStatement++) {
         const statement = statements[ixStatement];
 
+        // Increment the statement counter
+        statementCounter();
+
         // Assignment?
         if ('assignment' in statement) {
-            // Compute the assignment expression result
-            result = executeCalculation(statement.assignment.expression, getScriptVariable);
-
-            // Set the variable - store in local scope if no setter provided
-            if (setVariable !== null) {
-                setVariable(statement.assignment.name, result);
-            } else {
-                variables[statement.assignment.name] = result;
-            }
+            result = executeCalculation(statement.assignment.expression, getVariable);
+            setVariable(statement.assignment.name, result);
 
         // Function?
         } else if ('function' in statement) {
-            // Create the user function
             const userFunction = (args) => {
-                // Create the function variable scope
-                const functionVariables = {};
-                if ('arguments' in statement.function) {
-                    const argNames = statement.function.arguments;
-                    for (let ixArg = 0; ixArg < argNames.length; ixArg++) {
-                        variables[argNames[ixArg]] = ixArg < args.length ? args[ixArg] : null;
-                    }
-                }
-                const getFunctionVariable = (name) => {
-                    if (name in functionVariables) {
-                        return functionVariables[name];
-                    }
-                    return getScriptVariable(name);
-                };
+                const functionVariables = Object.fromEntries(
+                    statement.function.arguments.map((arg, ixArg) => [arg, ixArg < args.length ? args[ixArg] : null])
+                );
+                const getFunctionVariable = (name) => (name in functionVariables ? functionVariables[name] : getVariable(name));
                 const setFunctionVariable = (name, value) => {
                     functionVariables[name] = value;
                 };
-
-                // Execute the function statements
-                return executeScript(statement.function, getFunctionVariable, setFunctionVariable);
+                return executeScriptHelper(statement.function.statements, getFunctionVariable, setFunctionVariable, statementCounter);
             };
-
-            // Set the function variable - store in local scope if no setter provided
-            if (setVariable !== null) {
-                setVariable(statement.function.name, userFunction);
-            } else {
-                variables[statement.function.name] = userFunction;
-            }
+            setVariable(statement.function.name, userFunction);
 
         // Label?
         } else if ('label' in statement) {
@@ -373,7 +371,7 @@ export function executeScript(script, getVariable = null, setVariable = null) {
         // Jump-if?
         } else if ('jumpif' in statement) {
             // Execute the test expression and jump, if true
-            if (executeCalculation(statement.jumpif.expression, getScriptVariable)) {
+            if (executeCalculation(statement.jumpif.expression, getVariable)) {
                 // Find the label
                 const jumpLabel = statement.jumpif.label;
                 const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
@@ -388,7 +386,7 @@ export function executeScript(script, getVariable = null, setVariable = null) {
         // Expression
         } else {
             // if ('expression' in statement)
-            result = executeCalculation(statement.expression, getScriptVariable);
+            result = executeCalculation(statement.expression, getVariable);
         }
     }
 
