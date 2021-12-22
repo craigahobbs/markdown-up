@@ -341,9 +341,13 @@ export function executeScriptHelper(statements, getVariable, setVariable, statem
         // Function?
         } else if ('function' in statement) {
             const userFunction = (args) => {
-                const functionVariables = Object.fromEntries(
-                    statement.function.arguments.map((arg, ixArg) => [arg, ixArg < args.length ? args[ixArg] : null])
-                );
+                const functionVariables = {};
+                const {'arguments': argumentNames = null} = statement.function;
+                if (argumentNames !== null) {
+                    for (let ixArg = 0; ixArg < argumentNames.length; ixArg++) {
+                        functionVariables[argumentNames[ixArg]] = ixArg < args.length ? args[ixArg] : null;
+                    }
+                }
                 const getFunctionVariable = (name) => (name in functionVariables ? functionVariables[name] : getVariable(name));
                 const setFunctionVariable = (name, value) => {
                     functionVariables[name] = value;
@@ -370,7 +374,7 @@ export function executeScriptHelper(statements, getVariable, setVariable, statem
 
         // Jump-if?
         } else if ('jumpif' in statement) {
-            // Execute the test expression and jump, if true
+            // Execute the test expression and jump if true
             if (executeCalculation(statement.jumpif.expression, getVariable)) {
                 // Find the label
                 const jumpLabel = statement.jumpif.label;
@@ -408,9 +412,7 @@ export function executeCalculation(expr, getVariable = null) {
             executeCalculation(expr.binary.right, getVariable)
         );
     } else if ('unary' in expr) {
-        return unaryOperators[expr.unary.operator](
-            executeCalculation(expr.unary.expr, getVariable)
-        );
+        return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, getVariable));
     } else if ('function' in expr) {
         const functionName = expr.function.name;
         let functionValue = getVariable !== null ? getVariable(functionName) : null;

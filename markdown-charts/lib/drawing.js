@@ -17,25 +17,18 @@ import {getFieldValue} from './util.js';
  */
 // eslint-disable-next-line no-unused-vars
 export function drawingCodeBlock(language, lines, options = {}) {
-    // The geometry state
-    const pathParts = [];
-
     // Setup global variables and functions
+    const geoCtx = new GeoContext();
     const variables = {
         // Drawing width and height
         'drawingWidth': 300,
         'drawingHeight': 200,
 
-        // Path functions
-        'pathMoveTo': ([px, py]) => {
-            pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
-        },
-        'pathLineTo': ([px, py]) => {
-            pathParts.push(`L ${px.toFixed(6)} ${py.toFixed(6)}`);
-        },
-        'pathClose': () => {
-            pathParts.push('Z');
-        }
+        // Geometry functions
+        'path': ([stroke, strokeWidth, fill]) => geoCtx.path(stroke, strokeWidth, fill),
+        'pathMoveTo': ([px, py]) => geoCtx.pathMoveTo(px, py),
+        'pathLineTo': ([px, py]) => geoCtx.pathLineTo(px, py),
+        'pathClose': () => geoCtx.pathClose()
     };
     const getVariable = (name) => {
         if (name in variables) {
@@ -52,6 +45,7 @@ export function drawingCodeBlock(language, lines, options = {}) {
     // Execute the calculation script
     const scriptModel = parseScript(lines);
     executeScript(scriptModel, getVariable, setVariable);
+    geoCtx.finish();
 
     // Render the drawing
     return {
@@ -62,15 +56,54 @@ export function drawingCodeBlock(language, lines, options = {}) {
                 'width': variables.drawingWidth,
                 'height': variables.drawingHeight
             },
-            'elem': pathParts.length === 0 ? null : {
-                'svg': 'path',
-                'attr': {
-                    'fill': 'none',
-                    'stroke': 'black',
-                    'stroke-width': 1,
-                    'd': pathParts.join(' ')
-                }
-            }
+            'elem': geoCtx.elements
         }
     };
+}
+
+
+class GeoContext {
+    constructor() {
+        this.elements = [];
+        this.pathStroke = 'black';
+        this.pathStrokeWidth = 1;
+        this.pathFill = 'none';
+        this.pathParts = [];
+    }
+
+    finish() {
+        if (this.pathParts.length > 0) {
+            this.elements.push({
+                'svg': 'path',
+                'attr': {
+                    'fill': this.pathFill,
+                    'stroke': this.pathStroke,
+                    'stroke-width': this.pathStrokeWidth,
+                    'd': this.pathParts.join(' ')
+                }
+            });
+            this.pathParts.length = 0;
+        }
+    }
+
+    path(stroke = 'black', strokeWidth = 1, fill = 'none') {
+        if (stroke !== this.pathStroke || strokeWidth !== this.pathStrokeWidth || fill !== this.pathFill) {
+            this.finish();
+            this.pathStroke = stroke;
+            this.pathStrokeWidth = strokeWidth;
+            this.pathFill = fill;
+        }
+    }
+
+    pathMoveTo(px = 0, py = 0) {
+        this.pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
+    }
+
+    pathLineTo(px = 0, py = 0) {
+        this.pathParts.push(`L ${px.toFixed(6)} ${py.toFixed(6)}`);
+    }
+
+    pathClose() {
+        this.pathParts.push('Z');
+    }
 }
