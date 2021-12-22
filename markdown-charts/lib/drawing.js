@@ -25,10 +25,13 @@ export function drawingCodeBlock(language, lines, options = {}) {
         'drawingHeight': 200,
 
         // Geometry functions
-        'path': ([stroke, strokeWidth, fill]) => geoCtx.path(stroke, strokeWidth, fill),
-        'pathMoveTo': ([px, py]) => geoCtx.pathMoveTo(px, py),
-        'pathLineTo': ([px, py]) => geoCtx.pathLineTo(px, py),
-        'pathClose': () => geoCtx.pathClose()
+        'lineTo': ([px, py]) => geoCtx.lineTo(px, py),
+        'moveTo': ([px, py]) => geoCtx.moveTo(px, py),
+        'pathClose': () => geoCtx.pathClose(),
+        'pathFill': ([fill]) => geoCtx.setPathFill(fill),
+        'pathStroke': ([stroke]) => geoCtx.setPathStroke(stroke),
+        'pathStrokeWidth': ([strokeWidth]) => geoCtx.setPathStrokeWidth(strokeWidth),
+        'pathStrokeDashArray': ([strokeDashArray]) => geoCtx.setPathStrokeDashArray(strokeDashArray)
     };
     const getVariable = (name) => {
         if (name in variables) {
@@ -67,6 +70,7 @@ class GeoContext {
         this.elements = [];
         this.pathStroke = 'black';
         this.pathStrokeWidth = 1;
+        this.pathStrokeDashArray = 'none';
         this.pathFill = 'none';
         this.pathParts = [];
     }
@@ -79,6 +83,7 @@ class GeoContext {
                     'fill': this.pathFill,
                     'stroke': this.pathStroke,
                     'stroke-width': this.pathStrokeWidth,
+                    'stroke-dasharray': this.pathStrokeDashArray,
                     'd': this.pathParts.join(' ')
                 }
             });
@@ -86,24 +91,43 @@ class GeoContext {
         }
     }
 
-    path(stroke = 'black', strokeWidth = 1, fill = 'none') {
-        if (stroke !== this.pathStroke || strokeWidth !== this.pathStrokeWidth || fill !== this.pathFill) {
+    pathClose() {
+        this.pathParts.push('Z');
+    }
+
+    setPathFill(fill) {
+        if (fill !== this.pathFill) {
             this.finish();
-            this.pathStroke = stroke;
-            this.pathStrokeWidth = strokeWidth;
             this.pathFill = fill;
         }
     }
 
-    pathMoveTo(px = 0, py = 0) {
-        this.pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
-    }
-
-    pathLineTo(px = 0, py = 0) {
+    lineTo(px = 0, py = 0) {
         this.pathParts.push(`L ${px.toFixed(6)} ${py.toFixed(6)}`);
     }
 
-    pathClose() {
-        this.pathParts.push('Z');
+    moveTo(px = 0, py = 0) {
+        this.pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
+    }
+
+    setPathStroke(stroke) {
+        if (stroke !== this.pathStroke) {
+            this.finish();
+            this.pathStroke = stroke;
+        }
+    }
+
+    setPathStrokeWidth(strokeWidth) {
+        if (strokeWidth !== this.pathStrokeWidth) {
+            this.finish();
+            this.pathStrokeWidth = strokeWidth;
+        }
+    }
+
+    setPathStrokeDashArray(strokeDashArray) {
+        if (strokeDashArray !== this.pathStrokeDashArray) {
+            this.finish();
+            this.pathStrokeDashArray = strokeDashArray;
+        }
     }
 }
