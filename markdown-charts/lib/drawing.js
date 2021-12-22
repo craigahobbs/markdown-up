@@ -28,10 +28,9 @@ export function drawingCodeBlock(language, lines, options = {}) {
         'lineTo': ([px, py]) => geoCtx.lineTo(px, py),
         'moveTo': ([px, py]) => geoCtx.moveTo(px, py),
         'pathClose': () => geoCtx.pathClose(),
-        'pathFill': ([fill]) => geoCtx.setPathFill(fill),
-        'pathStroke': ([stroke]) => geoCtx.setPathStroke(stroke),
-        'pathStrokeWidth': ([strokeWidth]) => geoCtx.setPathStrokeWidth(strokeWidth),
-        'pathStrokeDashArray': ([strokeDashArray]) => geoCtx.setPathStrokeDashArray(strokeDashArray)
+        // eslint-disable-next-line id-length
+        'rect': ([x, y, w, h, rx, ry]) => geoCtx.rect(x, y, w, h, rx, ry),
+        'setStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => geoCtx.setStyle(stroke, strokeWidth, fill, strokeDashArray)
     };
     const getVariable = (name) => {
         if (name in variables) {
@@ -68,10 +67,10 @@ export function drawingCodeBlock(language, lines, options = {}) {
 class GeoContext {
     constructor() {
         this.elements = [];
-        this.pathStroke = 'black';
-        this.pathStrokeWidth = 1;
-        this.pathStrokeDashArray = 'none';
-        this.pathFill = 'none';
+        this.stroke = 'black';
+        this.strokeWidth = 1;
+        this.strokeDashArray = 'none';
+        this.fill = 'none';
         this.pathParts = [];
     }
 
@@ -80,10 +79,10 @@ class GeoContext {
             this.elements.push({
                 'svg': 'path',
                 'attr': {
-                    'fill': this.pathFill,
-                    'stroke': this.pathStroke,
-                    'stroke-width': this.pathStrokeWidth,
-                    'stroke-dasharray': this.pathStrokeDashArray,
+                    'fill': this.fill,
+                    'stroke': this.stroke,
+                    'stroke-width': this.strokeWidth,
+                    'stroke-dasharray': this.strokeDashArray,
                     'd': this.pathParts.join(' ')
                 }
             });
@@ -95,13 +94,6 @@ class GeoContext {
         this.pathParts.push('Z');
     }
 
-    setPathFill(fill) {
-        if (fill !== this.pathFill) {
-            this.finish();
-            this.pathFill = fill;
-        }
-    }
-
     lineTo(px = 0, py = 0) {
         this.pathParts.push(`L ${px.toFixed(6)} ${py.toFixed(6)}`);
     }
@@ -110,24 +102,38 @@ class GeoContext {
         this.pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
     }
 
-    setPathStroke(stroke) {
-        if (stroke !== this.pathStroke) {
-            this.finish();
-            this.pathStroke = stroke;
+    // eslint-disable-next-line id-length
+    rect(x = 0, y = 0, width = 60, height = 40, rx = null, ry = null) {
+        this.finish();
+        const element = {
+            'svg': 'rect',
+            'attr': {
+                'fill': this.fill,
+                'stroke': this.stroke,
+                'stroke-width': this.strokeWidth,
+                'stroke-dasharray': this.strokeDashArray,
+                'x': x,
+                'y': y,
+                'width': width,
+                'height': height
+            }
+        };
+        if (rx !== null) {
+            element.attr.rx = rx;
         }
+        if (ry !== null) {
+            element.attr.ry = ry;
+        }
+        this.elements.push(element);
     }
 
-    setPathStrokeWidth(strokeWidth) {
-        if (strokeWidth !== this.pathStrokeWidth) {
+    setStyle(stroke = 'black', strokeWidth = 1, fill = 'none', strokeDashArray = 'none') {
+        if (stroke !== this.stroke || strokeWidth !== this.strokeWidth || fill !== this.fill || strokeDashArray !== this.strokeDashArray) {
             this.finish();
-            this.pathStrokeWidth = strokeWidth;
-        }
-    }
-
-    setPathStrokeDashArray(strokeDashArray) {
-        if (strokeDashArray !== this.pathStrokeDashArray) {
-            this.finish();
-            this.pathStrokeDashArray = strokeDashArray;
+            this.stroke = stroke;
+            this.strokeWidth = strokeWidth;
+            this.fill = fill;
+            this.strokeDashArray = strokeDashArray;
         }
     }
 }
