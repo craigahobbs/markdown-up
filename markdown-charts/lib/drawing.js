@@ -15,7 +15,6 @@ import {getFieldValue} from './util.js';
  * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The drawing element model
  */
-// eslint-disable-next-line no-unused-vars
 export function drawingCodeBlock(language, lines, options = {}) {
     // Setup global variables and functions
     const geoCtx = new GeoContext();
@@ -25,12 +24,19 @@ export function drawingCodeBlock(language, lines, options = {}) {
         'drawingHeight': 200,
 
         // Geometry functions
+        'circle': ([cx, cy, radius]) => geoCtx.circle(cx, cy, radius),
+        'drawText': ([text, px, py]) => geoCtx.drawText(text, px, py),
+        'ellipse': ([cx, cy, rx, ry]) => geoCtx.ellipse(cx, cy, rx, ry),
+        'hlineTo': ([px]) => geoCtx.hlineTo(px),
         'lineTo': ([px, py]) => geoCtx.lineTo(px, py),
         'moveTo': ([px, py]) => geoCtx.moveTo(px, py),
         'pathClose': () => geoCtx.pathClose(),
-        // eslint-disable-next-line id-length
-        'rect': ([x, y, w, h, rx, ry]) => geoCtx.rect(x, y, w, h, rx, ry),
-        'setStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => geoCtx.setStyle(stroke, strokeWidth, fill, strokeDashArray)
+        'rect': ([px, py, width, height, rx, ry]) => geoCtx.rect(px, py, width, height, rx, ry),
+        'setStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => geoCtx.setStyle(stroke, strokeWidth, fill, strokeDashArray),
+        'setTextStyle': ([fontSizePx, textFill, fontFamily]) => geoCtx.setTextStyle(fontSizePx, textFill, fontFamily),
+        'textHeight': ([text, width]) => geoCtx.textHeight(text, width),
+        'textWidth': ([text]) => geoCtx.textWidth(text),
+        'vlineTo': ([py]) => geoCtx.vlineTo(py)
     };
     const getVariable = (name) => {
         if (name in variables) {
@@ -64,6 +70,12 @@ export function drawingCodeBlock(language, lines, options = {}) {
 }
 
 
+const fontWidthRatio = 0.6;
+const pixelsPerPoint = 4 / 3;
+const defaultFontFamily = 'Arial, Helvetica, sans-serif';
+const defaultFontSizePx = 12 * pixelsPerPoint;
+
+
 class GeoContext {
     constructor() {
         this.elements = [];
@@ -71,6 +83,9 @@ class GeoContext {
         this.strokeWidth = 1;
         this.strokeDashArray = 'none';
         this.fill = 'none';
+        this.fontFamily = defaultFontFamily;
+        this.fontSizePx = defaultFontSizePx;
+        this.textFill = 'black';
         this.pathParts = [];
     }
 
@@ -90,8 +105,60 @@ class GeoContext {
         }
     }
 
-    pathClose() {
-        this.pathParts.push('Z');
+    circle(cx = 0, cy = 0, radius = 50) {
+        this.finish();
+        const element = {
+            'svg': 'circle',
+            'attr': {
+                'fill': this.fill,
+                'stroke': this.stroke,
+                'stroke-width': this.strokeWidth,
+                'stroke-dasharray': this.strokeDashArray,
+                'cx': cx,
+                'cy': cy,
+                'r': radius
+            }
+        };
+        this.elements.push(element);
+    }
+
+    drawText(text = '', px = 0, py = 0, textAnchor = 'middle', dominantBaseline = 'middle') {
+        this.finish();
+        this.elements.push({
+            'svg': 'text',
+            'attr': {
+                'fill': this.textFill,
+                'font-family': this.fontFamily,
+                'font-size': this.fontSizePx,
+                'text-anchor': textAnchor,
+                'dominant-baseline': dominantBaseline,
+                'x': px,
+                'y': py
+            },
+            'elem': {'text': text}
+        });
+    }
+
+    ellipse(cx = 0, cy = 0, rx = 50, ry = 50) {
+        this.finish();
+        const element = {
+            'svg': 'ellipse',
+            'attr': {
+                'fill': this.fill,
+                'stroke': this.stroke,
+                'stroke-width': this.strokeWidth,
+                'stroke-dasharray': this.strokeDashArray,
+                'cx': cx,
+                'cy': cy,
+                'rx': rx,
+                'ry': ry
+            }
+        };
+        this.elements.push(element);
+    }
+
+    hlineTo(px = 0) {
+        this.pathParts.push(`H ${px.toFixed(6)}`);
     }
 
     lineTo(px = 0, py = 0) {
@@ -102,8 +169,11 @@ class GeoContext {
         this.pathParts.push(`M ${px.toFixed(6)} ${py.toFixed(6)}`);
     }
 
-    // eslint-disable-next-line id-length
-    rect(x = 0, y = 0, width = 60, height = 40, rx = null, ry = null) {
+    pathClose() {
+        this.pathParts.push('Z');
+    }
+
+    rect(px = 0, py = 0, width = 60, height = 40, rx = null, ry = null) {
         this.finish();
         const element = {
             'svg': 'rect',
@@ -112,8 +182,8 @@ class GeoContext {
                 'stroke': this.stroke,
                 'stroke-width': this.strokeWidth,
                 'stroke-dasharray': this.strokeDashArray,
-                'x': x,
-                'y': y,
+                'x': px,
+                'y': py,
                 'width': width,
                 'height': height
             }
@@ -135,5 +205,23 @@ class GeoContext {
             this.fill = fill;
             this.strokeDashArray = strokeDashArray;
         }
+    }
+
+    setTextStyle(fontSizePx = defaultFontSizePx, textFill = 'black', fontFamily = defaultFontFamily) {
+        this.fontSizePx = fontSizePx;
+        this.textFill = textFill;
+        this.fontFamily = fontFamily;
+    }
+
+    textHeight(text = '', width = 0) {
+        return width === 0 ? this.fontSizePx : width / (fontWidthRatio * text.length);
+    }
+
+    textWidth(text) {
+        return fontWidthRatio * this.fontSizePx * text.length;
+    }
+
+    vlineTo(py = 0) {
+        this.pathParts.push(`V ${py.toFixed(6)}`);
     }
 }
