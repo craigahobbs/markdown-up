@@ -189,7 +189,6 @@ export function validateCalculation(expr) {
 const binaryOperators = {
     '+': (left, right) => left + right,
     '&&': (left, right) => left && right,
-    '&': (left, right) => left + right,
     '/': (left, right) => left / right,
     '==': (left, right) => left === right,
     '^': (left, right) => left ** right,
@@ -233,10 +232,13 @@ const calcFunctions = {
     'ln': ([number]) => Math.log(number),
     'log': ([number, base = 10]) => Math.log(number) / Math.log(base),
     'log10': ([number]) => Math.log10(number),
+    'max': (args) => Math.max(...args),
     'mid': ([text, startNum, numChars]) => text.slice(startNum, startNum + numChars),
+    'min': (args) => Math.min(...args),
     'minute': ([datetime]) => datetime.getMinutes(),
     'month': ([datetime]) => datetime.getMonth() + 1,
     'now': () => new Date(),
+    'pi': () => Math.PI,
     'rand': () => Math.random(),
     'rept': ([text, count]) => text.repeat(count),
     'right': ([text, numChars = 1]) => text.slice(numChars),
@@ -249,7 +251,7 @@ const calcFunctions = {
     'sin': ([number]) => Math.sin(number),
     'sqrt': ([number]) => Math.sqrt(number),
     'substitute': ([text, oldText, newText]) => text.replaceAll(oldText, newText),
-    't': ([value]) => `${value}`,
+    'text': ([value]) => `${value}`,
     'tan': ([number]) => Math.tan(number),
     'today': () => {
         const now = new Date();
@@ -571,8 +573,9 @@ const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
 const rCalcStringEscape = /\\([\\'])/g;
 const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
 const rCalcStringDoubleEscape = /\\([\\"])/g;
-const rCalcVariable = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
-const rCalcVariableEscape = /\\([\\\]])/g;
+const rCalcVariable = /^\s*([A-Za-z_]\w*)/;
+const rCalcVariableEx = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
+const rCalcVariableExEscape = /\\([\\\]])/g;
 
 
 /**
@@ -691,9 +694,16 @@ function parseSubExpression(exprText) {
     // Variable?
     const matchVariable = exprText.match(rCalcVariable);
     if (matchVariable !== null) {
-        const variableName = matchVariable[1].replace(rCalcVariableEscape, '$1');
-        const expr = {'variable': variableName};
+        const expr = {'variable': matchVariable[1]};
         return [expr, exprText.slice(matchVariable[0].length)];
+    }
+
+    // Variable (brackets)?
+    const matchVariableEx = exprText.match(rCalcVariableEx);
+    if (matchVariableEx !== null) {
+        const variableName = matchVariableEx[1].replace(rCalcVariableExEscape, '$1');
+        const expr = {'variable': variableName};
+        return [expr, exprText.slice(matchVariableEx[0].length)];
     }
 
     throw new Error(`Syntax error "${exprText}"`);

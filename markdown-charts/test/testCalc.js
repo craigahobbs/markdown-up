@@ -154,15 +154,15 @@ a = 0
 b = 1
 
 fib:
-    jumpif ([i] >= [n]) fibend
-    tmp = [b]
-    b = [a] + [b]
-    a = [tmp]
-    i = [i] + 1
+    jumpif (i >= [n]) fibend
+    tmp = b
+    b = a + b
+    a = tmp
+    i = i + 1
     jump fib
 fibend:
 
-[a]
+a
 `));
     t.deepEqual(script, {
         'statements': [
