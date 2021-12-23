@@ -288,10 +288,10 @@ const calcFunctions = {
  * @param {Object} script - The calculation script model
  * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
  * @param {module:lib/calc~VariableSetter} [setVariable = null] - The variable setter function
- * @param {number} [maxStatements = 1000000] - The maximum number of statements, 0 for no maximum
+ * @param {number} [maxStatements = 1e9] - The maximum number of statements, 0 for no maximum
  * @returns The calculation script result
  */
-export function executeScript(script, getVariable = null, setVariable = null, maxStatements = 1000000) {
+export function executeScript(script, getVariable = null, setVariable = null, maxStatements = 1e9) {
     // The script variable getter and setter functions
     const variables = setVariable === null ? {} : null;
     const getScriptVariable = (name) => {
