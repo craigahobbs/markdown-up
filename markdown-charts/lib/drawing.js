@@ -56,7 +56,7 @@ export function drawingCodeBlock(language, lines, options = {}) {
     geoCtx.finish();
 
     // Render the drawing
-    return {
+    return geoCtx.elements.length === 0 ? null : {
         'html': 'p',
         'elem': {
             'svg': 'svg',
