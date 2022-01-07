@@ -50,14 +50,14 @@ struct ChartBase
     # The data specification
     Data data
 
-    # The map of variable name to variable value
-    optional FieldValue{len > 0} variables
+    # The map of variable name to variable expression
+    optional string{len > 0} variables
 
     # The calculated fields
     optional CalculatedField[len > 0] calculatedFields
 
-    # The data row filters. Omit any row that does not match all filters.
-    optional Filter[len > 0] filters
+    # The data row boolean filter expressions. Omit any row that does not match all filters.
+    optional string[len > 0] filters
 
     # The data aggregation specification
     optional Aggregation aggregation
@@ -98,55 +98,6 @@ struct DataJoin
     optional string[len > 0] rightFields
 
 
-# A field value
-union FieldValue
-
-    # A datetime value
-    datetime(nullable) datetime
-
-    # A number value
-    float(nullable) number
-
-    # A string value
-    string(nullable) string
-
-    # A live-computed value
-    LiveValue live
-
-
-# A live-computed value
-struct LiveValue
-
-    # The live value type
-    LiveValueType value
-
-    # The live value index (i.e. -1 for "Year" means last year)
-    optional int index
-
-
-# The live-computed value type
-enum LiveValueType
-
-    # Return the current datetime
-    Now
-
-    # Return today's datetime
-    Today
-
-    # Return this month's datetime
-    Month
-
-    # Return this year's datetime
-    Year
-
-
-# A field value with variable value
-union FieldValueEx (FieldValue)
-
-    # The variable name
-    string variable
-
-
 # A datetime format
 enum DatetimeFormat
 
@@ -168,31 +119,6 @@ struct CalculatedField
 
     # The calculation expression
     string expression
-
-
-# A data row filter specification
-struct Filter
-
-    # The filter field
-    string field
-
-    # Matches if the field value is in the value array
-    optional FieldValueEx[len > 0] includes
-
-    # Matches if the field value is NOT in the value array
-    optional FieldValueEx[len > 0] excludes
-
-    # Matches if the field value is less than the value
-    optional FieldValueEx lt
-
-    # Matches if the field value is less than or equal to the value
-    optional FieldValueEx lte
-
-    # Matches if the field value is greater than the value
-    optional FieldValueEx gt
-
-    # Matches if the field value is greater than or equal to the value
-    optional FieldValueEx gte
 
 
 # A data aggregation specification. The aggregated data rows are comprised of the generated
@@ -328,10 +254,10 @@ struct LineChart (ChartCommon, ChartBase)
 # An axis annotation
 struct AxisAnnotation
 
-    # The axis field value
-    FieldValueEx value
+    # The axis field value expression
+    string value
 
-    # The annotation label
+    # The annotation label expression
     optional string label
 
 
@@ -341,11 +267,11 @@ struct AxisTicks
     # The number of tick marks. Default is 3.
     optional int count
 
-    # The field value of the first tick mark. Default is the minimum field value.
-    optional FieldValueEx start
+    # The field value expression of the first tick mark. Default is the minimum field value.
+    optional string start
 
-    # The field value of the last tick mark. Default is the maximum field value.
-    optional FieldValueEx end
+    # The field value expression of the last tick mark. Default is the maximum field value.
+    optional string end
 
     # The number of tick mark labels to skip after a rendered label
     optional int(> 0) skip

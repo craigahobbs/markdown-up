@@ -4,9 +4,10 @@
 /** @module lib/lineChart */
 
 import {
-    categoricalColors, chartCodeBlock, compareValues, formatValue, formatVariables, getFieldValue, parameterValue, valueParameter
+    categoricalColors, chartCodeBlock, compareValues, formatValue, formatVariables, parameterValue, valueParameter
 } from './util.js';
-import {loadChartData} from './data.js';
+import {executeCalculation, parseCalculation} from './calc.js';
+import {getCalculatedValueType, loadChartData} from './data.js';
 import {validateLineChart} from './model.js';
 
 
@@ -58,7 +59,7 @@ export function lineChartCodeBlock(language, lines, options = {}) {
  */
 export async function lineChartElements(lineChart, options = {}) {
     // Load the chart data
-    const {data, types} = (await loadChartData(lineChart, options));
+    const {data, types, variables} = (await loadChartData(lineChart, options));
 
     // Validate X and Y field types
     const {xField, yFields, colorFields = null} = lineChart;
@@ -162,10 +163,17 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
-    // Compute the variables
-    const variables = {
-        ...('variables' in lineChart ? lineChart.variables : {}),
-        ...('variables' in options ? options.variables : {})
+    // Calculated expression helper function
+    const getVariable = (varName) => (varName in variables ? variables[varName] : null);
+    const computeExpr = (exprText, expectedType = null, desc = null) => {
+        const exprValue = executeCalculation(parseCalculation(exprText), getVariable);
+        if (exprValue !== null && expectedType !== null) {
+            const exprType = getCalculatedValueType(exprValue);
+            if (exprType !== expectedType) {
+                throw new Error(`Invalid ${desc} ${JSON.stringify(exprValue)} (type "${exprType}"), expected type "${expectedType}"`);
+            }
+        }
+        return exprValue;
     };
 
     // Compute Y-axis tick values
@@ -173,10 +181,10 @@ export async function lineChartElements(lineChart, options = {}) {
     const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount;
     const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
     const yTickStart = 'yTicks' in lineChart && 'start' in lineChart.yTicks
-        ? getFieldValue(lineChart.yTicks.start, variables, yFieldType, 'Y-axis start value')
+        ? computeExpr(lineChart.yTicks.start, yFieldType, 'Y-axis start value')
         : yMin;
     const yTickEnd = 'yTicks' in lineChart && 'end' in lineChart.yTicks
-        ? getFieldValue(lineChart.yTicks.end, variables, yFieldType, 'Y-axis end value')
+        ? computeExpr(lineChart.yTicks.end, yFieldType, 'Y-axis end value')
         : yMax;
     for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
         const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
@@ -191,10 +199,10 @@ export async function lineChartElements(lineChart, options = {}) {
     const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount;
     const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
     const xTickStart = 'xTicks' in lineChart && 'start' in lineChart.xTicks
-        ? getFieldValue(lineChart.xTicks.start, variables, xFieldType, 'X-axis start value')
+        ? computeExpr(lineChart.xTicks.start, xFieldType, 'X-axis start value')
         : xMin;
     const xTickEnd = 'xTicks' in lineChart && 'end' in lineChart.xTicks
-        ? getFieldValue(lineChart.xTicks.end, variables, xFieldType, 'X-axis end value')
+        ? computeExpr(lineChart.xTicks.end, xFieldType, 'X-axis end value')
         : xMax;
     for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
         const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
@@ -208,8 +216,13 @@ export async function lineChartElements(lineChart, options = {}) {
     const yAxisAnnotations = [];
     if ('yAnnotations' in lineChart) {
         for (const annotation of lineChart.yAnnotations) {
-            const yAnnotationValue = getFieldValue(annotation.value, variables, yFieldType, 'Y-axis annotation value');
-            yAxisAnnotations.push([yAnnotationValue, 'label' in annotation ? annotation.label : formatValue(yAnnotationValue, lineChart)]);
+            const yAnnotationValue = computeExpr(annotation.value, yFieldType, 'Y-axis annotation value');
+            yAxisAnnotations.push([
+                yAnnotationValue,
+                'label' in annotation
+                    ? formatValue(computeExpr(annotation.label), lineChart)
+                    : formatValue(yAnnotationValue, lineChart)
+            ]);
             yMin = yAnnotationValue < yMin ? yAnnotationValue : yMin;
             yMax = yAnnotationValue > yMax ? yAnnotationValue : yMax;
         }
@@ -219,8 +232,13 @@ export async function lineChartElements(lineChart, options = {}) {
     const xAxisAnnotations = [];
     if ('xAnnotations' in lineChart) {
         for (const annotation of lineChart.xAnnotations) {
-            const xAnnotationValue = getFieldValue(annotation.value, variables, xFieldType, 'X-axis annotation value');
-            xAxisAnnotations.push([xAnnotationValue, 'label' in annotation ? annotation.label : formatValue(xAnnotationValue, lineChart)]);
+            const xAnnotationValue = computeExpr(annotation.value, xFieldType, 'X-axis annotation value');
+            xAxisAnnotations.push([
+                xAnnotationValue,
+                'label' in annotation
+                    ? formatValue(computeExpr(annotation.label), lineChart)
+                    : formatValue(xAnnotationValue, lineChart)
+            ]);
             xMin = xAnnotationValue < xMin ? xAnnotationValue : xMin;
             xMax = xAnnotationValue > xMax ? xAnnotationValue : xMax;
         }

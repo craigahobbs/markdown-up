@@ -7,15 +7,39 @@ import {getMarkdownParagraphText} from './markdownModel.js';
 
 
 /**
+ * The markdownElements function's options object
+ *
+ * @typedef {Object} MarkdownElementsOptions
+ * @property {Object.<string, module:lib/elements~CodeBlockFn>} [codeBlocks] - The code block render-function map
+ * @property {module:lib/elements~HashFn} [hashFn] - The hash URL modifier function
+ * @property {boolean} [headerIds] - If true, generate header IDs
+ * @property {string} [url] - Markdown file URL
+ */
+
+/**
+ * A code block render function
+ *
+ * @callback CodeBlockFn
+ * @param {string} language - The code block language
+ * @param {string[]} lines - The code blocks lines
+ * @returns {*} The code block's element model
+ */
+
+/**
+ * A hash modifier function
+ *
+ * @callback HashFn
+ * @param {string} hashURL - The hash URL
+ * @returns {string} The fixed-up hash URL
+ */
+
+
+/**
  * Generate an element model from a markdown model
  *
  * @param {Object} markdown - The markdown model
- * @param {Object} [options.codeBlocks] - Optional map of code block language to render function with signature
- *     (language, lines) => elements.
- * @param {string} [options.hashFn] - Optional hash URL modifier function
- * @param {boolean} [options.headerIds] - If true, generate header IDs
- * @param {string} [options.url] - Optional markdown file URL
- * @returns {Array}
+ * @param {module:lib/elements~MarkdownElementsOptions} [options] - Options object
+ * @returns {*} The markdown's element model
  */
 export function markdownElements(markdown, options = {}) {
     return markdownPartElements(markdown.parts, {...options, 'usedHeaderIds': new Set()});

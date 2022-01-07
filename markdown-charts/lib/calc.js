@@ -221,6 +221,7 @@ const calcFunctions = {
     'cos': ([number]) => Math.cos(number),
     'date': ([year, month, day]) => new Date(year, month - 1, day),
     'day': ([datetime]) => datetime.getDate(),
+    'encodeURIComponent': ([text]) => encodeURIComponent(text),
     'find': ([findText, withinText]) => withinText.indexOf(findText),
     'fixed': ([number, decimals = 2]) => number.toFixed(decimals),
     'floor': ([number]) => Math.floor(number),
@@ -436,7 +437,7 @@ export function executeCalculation(expr, getVariable = null) {
 // Calculation script regex
 const rScriptLineSplit = /\r?\n/;
 const rScriptContinuation = /\\\s*$/;
-const rScriptComment = /^\s*(?:#.*)?$/;
+const rScriptComment = /^\s*(?:\/\/.*)?$/;
 const rScriptAssignment = /^\s*(?<name>[A-Za-z_]\w*)\s*=\s*(?<expr>.*)$/;
 const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[A-Za-z_]\w*(?:\s*,\s*[A-Za-z_]\w*)*)?\s*\)\s*$/;
 const rScriptFunctionArgSplit = /\s*,\s*/;

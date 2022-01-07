@@ -3,43 +3,116 @@
 
 /** @module lib/data */
 
-import {compareValues, getFieldValue} from './util.js';
 import {executeCalculation, parseCalculation} from './calc.js';
 import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
+import {parseCSV, parseCSVDatetime, parseCSVNumber} from './csv.js';
+import {compareValues} from './util.js';
+import {encodeMarkdownText} from '../../markdown-model/lib/parser.js';
 
 
 /**
+ * The loadChartData result object
+ *
  * @typedef {Object} LoadChartDataResult
  * @property {Object[]} data - The data row object array
  * @property {Object} types - The map of field name to field type ("datetime", "number", "string")
+ * @property {Object} variables - The map of computed variable expression values
  */
 
 
 /**
  * Load the chart's data
  *
- * @param {Object} chart - The chart model
+ * @param {Object} chartModel - The chart model
  * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {module:lib/data~LoadChartDataResult}
  */
-export async function loadChartData(chart, options = {}) {
+export async function loadChartData(chartModel, options = {}) {
+    // Load the data resources
+    let {data, types} = await loadData(chartModel.data, options.window, 'url' in options ? options.url : null);
+
+    // Compute the variable values
+    const variables = {
+        ...('variables' in chartModel ? computeVariables(chartModel.variables) : {}),
+        ...('variables' in options ? options.variables : {})
+    };
+
+    // Add calculated fields
+    if ('calculatedFields' in chartModel) {
+        const calcVariables = {
+            'hashURL': ([url]) => (
+                'runtime' in options && 'hashFn' in options.runtime.options ? options.runtime.options.hashFn(url) : url
+            ),
+            'markdownEncode': ([text]) => encodeMarkdownText(text),
+            ...variables
+        };
+        for (const calculatedField of chartModel.calculatedFields) {
+            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, calcVariables);
+        }
+    }
+
+    // Filter the data
+    if ('filters' in chartModel) {
+        for (const filterExpr of chartModel.filters) {
+            data = filterData(data, filterExpr, variables);
+        }
+    }
+
+    // Aggregate the data
+    if ('aggregation' in chartModel) {
+        ({data, types} = aggregateData(chartModel.aggregation, data, types));
+    }
+
+    // Sort the data
+    if ('sorts' in chartModel) {
+        sortData(chartModel.sorts, data);
+    }
+
+    // Top the data
+    if ('top' in chartModel) {
+        data = topData(chartModel.top, data);
+    }
+
+    return {data, types, variables};
+}
+
+
+/**
+ * The loadData result object
+ *
+ * @typedef {Object} LoadDataResult
+ * @property {Object[]} data - The data row object array
+ * @property {Object} types - The map of field name to field type ("datetime", "number", "string")
+ */
+
+
+/**
+ * Load a data model
+ *
+ * @param {Object} dataModel - The data model
+ * @param {Window} window - The window object (for fetch)
+ * @param {string} [rootURL = null] - The root URL for determining relative data URL locations
+ * @returns {module:lib/data~LoadDataResult}
+ */
+export async function loadData(dataModel, window, rootURL = null) {
     // Load the data resources
     const fixDataURL = (url) => {
-        if ('url' in options && options.url !== null && isRelativeURL(url)) {
-            return `${getBaseURL(options.url)}${url}`;
+        if (rootURL !== null && isRelativeURL(url)) {
+            return `${getBaseURL(rootURL)}${url}`;
         }
         return url;
     };
     const dataURLs = [
-        fixDataURL(chart.data.url),
-        ...('joins' in chart.data ? chart.data.joins.map((join) => fixDataURL(join.url)) : [])
+        fixDataURL(dataModel.url),
+        ...('joins' in dataModel ? dataModel.joins.map((join) => fixDataURL(join.url)) : [])
     ];
-    const dataResponses = await Promise.all(dataURLs.map((joinURL) => options.window.fetch(joinURL)));
+    const dataResponses = await Promise.all(dataURLs.map((joinURL) => window.fetch(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
-    let [{data, types}] = dataTypes;
 
     // Join the data
-    if (dataResponses.length > 1) {
+    let [{data}] = dataTypes;
+    const [{types}] = dataTypes;
+    if ('joins' in dataModel) {
         // Helper function to compute a unique field name
         const mapFieldName = (field) => {
             let unique = field;
@@ -53,8 +126,8 @@ export async function loadChartData(chart, options = {}) {
 
         // Perform each join in sequence
         let leftData;
-        for (let ixJoin = 0; ixJoin < chart.data.joins.length; ixJoin++) {
-            const join = chart.data.joins[ixJoin];
+        for (let ixJoin = 0; ixJoin < dataModel.joins.length; ixJoin++) {
+            const join = dataModel.joins[ixJoin];
             const {leftFields} = join;
             const rightFields = 'rightFields' in join ? join.rightFields : leftFields;
             const rightData = dataTypes[ixJoin + 1].data;
@@ -120,74 +193,6 @@ export async function loadChartData(chart, options = {}) {
         }
     }
 
-    // Add calculated fields
-    if ('calculatedFields' in chart) {
-        // Parse the calculations
-        const expressions = chart.calculatedFields.map((calc) => parseCalculation(calc.expression));
-
-        // Compute the variable values
-        let row;
-        const getVariable = (name) => {
-            if (name in row) {
-                return row[name];
-            } else if ('variables' in options && name in options.variables) {
-                return getFieldValue(options.variables[name]);
-            } else if ('variables' in chart && name in chart.variables) {
-                return getFieldValue(chart.variables[name]);
-            }
-            return null;
-        };
-
-        // Compute the calculated fields for each row
-        const calcNames = new Set();
-        for (row of data) {
-            for (let ixCalc = 0; ixCalc < chart.calculatedFields.length; ixCalc++) {
-                const calcName = chart.calculatedFields[ixCalc].name;
-                const calcValue = executeCalculation(expressions[ixCalc], getVariable);
-                row[calcName] = calcValue;
-                calcNames.add(calcName);
-
-                // Set the calculated field type
-                if (calcValue !== null && !(calcName in types)) {
-                    if (typeof calcValue === 'number' || typeof calcValue === 'boolean') {
-                        types[calcName] = 'number';
-                    } else if (calcValue instanceof Date) {
-                        types[calcName] = 'datetime';
-                    } else {
-                        types[calcName] = 'string';
-                    }
-                }
-            }
-        }
-
-        // Ensure all calculated fields have a type
-        for (const calcName of calcNames.values()) {
-            if (!(calcName in types)) {
-                types[calcName] = 'string';
-            }
-        }
-    }
-
-    // Filter the data
-    if ('filters' in chart) {
-        data = filterData(chart, data, types, options);
-    }
-
-    // Aggregate the data
-    if ('aggregation' in chart) {
-        ({data, types} = aggregateData(chart, data, types));
-    }
-
-    // Sort the data
-    if ('sorts' in chart) {
-        sortData(chart, data);
-    }
-
-    // Top the data
-    if ('top' in chart) {
-        data = topData(chart, data);
-    }
-
     return {data, types};
 }
 
@@ -210,36 +215,10 @@ async function dataResponseHandler(url, response) {
     }
 
     // Validate the data
-    const types = validateData(data, {csv});
+    const types = validateData(data, csv);
 
     return {data, types};
 }
-
-
-/**
- * Parse CSV text to a JSON data array
- *
- * @param {string} text - The CSV text
- * @returns {Object[]}
- */
-export function parseCSV(text) {
-    const data = [];
-    const splitLines = text.split(rCSVLineSplit).map((line) => line.replace(rCSVLineScrub, '$1').split(rCSVFieldSplit));
-    const [fields] = splitLines;
-    for (let ixLine = 1; ixLine < splitLines.length; ixLine += 1) {
-        const splitLine = splitLines[ixLine];
-        if (splitLine.length > 1 || splitLine[0] !== '') {
-            data.push(Object.fromEntries(fields.map(
-                (field, ixField) => [field, ixField < splitLine.length ? splitLine[ixField] : 'null']
-            )));
-        }
-    }
-    return data;
-}
-
-const rCSVLineSplit = /\r?\n/;
-const rCSVLineScrub = /^"?(.*?)"?$/;
-const rCSVFieldSplit = /"?,"?/;
 
 
 /**
@@ -321,125 +300,144 @@ export function validateData(data, csv = false) {
 }
 
 
-// Helper function to parse a CSV number
-function parseCSVNumber(text) {
-    const value = Number.parseFloat(text);
-    if (Number.isNaN(value) || !Number.isFinite(value)) {
+/**
+ * Compute a variable expression map
+ *
+ * @param {Object} variables - The variable expression map
+ * @param {Object} [externalVariables = null] - External variable value map
+ * @returns {Object} The map of variable values
+ */
+export function computeVariables(variables, externalVariables = null) {
+    const variableValues = {};
+
+    // Allow variable expressions to access previous variable values
+    const getVariable = (varName) => {
+        if (varName in variableValues) {
+            return variableValues[varName];
+        } else if (externalVariables !== null && varName in externalVariables) {
+            return externalVariables[varName];
+        }
         return null;
+    };
+
+    // Compute each variable expression
+    for (const varName of Object.keys(variables)) {
+        const varExpr = parseCalculation(variables[varName]);
+        variableValues[varName] = executeCalculation(varExpr, getVariable);
     }
-    return value;
+
+    return variableValues;
 }
 
 
-// Helper function to parse a CSV datetime
-function parseCSVDatetime(text) {
-    if (rCSVDate.test(text)) {
-        const localDate = new Date(text);
-        return new Date(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate());
-    } else if (rCSVDatetime.test(text)) {
-        return new Date(text);
+/**
+ * Add a calculated field to each row of a data array
+ *
+ * @param {Object[]} data - The data array. Row objects are updated with the calculated field values.
+ * @param {string} name - The calculated field name
+ * @param {string} expr - The calculated field expression
+ * @param {Object} [variables = null] - Map of variables to variable value
+ * @returns {string} The field type ("datetime", "number", "string")
+ */
+export function addCalculatedField(data, name, expr, variables = null) {
+    // Parse the calculation expression
+    const calcExpr = parseCalculation(expr);
+
+    // Allow filter expression access to row fields and variables
+    let row;
+    const getVariable = (varName) => {
+        if (varName in row) {
+            return row[varName];
+        } else if (variables !== null && varName in variables) {
+            return variables[varName];
+        }
+        return null;
+    };
+
+    // Compute the calculated fields for each row
+    let calcType = null;
+    for (row of data) {
+        const calcValue = executeCalculation(calcExpr, getVariable);
+        row[name] = calcValue;
+
+        // Determine the calculated field type
+        if (calcValue !== null && calcType === null) {
+            calcType = getCalculatedValueType(calcValue);
+        }
     }
-    return null;
+
+    return calcType !== null ? calcType : 'string';
 }
 
-const rCSVDate = /^\d{4}-\d{2}-\d{2}$/;
-const rCSVDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Get an computed expression value's type
+ *
+ * @param {*} value - The computed expression value
+ * @returns {string} The field type ("datetime", "number", "string")
+ */
+export function getCalculatedValueType(value) {
+    if (typeof value === 'number' || typeof value === 'boolean') {
+        return 'number';
+    } else if (value instanceof Date) {
+        return 'datetime';
+    }
+    return 'string';
+}
 
 
 /**
  * Filter data rows
  *
- * @param {Object} chart - The chart model
  * @param {Object[]} data - The data array. Row objects are updated with parsed/validated values.
- * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {string} expr - The boolean filter expression
+ * @param {Object} [variables = null] - Map of variables to variable value
  * @returns {Object[]} The filtered data array
  */
-export function filterData(chart, data, types, options = {}) {
-    const {filters} = chart;
+export function filterData(data, expr, variables = null) {
+    // Parse the filter expression
+    const filterExpr = parseCalculation(expr);
 
-    // Compute the variables
-    const variables = {
-        ...('variables' in chart ? chart.variables : {}),
-        ...('variables' in options ? options.variables : {})
+    // Allow filter expression access to row fields and variables
+    let row;
+    const getVariable = (varName) => {
+        if (varName in row) {
+            return row[varName];
+        } else if (varName in variables) {
+            return variables[varName];
+        }
+        return null;
     };
 
-    // Get the filter values - remove null filters
-    const filterDescs = filters.map((filter) => `"${filter.field}" field filter value`);
-    const getFilterValue = (filter, ixFilter, valueFilter, member) => {
-        if (member in filter) {
-            const value = getFieldValue(filter[member], variables, types[filter.field], filterDescs[ixFilter]);
-            if (value !== null) {
-                valueFilter[member] = value;
-            }
+    // Filter the data
+    const filteredData = [];
+    for (row of data) {
+        if (executeCalculation(filterExpr, getVariable)) {
+            filteredData.push(row);
         }
-    };
-    const getFilterValues = (filter, ixFilter, valueFilter, member) => {
-        if (member in filter) {
-            const values = filter[member].map(
-                (filterFieldValue) => getFieldValue(filterFieldValue, variables, types[filter.field], filterDescs[ixFilter])
-            ).filter((value) => value !== null);
-            if (values.length > 0) {
-                valueFilter[member] = values;
-            }
-        }
-    };
-    const valueFilters = filters.map((filter, ixFilter) => {
-        if (!(filter.field in types)) {
-            throw new Error(`Unknown filter field "${filter.field}"`);
-        }
-        const valueFilter = {'field': filter.field};
-        getFilterValue(filter, ixFilter, valueFilter, 'lt');
-        getFilterValue(filter, ixFilter, valueFilter, 'lte');
-        getFilterValue(filter, ixFilter, valueFilter, 'gt');
-        getFilterValue(filter, ixFilter, valueFilter, 'gte');
-        getFilterValues(filter, ixFilter, valueFilter, 'includes');
-        getFilterValues(filter, ixFilter, valueFilter, 'excludes');
-        if (Object.keys(valueFilter).length === 1) {
-            return null;
-        }
-        return valueFilter;
-    }).filter((valueFilter) => valueFilter !== null);
-
-    // Filter the rows
-    return data.filter((row) => valueFilters.every((valueFilter) => {
-        const fieldName = valueFilter.field;
-        const fieldValue = fieldName in row ? row[fieldName] : null;
-        if (fieldValue === null) {
-            return false;
-        }
-
-        // Test the field value
-        return (!('lt' in valueFilter) || compareValues(fieldValue, valueFilter.lt) < 0) &&
-            (!('lte' in valueFilter) || compareValues(fieldValue, valueFilter.lte) <= 0) &&
-            (!('gt' in valueFilter) || compareValues(fieldValue, valueFilter.gt) > 0) &&
-            (!('gte' in valueFilter) || compareValues(fieldValue, valueFilter.gte) >= 0) &&
-            (!('includes' in valueFilter) || valueFilter.includes.some((filterValue) => compareValues(fieldValue, filterValue) === 0)) &&
-            (!('excludes' in valueFilter) || !valueFilter.excludes.some((filterValue) => compareValues(fieldValue, filterValue) === 0));
-    }));
+    }
+    return filteredData;
 }
 
 
 /**
  * Aggregate data rows
  *
- * @param {Object} chart - The chart model
+ * @param {Object} aggregationModel - The aggregation model
  * @param {Object[]} data - The data array
  * @param {Object} types - The map of field name to field type ("datetime", "number", "string")
- * @returns {module:lib/data~LoadChartDataResult}
+ * @returns {module:lib/data~LoadDataResult}
  */
-export function aggregateData(chart, data, types) {
-    const {aggregation} = chart;
-
+export function aggregateData(aggregationModel, data, types) {
     // Compute the aggregate field types
     const aggregateTypes = {};
-    for (const categoryField of aggregation.categoryFields) {
+    for (const categoryField of aggregationModel.categoryFields) {
         if (!(categoryField in types)) {
             throw new Error(`Unknown aggregation category field "${categoryField}"`);
         }
         aggregateTypes[categoryField] = types[categoryField];
     }
-    for (const measure of aggregation.measures) {
+    for (const measure of aggregationModel.measures) {
         if (!(measure.field in types)) {
             throw new Error(`Unknown aggregation category field "${measure.field}"`);
         }
@@ -454,7 +452,7 @@ export function aggregateData(chart, data, types) {
     const measureRows = {};
     for (const row of data) {
         // Compute the category values
-        const categoryValues = aggregation.categoryFields.map((categoryField) => row[categoryField]);
+        const categoryValues = aggregationModel.categoryFields.map((categoryField) => row[categoryField]);
 
         // Get or create the aggregate row
         let aggregateRow;
@@ -464,13 +462,13 @@ export function aggregateData(chart, data, types) {
         } else {
             aggregateRow = {};
             measureRows[rowKey] = aggregateRow;
-            for (let ixCategoryField = 0; ixCategoryField < aggregation.categoryFields.length; ixCategoryField++) {
-                aggregateRow[aggregation.categoryFields[ixCategoryField]] = categoryValues[ixCategoryField];
+            for (let ixCategoryField = 0; ixCategoryField < aggregationModel.categoryFields.length; ixCategoryField++) {
+                aggregateRow[aggregationModel.categoryFields[ixCategoryField]] = categoryValues[ixCategoryField];
             }
         }
 
         // Add to the aggregate measure values
-        for (const measure of aggregation.measures) {
+        for (const measure of aggregationModel.measures) {
             const measureFieldName = getMeasureFieldName(measure);
             const value = measure.field in row ? row[measure.field] : null;
             if (value !== null) {
@@ -485,7 +483,7 @@ export function aggregateData(chart, data, types) {
     // Compute the measure values aggregate function value
     const aggregateRows = Object.values(measureRows);
     for (const aggregateRow of aggregateRows) {
-        for (const measure of aggregation.measures) {
+        for (const measure of aggregationModel.measures) {
             const measureFieldName = getMeasureFieldName(measure);
             const measureValues = measureFieldName in aggregateRow ? aggregateRow[measureFieldName] : null;
             const measureFunction = measure.function;
@@ -518,11 +516,11 @@ function getMeasureFieldName(measure) {
 /**
  * Sort data rows
  *
- * @param {Object} chart - The chart model
- * @param {Object[]} data - The data array
+ * @param {Object} sortModels - The sort model array
+ * @param {Object[]} data - The sorted data array
  */
-export function sortData(chart, data) {
-    data.sort((row1, row2) => chart.sorts.reduce((result, sort) => {
+export function sortData(sortModels, data) {
+    data.sort((row1, row2) => sortModels.reduce((result, sort) => {
         if (result !== 0) {
             return result;
         }
@@ -537,15 +535,15 @@ export function sortData(chart, data) {
 /**
  * Top data rows
  *
- * @param {Object} chart - The chart model
+ * @param {Object} topModel - The top model
  * @param {Object[]} data - The data array
  * @returns {Object[]} The top data array
  */
-export function topData(chart, data) {
+export function topData(topModel, data) {
     // Bucket rows by category
     const categoryRows = {};
     const categoryOrder = [];
-    const categoryFields = 'categoryFields' in chart.top ? chart.top.categoryFields : [];
+    const categoryFields = 'categoryFields' in topModel ? topModel.categoryFields : [];
     for (const row of data) {
         const categoryKey = JSON.stringify(categoryFields.map((field) => (field in row ? row[field] : null)));
         if (!(categoryKey in categoryRows)) {
@@ -557,7 +555,7 @@ export function topData(chart, data) {
 
     // Take only the top rows
     const dataTop = [];
-    const topCount = chart.top.count;
+    const topCount = topModel.count;
     for (const categoryKey of categoryOrder) {
         const categoryKeyRows = categoryRows[categoryKey];
         const categoryKeyLength = categoryKeyRows.length;
