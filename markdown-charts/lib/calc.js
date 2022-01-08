@@ -242,7 +242,7 @@ const calcFunctions = {
     'pi': () => Math.PI,
     'rand': () => Math.random(),
     'rept': ([text, count]) => text.repeat(count),
-    'right': ([text, numChars = 1]) => text.slice(numChars),
+    'right': ([text, numChars = 1]) => text.slice(Math.max(0, text.length - numChars)),
     'round': ([number, digits]) => {
         const multiplier = 10 ** digits;
         return Math.round(number * multiplier) / multiplier;
