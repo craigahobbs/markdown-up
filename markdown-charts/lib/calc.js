@@ -28,11 +28,8 @@ union CalcStatement
     # A label definition
     string label
 
-    # A jump (to label) statement
-    string jump
-
-    # A jump-if statement
-    CalcJumpIf jumpif
+    # A jump statement
+    CalcJump jump
 
     # A return statement
     CalcExpr return
@@ -64,14 +61,14 @@ struct CalcFunction
     CalcStatement[] statements
 
 
-# A calculation language jump-if statement
-struct CalcJumpIf
+# A calculation language jump statement
+struct CalcJump
 
     # The label to jump to
     string label
 
     # The test expression
-    CalcExpr expression
+    optional CalcExpr expression
 
 
 # A calculation language expression
@@ -322,12 +319,12 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
             globals[statement.function.name] = userFunction;
 
         // Jump?
-        } else if ('jump' in statement || 'jumpif' in statement) {
+        } else if ('jump' in statement) {
             // Evaluate the expression (if any)
-            const jumpValue = 'jumpif' in statement ? executeCalculation(statement.jumpif.expression, globals, locals) : true;
+            const jumpValue = 'expression' in statement.jump ? executeCalculation(statement.jump.expression, globals, locals) : true;
             if (jumpValue) {
                 // Find the label
-                const jumpLabel = 'jumpif' in statement ? statement.jumpif.label : statement.jump;
+                const jumpLabel = statement.jump.label;
                 let ixJump;
                 if (jumpLabel in labelIndexes) {
                     ixJump = labelIndexes[jumpLabel];
@@ -415,8 +412,7 @@ const rScriptFunctionBegin = /^function\s+(?<name>[A-Za-z_]\w*)\s*\(\s*(?<args>[
 const rScriptFunctionArgSplit = /\s*,\s*/;
 const rScriptFunctionEnd = /^endfunction\s*$/;
 const rScriptLabel = /^\s*(?<name>[A-Za-z_]\w*)\s*:\s*$/;
-const rScriptJump = /^\s*jump\s+(?<name>[A-Za-z_]\w*)\s*$/;
-const rScriptJumpIf = /^\s*jumpif\s*\((?<expr>.+)\)\s+(?<name>[A-Za-z_]\w*)\s*$/;
+const rScriptJump = /^\s*jump(?:if\s*\((?<expr>.+)\))?\s+(?<name>[A-Za-z_]\w*)\s*$/;
 const rScriptReturn = /^\s*return\s+(?<expr>.+)\s*$/;
 
 
@@ -510,19 +506,11 @@ export function parseScript(scriptText) {
         // Jump definition?
         const matchJump = line.match(rScriptJump);
         if (matchJump !== null) {
-            statements.push({'jump': matchJump.groups.name});
-            continue;
-        }
-
-        // JumpIf definition?
-        const matchJumpIf = line.match(rScriptJumpIf);
-        if (matchJumpIf !== null) {
-            statements.push({
-                'jumpif': {
-                    'label': matchJumpIf.groups.name,
-                    'expression': parseCalculation(matchJumpIf.groups.expr)
-                }
-            });
+            const jumpStatement = {'jump': {'label': matchJump.groups.name}};
+            if (typeof matchJump.groups.expr !== 'undefined') {
+                jumpStatement.jump.expression = parseCalculation(matchJump.groups.expr);
+            }
+            statements.push(jumpStatement);
             continue;
         }
 
