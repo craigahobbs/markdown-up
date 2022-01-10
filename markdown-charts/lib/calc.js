@@ -227,22 +227,20 @@ const calcFunctions = {
     'floor': ([number]) => Math.floor(number),
     'hour': ([datetime]) => datetime.getHours(),
     'if': ([condition, valueTrue, valueFalse]) => (condition ? valueTrue : valueFalse),
-    'left': ([text, numChars = 1]) => text.slice(0, numChars),
     'len': ([text]) => text.length,
     'lower': ([text]) => text.toLowerCase(),
     'ln': ([number]) => Math.log(number),
     'log': ([number, base = 10]) => Math.log(number) / Math.log(base),
     'log10': ([number]) => Math.log10(number),
     'max': (args) => Math.max(...args),
-    'mid': ([text, startNum, numChars]) => text.slice(startNum, startNum + numChars),
     'min': (args) => Math.min(...args),
     'minute': ([datetime]) => datetime.getMinutes(),
     'month': ([datetime]) => datetime.getMonth() + 1,
     'now': () => new Date(),
     'pi': () => Math.PI,
     'rand': () => Math.random(),
+    'replace': ([text, oldText, newText]) => text.replaceAll(oldText, newText),
     'rept': ([text, count]) => text.repeat(count),
-    'right': ([text, numChars = 1]) => text.slice(Math.max(0, text.length - numChars)),
     'round': ([number, digits]) => {
         const multiplier = 10 ** digits;
         return Math.round(number * multiplier) / multiplier;
@@ -250,8 +248,8 @@ const calcFunctions = {
     'second': ([datetime]) => datetime.getSeconds(),
     'sign': ([number]) => Math.sign(number),
     'sin': ([number]) => Math.sin(number),
+    'slice': ([text, beginIndex, endIndex]) => text.slice(beginIndex, endIndex),
     'sqrt': ([number]) => Math.sqrt(number),
-    'substitute': ([text, oldText, newText]) => text.replaceAll(oldText, newText),
     'text': ([value]) => `${value}`,
     'tan': ([number]) => Math.tan(number),
     'today': () => {
@@ -262,6 +260,31 @@ const calcFunctions = {
     'upper': ([text]) => text.toUpperCase(),
     'value': ([text]) => parseFloat(text),
     'year': ([datetime]) => datetime.getFullYear()
+};
+
+
+// Script function map (name => fn)
+const scriptFunctions = {
+    // Array functions
+    'arrayNew': (args) => args,
+    'arraySize': ([size = 0, value = 0]) => new Array(size).fill(value),
+    'arrayLength': ([array]) => array.length,
+    'arrayGet': ([array, index]) => array[index],
+    'arraySet': ([array, index, value]) => {
+        array[index] = value;
+    },
+    'arrayPush': ([array, ...values]) => array.push(...values),
+
+    // Object functions
+    'objectNew': () => ({}),
+    'objectKeys': ([obj]) => Object.keys(obj),
+    'objectGet': ([obj, key]) => obj[key],
+    'objectSet': ([obj, key, value]) => {
+        obj[key] = value;
+    },
+    'objectDelete': ([obj, key]) => {
+        delete obj[key];
+    }
 };
 
 
@@ -282,7 +305,9 @@ export function executeScript(script, globals = {}, maxStatements = 1e7) {
         }
     };
 
-    return executeScriptHelper(script.statements, globals, null, statementCounter);
+    // Execute the script
+    const scriptGlobals = {...scriptFunctions, ...globals};
+    return executeScriptHelper(script.statements, scriptGlobals, null, statementCounter);
 }
 
 
