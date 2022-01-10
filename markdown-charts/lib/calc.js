@@ -266,24 +266,26 @@ const calcFunctions = {
 // Script function map (name => fn)
 const scriptFunctions = {
     // Array functions
-    'arrayNew': (args) => args,
-    'arraySize': ([size = 0, value = 0]) => new Array(size).fill(value),
-    'arrayLength': ([array]) => array.length,
     'arrayGet': ([array, index]) => array[index],
+    'arrayJoin': ([array, sep]) => array.join(sep),
+    'arrayLength': ([array]) => array.length,
+    'arrayNew': (args) => args,
+    'arrayPush': ([array, ...values]) => array.push(...values),
     'arraySet': ([array, index, value]) => {
         array[index] = value;
     },
-    'arrayPush': ([array, ...values]) => array.push(...values),
+    'arraySize': ([size = 0, value = 0]) => new Array(size).fill(value),
+    'arraySplit': ([text, sep]) => text.split(sep),
 
     // Object functions
-    'objectNew': () => ({}),
-    'objectKeys': ([obj]) => Object.keys(obj),
-    'objectGet': ([obj, key]) => obj[key],
-    'objectSet': ([obj, key, value]) => {
-        obj[key] = value;
-    },
     'objectDelete': ([obj, key]) => {
         delete obj[key];
+    },
+    'objectGet': ([obj, key]) => obj[key],
+    'objectKeys': ([obj]) => Object.keys(obj),
+    'objectNew': () => ({}),
+    'objectSet': ([obj, key, value]) => {
+        obj[key] = value;
     }
 };
 
