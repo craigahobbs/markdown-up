@@ -289,7 +289,8 @@ export function executeScript(script, globals = {}, maxStatements = 1e7) {
 export function executeScriptHelper(statements, globals, locals, statementCounter) {
     // Iterate each script statement
     const labelIndexes = {};
-    for (let ixStatement = 0; ixStatement < statements.length; ixStatement++) {
+    const statementsLength = statements.length;
+    for (let ixStatement = 0; ixStatement < statementsLength; ixStatement++) {
         const statement = statements[ixStatement];
 
         // Increment the statement counter
@@ -306,7 +307,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
 
         // Function?
         } else if ('function' in statement) {
-            const userFunction = (args) => {
+            globals[statement.function.name] = (args) => {
                 const functionLocals = {};
                 if ('arguments' in statement.function) {
                     const argumentNames = statement.function.arguments;
@@ -316,13 +317,11 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
                 }
                 return executeScriptHelper(statement.function.statements, globals, functionLocals, statementCounter);
             };
-            globals[statement.function.name] = userFunction;
 
         // Jump?
         } else if ('jump' in statement) {
             // Evaluate the expression (if any)
-            const jumpValue = 'expression' in statement.jump ? executeCalculation(statement.jump.expression, globals, locals) : true;
-            if (jumpValue) {
+            if (!('expression' in statement.jump) || executeCalculation(statement.jump.expression, globals, locals)) {
                 // Find the label
                 const jumpLabel = statement.jump.label;
                 let ixJump;
@@ -539,7 +538,7 @@ const rCalcFunctionSeparator = /^\s*,/;
 const rCalcFunctionClose = /^\s*\)/;
 const rCalcGroupOpen = /^\s*\(/;
 const rCalcGroupClose = /^\s*\)/;
-const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?)/;
+const rCalcNumber = /^\s*([+-]?\d+(?:\.\d*)?(?:e[+-]\d+)?)/;
 const rCalcString = /^\s*'((?:\\'|[^'])*)'/;
 const rCalcStringEscape = /\\([\\'])/g;
 const rCalcStringDouble = /^\s*"((?:\\"|[^"])*)"/;
