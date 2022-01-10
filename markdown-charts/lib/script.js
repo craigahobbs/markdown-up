@@ -17,13 +17,19 @@ import {markdownElements} from '../../markdown-model/lib/elements.js';
  * @returns {Object} The generated element model
  */
 export function markdownScriptCodeBlock(language, lines, options = {}) {
-    // Execute the calculation script
+    // Get/create the script's runtime
     const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime(options);
-    const globals = {...runtime.variables, ...('variables' in options ? options.variables : {})};
+
+    // Add the options variables to the runtime's globals
+    if ('variables' in options) {
+        Object.assign(runtime.globals, options.variables);
+    }
+
+    // Execute the calculation script
     let errorMessage = null;
     try {
         const scriptModel = parseScript(lines);
-        executeScript(scriptModel, globals);
+        executeScript(scriptModel, runtime.globals);
     } catch ({message}) {
         errorMessage = message;
     } finally {
@@ -101,8 +107,8 @@ export class MarkdownScriptRuntime {
     constructor(options = {}) {
         this.options = options;
 
-        // Initial runtime variables
-        this.variables = {
+        // The runtime's global variables
+        this.globals = {
             // Drawing functions
             'drawCircle': ([cx, cy, radius]) => this.drawCircle(cx, cy, radius),
             'drawClose': () => this.drawClose(),
