@@ -164,9 +164,8 @@ export async function lineChartElements(lineChart, options = {}) {
     const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
     // Calculated expression helper function
-    const getVariable = (varName) => (varName in variables ? variables[varName] : null);
     const computeExpr = (exprText, expectedType = null, desc = null) => {
-        const exprValue = executeCalculation(parseCalculation(exprText), getVariable);
+        const exprValue = executeCalculation(parseCalculation(exprText), variables);
         if (exprValue !== null && expectedType !== null) {
             const exprType = getCalculatedValueType(exprValue);
             if (exprType !== expectedType) {

@@ -304,26 +304,16 @@ export function validateData(data, csv = false) {
  * Compute a variable expression map
  *
  * @param {Object} variables - The variable expression map
- * @param {Object} [externalVariables = null] - External variable value map
+ * @param {Object} [globals = {}] - The global variables
  * @returns {Object} The map of variable values
  */
-export function computeVariables(variables, externalVariables = null) {
+export function computeVariables(variables, globals = {}) {
     const variableValues = {};
-
-    // Allow variable expressions to access previous variable values
-    const getVariable = (varName) => {
-        if (varName in variableValues) {
-            return variableValues[varName];
-        } else if (externalVariables !== null && varName in externalVariables) {
-            return externalVariables[varName];
-        }
-        return null;
-    };
 
     // Compute each variable expression
     for (const varName of Object.keys(variables)) {
         const varExpr = parseCalculation(variables[varName]);
-        variableValues[varName] = executeCalculation(varExpr, getVariable);
+        variableValues[varName] = executeCalculation(varExpr, globals, variableValues);
     }
 
     return variableValues;
@@ -343,21 +333,10 @@ export function addCalculatedField(data, name, expr, variables = null) {
     // Parse the calculation expression
     const calcExpr = parseCalculation(expr);
 
-    // Allow filter expression access to row fields and variables
-    let row;
-    const getVariable = (varName) => {
-        if (varName in row) {
-            return row[varName];
-        } else if (variables !== null && varName in variables) {
-            return variables[varName];
-        }
-        return null;
-    };
-
     // Compute the calculated fields for each row
     let calcType = null;
-    for (row of data) {
-        const calcValue = executeCalculation(calcExpr, getVariable);
+    for (const row of data) {
+        const calcValue = executeCalculation(calcExpr, variables, row);
         row[name] = calcValue;
 
         // Determine the calculated field type
@@ -398,21 +377,10 @@ export function filterData(data, expr, variables = null) {
     // Parse the filter expression
     const filterExpr = parseCalculation(expr);
 
-    // Allow filter expression access to row fields and variables
-    let row;
-    const getVariable = (varName) => {
-        if (varName in row) {
-            return row[varName];
-        } else if (varName in variables) {
-            return variables[varName];
-        }
-        return null;
-    };
-
     // Filter the data
     const filteredData = [];
-    for (row of data) {
-        if (executeCalculation(filterExpr, getVariable)) {
+    for (const row of data) {
+        if (executeCalculation(filterExpr, variables, row)) {
             filteredData.push(row);
         }
     }

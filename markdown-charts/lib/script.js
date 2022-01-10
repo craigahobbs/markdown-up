@@ -17,24 +17,18 @@ import {markdownElements} from '../../markdown-model/lib/elements.js';
  * @returns {Object} The generated element model
  */
 export function markdownScriptCodeBlock(language, lines, options = {}) {
-    // Create the markdown-script runtime
-    const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime(options);
-    const getVariable = (name) => {
-        if (name in runtime.variables) {
-            return runtime.variables[name];
-        } else if ('variables' in options && name in options.variables) {
-            return options.variables[name];
-        }
-        return null;
-    };
-    const setVariable = (name, value) => {
-        runtime.variables[name] = value;
-    };
-
     // Execute the calculation script
-    const scriptModel = parseScript(lines);
-    executeScript(scriptModel, getVariable, setVariable);
-    runtime.finishDrawingPath();
+    const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime(options);
+    const globals = {...runtime.variables, ...('variables' in options ? options.variables : {})};
+    let errorMessage = null;
+    try {
+        const scriptModel = parseScript(lines);
+        executeScript(scriptModel, globals);
+    } catch ({message}) {
+        errorMessage = message;
+    } finally {
+        runtime.finishDrawingPath();
+    }
 
     // Render the element model parts
     const elements = [];
@@ -46,6 +40,12 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
         }
     }
     runtime.elementParts.length = 0;
+
+    // If an error occurred, render the error message
+    if (errorMessage !== null) {
+        elements.push({'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': errorMessage}}});
+    }
+
     return elements;
 }
 

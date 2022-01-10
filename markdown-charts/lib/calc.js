@@ -34,6 +34,9 @@ union CalcStatement
     # A jump-if statement
     CalcJumpIf jumpif
 
+    # A return statement
+    CalcExpr return
+
     # An expression
     CalcExpr expression
 
@@ -266,100 +269,62 @@ const calcFunctions = {
 
 
 /**
- * A calculation variable getter function
- *
- * @callback VariableGetter
- * @param {string} name - The variable name
- * @returns The variable value
- */
-
-
-/**
- * A calculation variable setter function
- *
- * @callback VariableSetter
- * @param {string} name - The variable name
- * @param value - The variable value
- */
-
-
-/**
  * Execute a calculation language script
  *
  * @param {Object} script - The calculation script model
- * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
- * @param {module:lib/calc~VariableSetter} [setVariable = null] - The variable setter function
+ * @param {Object} [globals = {}] - The global variables
  * @param {number} [maxStatements = 1e9] - The maximum number of statements, 0 for no maximum
  * @returns The calculation script result
  */
-export function executeScript(script, getVariable = null, setVariable = null, maxStatements = 1e9) {
-    // The script variable getter and setter functions
-    const variables = setVariable === null ? {} : null;
-    const getScriptVariable = (name) => {
-        if (variables !== null && name in variables) {
-            return variables[name];
-        } else if (getVariable !== null) {
-            return getVariable(name);
-        }
-        return null;
-    };
-    const setScriptVariable = (name, value) => {
-        if (variables !== null) {
-            variables[name] = value;
-        } else {
-            setVariable(name, value);
-        }
-    };
-
+export function executeScript(script, globals = {}, maxStatements = 1e9) {
     // The statement counter
     let statementCount = 0;
-    const statementCounter = () => {
-        statementCount++;
+    const statementCounter = (count) => {
+        statementCount += count;
         if (maxStatements !== 0 && statementCount > maxStatements) {
-            throw new Error(`Maximum number of script statements exceeded (${maxStatements})`);
+            throw new Error(`Exceeded maximum script statements (${maxStatements})`);
         }
     };
 
-    return executeScriptHelper(script.statements, getScriptVariable, setScriptVariable, statementCounter);
+    return executeScriptHelper(script.statements, globals, null, statementCounter);
 }
 
 
-export function executeScriptHelper(statements, getVariable, setVariable, statementCounter) {
-    let result = null;
-
+export function executeScriptHelper(statements, globals, locals, statementCounter) {
     // Iterate each script statement
     for (let ixStatement = 0; ixStatement < statements.length; ixStatement++) {
         const statement = statements[ixStatement];
 
         // Increment the statement counter
-        statementCounter();
+        statementCounter(1);
 
         // Assignment?
         if ('assignment' in statement) {
-            result = executeCalculation(statement.assignment.expression, getVariable);
-            setVariable(statement.assignment.name, result);
+            const exprValue = executeCalculation(statement.assignment.expression, globals, locals);
+            if (locals !== null) {
+                locals[statement.assignment.name] = exprValue;
+            } else {
+                globals[statement.assignment.name] = exprValue;
+            }
 
         // Function?
         } else if ('function' in statement) {
             const userFunction = (args) => {
-                const functionVariables = {};
-                const {'arguments': argumentNames = null} = statement.function;
-                if (argumentNames !== null) {
+                const functionLocals = {};
+                if ('arguments' in statement.function) {
+                    const argumentNames = statement.function.arguments;
                     for (let ixArg = 0; ixArg < argumentNames.length; ixArg++) {
-                        functionVariables[argumentNames[ixArg]] = ixArg < args.length ? args[ixArg] : null;
+                        functionLocals[argumentNames[ixArg]] = (ixArg < args.length ? args[ixArg] : null);
                     }
                 }
-                const getFunctionVariable = (name) => (name in functionVariables ? functionVariables[name] : getVariable(name));
-                const setFunctionVariable = (name, value) => {
-                    functionVariables[name] = value;
-                };
-                return executeScriptHelper(statement.function.statements, getFunctionVariable, setFunctionVariable, statementCounter);
+                return executeScriptHelper(statement.function.statements, globals, functionLocals, statementCounter);
             };
-            setVariable(statement.function.name, userFunction);
+            globals[statement.function.name] = userFunction;
 
         // Label?
         } else if ('label' in statement) {
-            // Do nothing
+            // Don't count labels towards the maximum statement count check
+            statementCounter(-1);
 
         // Jump?
         } else if ('jump' in statement) {
@@ -376,7 +341,7 @@ export function executeScriptHelper(statements, getVariable, setVariable, statem
         // Jump-if?
         } else if ('jumpif' in statement) {
             // Execute the test expression and jump if true
-            if (executeCalculation(statement.jumpif.expression, getVariable)) {
+            if (executeCalculation(statement.jumpif.expression, globals, locals)) {
                 // Find the label
                 const jumpLabel = statement.jumpif.label;
                 const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
@@ -388,14 +353,18 @@ export function executeScriptHelper(statements, getVariable, setVariable, statem
                 ixStatement = ixJump;
             }
 
+        // Return?
+        } else if ('return' in statement) {
+            return executeCalculation(statement.return, globals, locals);
+
         // Expression
         } else {
             // if ('expression' in statement)
-            result = executeCalculation(statement.expression, getVariable);
+            executeCalculation(statement.expression, globals, locals);
         }
     }
 
-    return result;
+    return null;
 }
 
 
@@ -403,29 +372,31 @@ export function executeScriptHelper(statements, getVariable, setVariable, statem
  * Excecute a calculation language model
  *
  * @param {Object} expr - The calculation expression model
- * @param {module:lib/calc~VariableGetter} [getVariable = null] - The variable getter function
+ * @param {Object} [globals = {}] - The global variables
+ * @param {Object} [locals = null] - The local variables
  * @returns The calculation expression result
  */
-export function executeCalculation(expr, getVariable = null) {
+export function executeCalculation(expr, globals = {}, locals = null) {
     if ('binary' in expr) {
         return binaryOperators[expr.binary.operator](
-            executeCalculation(expr.binary.left, getVariable),
-            executeCalculation(expr.binary.right, getVariable)
+            executeCalculation(expr.binary.left, globals, locals),
+            executeCalculation(expr.binary.right, globals, locals)
         );
     } else if ('unary' in expr) {
-        return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, getVariable));
+        return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, globals, locals));
     } else if ('function' in expr) {
-        const functionName = expr.function.name;
-        let functionValue = getVariable !== null ? getVariable(functionName) : null;
-        if (functionValue === null) {
-            if (!(functionName in calcFunctions)) {
-                throw new Error(`Undefined function "${functionName}"`);
+        const funcName = expr.function.name;
+        let funcValue = locals !== null && funcName in locals ? locals[funcName] : (funcName in globals ? globals[funcName] : null);
+        if (funcValue === null) {
+            if (!(funcName in calcFunctions)) {
+                throw new Error(`Undefined function "${funcName}"`);
             }
-            functionValue = calcFunctions[functionName];
+            funcValue = calcFunctions[funcName];
         }
-        return functionValue(expr.function.arguments.map((arg) => executeCalculation(arg, getVariable)));
+        return funcValue(expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals)));
     } else if ('variable' in expr) {
-        return getVariable !== null ? getVariable(expr.variable) : null;
+        const varName = expr.variable;
+        return locals !== null && varName in locals ? locals[expr.variable] : (varName in globals ? globals[varName] : null);
     } else if ('number' in expr) {
         return expr.number;
     }
@@ -445,6 +416,7 @@ const rScriptFunctionEnd = /^endfunction\s*$/;
 const rScriptLabel = /^\s*(?<name>[A-Za-z_]\w*)\s*:\s*$/;
 const rScriptJump = /^\s*jump\s+(?<name>[A-Za-z_]\w*)\s*$/;
 const rScriptJumpIf = /^\s*jumpif\s*\((?<expr>.+)\)\s+(?<name>[A-Za-z_]\w*)\s*$/;
+const rScriptReturn = /^\s*return\s+(?<expr>.+)\s*$/;
 
 
 /**
@@ -549,6 +521,15 @@ export function parseScript(scriptText) {
                     'label': matchJumpIf.groups.name,
                     'expression': parseCalculation(matchJumpIf.groups.expr)
                 }
+            });
+            continue;
+        }
+
+        // Return?
+        const matchReturn = line.match(rScriptReturn);
+        if (matchReturn !== null) {
+            statements.push({
+                'return': parseCalculation(matchReturn.groups.expr)
             });
             continue;
         }
