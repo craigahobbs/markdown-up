@@ -279,9 +279,8 @@ const calcFunctions = {
 export function executeScript(script, globals = {}, maxStatements = 1e9) {
     // The statement counter
     let statementCount = 0;
-    const statementCounter = (count) => {
-        statementCount += count;
-        if (maxStatements !== 0 && statementCount > maxStatements) {
+    const statementCounter = () => {
+        if (maxStatements !== 0 && ++statementCount > maxStatements) {
             throw new Error(`Exceeded maximum script statements (${maxStatements})`);
         }
     };
@@ -297,7 +296,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
         const statement = statements[ixStatement];
 
         // Increment the statement counter
-        statementCounter(1);
+        statementCounter();
 
         // Assignment?
         if ('assignment' in statement) {
@@ -321,11 +320,6 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
                 return executeScriptHelper(statement.function.statements, globals, functionLocals, statementCounter);
             };
             globals[statement.function.name] = userFunction;
-
-        // Label?
-        } else if ('label' in statement) {
-            // Don't count labels towards the maximum statement count check
-            statementCounter(-1);
 
         // Jump?
         } else if ('jump' in statement || 'jumpif' in statement) {
@@ -354,8 +348,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
             return executeCalculation(statement.return, globals, locals);
 
         // Expression
-        } else {
-            // if ('expression' in statement)
+        } else if ('expression' in statement) {
             executeCalculation(statement.expression, globals, locals);
         }
     }
