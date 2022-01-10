@@ -375,15 +375,25 @@ export function executeCalculation(expr, globals = {}, locals = null) {
         return unaryOperators[expr.unary.operator](value);
     } else if ('function' in expr) {
         const funcName = expr.function.name;
-        let funcValue = locals !== null && funcName in locals ? locals[funcName] : (funcName in globals ? globals[funcName] : null);
-        if (funcValue === null) {
-            if (!(funcName in calcFunctions)) {
-                throw new Error(`Undefined function "${funcName}"`);
-            }
-            funcValue = calcFunctions[funcName];
-        }
         const funcArgs = expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals));
-        return funcValue(funcArgs);
+
+        // Global function?
+        if (funcName in globals) {
+            return globals[funcName](funcArgs);
+        }
+
+        // Built-in function?
+        if (funcName === 'getGlobal') {
+            const [name] = funcArgs;
+            return name in globals ? globals[name] : null;
+        } else if (funcName === 'setGlobal') {
+            const [name, value] = funcArgs;
+            globals[name] = value;
+            return value;
+        } else if (funcName in calcFunctions) {
+            return calcFunctions[funcName](funcArgs);
+        }
+        throw new Error(`Undefined function "${funcName}"`);
     } else if ('variable' in expr) {
         const varName = expr.variable;
         return locals !== null && varName in locals ? locals[expr.variable] : (varName in globals ? globals[varName] : null);
