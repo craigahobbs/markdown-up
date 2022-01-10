@@ -377,9 +377,10 @@ export function executeCalculation(expr, globals = {}, locals = null) {
         const funcName = expr.function.name;
         const funcArgs = expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals));
 
-        // Global function?
-        if (funcName in globals) {
-            return globals[funcName](funcArgs);
+        // Global/local function?
+        const funcValue = locals !== null && funcName in locals ? locals[funcName] : (funcName in globals ? globals[funcName] : null);
+        if (funcValue !== null) {
+            return funcValue(funcArgs);
         }
 
         // Built-in function?
