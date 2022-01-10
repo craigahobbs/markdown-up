@@ -292,6 +292,7 @@ export function executeScript(script, globals = {}, maxStatements = 1e9) {
 
 export function executeScriptHelper(statements, globals, locals, statementCounter) {
     // Iterate each script statement
+    const labelIndexes = {};
     for (let ixStatement = 0; ixStatement < statements.length; ixStatement++) {
         const statement = statements[ixStatement];
 
@@ -327,26 +328,21 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
             statementCounter(-1);
 
         // Jump?
-        } else if ('jump' in statement) {
-            // Find the label
-            const jumpLabel = statement.jump;
-            const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
-            if (ixJump === -1) {
-                throw new Error(`Jump label "${jumpLabel}" not found`);
-            }
-
-            // Set the new execution statement index
-            ixStatement = ixJump;
-
-        // Jump-if?
-        } else if ('jumpif' in statement) {
-            // Execute the test expression and jump if true
-            if (executeCalculation(statement.jumpif.expression, globals, locals)) {
+        } else if ('jump' in statement || 'jumpif' in statement) {
+            // Evaluate the expression (if any)
+            const jumpValue = 'jumpif' in statement ? executeCalculation(statement.jumpif.expression, globals, locals) : true;
+            if (jumpValue) {
                 // Find the label
-                const jumpLabel = statement.jumpif.label;
-                const ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
-                if (ixJump === -1) {
-                    throw new Error(`Jump label "${jumpLabel}" not found`);
+                const jumpLabel = 'jumpif' in statement ? statement.jumpif.label : statement.jump;
+                let ixJump;
+                if (jumpLabel in labelIndexes) {
+                    ixJump = labelIndexes[jumpLabel];
+                } else {
+                    ixJump = statements.findIndex((stmt) => stmt.label === jumpLabel);
+                    if (ixJump === -1) {
+                        throw new Error(`Jump label "${jumpLabel}" not found`);
+                    }
+                    labelIndexes[jumpLabel] = ixJump;
                 }
 
                 // Set the new execution statement index
