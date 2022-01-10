@@ -367,12 +367,12 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
  */
 export function executeCalculation(expr, globals = {}, locals = null) {
     if ('binary' in expr) {
-        return binaryOperators[expr.binary.operator](
-            executeCalculation(expr.binary.left, globals, locals),
-            executeCalculation(expr.binary.right, globals, locals)
-        );
+        const left = executeCalculation(expr.binary.left, globals, locals);
+        const right = executeCalculation(expr.binary.right, globals, locals);
+        return binaryOperators[expr.binary.operator](left, right);
     } else if ('unary' in expr) {
-        return unaryOperators[expr.unary.operator](executeCalculation(expr.unary.expr, globals, locals));
+        const value = executeCalculation(expr.unary.expr, globals, locals);
+        return unaryOperators[expr.unary.operator](value);
     } else if ('function' in expr) {
         const funcName = expr.function.name;
         let funcValue = locals !== null && funcName in locals ? locals[funcName] : (funcName in globals ? globals[funcName] : null);
@@ -382,7 +382,8 @@ export function executeCalculation(expr, globals = {}, locals = null) {
             }
             funcValue = calcFunctions[funcName];
         }
-        return funcValue(expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals)));
+        const funcArgs = expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals));
+        return funcValue(funcArgs);
     } else if ('variable' in expr) {
         const varName = expr.variable;
         return locals !== null && varName in locals ? locals[expr.variable] : (varName in globals ? globals[varName] : null);
