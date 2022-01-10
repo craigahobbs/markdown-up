@@ -273,10 +273,10 @@ const calcFunctions = {
  *
  * @param {Object} script - The calculation script model
  * @param {Object} [globals = {}] - The global variables
- * @param {number} [maxStatements = 1e9] - The maximum number of statements, 0 for no maximum
+ * @param {number} [maxStatements = 1e7] - The maximum number of statements, 0 for no maximum
  * @returns The calculation script result
  */
-export function executeScript(script, globals = {}, maxStatements = 1e9) {
+export function executeScript(script, globals = {}, maxStatements = 1e7) {
     // The statement counter
     let statementCount = 0;
     const statementCounter = () => {
