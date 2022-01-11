@@ -18,7 +18,8 @@ import {markdownElements} from '../../markdown-model/lib/elements.js';
  */
 export function markdownScriptCodeBlock(language, lines, options = {}) {
     // Get/create the script's runtime
-    const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime();
+    const runtime = 'runtime' in options && options.runtime !== null ? options.runtime
+        : new MarkdownScriptRuntime({'fontSize': options ? options.fontSize : null});
 
     // Add the options variables to the runtime's globals
     if ('variables' in options) {
@@ -76,6 +77,14 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
 
 
 /**
+ * A MarkdownScriptRuntime options object
+ *
+ * @typedef {Object} MarkdownScriptRuntimeOptions
+ * @property {module:lib/script~LogFn} [logFn] - The log function
+ * @property {number} [fontSize] - The default font size, in points
+ */
+
+/**
  * A log function
  *
  * @callback LogFn
@@ -97,9 +106,9 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  */
 export class MarkdownScriptRuntime {
     /**
-     * @param {module:lib/script~LogFn} [logFn = null] - The log function
+     * @param {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
      */
-    constructor(logFn = null) {
+    constructor(options = {}) {
         // The runtime's global variables
         this.globals = {
             // Drawing functions
@@ -133,7 +142,7 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'log': ([text]) => (logFn !== null ? logFn(text) : null)
+            'log': ([text]) => ('logFn' in options && options.logFn !== null ? options.logFn(text) : null)
         };
 
         // Element model parts ('drawing', 'markdown')
@@ -152,7 +161,9 @@ export class MarkdownScriptRuntime {
 
         // Drawing text style
         this.drawingFontFamily = defaultFontFamily;
-        this.drawingFontSizePx = defaultFontSizePx;
+        this.drawingFontSizePx = (
+            'fontSize' in options && options.fontSize !== null ? options.fontSize * pixelsPerPoint : defaultFontSizePx
+        );
         this.drawingFontFill = 'black';
     }
 
@@ -318,7 +329,7 @@ export class MarkdownScriptRuntime {
     }
 
     drawTextHeight(text, width) {
-        return width === 0 ? this.drawingFontSizePx : width / (fontWidthRatio * text.length);
+        return width > 0 ? width / (fontWidthRatio * text.length) : this.drawingFontSizePx;
     }
 
     drawTextStyle(fontSizePx = defaultFontSizePx, textFill = 'black', fontFamily = defaultFontFamily) {

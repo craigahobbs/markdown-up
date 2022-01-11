@@ -11,12 +11,20 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
 
 /**
  * @typedef {Object} ChartOptions
- * @property {number} [fontSize] - The chart font size
- * @property {module:lib/script~HashFn} [hashFn] - The hash URL modifier function
+ * @property {number} [fontSize] - The chart font size, in points
+ * @property {module:lib/util~HashFn} [hashFn] - The hash URL modifier function
  * @property {module:lib/script.MarkdownScriptRuntime} [runtime] - The markdown-script runtime state
  * @property {string} [url] - The markdown file URL
  * @property {Object} [variables] - The map of variable name to chart variable value
  * @property {Window} [window] - The web browser's Window object
+ */
+
+/**
+ * A hash modifier function
+ *
+ * @callback HashFn
+ * @param {string} hashURL - The hash URL
+ * @returns {string} The fixed-up hash URL
  */
 
 
