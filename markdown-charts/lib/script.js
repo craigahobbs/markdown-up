@@ -18,7 +18,7 @@ import {markdownElements} from '../../markdown-model/lib/elements.js';
  */
 export function markdownScriptCodeBlock(language, lines, options = {}) {
     // Get/create the script's runtime
-    const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime(options);
+    const runtime = 'runtime' in options ? options.runtime : new MarkdownScriptRuntime();
 
     // Add the options variables to the runtime's globals
     if ('variables' in options) {
@@ -36,13 +36,22 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
         runtime.finishDrawingPath();
     }
 
+    // Create the markdownElements options
+    const markdownElementsOptions = {};
+    if ('hashFn' in options) {
+        markdownElementsOptions.hashFn = options.hashFn;
+    }
+    if ('url' in options) {
+        markdownElementsOptions.url = options.url;
+    }
+
     // Render the element model parts
     const elements = [];
     for (const part of runtime.elementParts) {
         if ('drawing' in part) {
             elements.push({'html': 'p', 'elem': part.drawing});
         } else {
-            elements.push(markdownElements(parseMarkdown(part.markdown)));
+            elements.push(markdownElements(parseMarkdown(part.markdown), markdownElementsOptions));
         }
     }
     runtime.elementParts.length = 0;
@@ -67,20 +76,6 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
 
 
 /**
- * @typedef {Object} MarkdownScriptRuntimeOptions
- * @property {module:lib/script~HashFn} [hashFn] - The hash URL modifier function
- * @property {module:lib/script~LogFn} [logFn] - The log function
- */
-
-/**
- * A hash modifier function
- *
- * @callback HashFn
- * @param {string} hashURL - The hash URL
- * @returns {string} The fixed-up hash URL
- */
-
-/**
  * A log function
  *
  * @callback LogFn
@@ -97,30 +92,31 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
 /**
  * markdown-script runtime state
  *
- * @property {module:lib/script~MarkdownScriptRuntimeOptions} options - The runtime options
+ * @property {Object} globals - The global variables
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
  */
 export class MarkdownScriptRuntime {
     /**
-     * @param {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
+     * @param {module:lib/script~LogFn} [logFn = null] - The log function
      */
-    constructor(options = {}) {
-        this.options = options;
-
+    constructor(logFn = null) {
         // The runtime's global variables
         this.globals = {
             // Drawing functions
+            'drawArc': ([rx, ry, xAxisRotation, largeArcFlag, sweepFlag, px, py]) => (
+                this.drawArc(rx, ry, xAxisRotation, largeArcFlag, sweepFlag, px, py)
+            ),
             'drawCircle': ([cx, cy, radius]) => this.drawCircle(cx, cy, radius),
             'drawClose': () => this.drawClose(),
             'drawEllipse': ([cx, cy, rx, ry]) => this.drawEllipse(cx, cy, rx, ry),
-            'drawHline': ([px]) => this.drawHline(px),
+            'drawHLine': ([px]) => this.drawHLine(px),
             'drawLine': ([px, py]) => this.drawLine(px, py),
             'drawMove': ([px, py]) => this.drawMove(px, py),
             'drawRect': ([px, py, width, height, rx, ry]) => this.drawRect(px, py, width, height, rx, ry),
             'drawStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => this.drawStyle(stroke, strokeWidth, fill, strokeDashArray),
             'drawText': ([text, px, py]) => this.drawText(text, px, py),
             'drawTextStyle': ([fontSizePx, textFill, fontFamily]) => this.drawTextStyle(fontSizePx, textFill, fontFamily),
-            'drawVline': ([py]) => this.drawVline(py),
+            'drawVLine': ([py]) => this.drawVLine(py),
             'getDrawingHeight': () => this.drawingHeight,
             'getDrawingWidth': () => this.drawingWidth,
             'getTextHeight': ([text, width]) => this.drawTextHeight(text, width),
@@ -137,12 +133,7 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'hashURL': ([url]) => ('hashFn' in options ? options.hashFn(url) : url),
-            'log': ([text]) => {
-                if ('logFn' in options) {
-                    options.logFn(text);
-                }
-            }
+            'log': ([text]) => (logFn !== null ? logFn(text) : null)
         };
 
         // Element model parts ('drawing', 'markdown')
@@ -209,7 +200,15 @@ export class MarkdownScriptRuntime {
         }
     }
 
-    drawCircle(cx = 0, cy = 0, radius = 50) {
+    drawArc(rx, ry, xAxisRotation, largeArcFlag, sweepFlag, px, py) {
+        this.setDrawing();
+        this.drawingPath.push(
+            `A ${rx.toFixed(svgPrecision)} ${ry.toFixed(svgPrecision)} ${xAxisRotation.toFixed(svgPrecision)} ` +
+                `${largeArcFlag ? 1 : 0} ${sweepFlag ? 1 : 0} ${px.toFixed(svgPrecision)} ${py.toFixed(svgPrecision)}`
+        );
+    }
+
+    drawCircle(cx, cy, radius) {
         const svg = this.setDrawing();
         this.finishDrawingPath();
         svg.elem.push({
@@ -226,25 +225,12 @@ export class MarkdownScriptRuntime {
         });
     }
 
-    drawText(text = '', px = 0, py = 0, textAnchor = 'middle', dominantBaseline = 'middle') {
-        const svg = this.setDrawing();
-        this.finishDrawingPath();
-        svg.elem.push({
-            'svg': 'text',
-            'attr': {
-                'fill': this.drawingFontFill,
-                'font-family': this.drawingFontFamily,
-                'font-size': this.drawingFontSizePx.toFixed(svgPrecision),
-                'text-anchor': textAnchor,
-                'dominant-baseline': dominantBaseline,
-                'x': px,
-                'y': py
-            },
-            'elem': {'text': text}
-        });
+    drawClose() {
+        this.setDrawing();
+        this.drawingPath.push('Z');
     }
 
-    drawEllipse(cx = 0, cy = 0, rx = 50, ry = 50) {
+    drawEllipse(cx, cy, rx, ry) {
         const svg = this.setDrawing();
         this.finishDrawingPath();
         svg.elem.push({
@@ -262,27 +248,22 @@ export class MarkdownScriptRuntime {
         });
     }
 
-    drawHline(px = 0) {
+    drawHLine(px) {
         this.setDrawing();
         this.drawingPath.push(`H ${px.toFixed(svgPrecision)}`);
     }
 
-    drawLine(px = 0, py = 0) {
+    drawLine(px, py) {
         this.setDrawing();
         this.drawingPath.push(`L ${px.toFixed(svgPrecision)} ${py.toFixed(svgPrecision)}`);
     }
 
-    drawMove(px = 0, py = 0) {
+    drawMove(px, py) {
         this.setDrawing();
         this.drawingPath.push(`M ${px.toFixed(svgPrecision)} ${py.toFixed(svgPrecision)}`);
     }
 
-    drawClose() {
-        this.setDrawing();
-        this.drawingPath.push('Z');
-    }
-
-    drawRect(px = 0, py = 0, width = 60, height = 40, rx = null, ry = null) {
+    drawRect(px, py, width, height, rx = null, ry = null) {
         const svg = this.setDrawing();
         this.finishDrawingPath();
         const element = {
@@ -311,14 +292,32 @@ export class MarkdownScriptRuntime {
         if (stroke !== this.drawingPathStroke || strokeWidth !== this.drawingPathStrokeWidth ||
             strokeDashArray !== this.drawingPathStrokeDashArray || fill !== this.drawingPathFill) {
             this.finishDrawingPath();
-            this.drawingPathstroke = stroke;
+            this.drawingPathStroke = stroke;
             this.drawingPathStrokeWidth = strokeWidth;
             this.drawingPathStrokeDashArray = strokeDashArray;
             this.drawingPathFill = fill;
         }
     }
 
-    drawTextHeight(text = '', width = 0) {
+    drawText(text, px, py, textAnchor = 'middle', dominantBaseline = 'middle') {
+        const svg = this.setDrawing();
+        this.finishDrawingPath();
+        svg.elem.push({
+            'svg': 'text',
+            'attr': {
+                'fill': this.drawingFontFill,
+                'font-family': this.drawingFontFamily,
+                'font-size': this.drawingFontSizePx.toFixed(svgPrecision),
+                'text-anchor': textAnchor,
+                'dominant-baseline': dominantBaseline,
+                'x': px,
+                'y': py
+            },
+            'elem': {'text': text}
+        });
+    }
+
+    drawTextHeight(text, width) {
         return width === 0 ? this.drawingFontSizePx : width / (fontWidthRatio * text.length);
     }
 
@@ -332,7 +331,7 @@ export class MarkdownScriptRuntime {
         return fontWidthRatio * this.drawiingFontSizePx * text.length;
     }
 
-    drawVline(py = 0) {
+    drawVLine(py) {
         this.setDrawing();
         this.drawingPath.push(`V ${py.toFixed(svgPrecision)}`);
     }

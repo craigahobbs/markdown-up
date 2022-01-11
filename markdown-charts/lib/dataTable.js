@@ -33,6 +33,15 @@ export function dataTableCodeBlock(language, lines, options = {}) {
 export async function dataTableElements(dataTable, options = {}) {
     const {data, types} = await loadChartData(dataTable, options);
 
+    // Create the markdownElements options
+    const markdownElementsOptions = {};
+    if ('hashFn' in options) {
+        markdownElementsOptions.hashFn = options.hashFn;
+    }
+    if ('url' in options) {
+        markdownElementsOptions.url = options.url;
+    }
+
     // Generate the data table's element model
     const categoryFields = 'categoryFields' in dataTable ? dataTable.categoryFields : [];
     const fields = 'fields' in dataTable
@@ -69,14 +78,14 @@ export async function dataTableElements(dataTable, options = {}) {
                             }
 
                             const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
-                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)))
+                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)), markdownElementsOptions)
                                 : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': skip ? null : fieldElements};
                         }),
                         fields.map((field) => {
                             const value = field in row ? row[field] : null;
                             const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
-                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)))
+                                ? markdownElements(parseMarkdown(formatValue(value, dataTable)), markdownElementsOptions)
                                 : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': field === null ? null : fieldElements};
                         })

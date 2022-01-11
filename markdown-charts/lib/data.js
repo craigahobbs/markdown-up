@@ -33,21 +33,15 @@ export async function loadChartData(chartModel, options = {}) {
 
     // Compute the variable values
     const variables = {
+        'markdownEncode': ([text]) => encodeMarkdownText(text),
         ...('variables' in chartModel ? computeVariables(chartModel.variables) : {}),
         ...('variables' in options ? options.variables : {})
     };
 
     // Add calculated fields
     if ('calculatedFields' in chartModel) {
-        const calcVariables = {
-            'hashURL': ([url]) => (
-                'runtime' in options && 'hashFn' in options.runtime.options ? options.runtime.options.hashFn(url) : url
-            ),
-            'markdownEncode': ([text]) => encodeMarkdownText(text),
-            ...variables
-        };
         for (const calculatedField of chartModel.calculatedFields) {
-            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, calcVariables);
+            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, variables);
         }
     }
 
