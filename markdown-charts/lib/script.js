@@ -37,7 +37,7 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
     }
 
     // Create the markdownElements options
-    const markdownElementsOptions = {};
+    const markdownElementsOptions = {'headerIds': true};
     if ('hashFn' in options) {
         markdownElementsOptions.hashFn = options.hashFn;
     }
