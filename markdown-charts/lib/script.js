@@ -68,7 +68,7 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
 // markdown-script runtime constants
 const defaultDrawingWidth = 300;
 const defaultDrawingHeight = 200;
-const svgPrecision = 6;
+const svgPrecision = 8;
 const fontWidthRatio = 0.6;
 const pixelsPerPoint = 4 / 3;
 const defaultFontFamily = 'Arial, Helvetica, sans-serif';
