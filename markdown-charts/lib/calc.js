@@ -308,8 +308,12 @@ export function executeScript(script, globals = {}, maxStatements = 1e7) {
     };
 
     // Execute the script
-    const scriptGlobals = {...scriptFunctions, ...globals};
-    return executeScriptHelper(script.statements, scriptGlobals, null, statementCounter);
+    for (const scriptFunctionName of Object.keys(scriptFunctions)) {
+        if (!(scriptFunctionName in globals)) {
+            globals[scriptFunctionName] = scriptFunctions[scriptFunctionName];
+        }
+    }
+    return executeScriptHelper(script.statements, globals, null, statementCounter);
 }
 
 
