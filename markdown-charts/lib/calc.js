@@ -113,6 +113,7 @@ enum CalcExprBinaryOperator
     "&"
     "/"
     "=="
+    "!="
     "^"
     ">"
     ">="
@@ -191,6 +192,7 @@ const binaryOperators = {
     '&&': (left, right) => left && right,
     '/': (left, right) => left / right,
     '==': (left, right) => left === right,
+    '!=': (left, right) => left !== right,
     '^': (left, right) => left ** right,
     '>=': (left, right) => left >= right,
     '>': (left, right) => left > right,
@@ -222,7 +224,7 @@ const calcFunctions = {
     'date': ([year, month, day]) => new Date(year, month - 1, day),
     'day': ([datetime]) => datetime.getDate(),
     'encodeURIComponent': ([text]) => encodeURIComponent(text),
-    'find': ([findText, withinText]) => withinText.indexOf(findText),
+    'indexOf': ([text, findText, index = 0]) => text.indexOf(findText, index),
     'fixed': ([number, decimals = 2]) => number.toFixed(decimals),
     'floor': ([number]) => Math.floor(number),
     'hour': ([datetime]) => datetime.getHours(),
@@ -266,10 +268,18 @@ const calcFunctions = {
 // Script function map (name => fn)
 const scriptFunctions = {
     // Array functions
+    'arrayCopy': ([array]) => [...array],
     'arrayGet': ([array, index]) => array[index],
+    'arrayIndexOf': ([array, value, index = 0]) => array.indexOf(value, index),
     'arrayJoin': ([array, sep]) => array.join(sep),
     'arrayLength': ([array]) => array.length,
-    'arrayNew': (args) => args,
+    'arrayNew': ([size = 0, value = 0]) => {
+        const array = [];
+        for (let ix = 0; ix < size; ix++) {
+            array.push(value);
+        }
+        return array;
+    },
     'arrayPush': ([array, ...values]) => array.push(...values),
     'arraySet': ([array, index, value]) => {
         array[index] = value;
@@ -278,6 +288,7 @@ const scriptFunctions = {
     'arraySplit': ([text, sep]) => text.split(sep),
 
     // Object functions
+    'objectCopy': ([obj]) => ({...obj}),
     'objectDelete': ([obj, key]) => {
         delete obj[key];
     },
