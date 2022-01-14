@@ -103,6 +103,8 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  *
  * @property {Object} globals - The global variables
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
+ * @property {string} [setNavigateTimeoutURL = null] The navigate timeout URL (set by setNavigateTimeout function)
+ * @property {number} [setNavigateTimeoutDelay = null] The navigate timeout delay (set by setNavigateTimeout function)
  */
 export class MarkdownScriptRuntime {
     /**
@@ -142,11 +144,17 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'log': ([text]) => ('logFn' in options && options.logFn !== null ? options.logFn(text) : null)
+            'log': ([text]) => ('logFn' in options && options.logFn !== null ? options.logFn(text) : null),
+            'setNavigateTimeout': ([url, delay]) => {
+                this.setNavigateTimeoutURL = url;
+                this.setNavigateTimeoutDelay = delay;
+            }
         };
 
         // Element model parts ('drawing', 'markdown')
         this.elementParts = [];
+        this.setNavigateTimeoutURL = null;
+        this.setNavigateTimeoutDelay = null;
 
         // Drawing state
         this.drawingWidth = defaultDrawingWidth;
