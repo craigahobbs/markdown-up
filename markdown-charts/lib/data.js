@@ -29,7 +29,7 @@ import {encodeMarkdownText} from '../../markdown-model/lib/parser.js';
  */
 export async function loadChartData(chartModel, options = {}) {
     // Load the data resources
-    let {data, types} = await loadData(chartModel.data, options.window, 'url' in options ? options.url : null);
+    let {data, types} = await loadData(chartModel.data, options.fetchFn, 'url' in options ? options.url : null);
 
     // Compute the variable values
     const variables = {
@@ -84,11 +84,11 @@ export async function loadChartData(chartModel, options = {}) {
  * Load a data model
  *
  * @param {Object} dataModel - The data model
- * @param {Window} window - The window object (for fetch)
+ * @property {module:lib/util~FetchFn} fetchFn - The URL fetch function
  * @param {string} [rootURL = null] - The root URL for determining relative data URL locations
  * @returns {module:lib/data~LoadDataResult}
  */
-export async function loadData(dataModel, window, rootURL = null) {
+export async function loadData(dataModel, fetchFn, rootURL = null) {
     // Load the data resources
     const fixDataURL = (url) => {
         if (rootURL !== null && isRelativeURL(url)) {
@@ -100,7 +100,7 @@ export async function loadData(dataModel, window, rootURL = null) {
         fixDataURL(dataModel.url),
         ...('joins' in dataModel ? dataModel.joins.map((join) => fixDataURL(join.url)) : [])
     ];
-    const dataResponses = await Promise.all(dataURLs.map((joinURL) => window.fetch(joinURL)));
+    const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
 
     // Join the data
