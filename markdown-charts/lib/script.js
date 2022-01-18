@@ -132,12 +132,7 @@ export class MarkdownScriptRuntime {
             'getDrawingWidth': () => this.drawingWidth,
             'getTextHeight': ([text, width]) => this.drawTextHeight(text, width),
             'getTextWidth': ([text]) => this.drawTextWidth(text),
-            'setDrawingHeight': ([height]) => {
-                this.drawingHeight = height;
-            },
-            'setDrawingWidth': ([width]) => {
-                this.drawingWidth = width;
-            },
+            'setDrawingSize': ([width, height]) => this.setDrawingSize(width, height),
 
             // Markdown functions
             'markdownEncode': ([text]) => encodeMarkdownText(text),
@@ -175,9 +170,10 @@ export class MarkdownScriptRuntime {
         this.drawingFontFill = 'black';
     }
 
-    setDrawing() {
+    setDrawing(newDrawing = false) {
         let part = this.elementParts.length !== 0 ? this.elementParts[this.elementParts.length - 1] : null;
-        if (part === null || !('drawing' in part)) {
+        const isDrawing = part !== null && 'drawing' in part;
+        if (!isDrawing || (newDrawing && isDrawing)) {
             part = {
                 'drawing': {
                     'svg': 'svg',
@@ -195,7 +191,8 @@ export class MarkdownScriptRuntime {
 
     setMarkdown() {
         let part = this.elementParts.length !== 0 ? this.elementParts[this.elementParts.length - 1] : null;
-        if (part === null || !('markdown' in part)) {
+        const isMarkdown = part !== null && 'markdown' in part;
+        if (!isMarkdown) {
             this.finishDrawingPath();
             part = {'markdown': []};
             this.elementParts.push(part);
@@ -358,5 +355,12 @@ export class MarkdownScriptRuntime {
     markdownPrint(lines) {
         const markdownLines = this.setMarkdown();
         markdownLines.push(...lines);
+    }
+
+    setDrawingSize(width, height) {
+        this.finishDrawingPath();
+        this.drawingWidth = width;
+        this.drawingHeight = height;
+        this.setDrawing(true);
     }
 }
