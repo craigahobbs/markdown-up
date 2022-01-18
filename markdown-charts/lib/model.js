@@ -184,14 +184,14 @@ struct Top
 # Base struct for line and bar charts
 struct ChartCommon
 
-    # The chart title
+    # The chart title expression
     optional string title
 
-    # The chart width
-    optional int(> 0) width
+    # The chart width expression
+    optional string width
 
-    # The chart height
-    optional int(> 0) height
+    # The chart height expression
+    optional string height
 
 
 # A bar chart specification
@@ -264,8 +264,8 @@ struct AxisAnnotation
 # Automatically-generated, evenly-spaced tick marks specification
 struct AxisTicks
 
-    # The number of tick marks. Default is 3.
-    optional int count
+    # The tick mark count expression. Default is 3.
+    optional string count
 
     # The field value expression of the first tick mark. Default is the minimum field value.
     optional string start

@@ -61,19 +61,6 @@ export const categoricalColors = [
 ];
 
 
-// Helper function to replace variable tokens (e.g. "{{name}}") in a string
-export function formatVariables(chart, variables, text, missingNull = true) {
-    return text.replace(rVariable, (match, variable) => {
-        if (variable in variables) {
-            return formatValue(variables[variable], chart);
-        }
-        return missingNull ? null : match;
-    });
-}
-
-const rVariable = /\{\{(\w+)\}\}/g;
-
-
 // Helper function to format labels
 export function formatValue(value, chart) {
     if (value instanceof Date) {

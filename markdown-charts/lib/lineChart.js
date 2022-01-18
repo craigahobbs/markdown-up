@@ -4,7 +4,7 @@
 /** @module lib/lineChart */
 
 import {
-    categoricalColors, chartCodeBlock, compareValues, formatValue, formatVariables, parameterValue, valueParameter
+    categoricalColors, chartCodeBlock, compareValues, formatValue, parameterValue, valueParameter
 } from './util.js';
 import {executeCalculation, parseCalculation} from './calc.js';
 import {getCalculatedValueType, loadChartData} from './data.js';
@@ -58,6 +58,8 @@ export function lineChartCodeBlock(language, lines, options = {}) {
  * @returns {Object} The line chart element model
  */
 export async function lineChartElements(lineChart, options = {}) {
+    const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
+
     // Load the chart data
     const {data, types, variables} = (await loadChartData(lineChart, options));
 
@@ -158,11 +160,6 @@ export async function lineChartElements(lineChart, options = {}) {
         throw new Error('No data');
     }
 
-    // Override-able properties
-    const chartWidth = 'width' in lineChart ? lineChart.width : defaultWidth;
-    const chartHeight = 'height' in lineChart ? lineChart.height : defaultHeight;
-    const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
-
     // Calculated expression helper function
     const computeExpr = (exprText, expectedType = null, desc = null) => {
         const exprValue = executeCalculation(parseCalculation(exprText), variables);
@@ -175,9 +172,16 @@ export async function lineChartElements(lineChart, options = {}) {
         return exprValue;
     };
 
+    // Compute the chart title, width, and height
+    const chartTitle = 'title' in lineChart ? computeExpr(lineChart.title, 'string', 'chart title') : null;
+    const chartWidth = 'width' in lineChart ? computeExpr(lineChart.width, 'number', 'chart width') : defaultWidth;
+    const chartHeight = 'height' in lineChart ? computeExpr(lineChart.height, 'number', 'chart height') : defaultHeight;
+
     // Compute Y-axis tick values
     const yAxisTicks = [];
-    const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount;
+    const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks
+        ? computeExpr(lineChart.yTicks.count, 'number', 'Y-axis tick count')
+        : defaultYAxisTickCount;
     const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
     const yTickStart = 'yTicks' in lineChart && 'start' in lineChart.yTicks
         ? computeExpr(lineChart.yTicks.start, yFieldType, 'Y-axis start value')
@@ -195,7 +199,9 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Compute X-axis tick values
     const xAxisTicks = [];
-    const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount;
+    const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks
+        ? computeExpr(lineChart.xTicks.count, 'number', 'X-axis tick count')
+        : defaultXAxisTickCount;
     const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
     const xTickStart = 'xTicks' in lineChart && 'start' in lineChart.xTicks
         ? computeExpr(lineChart.xTicks.start, xFieldType, 'X-axis start value')
@@ -246,7 +252,6 @@ export async function lineChartElements(lineChart, options = {}) {
     // Chart title calculations
     const chartBorderSize = chartFontSize;
     const chartTitleFontSize = 1.1 * chartFontSize;
-    const chartTitle = 'title' in lineChart ? lineChart.title : null;
     const chartTitleHeight = chartTitle !== null ? 1.5 * chartTitleFontSize : 0;
 
     // Y-axis calculations
@@ -353,7 +358,7 @@ export async function lineChartElements(lineChart, options = {}) {
                     'text-anchor': 'middle',
                     'dominant-baseline': 'hanging'
                 },
-                'elem': {'text': formatVariables(lineChart, variables, lineChart.title)}
+                'elem': {'text': chartTitle}
             },
 
             // Y-Axis title
