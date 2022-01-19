@@ -30,7 +30,12 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
     let errorMessage = null;
     try {
         const scriptModel = parseScript(lines);
+        const timeBegin = performance.now();
         executeScript(scriptModel, runtime.globals);
+        if ('logFn' in runtime.options) {
+            const timeEnd = performance.now();
+            runtime.options.logFn(`Script executed in ${(timeEnd - timeBegin).toFixed(1)} milliseconds`);
+        }
     } catch ({message}) {
         errorMessage = message;
     } finally {
@@ -102,6 +107,7 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  * markdown-script runtime state
  *
  * @property {Object} globals - The global variables
+ * @property {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
  * @property {string} [setNavigateTimeoutURL = null] The navigate timeout URL (set by setNavigateTimeout function)
  * @property {number} [setNavigateTimeoutDelay = null] The navigate timeout delay (set by setNavigateTimeout function)
@@ -111,6 +117,8 @@ export class MarkdownScriptRuntime {
      * @param {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
      */
     constructor(options = {}) {
+        this.options = options;
+
         // The runtime's global variables
         this.globals = {
             // Drawing functions
