@@ -131,6 +131,7 @@ export class MarkdownScriptRuntime {
             'drawHLine': ([px]) => this.drawHLine(px),
             'drawLine': ([px, py]) => this.drawLine(px, py),
             'drawMove': ([px, py]) => this.drawMove(px, py),
+            'drawOnClick': ([callback]) => this.drawOnClick(callback),
             'drawRect': ([px, py, width, height, rx, ry]) => this.drawRect(px, py, width, height, rx, ry),
             'drawStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => this.drawStyle(stroke, strokeWidth, fill, strokeDashArray),
             'drawText': ([text, px, py]) => this.drawText(text, px, py),
@@ -285,6 +286,17 @@ export class MarkdownScriptRuntime {
     drawMove(px, py) {
         this.setDrawing();
         this.drawingPath.push(`M ${px.toFixed(svgPrecision)} ${py.toFixed(svgPrecision)}`);
+    }
+
+    drawOnClick(callback) {
+        const svg = this.setDrawing();
+        const clickElement = svg.elem.length === 0 ? svg : svg.elem[svg.elem.length - 1];
+        clickElement.callback = (element) => {
+            element.addEventListener('click', (event) => {
+                const boundingRect = event.target.ownerSVGElement.getBoundingClientRect();
+                callback([event.clientX - boundingRect.left, event.clientY - boundingRect.top]);
+            });
+        };
     }
 
     drawRect(px, py, width, height, rx = null, ry = null) {
