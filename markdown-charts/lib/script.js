@@ -86,6 +86,7 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  *
  * @typedef {Object} MarkdownScriptRuntimeOptions
  * @property {module:lib/script~LogFn} [logFn] - The log function
+ * @property {module:lib/script~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
  * @property {number} [fontSize] - The default font size, in points
  */
 
@@ -94,6 +95,14 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  *
  * @callback LogFn
  * @param {string} text - The log text
+ */
+
+/**
+ * A navigate timeout function
+ *
+ * @callback NavigateTimeoutFn
+ * @param {string} url - The URL to navigate to
+ * @param {number} delay - The navigation delay, in milliseconds
  */
 
 /**
@@ -109,8 +118,6 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  * @property {Object} globals - The global variables
  * @property {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
- * @property {string} [setNavigateTimeoutURL = null] The navigate timeout URL (set by setNavigateTimeout function)
- * @property {number} [setNavigateTimeoutDelay = null] The navigate timeout delay (set by setNavigateTimeout function)
  */
 export class MarkdownScriptRuntime {
     /**
@@ -148,17 +155,12 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'log': ([text]) => ('logFn' in options && options.logFn !== null ? options.logFn(text) : null),
-            'setNavigateTimeout': ([url, delay]) => {
-                this.setNavigateTimeoutURL = url;
-                this.setNavigateTimeoutDelay = delay;
-            }
+            'log': ([text]) => this.log(text),
+            'setNavigateTimeout': ([url, delay = 0]) => this.setNavigateTimeout(url, delay)
         };
 
         // Element model parts ('drawing', 'markdown')
         this.elementParts = [];
-        this.setNavigateTimeoutURL = null;
-        this.setNavigateTimeoutDelay = null;
 
         // Drawing state
         this.drawingWidth = defaultDrawingWidth;
@@ -372,6 +374,12 @@ export class MarkdownScriptRuntime {
         this.drawingPath.push(`V ${py.toFixed(svgPrecision)}`);
     }
 
+    log(text) {
+        if ('logFn' in this.options && this.options.logFn !== null) {
+            this.options.logFn(text);
+        }
+    }
+
     markdownPrint(lines) {
         const markdownLines = this.setMarkdown();
         markdownLines.push(...lines);
@@ -382,5 +390,11 @@ export class MarkdownScriptRuntime {
         this.drawingWidth = width;
         this.drawingHeight = height;
         this.setDrawing(true);
+    }
+
+    setNavigateTimeout(url, delay) {
+        if ('navigateTimeoutFn' in this.options && this.navigateTimeoutFn !== null) {
+            this.options.navigateTimeoutFn(url, delay);
+        }
     }
 }
