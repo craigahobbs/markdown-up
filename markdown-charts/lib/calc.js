@@ -412,7 +412,18 @@ export function executeCalculation(expr, globals = {}, locals = null) {
         const value = executeCalculation(expr.unary.expr, globals, locals);
         return unaryOperators[expr.unary.operator](value);
     } else if ('function' in expr) {
+        // "if" built-in function?
         const funcName = expr.function.name;
+        if (funcName === 'if') {
+            const [valueExpr, trueExpr, falseExpr] = expr.function.arguments;
+            const value = executeCalculation(valueExpr, globals, locals);
+            if (value) {
+                return executeCalculation(trueExpr, globals, locals);
+            }
+            return executeCalculation(falseExpr, globals, locals);
+        }
+
+        // Compute the function arguments
         const funcArgs = expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals));
 
         // Global/local function?
@@ -432,10 +443,22 @@ export function executeCalculation(expr, globals = {}, locals = null) {
         } else if (funcName in calcFunctions) {
             return calcFunctions[funcName](funcArgs);
         }
+
         throw new Error(`Undefined function "${funcName}"`);
     } else if ('variable' in expr) {
+        // "null" is a keyword
         const varName = expr.variable;
-        return locals !== null && varName in locals ? locals[expr.variable] : (varName in globals ? globals[varName] : null);
+        if (varName === 'null') {
+            return null;
+        }
+
+        // Local variable?
+        if (locals !== null && varName in locals) {
+            return locals[expr.variable];
+        }
+
+        // Global variable...
+        return varName in globals ? globals[varName] : null;
     } else if ('number' in expr) {
         return expr.number;
     }
