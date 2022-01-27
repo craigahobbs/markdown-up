@@ -129,34 +129,32 @@ export class MarkdownScriptRuntime {
         // The runtime's global variables
         this.globals = {
             // Drawing functions
-            'drawArc': ([rx, ry, xAxisRotation, largeArcFlag, sweepFlag, px, py]) => (
-                this.drawArc(rx, ry, xAxisRotation, largeArcFlag, sweepFlag, px, py)
-            ),
-            'drawCircle': ([cx, cy, radius]) => this.drawCircle(cx, cy, radius),
+            'drawArc': (args) => this.drawArc(...args),
+            'drawCircle': (args) => this.drawCircle(...args),
             'drawClose': () => this.drawClose(),
-            'drawEllipse': ([cx, cy, rx, ry]) => this.drawEllipse(cx, cy, rx, ry),
-            'drawHLine': ([px]) => this.drawHLine(px),
-            'drawLine': ([px, py]) => this.drawLine(px, py),
-            'drawMove': ([px, py]) => this.drawMove(px, py),
-            'drawOnClick': ([callback]) => this.drawOnClick(callback),
-            'drawRect': ([px, py, width, height, rx, ry]) => this.drawRect(px, py, width, height, rx, ry),
-            'drawStyle': ([stroke, strokeWidth, fill, strokeDashArray]) => this.drawStyle(stroke, strokeWidth, fill, strokeDashArray),
-            'drawText': ([text, px, py]) => this.drawText(text, px, py),
-            'drawTextStyle': ([fontSizePx, textFill, fontFamily]) => this.drawTextStyle(fontSizePx, textFill, fontFamily),
-            'drawVLine': ([py]) => this.drawVLine(py),
+            'drawEllipse': (args) => this.drawEllipse(...args),
+            'drawHLine': (args) => this.drawHLine(...args),
+            'drawLine': (args) => this.drawLine(...args),
+            'drawMove': (args) => this.drawMove(...args),
+            'drawOnClick': (args) => this.drawOnClick(...args),
+            'drawRect': (args) => this.drawRect(...args),
+            'drawStyle': (args) => this.drawStyle(...args),
+            'drawText': (args) => this.drawText(...args),
+            'drawTextStyle': (args) => this.drawTextStyle(...args),
+            'drawVLine': (args) => this.drawVLine(...args),
             'getDrawingHeight': () => this.drawingHeight,
             'getDrawingWidth': () => this.drawingWidth,
-            'getTextHeight': ([text, width]) => this.drawTextHeight(text, width),
-            'getTextWidth': ([text]) => this.drawTextWidth(text),
-            'setDrawingSize': ([width, height]) => this.setDrawingSize(width, height),
+            'getTextHeight': (args) => this.drawTextHeight(...args),
+            'getTextWidth': (args) => this.drawTextWidth(...args),
+            'setDrawingSize': (args) => this.setDrawingSize(...args),
 
             // Markdown functions
-            'markdownEncode': ([text]) => encodeMarkdownText(text),
+            'markdownEncode': (args) => encodeMarkdownText(...args),
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'log': ([text]) => this.log(text),
-            'setNavigateTimeout': ([url, delay = 0]) => this.setNavigateTimeout(url, delay)
+            'log': (args) => this.log(...args),
+            'setNavigateTimeout': (args) => this.setNavigateTimeout(...args)
         };
 
         // Element model parts ('drawing', 'markdown')
@@ -179,6 +177,8 @@ export class MarkdownScriptRuntime {
             'fontSize' in options && options.fontSize !== null ? options.fontSize * pixelsPerPoint : defaultFontSizePx
         );
         this.drawingFontFill = 'black';
+        this.drawingFontBold = false;
+        this.drawingFontItalic = false;
     }
 
     setDrawing(newDrawing = false) {
@@ -348,6 +348,8 @@ export class MarkdownScriptRuntime {
                 'font-size': this.drawingFontSizePx.toFixed(svgPrecision),
                 'text-anchor': textAnchor,
                 'dominant-baseline': dominantBaseline,
+                'font-weight': (this.drawingFontBold ? 'bold' : 'normal'),
+                'font-style': (this.drawingFontItalic ? 'italic' : 'normal'),
                 'x': px,
                 'y': py
             },
@@ -359,10 +361,12 @@ export class MarkdownScriptRuntime {
         return width > 0 ? width / (fontWidthRatio * text.length) : this.drawingFontSizePx;
     }
 
-    drawTextStyle(fontSizePx = defaultFontSizePx, textFill = 'black', fontFamily = defaultFontFamily) {
+    drawTextStyle(fontSizePx = defaultFontSizePx, textFill = 'black', bold = false, italic = false, fontFamily = defaultFontFamily) {
         this.drawingFontSizePx = fontSizePx;
-        this.drawingFontFamily = fontFamily;
         this.drawingFontFill = textFill;
+        this.drawingFontBold = bold;
+        this.drawingFontItalic = italic;
+        this.drawingFontFamily = fontFamily;
     }
 
     drawTextWidth(text) {
@@ -392,7 +396,7 @@ export class MarkdownScriptRuntime {
         this.setDrawing(true);
     }
 
-    setNavigateTimeout(url, delay) {
+    setNavigateTimeout(url, delay = 0) {
         if ('navigateTimeoutFn' in this.options && this.navigateTimeoutFn !== null) {
             this.options.navigateTimeoutFn(url, delay);
         }
