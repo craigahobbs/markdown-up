@@ -80,8 +80,8 @@ union CalcExpr
     # A unary expression
     CalcExprUnary unary
 
-    # A parenthesized expression
-    CalcExpr paren
+    # An expression group
+    CalcExpr group
 
     # A function expression
     CalcExprFunction function
@@ -395,7 +395,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
 
 
 /**
- * Excecute a calculation language model
+ * Evaluate a calculation language expression model
  *
  * @param {Object} expr - The calculation expression model
  * @param {Object} [globals = {}] - The global variables
@@ -403,22 +403,31 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
  * @returns The calculation expression result
  */
 export function evaluateExpression(expr, globals = {}, locals = null) {
-    if ('binary' in expr) {
-        const binExpr = expr.binary;
-        if (binExpr.operator === '&&') {
-            return evaluateExpression(binExpr.left, globals, locals) && evaluateExpression(binExpr.right, globals, locals);
-        } else if (binExpr.operator === '||') {
-            return evaluateExpression(binExpr.left, globals, locals) || evaluateExpression(binExpr.right, globals, locals);
+    // Number
+    if ('number' in expr) {
+        return expr.number;
+
+    // String
+    } else if ('string' in expr) {
+        return expr.string;
+
+    // Variable
+    } else if ('variable' in expr) {
+        // "null" is a keyword
+        const varName = expr.variable;
+        if (varName === 'null') {
+            return null;
         }
-        return binaryOperators[binExpr.operator](
-            evaluateExpression(binExpr.left, globals, locals),
-            evaluateExpression(binExpr.right, globals, locals)
-        );
-    } else if ('unary' in expr) {
-        const value = evaluateExpression(expr.unary.expr, globals, locals);
-        return unaryOperators[expr.unary.operator](value);
-    } else if ('paren' in expr) {
-        return evaluateExpression(expr.paren, globals, locals);
+
+        // Local variable?
+        if (locals !== null && varName in locals) {
+            return locals[varName];
+        }
+
+        // Global variable...
+        return varName in globals ? globals[varName] : null;
+
+    // Function
     } else if ('function' in expr) {
         // "if" built-in function?
         const funcName = expr.function.name;
@@ -451,25 +460,29 @@ export function evaluateExpression(expr, globals = {}, locals = null) {
         }
 
         throw new Error(`Undefined function "${funcName}"`);
-    } else if ('variable' in expr) {
-        // "null" is a keyword
-        const varName = expr.variable;
-        if (varName === 'null') {
-            return null;
-        }
 
-        // Local variable?
-        if (locals !== null && varName in locals) {
-            return locals[expr.variable];
+    // Binary expression
+    } else if ('binary' in expr) {
+        const binExpr = expr.binary;
+        if (binExpr.operator === '&&') {
+            return evaluateExpression(binExpr.left, globals, locals) && evaluateExpression(binExpr.right, globals, locals);
+        } else if (binExpr.operator === '||') {
+            return evaluateExpression(binExpr.left, globals, locals) || evaluateExpression(binExpr.right, globals, locals);
         }
+        return binaryOperators[binExpr.operator](
+            evaluateExpression(binExpr.left, globals, locals),
+            evaluateExpression(binExpr.right, globals, locals)
+        );
 
-        // Global variable...
-        return varName in globals ? globals[varName] : null;
-    } else if ('number' in expr) {
-        return expr.number;
+    // Unary expression
+    } else if ('unary' in expr) {
+        const value = evaluateExpression(expr.unary.expr, globals, locals);
+        return unaryOperators[expr.unary.operator](value);
     }
-    // else if ('string' in expr) {
-    return expr.string;
+
+    // Expression group
+    // else if ('group' in expr) {
+    return evaluateExpression(expr.group, globals, locals);
 }
 
 
@@ -708,7 +721,7 @@ function parseUnaryExpression(exprText) {
         if (matchGroupClose === null) {
             throw new Error(`Unmatched parenthesis "${exprText}"`);
         }
-        return [{'paren': expr}, nextText.slice(matchGroupClose[0].length)];
+        return [{'group': expr}, nextText.slice(matchGroupClose[0].length)];
     }
 
     // Unary operator?
