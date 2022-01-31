@@ -3,7 +3,7 @@
 
 /** @module lib/data */
 
-import {executeCalculation, parseCalculation} from './calc.js';
+import {evaluateExpression, parseExpression} from './calc.js';
 import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
 import {parseCSV, parseCSVDatetime, parseCSVNumber} from './csv.js';
 import {compareValues} from './util.js';
@@ -306,8 +306,8 @@ export function computeVariables(variables, globals = {}) {
 
     // Compute each variable expression
     for (const varName of Object.keys(variables)) {
-        const varExpr = parseCalculation(variables[varName]);
-        variableValues[varName] = executeCalculation(varExpr, globals, variableValues);
+        const varExpr = parseExpression(variables[varName]);
+        variableValues[varName] = evaluateExpression(varExpr, globals, variableValues);
     }
 
     return variableValues;
@@ -325,12 +325,12 @@ export function computeVariables(variables, globals = {}) {
  */
 export function addCalculatedField(data, name, expr, variables = null) {
     // Parse the calculation expression
-    const calcExpr = parseCalculation(expr);
+    const calcExpr = parseExpression(expr);
 
     // Compute the calculated fields for each row
     let calcType = null;
     for (const row of data) {
-        const calcValue = executeCalculation(calcExpr, variables, row);
+        const calcValue = evaluateExpression(calcExpr, variables, row);
         row[name] = calcValue;
 
         // Determine the calculated field type
@@ -369,12 +369,12 @@ export function getCalculatedValueType(value) {
  */
 export function filterData(data, expr, variables = null) {
     // Parse the filter expression
-    const filterExpr = parseCalculation(expr);
+    const filterExpr = parseExpression(expr);
 
     // Filter the data
     const filteredData = [];
     for (const row of data) {
-        if (executeCalculation(filterExpr, variables, row)) {
+        if (evaluateExpression(filterExpr, variables, row)) {
             filteredData.push(row);
         }
     }

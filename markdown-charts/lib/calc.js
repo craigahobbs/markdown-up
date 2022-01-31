@@ -183,12 +183,12 @@ export function validateScript(script) {
  * @param {Object} expr - The calculation expression model
  * @returns {Object} The validated calculation expression model
  */
-export function validateCalculation(expr) {
+export function validateExpression(expr) {
     return validateType(calcModel.types, 'CalcExpr', expr);
 }
 
 
-// Binary operator map (op => fn)
+// Binary operator map
 const binaryOperators = {
     '**': (left, right) => left ** right,
     '*': (left, right) => left * right,
@@ -205,7 +205,7 @@ const binaryOperators = {
 };
 
 
-// Unary operator map (op => fn)
+// Unary operator map
 const unaryOperators = {
     '!': (value) => !value,
     '-': (value) => -value
@@ -339,7 +339,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
 
         // Assignment?
         if ('assignment' in statement) {
-            const exprValue = executeCalculation(statement.assignment.expression, globals, locals);
+            const exprValue = evaluateExpression(statement.assignment.expression, globals, locals);
             if (locals !== null) {
                 locals[statement.assignment.name] = exprValue;
             } else {
@@ -362,7 +362,7 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
         // Jump?
         } else if ('jump' in statement) {
             // Evaluate the expression (if any)
-            if (!('expression' in statement.jump) || executeCalculation(statement.jump.expression, globals, locals)) {
+            if (!('expression' in statement.jump) || evaluateExpression(statement.jump.expression, globals, locals)) {
                 // Find the label
                 const jumpLabel = statement.jump.label;
                 let ixJump;
@@ -382,11 +382,11 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
 
         // Return?
         } else if ('return' in statement) {
-            return executeCalculation(statement.return, globals, locals);
+            return evaluateExpression(statement.return, globals, locals);
 
         // Expression
         } else if ('expression' in statement) {
-            executeCalculation(statement.expression, globals, locals);
+            evaluateExpression(statement.expression, globals, locals);
         }
     }
 
@@ -402,35 +402,35 @@ export function executeScriptHelper(statements, globals, locals, statementCounte
  * @param {Object} [locals = null] - The local variables
  * @returns The calculation expression result
  */
-export function executeCalculation(expr, globals = {}, locals = null) {
+export function evaluateExpression(expr, globals = {}, locals = null) {
     if ('binary' in expr) {
         const binExpr = expr.binary;
         if (binExpr.operator === '&&') {
-            return executeCalculation(binExpr.left, globals, locals) && executeCalculation(binExpr.right, globals, locals);
+            return evaluateExpression(binExpr.left, globals, locals) && evaluateExpression(binExpr.right, globals, locals);
         } else if (binExpr.operator === '||') {
-            return executeCalculation(binExpr.left, globals, locals) || executeCalculation(binExpr.right, globals, locals);
+            return evaluateExpression(binExpr.left, globals, locals) || evaluateExpression(binExpr.right, globals, locals);
         }
         return binaryOperators[binExpr.operator](
-            executeCalculation(binExpr.left, globals, locals),
-            executeCalculation(binExpr.right, globals, locals)
+            evaluateExpression(binExpr.left, globals, locals),
+            evaluateExpression(binExpr.right, globals, locals)
         );
     } else if ('unary' in expr) {
-        const value = executeCalculation(expr.unary.expr, globals, locals);
+        const value = evaluateExpression(expr.unary.expr, globals, locals);
         return unaryOperators[expr.unary.operator](value);
     } else if ('paren' in expr) {
-        return executeCalculation(expr.paren, globals, locals);
+        return evaluateExpression(expr.paren, globals, locals);
     } else if ('function' in expr) {
         // "if" built-in function?
         const funcName = expr.function.name;
         if (funcName === 'if') {
             const [valueExpr = null, trueExpr = null, falseExpr = null] = expr.function.arguments;
-            const value = (valueExpr !== null ? executeCalculation(valueExpr, globals, locals) : false);
+            const value = (valueExpr !== null ? evaluateExpression(valueExpr, globals, locals) : false);
             const resultExpr = (value ? trueExpr : falseExpr);
-            return resultExpr !== null ? executeCalculation(resultExpr, globals, locals) : null;
+            return resultExpr !== null ? evaluateExpression(resultExpr, globals, locals) : null;
         }
 
         // Compute the function arguments
-        const funcArgs = expr.function.arguments.map((arg) => executeCalculation(arg, globals, locals));
+        const funcArgs = expr.function.arguments.map((arg) => evaluateExpression(arg, globals, locals));
 
         // Global/local function?
         const funcValue = locals !== null && funcName in locals ? locals[funcName] : (funcName in globals ? globals[funcName] : null);
@@ -529,7 +529,7 @@ export function parseScript(scriptText) {
             statements.push({
                 'assignment': {
                     'name': matchAssignment.groups.name,
-                    'expression': parseCalculation(matchAssignment.groups.expr)
+                    'expression': parseExpression(matchAssignment.groups.expr)
                 }
             });
             continue;
@@ -578,7 +578,7 @@ export function parseScript(scriptText) {
         if (matchJump !== null) {
             const jumpStatement = {'jump': {'label': matchJump.groups.name}};
             if (typeof matchJump.groups.expr !== 'undefined') {
-                jumpStatement.jump.expression = parseCalculation(matchJump.groups.expr);
+                jumpStatement.jump.expression = parseExpression(matchJump.groups.expr);
             }
             statements.push(jumpStatement);
             continue;
@@ -588,13 +588,13 @@ export function parseScript(scriptText) {
         const matchReturn = line.match(rScriptReturn);
         if (matchReturn !== null) {
             statements.push({
-                'return': parseCalculation(matchReturn.groups.expr)
+                'return': parseExpression(matchReturn.groups.expr)
             });
             continue;
         }
 
         // Expression
-        statements.push({'expression': parseCalculation(line)});
+        statements.push({'expression': parseExpression(line)});
     }
 
     return script;
@@ -621,38 +621,89 @@ const rCalcVariableEx = /^\s*\[\s*((?:\\\]|[^\]])+)\s*\]/;
 const rCalcVariableExEscape = /\\([\\\]])/g;
 
 
+// Binary operator re-order map
+const binaryReorder = {
+    '**': new Set(['*', '/', '%', '+', '-', '<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '*': new Set(['+', '-', '<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '/': new Set(['+', '-', '<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '%': new Set(['+', '-', '<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '+': new Set(['<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '-': new Set(['<=', '<', '>=', '>', '==', '!=', '&&', '||']),
+    '<=': new Set(['==', '!=', '&&', '||']),
+    '<': new Set(['==', '!=', '&&', '||']),
+    '>=': new Set(['==', '!=', '&&', '||']),
+    '>': new Set(['==', '!=', '&&', '||']),
+    '==': new Set(['&&', '||']),
+    '!=': new Set(['&&', '||']),
+    '&&': new Set(['||']),
+    '||': new Set([])
+};
+
+
 /**
  * Parse a calculation language expression
  *
  * @param {string} exprText - The calculation language expression
  * @returns {Object} The calculation expression model
  */
-export function parseCalculation(exprText) {
-    const [expr, nextText] = parseExpression(exprText);
-    const syntaxError = nextText.trim();
-    if (syntaxError !== '') {
-        throw new Error(`Syntax error "${syntaxError}"`);
+export function parseExpression(exprText) {
+    const [expr, nextText] = parseBinaryExpression(exprText);
+    if (nextText.trim() !== '') {
+        throw new Error(`Syntax error "${nextText}"`);
     }
     return expr;
 }
 
 
-// Helper function to parse an expression
-function parseExpression(exprText) {
-    const exprResult = parseSubExpression(exprText);
-    const [leftExpr, nextText] = exprResult;
-    const binaryResult = parseBinaryOperator(nextText, leftExpr);
-    return binaryResult !== null ? binaryResult : exprResult;
+// Helper function to parse a binary operator expression chain
+function parseBinaryExpression(exprText, binLeftExpr = null) {
+    // Parse the binary operator's left unary expression if none was passed
+    let leftExpr;
+    let binText;
+    if (binLeftExpr !== null) {
+        binText = exprText;
+        leftExpr = binLeftExpr;
+    } else {
+        [leftExpr, binText] = parseUnaryExpression(exprText);
+    }
+
+    // Match a binary operator - if not found, return the left expression
+    const matchBinaryOp = binText.match(rCalcBinaryOp);
+    if (matchBinaryOp === null) {
+        return [leftExpr, binText];
+    }
+    const [, binOp] = matchBinaryOp;
+    const rightText = binText.slice(matchBinaryOp[0].length);
+
+    // Parse the right sub-expression
+    const [rightExpr, nextText] = parseUnaryExpression(rightText);
+
+    // Create the binary expression - re-order for binary operators as necessary
+    let binExpr;
+    if ('binary' in leftExpr && binaryReorder[binOp].has(leftExpr.binary.operator)) {
+        // Left expression has lower precendence - find where to put this expression within the left expression
+        binExpr = leftExpr;
+        let reorderExpr = leftExpr;
+        while ('binary' in reorderExpr.binary.right && binaryReorder[binOp].has(reorderExpr.binary.right.binary.operator)) {
+            reorderExpr = reorderExpr.binary.right;
+        }
+        reorderExpr.binary.right = {'binary': {'operator': binOp, 'left': reorderExpr.binary.right, 'right': rightExpr}};
+    } else {
+        binExpr = {'binary': {'operator': binOp, 'left': leftExpr, 'right': rightExpr}};
+    }
+
+    // Parse the next binary expression in the chain
+    return parseBinaryExpression(nextText, binExpr);
 }
 
 
-// Helper function to parse an expression NOT including binary operator sub-expressions
-function parseSubExpression(exprText) {
+// Helper function to parse a unary expression
+function parseUnaryExpression(exprText) {
     // Group open?
     const matchGroupOpen = exprText.match(rCalcGroupOpen);
     if (matchGroupOpen !== null) {
         const groupText = exprText.slice(matchGroupOpen[0].length);
-        const [expr, nextText] = parseExpression(groupText);
+        const [expr, nextText] = parseBinaryExpression(groupText);
         const matchGroupClose = nextText.match(rCalcGroupClose);
         if (matchGroupClose === null) {
             throw new Error(`Unmatched parenthesis "${exprText}"`);
@@ -664,7 +715,7 @@ function parseSubExpression(exprText) {
     const matchUnary = exprText.match(rCalcUnaryOp);
     if (matchUnary !== null) {
         const unaryText = exprText.slice(matchUnary[0].length);
-        const [expr, nextText] = parseSubExpression(unaryText);
+        const [expr, nextText] = parseUnaryExpression(unaryText);
         const unaryExpr = {
             'unary': {
                 'operator': matchUnary[1],
@@ -698,7 +749,7 @@ function parseSubExpression(exprText) {
             }
 
             // Get the argument
-            const [argExpr, nextArgText] = parseExpression(argText);
+            const [argExpr, nextArgText] = parseBinaryExpression(argText);
             args.push(argExpr);
             argText = nextArgText;
         }
@@ -752,47 +803,4 @@ function parseSubExpression(exprText) {
     }
 
     throw new Error(`Syntax error "${exprText}"`);
-}
-
-
-// Helper function to parse an expression including binary operator sub-expressions
-function parseBinaryOperator(exprText, leftExpr) {
-    // Match a binary operator - if not found, return the left expression
-    const matchBinaryOp = exprText.match(rCalcBinaryOp);
-    if (matchBinaryOp === null) {
-        return null;
-    }
-    const [, binOp] = matchBinaryOp;
-    const rightText = exprText.slice(matchBinaryOp[0].length);
-
-    // Parse the right expression and return the binary operator expression
-    const [rightExpr, nextText] = parseExpression(rightText);
-
-    // Adjust expression order for operator precedence
-    const binOpOrder = binaryOpValues.indexOf(binOp);
-    if ('binary' in rightExpr && binOpOrder <= binaryOpValues.indexOf(rightExpr.binary.operator)) {
-        let resultExpr = rightExpr;
-        while ('binary' in resultExpr.binary.left && binOpOrder <= binaryOpValues.indexOf(resultExpr.binary.left.binary.operator)) {
-            resultExpr = resultExpr.binary.left;
-        }
-        const binOpExpr = {
-            'binary': {
-                'operator': binOp,
-                'left': leftExpr,
-                'right': resultExpr.binary.left
-            }
-        };
-        resultExpr.binary.left = binOpExpr;
-        return [rightExpr, nextText];
-    }
-
-    // Return the binary operator with expressions in-order
-    const binOpExpr = {
-        'binary': {
-            'operator': binOp,
-            'left': leftExpr,
-            'right': rightExpr
-        }
-    };
-    return [binOpExpr, nextText];
 }

@@ -6,7 +6,7 @@
 import {
     categoricalColors, chartCodeBlock, compareValues, formatValue, parameterValue, valueParameter
 } from './util.js';
-import {executeCalculation, parseCalculation} from './calc.js';
+import {evaluateExpression, parseExpression} from './calc.js';
 import {getCalculatedValueType, loadChartData} from './data.js';
 import {validateLineChart} from './model.js';
 
@@ -162,7 +162,7 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Calculated expression helper function
     const computeExpr = (exprText, expectedType = null, desc = null) => {
-        const exprValue = executeCalculation(parseCalculation(exprText), variables);
+        const exprValue = evaluateExpression(parseExpression(exprText), variables);
         if (exprValue !== null && expectedType !== null) {
             const exprType = getCalculatedValueType(exprValue);
             if (exprType !== expectedType) {
