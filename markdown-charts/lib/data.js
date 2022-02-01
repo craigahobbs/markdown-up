@@ -3,11 +3,12 @@
 
 /** @module lib/data */
 
-import {evaluateExpression, parseExpression} from './calc.js';
 import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
 import {parseCSV, parseCSVDatetime, parseCSVNumber} from './csv.js';
 import {compareValues} from './util.js';
 import {encodeMarkdownText} from '../../markdown-model/lib/parser.js';
+import {evaluateExpression} from '../../calc-script/lib/runtime.js';
+import {parseExpression} from '../../calc-script/lib/parser.js';
 
 
 /**

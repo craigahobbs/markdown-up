@@ -6,8 +6,9 @@
 import {
     categoricalColors, chartCodeBlock, compareValues, formatValue, parameterValue, valueParameter
 } from './util.js';
-import {evaluateExpression, parseExpression} from './calc.js';
 import {getCalculatedValueType, loadChartData} from './data.js';
+import {evaluateExpression} from '../../calc-script/lib/runtime.js';
+import {parseExpression} from '../../calc-script/lib/parser.js';
 import {validateLineChart} from './model.js';
 
 

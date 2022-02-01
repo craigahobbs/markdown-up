@@ -4,8 +4,9 @@
 /** @module lib/script */
 
 import {encodeMarkdownText, parseMarkdown} from '../../markdown-model/lib/parser.js';
-import {executeScript, parseScript} from './calc.js';
+import {executeScript} from '../../calc-script/lib/runtime.js';
 import {markdownElements} from '../../markdown-model/lib/elements.js';
+import {parseScript} from '../../calc-script/lib/parser.js';
 
 
 /**
