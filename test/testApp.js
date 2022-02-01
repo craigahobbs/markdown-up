@@ -52,6 +52,30 @@ function menuElements({
         'elem': [
             {
                 'html': 'a',
+                'attr': {'href': markdownURL, 'aria-label': 'Show Markdown'},
+                'elem': {
+                    'svg': 'svg',
+                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
+                    'elem': [
+                        {
+                            'svg': 'path',
+                            'attr': {
+                                'd': 'M4,2 L20,2 L20,22 L4,22 Z',
+                                'fill': 'none', 'stroke': 'black', 'stroke-width': '3'
+                            }
+                        },
+                        {
+                            'svg': 'path',
+                            'attr': {
+                                'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5',
+                                'fill': 'none', 'stroke': 'black', 'stroke-width': '2'
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                'html': 'a',
                 'attr': {'href': fontSizeURL, 'aria-label': 'Font size'},
                 'elem': {
                     'svg': 'svg',
@@ -78,30 +102,6 @@ function menuElements({
                             'fill': 'none', 'stroke': 'black', 'stroke-width': '2'
                         }
                     }
-                }
-            },
-            {
-                'html': 'a',
-                'attr': {'href': markdownURL, 'aria-label': 'Show Markdown'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
-                    'elem': [
-                        {
-                            'svg': 'path',
-                            'attr': {
-                                'd': 'M4,2 L20,2 L20,22 L4,22 Z',
-                                'fill': 'none', 'stroke': 'black', 'stroke-width': '3'
-                            }
-                        },
-                        {
-                            'svg': 'path',
-                            'attr': {
-                                'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5',
-                                'fill': 'none', 'stroke': 'black', 'stroke-width': '2'
-                            }
-                        }
-                    ]
                 }
             },
             {
@@ -133,6 +133,7 @@ test('MarkdownUp, constructor', (t) => {
     t.is(app.lineHeight, 1.2);
     t.is(app.menu, true);
     t.is(app.url, 'README.md');
+    t.is(app.setNavigateTimeoutId, null);
 });
 
 
@@ -150,6 +151,7 @@ test('MarkdownUp, constructor options', (t) => {
     t.is(app.lineHeight, 1.6);
     t.is(app.menu, false);
     t.is(app.url, 'CHANGELOG.md');
+    t.is(app.setNavigateTimeoutId, null);
 });
 
 
@@ -692,13 +694,14 @@ test('markdown-charts, data table', async (t) => {
 });
 
 
-test('markdown-charts, drawing', async (t) => {
+test('markdown-charts, markdown-script', async (t) => {
     const {window} = new JSDOM();
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
-# Drawing
+# markdown-script
 
-~~~ drawing
+~~~ markdown-script
+log('Hello')
 ~~~
 `);
     })});
@@ -710,22 +713,50 @@ test('markdown-charts, drawing', async (t) => {
     t.deepEqual(
         ElementApplication.validateMain(await app.main()),
         {
-            'title': 'Drawing',
+            'title': 'markdown-script',
             'elements': [
                 null,
                 null,
                 [
-                    {'html': 'h1', 'attr': {'id': 'drawing'}, 'elem': [{'text': 'Drawing'}]},
-                    {'html': 'p', 'elem': {
-                        'svg': 'svg',
-                        'attr': {
-                            'height': 200,
-                            'width': 300
-                        },
-                        'elem': null
-                    }}
+                    {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    []
                 ],
                 menuBurgerElements(),
+                null
+            ]
+        }
+    );
+});
+
+
+test('markdown-charts, markdown-script debug', async (t) => {
+    const {window} = new JSDOM();
+    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
+        resolve(`\
+# markdown-script
+
+~~~ markdown-script
+log('Hello')
+~~~
+`);
+    })});
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window);
+    app.updateParams('debug=1');
+    t.deepEqual(
+        ElementApplication.validateMain(await app.main()),
+        {
+            'title': 'markdown-script',
+            'elements': [
+                null,
+                {'html': 'div', 'attr': {'id': 'debug=1', 'style': 'display=none'}},
+                [
+                    {'html': 'h1', 'attr': {'id': 'debug=1&markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    []
+                ],
+                menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
                 null
             ]
         }
@@ -747,19 +778,19 @@ test('markdown-charts, variables', async (t) => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window);
-    app.updateParams('variables.varName.number=5');
+    app.updateParams('var.varName=5');
     t.deepEqual(
         ElementApplication.validateMain(await app.main()),
         {
             'title': 'Data Table',
             'elements': [
                 null,
-                {'html': 'div', 'attr': {'id': 'variables.varName.number=5', 'style': 'display=none'}},
+                {'html': 'div', 'attr': {'id': 'var.varName=5', 'style': 'display=none'}},
                 [
-                    {'html': 'h1', 'attr': {'id': 'variables.varName.number=5&data-table'}, 'elem': [{'text': 'Data Table'}]},
+                    {'html': 'h1', 'attr': {'id': 'var.varName=5&data-table'}, 'elem': [{'text': 'Data Table'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
-                menuBurgerElements({'menuURL': '#menu=1&variables.varName.number=5'}),
+                menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
                 null
             ]
         }

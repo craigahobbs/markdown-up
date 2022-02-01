@@ -1,3 +1,11 @@
+## 1.5.1 (2021-12-26)
+
+- [edacf2e](https://github.com/craigahobbs/markdown-up/commit/edacf2e) - move show-markdown menu button to top
+
+- [ee83ad5](https://github.com/craigahobbs/markdown-up/commit/ee83ad5) - fix drawing integration test
+
+- [7516a5f](https://github.com/craigahobbs/markdown-up/commit/7516a5f) - add drawing code block
+
 ## 1.5.0 (2021-12-09)
 
 - [96a252f](https://github.com/craigahobbs/markdown-up/commit/96a252f) - integrate markdown-charts

@@ -47,6 +47,7 @@ app: build/npm.build
 		README.md \
 		static/* \
 		lib \
+		node_modules/calc-script \
 		node_modules/element-app \
 		node_modules/element-model \
 		node_modules/markdown-charts \
