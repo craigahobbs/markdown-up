@@ -3,7 +3,7 @@
 
 /** @module lib/elements */
 
-import {getMarkdownParagraphText} from './markdownModel.js';
+import {getMarkdownParagraphText} from './parser.js';
 
 
 /**

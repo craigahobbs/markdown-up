@@ -5,6 +5,46 @@
 
 
 /**
+ * Get a Markdown model's title. Returns null if no title is found.
+ *
+ * @param {Object} markdown - The markdown model
+ * @returns {string|null}
+ */
+export function getMarkdownTitle(markdown) {
+    for (const part of markdown.parts) {
+        if ('paragraph' in part && 'style' in part.paragraph) {
+            return getMarkdownParagraphText(part.paragraph);
+        }
+    }
+    return null;
+}
+
+
+/**
+ * Get a Markdown paragraph model's text
+ *
+ * @param {Object} paragraph - The markdown paragraph model
+ * @returns {string}
+ */
+export function getMarkdownParagraphText(paragraph) {
+    return paragraph.spans.map(getMarkdownSpanText).join('');
+}
+
+
+// Helper function to get a Markdown span model's text
+function getMarkdownSpanText(span) {
+    if ('image' in span) {
+        return span.image.alt;
+    } else if ('link' in span) {
+        return span.link.spans.map(getMarkdownSpanText).join('');
+    } else if ('style' in span) {
+        return span.style.spans.map(getMarkdownSpanText).join('');
+    }
+    return span.text;
+}
+
+
+/**
  * Encode a string for inclusion in Markdown text
  *
  * @param {string} text
