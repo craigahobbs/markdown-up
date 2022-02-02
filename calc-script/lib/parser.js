@@ -3,8 +3,6 @@
 
 /** @module lib/parser */
 
-import {binaryOperators, unaryOperators} from './runtime.js';
-
 
 // Calculation script regex
 const rScriptLineSplit = /\r?\n/;
@@ -135,10 +133,8 @@ export function parseScript(scriptText) {
 
 
 // Calculation language expression regex
-const rCalcBinaryOp = new RegExp(
-    `^\\s*(${Object.keys(binaryOperators).map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`
-);
-const rCalcUnaryOp = new RegExp(`^\\s*(${Object.keys(unaryOperators).join('|')})`);
+const rCalcBinaryOp = /^\s*(\*\*|\*|\/|%|\+|-|<=|<|>=|>|==|!=|&&|\|\|)/;
+const rCalcUnaryOp = /^\s*(!|-)/;
 const rCalcFunctionOpen = /^\s*([A-Za-z_]\w+)\s*\(/;
 const rCalcFunctionSeparator = /^\s*,/;
 const rCalcFunctionClose = /^\s*\)/;
@@ -213,11 +209,12 @@ function parseBinaryExpression(exprText, binLeftExpr = null) {
 
     // Create the binary expression - re-order for binary operators as necessary
     let binExpr;
-    if ('binary' in leftExpr && binaryReorder[binOp].has(leftExpr.binary.operator)) {
+    if (Object.keys(leftExpr)[0] === 'binary' && binaryReorder[binOp].has(leftExpr.binary.operator)) {
         // Left expression has lower precendence - find where to put this expression within the left expression
         binExpr = leftExpr;
         let reorderExpr = leftExpr;
-        while ('binary' in reorderExpr.binary.right && binaryReorder[binOp].has(reorderExpr.binary.right.binary.operator)) {
+        while (Object.keys(reorderExpr.binary.right)[0] === 'binary' &&
+               binaryReorder[binOp].has(reorderExpr.binary.right.binary.operator)) {
             reorderExpr = reorderExpr.binary.right;
         }
         reorderExpr.binary.right = {'binary': {'operator': binOp, 'left': reorderExpr.binary.right, 'right': rightExpr}};
