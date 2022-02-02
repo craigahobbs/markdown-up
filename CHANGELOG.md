@@ -1,3 +1,7 @@
+## 1.6.0 (2022-02-01)
+
+- [d5716ef](https://github.com/craigahobbs/markdown-up/commit/d5716ef) - markdown-model 1.4
+
 ## 1.5.1 (2021-12-26)
 
 - [edacf2e](https://github.com/craigahobbs/markdown-up/commit/edacf2e) - move show-markdown menu button to top
