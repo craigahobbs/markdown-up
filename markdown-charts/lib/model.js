@@ -62,6 +62,9 @@ struct ChartBase
     # The data aggregation specification
     optional Aggregation aggregation
 
+    # The post-aggregation calculated fields
+    optional CalculatedField[len > 0] postCalculatedFields
+
     # The data's sort specification
     optional SortField[len > 0] sorts
 
@@ -90,6 +93,9 @@ struct DataJoin
 
     # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
     string url
+
+    # If true, the join is a left join
+    optional bool left
 
     # The left field of the join
     string[len > 0] leftFields

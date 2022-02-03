@@ -58,6 +58,13 @@ export async function loadChartData(chartModel, options = {}) {
         ({data, types} = aggregateData(chartModel.aggregation, data, types));
     }
 
+    // Add the post-aggregation calculated fields
+    if ('postCalculatedFields' in chartModel) {
+        for (const calculatedField of chartModel.postCalculatedFields) {
+            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, variables);
+        }
+    }
+
     // Sort the data
     if ('sorts' in chartModel) {
         sortData(chartModel.sorts, data);
@@ -123,7 +130,7 @@ export async function loadData(dataModel, fetchFn, rootURL = null) {
         let leftData;
         for (let ixJoin = 0; ixJoin < dataModel.joins.length; ixJoin++) {
             const join = dataModel.joins[ixJoin];
-            const {leftFields} = join;
+            const {'left': isLeftJoin = false, leftFields} = join;
             const rightFields = 'rightFields' in join ? join.rightFields : leftFields;
             const rightData = dataTypes[ixJoin + 1].data;
             const rightTypes = dataTypes[ixJoin + 1].types;
@@ -183,6 +190,8 @@ export async function loadData(dataModel, fetchFn, rootURL = null) {
                         }
                         data.push(joinRow);
                     }
+                } else if (!isLeftJoin) {
+                    data.push(row);
                 }
             }
         }
