@@ -78,34 +78,30 @@ struct ChartBase
     optional DatetimeFormat datetime
 
 
-# Base chart data specification struct
-struct DataBase
+# A chart data specification
+struct Data
 
     # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
     string url
-
-    # The pre-join calculated fields
-    optional CalculatedField[len > 0] preCalculatedFields
-
-
-# A chart data specification
-struct Data (DataBase)
 
     # Data joins
     optional DataJoin[len > 0] joins
 
 
 # A data join specification
-struct DataJoin (DataBase)
+struct DataJoin
+
+    # The data resource URL. The data resource is formatted either as a CSV or as a JSON array of row objects.
+    string url
 
     # If true, the join is a left join (default is right join)
     optional bool left
 
-    # The left field of the join
-    string[len > 0] leftFields
+    # The join expression for the left row
+    string leftExpression
 
-    # The right field of the join
-    optional string[len > 0] rightFields
+    # The join expression for the right row
+    optional string rightExpression
 
 
 # A datetime format

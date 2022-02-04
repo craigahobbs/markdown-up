@@ -110,17 +110,6 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
     const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
 
-    // Compute the pre-join calculated fields
-    for (let ixBase = 0; ixBase < dataBases.length; ixBase++) {
-        const dataBase = dataBases[ixBase];
-        if ('preCalculatedFields' in dataBase) {
-            const {'data': baseData, 'types': baseTypes} = dataTypes[ixBase];
-            for (const calculatedField of dataBase.preCalculatedFields) {
-                baseTypes[calculatedField.name] = addCalculatedField(baseData, calculatedField.name, calculatedField.expression, variables);
-            }
-        }
-    }
-
     // Join the data
     let [{data}] = dataTypes;
     const [{types}] = dataTypes;
@@ -140,37 +129,16 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
         let leftData;
         for (let ixJoin = 0; ixJoin < dataModel.joins.length; ixJoin++) {
             const join = dataModel.joins[ixJoin];
-            const {'left': isLeftJoin = false, leftFields} = join;
-            const rightFields = 'rightFields' in join ? join.rightFields : leftFields;
+            const {'left': isLeftJoin = false} = join;
+            const leftExpression = parseExpression(join.leftExpression);
+            const rightExpression = parseExpression('rightExpression' in join ? join.rightExpression : join.leftExpression);
             const rightData = dataTypes[ixJoin + 1].data;
             const rightTypes = dataTypes[ixJoin + 1].types;
 
-            // Validate left and right field names
-            if (leftFields.length !== rightFields.length) {
-                throw new Error(
-                    `Join "${join.url}" has left-field count ${leftFields.length} and right-field count ${rightFields.length}`
-                );
-            }
-            for (let ixJoinField = 0; ixJoinField < leftFields.length; ixJoinField++) {
-                const leftField = leftFields[ixJoinField];
-                const rightField = rightFields[ixJoinField];
-                if (!(leftField in types)) {
-                    throw new Error(`Unknown "${join.url}" join left-field "${leftField}"`);
-                }
-                if (!(rightField in rightTypes)) {
-                    throw new Error(`Unknown "${join.url}" join right-field "${rightField}"`);
-                }
-                if (types[leftField] !== rightTypes[rightField]) {
-                    throw new Error(
-                        `Join "${join.url}" has left-field type "${types[leftField]}" and right-field type "${rightTypes[rightField]}`
-                    );
-                }
-            }
-
-            // Bucket rows by category
+            // Bucket the right rows by the right expression value
             const rightCategoryRows = {};
             for (const row of rightData) {
-                const categoryKey = JSON.stringify(rightFields.map((field) => (field in row ? row[field] : null)));
+                const categoryKey = JSON.stringify(evaluateExpression(rightExpression, variables, row));
                 if (!(categoryKey in rightCategoryRows)) {
                     rightCategoryRows[categoryKey] = [];
                 }
@@ -179,17 +147,16 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
 
             // Compute the right column names
             const rightFieldMap = Object.fromEntries(Object.keys(rightTypes).map(mapFieldName));
-
-            // Update types
             for (const rightField of Object.keys(rightTypes)) {
                 types[rightFieldMap[rightField]] = rightTypes[rightField];
             }
 
             // Join the left with the right
             leftData = data;
+
             data = [];
             for (const row of leftData) {
-                const categoryKey = JSON.stringify(leftFields.map((field) => (field in row ? row[field] : null)));
+                const categoryKey = JSON.stringify(evaluateExpression(leftExpression, variables, row));
                 if (categoryKey in rightCategoryRows) {
                     for (const rightRow of rightCategoryRows[categoryKey]) {
                         const joinRow = {...row};
