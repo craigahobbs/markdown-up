@@ -29,15 +29,15 @@ import {parseExpression} from '../../calc-script/lib/parser.js';
  * @returns {module:lib/data~LoadChartDataResult}
  */
 export async function loadChartData(chartModel, options = {}) {
-    // Load the data resources
-    let {data, types} = await loadData(chartModel.data, options.fetchFn, 'url' in options ? options.url : null);
-
     // Compute the variable values
     const variables = {
         'markdownEncode': ([text]) => encodeMarkdownText(text),
         ...('variables' in chartModel ? computeVariables(chartModel.variables) : {}),
         ...('variables' in options ? options.variables : {})
     };
+
+    // Load the data resources
+    let {data, types} = await loadData(chartModel.data, options.fetchFn, ('url' in options ? options.url : null), variables);
 
     // Add calculated fields
     if ('calculatedFields' in chartModel) {
@@ -92,11 +92,12 @@ export async function loadChartData(chartModel, options = {}) {
  * Load a data model
  *
  * @param {Object} dataModel - The data model
- * @property {module:lib/util~FetchFn} fetchFn - The URL fetch function
+ * @param {module:lib/util~FetchFn} fetchFn - The URL fetch function
  * @param {string} [rootURL = null] - The root URL for determining relative data URL locations
+ * @param {Object} [variables = null] - Map of variables to variable value
  * @returns {module:lib/data~LoadDataResult}
  */
-export async function loadData(dataModel, fetchFn, rootURL = null) {
+export async function loadData(dataModel, fetchFn, rootURL = null, variables = null) {
     // Load the data resources
     const fixDataURL = (url) => {
         if (rootURL !== null && isRelativeURL(url)) {
@@ -104,12 +105,21 @@ export async function loadData(dataModel, fetchFn, rootURL = null) {
         }
         return url;
     };
-    const dataURLs = [
-        fixDataURL(dataModel.url),
-        ...('joins' in dataModel ? dataModel.joins.map((join) => fixDataURL(join.url)) : [])
-    ];
+    const dataBases = [dataModel, ...('joins' in dataModel ? dataModel.joins : [])];
+    const dataURLs = dataBases.map((base) => fixDataURL(base.url));
     const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
+
+    // Compute the pre-join calculated fields
+    for (let ixBase = 0; ixBase < dataBases.length; ixBase++) {
+        const dataBase = dataBases[ixBase];
+        if ('preCalculatedFields' in dataBase) {
+            const {'data': baseData, 'types': baseTypes} = dataTypes[ixBase];
+            for (const calculatedField of dataBase.preCalculatedFields) {
+                baseTypes[calculatedField.name] = addCalculatedField(baseData, calculatedField.name, calculatedField.expression, variables);
+            }
+        }
+    }
 
     // Join the data
     let [{data}] = dataTypes;
