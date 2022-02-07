@@ -65,7 +65,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const {data, types, variables} = (await loadChartData(lineChart, options));
 
     // Validate X and Y field types
-    const {xField, yFields, colorFields = null} = lineChart;
+    const {xField, yFields, colorField = null} = lineChart;
     for (const [fieldDesc, fields] of [['X-field', [xField]], ['Y-field', yFields]]) {
         for (const field of fields) {
             if (!(field in types)) {
@@ -97,14 +97,14 @@ export async function lineChartElements(lineChart, options = {}) {
     let yMin = null;
     let xMax = null;
     let yMax = null;
-    if (colorFields !== null) {
+    if (colorField !== null) {
         // Determine the set of color encoding values
         const colorValueSet = new Set();
         const pointsMap = {};
         for (const row of data) {
             for (const yField of yFields) {
-                const rowKeyPrefix = yFields.length === 1 ? '' : `${yField}, `;
-                const rowKey = `${rowKeyPrefix}${colorFields.map((field) => formatValue(row[field], lineChart)).join(', ')}`;
+                const colorValue = formatValue(colorField in row ? row[colorField] : null, lineChart);
+                const rowKey = (yFields.length === 1 ? colorValue : `${yField}, ${colorValue}`);
                 colorValueSet.add(rowKey);
                 const xRow = xField in row ? row[xField] : null;
                 const yRow = yField in row ? row[yField] : null;
@@ -297,7 +297,7 @@ export async function lineChartElements(lineChart, options = {}) {
         const labelWidth = label.length * chartFontWidthRatio * colorLegendFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
-    const colorLegendX = yFields.length === 1 && !('colorFields' in lineChart) ? null : Math.max(
+    const colorLegendX = yFields.length === 1 && !('colorField' in lineChart) ? null : Math.max(
         chartWidth - chartBorderSize - colorLegendLabelWidth - colorLegendSampleWidth,
         0.6 * chartWidth
     );

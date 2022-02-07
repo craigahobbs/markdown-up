@@ -56,8 +56,8 @@ struct ChartBase
     # The calculated fields
     optional CalculatedField[len > 0] calculatedFields
 
-    # The data row boolean filter expressions. Omit any row that does not match all filters.
-    optional string[len > 0] filters
+    # The data row boolean filter expression. Omit any row that does not match.
+    optional string filter
 
     # The data aggregation specification
     optional Aggregation aggregation
@@ -120,15 +120,14 @@ enum DatetimeFormat
 # A calculated field specification
 struct CalculatedField
 
-    # The field name
+    # The calculated field name
     string name
 
     # The calculation expression
     string expression
 
 
-# A data aggregation specification. The aggregated data rows are comprised of the generated
-# aggregation category and measure fields (e.g. "SUM(measure)").
+# A data aggregation specification
 struct Aggregation
 
     # The aggregation category fields
@@ -140,6 +139,9 @@ struct Aggregation
 
 # An aggregation measure specification
 struct AggregationMeasure
+
+    # The aggregated-measure field name
+    optional string name
 
     # The aggregation measure field
     string field
@@ -167,7 +169,7 @@ enum AggregationFunction
     Sum
 
 
-# A sort's field specification
+# A sort field specification
 struct SortField
 
     # The field to sort by
@@ -241,8 +243,8 @@ struct LineChart (ChartCommon, ChartBase)
     # The line chart's Y-axis fields
     string[len > 0] yFields
 
-    # The color encoding fields. Render a colored line for each of the fields' values.
-    optional string[len > 0] colorFields
+    # The color encoding field
+    optional string colorField
 
     # The X-axis tick mark specification
     optional AxisTicks xTicks

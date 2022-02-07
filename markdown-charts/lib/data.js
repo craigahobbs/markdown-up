@@ -47,10 +47,8 @@ export async function loadChartData(chartModel, options = {}) {
     }
 
     // Filter the data
-    if ('filters' in chartModel) {
-        for (const filterExpr of chartModel.filters) {
-            data = filterData(data, filterExpr, variables);
-        }
+    if ('filter' in chartModel) {
+        data = filterData(data, chartModel.filter, variables);
     }
 
     // Aggregate the data
@@ -394,7 +392,8 @@ export function aggregateData(aggregationModel, data, types) {
             throw new Error(`Invalid aggregation measure function "${measure.function}" ` +
                             `for field "${measure.field}" (type "${types[measure.field]}")`);
         }
-        aggregateTypes[getMeasureFieldName(measure)] = types[measure.field];
+        const measureName = ('name' in measure ? measure.name : measure.field);
+        aggregateTypes[measureName] = types[measure.field];
     }
 
     // Create the aggregate rows
@@ -418,13 +417,13 @@ export function aggregateData(aggregationModel, data, types) {
 
         // Add to the aggregate measure values
         for (const measure of aggregationModel.measures) {
-            const measureFieldName = getMeasureFieldName(measure);
-            const value = measure.field in row ? row[measure.field] : null;
+            const measureName = ('name' in measure ? measure.name : measure.field);
+            const value = (measure.field in row ? row[measure.field] : null);
             if (value !== null) {
-                if (!(measureFieldName in aggregateRow)) {
-                    aggregateRow[measureFieldName] = [];
+                if (!(measureName in aggregateRow)) {
+                    aggregateRow[measureName] = [];
                 }
-                aggregateRow[measureFieldName].push(value);
+                aggregateRow[measureName].push(value);
             }
         }
     }
@@ -433,32 +432,26 @@ export function aggregateData(aggregationModel, data, types) {
     const aggregateRows = Object.values(measureRows);
     for (const aggregateRow of aggregateRows) {
         for (const measure of aggregationModel.measures) {
-            const measureFieldName = getMeasureFieldName(measure);
-            const measureValues = measureFieldName in aggregateRow ? aggregateRow[measureFieldName] : null;
+            const measureName = ('name' in measure ? measure.name : measure.field);
+            const measureValues = measureName in aggregateRow ? aggregateRow[measureName] : null;
             const measureFunction = measure.function;
             if (measureValues === null) {
-                aggregateRow[measureFieldName] = null;
+                aggregateRow[measureName] = null;
             } else if (measureFunction === 'Average') {
-                aggregateRow[measureFieldName] = measureValues.reduce((sum, val) => sum + val) / measureValues.length;
+                aggregateRow[measureName] = measureValues.reduce((sum, val) => sum + val) / measureValues.length;
             } else if (measureFunction === 'Count') {
-                aggregateRow[measureFieldName] = measureValues.length;
+                aggregateRow[measureName] = measureValues.length;
             } else if (measureFunction === 'Max') {
-                aggregateRow[measureFieldName] = measureValues.reduce((max, val) => (val > max ? val : max));
+                aggregateRow[measureName] = measureValues.reduce((max, val) => (val > max ? val : max));
             } else if (measureFunction === 'Min') {
-                aggregateRow[measureFieldName] = measureValues.reduce((min, val) => (val < min ? val : min));
+                aggregateRow[measureName] = measureValues.reduce((min, val) => (val < min ? val : min));
             } else if (measureFunction === 'Sum') {
-                aggregateRow[measureFieldName] = measureValues.reduce((sum, val) => sum + val);
+                aggregateRow[measureName] = measureValues.reduce((sum, val) => sum + val);
             }
         }
     }
 
     return {'data': aggregateRows, 'types': aggregateTypes};
-}
-
-
-// Helper function to compute aggregation measure field names
-function getMeasureFieldName(measure) {
-    return `${measure.function.toUpperCase()}(${measure.field})`;
 }
 
 
