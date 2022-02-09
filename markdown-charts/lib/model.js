@@ -51,22 +51,22 @@ struct ChartBase
     Data data
 
     # The map of variable name to variable expression
-    optional string{len > 0} variables
+    optional string{len > 0} var
 
     # The calculated fields
-    optional CalculatedField[len > 0] calculatedFields
+    optional CalculatedField[len > 0] calc
 
     # The data row boolean filter expression. Omit any row that does not match.
     optional string filter
 
     # The data aggregation specification
-    optional Aggregation aggregation
+    optional Aggregation agg
 
     # The post-aggregation calculated fields
-    optional CalculatedField[len > 0] postCalculatedFields
+    optional CalculatedField[len > 0] aggcalc
 
     # The data's sort specification
-    optional SortField[len > 0] sorts
+    optional SortField[len > 0] sort
 
     # The data's top specification
     optional Top top
@@ -85,7 +85,7 @@ struct Data
     string url
 
     # Data joins
-    optional DataJoin[len > 0] joins
+    optional DataJoin[len > 0] join
 
 
 # A data join specification
@@ -95,13 +95,13 @@ struct DataJoin
     string url
 
     # If true, the join is a left join (default is right join)
-    optional bool left
+    optional bool leftJoin
 
     # The join expression for the left row
-    string leftExpression
+    string left
 
     # The join expression for the right row
-    optional string rightExpression
+    optional string right
 
 
 # A datetime format
@@ -124,17 +124,17 @@ struct CalculatedField
     string name
 
     # The calculation expression
-    string expression
+    string expr
 
 
 # A data aggregation specification
 struct Aggregation
 
     # The aggregation category fields
-    string[len > 0] categoryFields
+    string[len > 0] category
 
     # The aggregation measures
-    AggregationMeasure[len > 0] measures
+    AggregationMeasure[len > 0] measure
 
 
 # An aggregation measure specification
@@ -147,7 +147,7 @@ struct AggregationMeasure
     string field
 
     # The aggregation function
-    AggregationFunction function
+    AggregationFunction func
 
 
 # An aggregation function
@@ -186,7 +186,7 @@ struct Top
     optional int(> 0) count
 
     # The category fields
-    optional string[len > 0] categoryFields
+    optional string[len > 0] category
 
 
 # Base struct for line and bar charts
@@ -206,57 +206,57 @@ struct ChartCommon
 struct BarChart (ChartCommon, ChartBase)
 
     # The bar measure fields
-    string[len > 0] measureFields
+    string[len > 0] measure
 
     # The bar category fields
-    optional string[len > 0] barFields
+    optional string[len > 0] bar
 
     # The category fields
-    optional string[len > 0] categoryFields
+    optional string[len > 0] category
 
-    # The color encoding fields
-    optional string[len > 0] colorFields
+    # The color encoding field
+    optional string[len > 0] color
 
     # If true, the bar chart is rendered "reversed". The default is false.
-    optional bool reversed
+    optional bool reverse
 
 
 # A data table specification
 struct DataTable (ChartBase)
 
     # The table's category fields
-    optional string[len > 0] categoryFields
+    optional string[len > 0] category
 
     # The table's fields
-    optional string[len > 0] fields
+    optional string[len > 0] field
 
     # The "categoryFields" and "fields" to be rendered as Markdown text
-    optional string[len > 0] markdownFields
+    optional string[len > 0] markdown
 
 
 # A line chart specification
 struct LineChart (ChartCommon, ChartBase)
 
     # The line chart's X-axis field
-    string xField
+    string x
 
     # The line chart's Y-axis fields
-    string[len > 0] yFields
+    string[len > 0] y
 
     # The color encoding field
-    optional string colorField
+    optional string color
 
     # The X-axis tick mark specification
-    optional AxisTicks xTicks
+    optional AxisTicks xtick
 
     # The Y-axis tick mark specification
-    optional AxisTicks yTicks
+    optional AxisTicks ytick
 
     # The X-axis annotations
-    optional AxisAnnotation[len > 0] xAnnotations
+    optional AxisAnnotation[len > 0] xline
 
     # The Y-axis annotations
-    optional AxisAnnotation[len > 0] yAnnotations
+    optional AxisAnnotation[len > 0] yline
 
 
 # An axis annotation

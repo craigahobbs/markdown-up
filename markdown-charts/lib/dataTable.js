@@ -43,9 +43,9 @@ export async function dataTableElements(dataTable, options = {}) {
     }
 
     // Generate the data table's element model
-    const categoryFields = 'categoryFields' in dataTable ? dataTable.categoryFields : [];
-    const fields = 'fields' in dataTable
-        ? dataTable.fields
+    const categoryFields = 'category' in dataTable ? dataTable.category : [];
+    const fields = 'field' in dataTable
+        ? dataTable.field
         : Object.keys(types).filter((key) => categoryFields.indexOf(key) === -1);
     return {
         'html': 'table',
@@ -77,14 +77,14 @@ export async function dataTableElements(dataTable, options = {}) {
                                 skip = (compareValues(skipValue, skipValuePrev) === 0);
                             }
 
-                            const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
+                            const fieldElements = 'markdown' in dataTable && dataTable.markdown.indexOf(field) !== -1
                                 ? markdownElements(parseMarkdown(formatValue(value, dataTable)), markdownElementsOptions)
                                 : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': skip ? null : fieldElements};
                         }),
                         fields.map((field) => {
                             const value = field in row ? row[field] : null;
-                            const fieldElements = 'markdownFields' in dataTable && dataTable.markdownFields.indexOf(field) !== -1
+                            const fieldElements = 'markdown' in dataTable && dataTable.markdown.indexOf(field) !== -1
                                 ? markdownElements(parseMarkdown(formatValue(value, dataTable)), markdownElementsOptions)
                                 : {'text': formatValue(value, dataTable)};
                             return {'html': 'td', 'elem': field === null ? null : fieldElements};

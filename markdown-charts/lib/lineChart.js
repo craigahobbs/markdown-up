@@ -65,7 +65,7 @@ export async function lineChartElements(lineChart, options = {}) {
     const {data, types, variables} = (await loadChartData(lineChart, options));
 
     // Validate X and Y field types
-    const {xField, yFields, colorField = null} = lineChart;
+    const {'x': xField, 'y': yFields, 'color': colorField = null} = lineChart;
     for (const [fieldDesc, fields] of [['X-field', [xField]], ['Y-field', yFields]]) {
         for (const field of fields) {
             if (!(field in types)) {
@@ -180,15 +180,15 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Compute Y-axis tick values
     const yAxisTicks = [];
-    const yTickCount = 'yTicks' in lineChart && 'count' in lineChart.yTicks
-        ? computeExpr(lineChart.yTicks.count, 'number', 'Y-axis tick count')
+    const yTickCount = 'ytick' in lineChart && 'count' in lineChart.ytick
+        ? computeExpr(lineChart.ytick.count, 'number', 'Y-axis tick count')
         : defaultYAxisTickCount;
-    const yTickSkip = 'yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1;
-    const yTickStart = 'yTicks' in lineChart && 'start' in lineChart.yTicks
-        ? computeExpr(lineChart.yTicks.start, yFieldType, 'Y-axis start value')
+    const yTickSkip = 'ytick' in lineChart && 'skip' in lineChart.ytick ? lineChart.ytick.skip + 1 : 1;
+    const yTickStart = 'ytick' in lineChart && 'start' in lineChart.ytick
+        ? computeExpr(lineChart.ytick.start, yFieldType, 'Y-axis start value')
         : yMin;
-    const yTickEnd = 'yTicks' in lineChart && 'end' in lineChart.yTicks
-        ? computeExpr(lineChart.yTicks.end, yFieldType, 'Y-axis end value')
+    const yTickEnd = 'ytick' in lineChart && 'end' in lineChart.ytick
+        ? computeExpr(lineChart.ytick.end, yFieldType, 'Y-axis end value')
         : yMax;
     for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
         const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
@@ -200,15 +200,15 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Compute X-axis tick values
     const xAxisTicks = [];
-    const xTickCount = 'xTicks' in lineChart && 'count' in lineChart.xTicks
-        ? computeExpr(lineChart.xTicks.count, 'number', 'X-axis tick count')
+    const xTickCount = 'xtick' in lineChart && 'count' in lineChart.xtick
+        ? computeExpr(lineChart.xtick.count, 'number', 'X-axis tick count')
         : defaultXAxisTickCount;
-    const xTickSkip = 'xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1;
-    const xTickStart = 'xTicks' in lineChart && 'start' in lineChart.xTicks
-        ? computeExpr(lineChart.xTicks.start, xFieldType, 'X-axis start value')
+    const xTickSkip = 'xtick' in lineChart && 'skip' in lineChart.xtick ? lineChart.xtick.skip + 1 : 1;
+    const xTickStart = 'xtick' in lineChart && 'start' in lineChart.xtick
+        ? computeExpr(lineChart.xtick.start, xFieldType, 'X-axis start value')
         : xMin;
-    const xTickEnd = 'xTicks' in lineChart && 'end' in lineChart.xTicks
-        ? computeExpr(lineChart.xTicks.end, xFieldType, 'X-axis end value')
+    const xTickEnd = 'xtick' in lineChart && 'end' in lineChart.xtick
+        ? computeExpr(lineChart.xtick.end, xFieldType, 'X-axis end value')
         : xMax;
     for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
         const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
@@ -220,8 +220,8 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Compute Y-axis annotations
     const yAxisAnnotations = [];
-    if ('yAnnotations' in lineChart) {
-        for (const annotation of lineChart.yAnnotations) {
+    if ('yline' in lineChart) {
+        for (const annotation of lineChart.yline) {
             const yAnnotationValue = computeExpr(annotation.value, yFieldType, 'Y-axis annotation value');
             yAxisAnnotations.push([
                 yAnnotationValue,
@@ -236,8 +236,8 @@ export async function lineChartElements(lineChart, options = {}) {
 
     // Compute X-axis annotations
     const xAxisAnnotations = [];
-    if ('xAnnotations' in lineChart) {
-        for (const annotation of lineChart.xAnnotations) {
+    if ('xline' in lineChart) {
+        for (const annotation of lineChart.xline) {
             const xAnnotationValue = computeExpr(annotation.value, xFieldType, 'X-axis annotation value');
             xAxisAnnotations.push([
                 xAnnotationValue,
@@ -297,7 +297,7 @@ export async function lineChartElements(lineChart, options = {}) {
         const labelWidth = label.length * chartFontWidthRatio * colorLegendFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
-    const colorLegendX = yFields.length === 1 && !('colorField' in lineChart) ? null : Math.max(
+    const colorLegendX = yFields.length === 1 && !('color' in lineChart) ? null : Math.max(
         chartWidth - chartBorderSize - colorLegendLabelWidth - colorLegendSampleWidth,
         0.6 * chartWidth
     );

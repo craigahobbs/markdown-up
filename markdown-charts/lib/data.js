@@ -32,7 +32,7 @@ export async function loadChartData(chartModel, options = {}) {
     // Compute the variable values
     const variables = {
         'markdownEncode': ([text]) => encodeMarkdownText(text),
-        ...('variables' in chartModel ? computeVariables(chartModel.variables) : {}),
+        ...('var' in chartModel ? computeVariables(chartModel.var) : {}),
         ...('variables' in options ? options.variables : {})
     };
 
@@ -40,9 +40,9 @@ export async function loadChartData(chartModel, options = {}) {
     let {data, types} = await loadData(chartModel.data, options.fetchFn, ('url' in options ? options.url : null), variables);
 
     // Add calculated fields
-    if ('calculatedFields' in chartModel) {
-        for (const calculatedField of chartModel.calculatedFields) {
-            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, variables);
+    if ('calc' in chartModel) {
+        for (const calculatedField of chartModel.calc) {
+            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expr, variables);
         }
     }
 
@@ -52,20 +52,20 @@ export async function loadChartData(chartModel, options = {}) {
     }
 
     // Aggregate the data
-    if ('aggregation' in chartModel) {
-        ({data, types} = aggregateData(chartModel.aggregation, data, types));
+    if ('agg' in chartModel) {
+        ({data, types} = aggregateData(chartModel.agg, data, types));
     }
 
     // Add the post-aggregation calculated fields
-    if ('postCalculatedFields' in chartModel) {
-        for (const calculatedField of chartModel.postCalculatedFields) {
-            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expression, variables);
+    if ('aggcalc' in chartModel) {
+        for (const calculatedField of chartModel.aggcalc) {
+            types[calculatedField.name] = addCalculatedField(data, calculatedField.name, calculatedField.expr, variables);
         }
     }
 
     // Sort the data
-    if ('sorts' in chartModel) {
-        sortData(chartModel.sorts, data);
+    if ('sort' in chartModel) {
+        sortData(chartModel.sort, data);
     }
 
     // Top the data
@@ -103,7 +103,7 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
         }
         return url;
     };
-    const dataBases = [dataModel, ...('joins' in dataModel ? dataModel.joins : [])];
+    const dataBases = [dataModel, ...('join' in dataModel ? dataModel.join : [])];
     const dataURLs = dataBases.map((base) => fixDataURL(base.url));
     const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
@@ -111,7 +111,7 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
     // Join the data
     let [{data}] = dataTypes;
     const [{types}] = dataTypes;
-    if ('joins' in dataModel) {
+    if ('join' in dataModel) {
         // Helper function to compute a unique field name
         const mapFieldName = (field) => {
             let unique = field;
@@ -125,11 +125,11 @@ export async function loadData(dataModel, fetchFn, rootURL = null, variables = n
 
         // Perform each join in sequence
         let leftData;
-        for (let ixJoin = 0; ixJoin < dataModel.joins.length; ixJoin++) {
-            const join = dataModel.joins[ixJoin];
-            const {'left': isLeftJoin = false} = join;
-            const leftExpression = parseExpression(join.leftExpression);
-            const rightExpression = parseExpression('rightExpression' in join ? join.rightExpression : join.leftExpression);
+        for (let ixJoin = 0; ixJoin < dataModel.join.length; ixJoin++) {
+            const join = dataModel.join[ixJoin];
+            const {'leftJoin': isLeftJoin = false} = join;
+            const leftExpression = parseExpression(join.left);
+            const rightExpression = parseExpression('right' in join ? join.right : join.left);
             const rightData = dataTypes[ixJoin + 1].data;
             const rightTypes = dataTypes[ixJoin + 1].types;
 
@@ -378,18 +378,18 @@ export function filterData(data, expr, variables = null) {
 export function aggregateData(aggregationModel, data, types) {
     // Compute the aggregate field types
     const aggregateTypes = {};
-    for (const categoryField of aggregationModel.categoryFields) {
+    for (const categoryField of aggregationModel.category) {
         if (!(categoryField in types)) {
             throw new Error(`Unknown aggregation category field "${categoryField}"`);
         }
         aggregateTypes[categoryField] = types[categoryField];
     }
-    for (const measure of aggregationModel.measures) {
+    for (const measure of aggregationModel.measure) {
         if (!(measure.field in types)) {
             throw new Error(`Unknown aggregation category field "${measure.field}"`);
         }
-        if ((measure.function === 'Average' || measure.function === 'Sum') && types[measure.field] !== 'number') {
-            throw new Error(`Invalid aggregation measure function "${measure.function}" ` +
+        if ((measure.func === 'Average' || measure.func === 'Sum') && types[measure.field] !== 'number') {
+            throw new Error(`Invalid aggregation measure function "${measure.func}" ` +
                             `for field "${measure.field}" (type "${types[measure.field]}")`);
         }
         const measureName = ('name' in measure ? measure.name : measure.field);
@@ -400,7 +400,7 @@ export function aggregateData(aggregationModel, data, types) {
     const measureRows = {};
     for (const row of data) {
         // Compute the category values
-        const categoryValues = aggregationModel.categoryFields.map((categoryField) => row[categoryField]);
+        const categoryValues = aggregationModel.category.map((categoryField) => row[categoryField]);
 
         // Get or create the aggregate row
         let aggregateRow;
@@ -410,13 +410,13 @@ export function aggregateData(aggregationModel, data, types) {
         } else {
             aggregateRow = {};
             measureRows[rowKey] = aggregateRow;
-            for (let ixCategoryField = 0; ixCategoryField < aggregationModel.categoryFields.length; ixCategoryField++) {
-                aggregateRow[aggregationModel.categoryFields[ixCategoryField]] = categoryValues[ixCategoryField];
+            for (let ixCategoryField = 0; ixCategoryField < aggregationModel.category.length; ixCategoryField++) {
+                aggregateRow[aggregationModel.category[ixCategoryField]] = categoryValues[ixCategoryField];
             }
         }
 
         // Add to the aggregate measure values
-        for (const measure of aggregationModel.measures) {
+        for (const measure of aggregationModel.measure) {
             const measureName = ('name' in measure ? measure.name : measure.field);
             const value = (measure.field in row ? row[measure.field] : null);
             if (value !== null) {
@@ -431,10 +431,10 @@ export function aggregateData(aggregationModel, data, types) {
     // Compute the measure values aggregate function value
     const aggregateRows = Object.values(measureRows);
     for (const aggregateRow of aggregateRows) {
-        for (const measure of aggregationModel.measures) {
+        for (const measure of aggregationModel.measure) {
             const measureName = ('name' in measure ? measure.name : measure.field);
             const measureValues = measureName in aggregateRow ? aggregateRow[measureName] : null;
-            const measureFunction = measure.function;
+            const measureFunction = measure.func;
             if (measureValues === null) {
                 aggregateRow[measureName] = null;
             } else if (measureFunction === 'Average') {
@@ -485,7 +485,7 @@ export function topData(topModel, data) {
     // Bucket rows by category
     const categoryRows = {};
     const categoryOrder = [];
-    const categoryFields = 'categoryFields' in topModel ? topModel.categoryFields : [];
+    const categoryFields = 'category' in topModel ? topModel.category : [];
     for (const row of data) {
         const categoryKey = JSON.stringify(categoryFields.map((field) => (field in row ? row[field] : null)));
         if (!(categoryKey in categoryRows)) {

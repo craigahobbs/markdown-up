@@ -160,15 +160,33 @@ export function chartCodeBlock(language, lines, options, validationFn, renderFn)
 
 
 // Chart code block regular expressions
-const rComment = /^\s*(?:#.*)?$/;
+const rComment = /^\s*(?:(?:#|\/\/).*)?$/;
 const rKeyValue = /^\s*(?<key>.+?)\s*(:\s*(?<value>.*?)\s*)?$/;
+const rContinuation = /\\\s*$/;
 
 
 // Helper function to decode chart lines
 function decodeChartLines(lines) {
     // Parse and URI-encode the chart model key/value pairs
     const keyValues = [];
-    for (const line of lines) {
+    const lineContinuation = [];
+    for (const linePart of lines) {
+        // Line continuation?
+        const linePartNoContinuation = linePart.replace(rContinuation, '');
+        if (lineContinuation.length || linePartNoContinuation !== linePart) {
+            lineContinuation.push(linePartNoContinuation);
+        }
+        if (linePartNoContinuation !== linePart) {
+            continue;
+        }
+        let line;
+        if (lineContinuation.length) {
+            line = lineContinuation.join('');
+            lineContinuation.length = 0;
+        } else {
+            line = linePart;
+        }
+
         // Skip comment lines
         if (line.match(rComment) !== null) {
             continue;
