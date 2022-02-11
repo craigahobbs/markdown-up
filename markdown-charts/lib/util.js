@@ -14,6 +14,9 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  * @property {module:lib/util~FetchFn} [fetchFn] - The URL fetch function
  * @property {number} [fontSize] - The chart font size, in points
  * @property {module:lib/util~HashFn} [hashFn] - The hash URL modifier function
+ * @property {module:lib/util~LogFn} [logFn] - The log function
+ * @property {number} [maxStatements] - The maximum number of statements, 0 for no maximum
+ * @property {module:lib/util~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
  * @property {module:lib/script.MarkdownScriptRuntime} [runtime] - The markdown-script runtime state
  * @property {string} [url] - The markdown file URL
  * @property {Object} [variables] - The map of variable name to chart variable value
@@ -22,7 +25,7 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
 /**
  * The URL fetch function
  *
- * @callback HashFn
+ * @callback FetchFn
  * @param {string} url - The URL to fetch
  * @returns {Promise} The fetch promise
  */
@@ -33,6 +36,21 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  * @callback HashFn
  * @param {string} hashURL - The hash URL
  * @returns {string} The fixed-up hash URL
+ */
+
+/**
+ * A log function
+ *
+ * @callback LogFn
+ * @param {string} text - The log text
+ */
+
+/**
+ * A navigate timeout function
+ *
+ * @callback NavigateTimeoutFn
+ * @param {string} url - The URL to navigate to
+ * @param {number} delay - The navigation delay, in milliseconds
  */
 
 

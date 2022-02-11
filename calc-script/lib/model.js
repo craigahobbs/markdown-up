@@ -8,7 +8,7 @@ import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 // The calc model's Schema Markdown
-const calcModelSmd = `\
+const calcScriptModelSmd = `\
 # The calculation script model
 struct CalcScript
 
@@ -16,30 +16,43 @@ struct CalcScript
     CalcStatement[] statements
 
 
-# A calculation language statement
+# A calculation script statement
 union CalcStatement
 
+    # An expression
+    ExpressionStatement expression
+
     # A variable assignment
-    CalcVariableAssignment assignment
+    AssignmentStatement assignment
 
     # A function definition
-    CalcFunction function
+    FunctionStatement function
 
     # A label definition
     string label
 
     # A jump statement
-    CalcJump jump
+    JumpStatement jump
 
-    # A return statement
-    CalcExpr return
 
-    # An expression
+# A calculation script expression statement
+struct ExpressionStatement
+
+    # If true, await the (async) expression
+    optional bool await
+
+    # If true, the expression value is returned
+    optional bool return
+
+    # The expression to assign to the variable
     CalcExpr expression
 
 
-# A calculation language variable assignment statement
-struct CalcVariableAssignment
+# A calculation script variable assignment statement
+struct AssignmentStatement
+
+    # If true, await the (async) expression
+    optional bool await
 
     # The variable name
     string name
@@ -48,8 +61,11 @@ struct CalcVariableAssignment
     CalcExpr expression
 
 
-# A calculation language function statement
-struct CalcFunction
+# A calculation script function statement
+struct FunctionStatement
+
+    # If true, the function is defined as async
+    optional bool async
 
     # The function name
     string name
@@ -61,8 +77,8 @@ struct CalcFunction
     CalcStatement[] statements
 
 
-# A calculation language jump statement
-struct CalcJump
+# A calculation script jump statement
+struct JumpStatement
 
     # The label to jump to
     string label
@@ -71,7 +87,7 @@ struct CalcJump
     optional CalcExpr expression
 
 
-# A calculation language expression
+# A calculation script expression
 union CalcExpr
 
     # A number literal
@@ -96,7 +112,7 @@ union CalcExpr
     CalcExpr group
 
 
-# A calculation language binary expression
+# A calculation script binary expression
 struct CalcExprBinary
 
     # The binary expression operator
@@ -109,7 +125,7 @@ struct CalcExprBinary
     CalcExpr right
 
 
-# A calculation language binary expression operator
+# A calculation script binary expression operator
 enum CalcExprBinaryOperator
     "**"
     "*"
@@ -127,7 +143,7 @@ enum CalcExprBinaryOperator
     "||"
 
 
-# A calculation language unary expression
+# A calculation script unary expression
 struct CalcExprUnary
 
     # The unary expression operator
@@ -137,13 +153,13 @@ struct CalcExprUnary
     CalcExpr expr
 
 
-# A calculation language unary expression operator
+# A calculation script unary expression operator
 enum CalcExprUnaryOperator
     "-"
     "!"
 
 
-# A calculation language function expression
+# A calculation script function expression
 struct CalcExprFunction
 
     # The function name
@@ -155,14 +171,14 @@ struct CalcExprFunction
 
 
 /**
- * The calculation language model
+ * The calculation script model
  *
  * @property {string} title - The model's title
  * @property {Object} types - The model's referenced types dictionary
  */
-export const calcModel = {
+export const calcScriptModel = {
     'title': 'The Calculation Language Model',
-    'types': new SchemaMarkdownParser(calcModelSmd).types
+    'types': new SchemaMarkdownParser(calcScriptModelSmd).types
 };
 
 
@@ -173,7 +189,7 @@ export const calcModel = {
  * @returns {Object} The validated calculation script model
  */
 export function validateScript(script) {
-    return validateType(calcModel.types, 'CalcScript', script);
+    return validateType(calcScriptModel.types, 'CalcScript', script);
 }
 
 
@@ -184,5 +200,5 @@ export function validateScript(script) {
  * @returns {Object} The validated calculation expression model
  */
 export function validateExpression(expr) {
-    return validateType(calcModel.types, 'CalcExpr', expr);
+    return validateType(calcScriptModel.types, 'CalcExpr', expr);
 }

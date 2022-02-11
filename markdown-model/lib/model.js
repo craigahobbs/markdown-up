@@ -1,7 +1,7 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-model/blob/main/LICENSE
 
-/** @module lib/markdownModel */
+/** @module lib/model */
 
 import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
 import {validateType} from '../../schema-markdown/lib/schema.js';
@@ -152,7 +152,7 @@ struct CodeBlock
 `;
 
 
-// The Markdown model
+/** The Markdown schema-markdown model */
 export const markdownModel = {
     'title': 'The Markdown Model',
     'types': (new SchemaMarkdownParser(markdownModelSmd)).types

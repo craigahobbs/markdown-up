@@ -14,6 +14,7 @@ import {getMarkdownParagraphText} from './parser.js';
  * @property {module:lib/elements~HashFn} [hashFn] - The hash URL modifier function
  * @property {boolean} [headerIds] - If true, generate header IDs
  * @property {string} [url] - Markdown file URL
+ * @property {Set} [usedHeaderIds] - Set of used header IDs
  */
 
 /**
@@ -35,14 +36,110 @@ import {getMarkdownParagraphText} from './parser.js';
 
 
 /**
- * Generate an element model from a markdown model
+ * Generate an element model from a markdown model.
  *
  * @param {Object} markdown - The markdown model
- * @param {module:lib/elements~MarkdownElementsOptions} [options] - Options object
+ * @param {?module:lib/elements~MarkdownElementsOptions} [options] - Options object
  * @returns {*} The markdown's element model
  */
-export function markdownElements(markdown, options = {}) {
-    return markdownPartElements(markdown.parts, {...options, 'usedHeaderIds': new Set()});
+export function markdownElements(markdown, options = null) {
+    const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
+    return markdownElementsParts(markdown.parts, options, usedHeaderIds);
+}
+
+
+function markdownElementsParts(parts, options, usedHeaderIds) {
+    return parts.map((part) => markdownElementsPart(part, options, usedHeaderIds));
+}
+
+
+function markdownElementsPart(part, options, usedHeaderIds) {
+    const [partKey] = Object.keys(part);
+
+    // List?
+    if (partKey === 'list') {
+        const {items} = part.list;
+        const itemElements = items.map((item) => markdownElementsParts(item.parts, options, usedHeaderIds));
+        return markdownElementsListPart(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+
+    // Code block?
+    } else if (partKey === 'codeBlock') {
+        const {codeBlock} = part;
+        if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
+            return options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines);
+        }
+        return markdownElementsCodeBlockPart(part);
+    }
+
+    return markdownElementsPartBase(part, options, usedHeaderIds);
+}
+
+
+/**
+ * Generate an element model from a markdown model.
+ *
+ * This is the asynchronous form of the [markdownElements function]{@link module:lib/elements.markdownElements}.
+ * Use this form of the function if you have one or more asynchronous code block functions.
+ *
+ * @async
+ * @param {Object} markdown - The markdown model
+ * @param {?module:lib/elements~MarkdownElementsOptions} [options] - Options object
+ * @returns {*} The markdown's element model
+ */
+// eslint-disable-next-line require-await
+export async function markdownElementsAsync(markdown, options = null) {
+    const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
+    return markdownElementsPartsAsync(markdown.parts, options, usedHeaderIds);
+}
+
+
+// eslint-disable-next-line require-await
+async function markdownElementsPartsAsync(parts, options, usedHeaderIds) {
+    return Promise.all(parts.map((part) => markdownElementsPartAsync(part, options, usedHeaderIds)));
+}
+
+
+async function markdownElementsPartAsync(part, options, usedHeaderIds) {
+    const [partKey] = Object.keys(part);
+
+    // List?
+    if (partKey === 'list') {
+        const {items} = part.list;
+        const itemElements = await Promise.all(items.map((item) => markdownElementsPartsAsync(item.parts, options, usedHeaderIds)));
+        return markdownElementsListPart(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+
+    // Code block?
+    } else if (partKey === 'codeBlock') {
+        const {codeBlock} = part;
+        if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
+            return options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines);
+        }
+        return markdownElementsCodeBlockPart(part);
+    }
+
+    return markdownElementsPartBase(part, options, usedHeaderIds);
+}
+
+
+function markdownElementsListPart(part, listItemElements) {
+    const {list} = part;
+    return {
+        'html': 'start' in list ? 'ol' : 'ul',
+        'attr': 'start' in list && list.start > 1 ? {'start': `${list.start}`} : null,
+        'elem': listItemElements
+    };
+}
+
+
+function markdownElementsCodeBlockPart(part) {
+    const {codeBlock} = part;
+    return {
+        'html': 'pre',
+        'elem': {
+            'html': 'code',
+            'elem': codeBlock.lines.map((line) => ({'text': `${line}\n`}))
+        }
+    };
 }
 
 
@@ -53,83 +150,54 @@ const rHeaderIdRemove = /['"]/g;
 const rHeaderIdDash = /[^a-z0-9]+/g;
 
 
-// Helper function to generate an element model from a markdown part model array
-function markdownPartElements(parts, options) {
-    const partElements = [];
-    for (const markdownPart of parts) {
-        // Paragraph?
-        if ('paragraph' in markdownPart) {
-            const {paragraph} = markdownPart;
-            if ('style' in paragraph) {
-                // Determine the header ID, if requested
-                let headerId = null;
-                if ('headerIds' in options && options.headerIds) {
-                    headerId = getMarkdownParagraphText(paragraph).toLowerCase().
-                        replace(rHeaderStart, '').replace(rHeaderEnd, '').
-                        replace(rHeaderIdRemove, '').replace(rHeaderIdDash, '-');
+function markdownElementsPartBase(part, options, usedHeaderIds) {
+    const [partKey] = Object.keys(part);
 
-                    // Duplicate header ID?
-                    if (options.usedHeaderIds.has(headerId)) {
-                        let ix = 1;
-                        let headerIdNew;
-                        do {
-                            ix += 1;
-                            headerIdNew = `${headerId}${ix}`;
-                        } while (options.usedHeaderIds.has(headerIdNew));
-                        headerId = headerIdNew;
-                    }
-                    options.usedHeaderIds.add(headerId);
+    // Paragraph?
+    if (partKey === 'paragraph') {
+        const {paragraph} = part;
+        if ('style' in paragraph) {
+            // Determine the header ID, if requested
+            let headerId = null;
+            if (options !== null && 'headerIds' in options && options.headerIds) {
+                headerId = getMarkdownParagraphText(paragraph).toLowerCase().
+                    replace(rHeaderStart, '').replace(rHeaderEnd, '').
+                    replace(rHeaderIdRemove, '').replace(rHeaderIdDash, '-');
 
-                    // Hash prefix fixup?
-                    if ('hashFn' in options) {
-                        headerId = options.hashFn(`#${headerId}`).slice(1);
-                    }
+                // Duplicate header ID?
+                if (usedHeaderIds.has(headerId)) {
+                    let ix = 1;
+                    let headerIdNew;
+                    do {
+                        ix += 1;
+                        headerIdNew = `${headerId}${ix}`;
+                    } while (usedHeaderIds.has(headerIdNew));
+                    headerId = headerIdNew;
                 }
+                usedHeaderIds.add(headerId);
 
-                partElements.push({
-                    'html': paragraph.style,
-                    'attr': headerId !== null ? {'id': headerId} : null,
-                    'elem': paragraphSpanElements(paragraph.spans, options)
-                });
-            } else {
-                partElements.push({
-                    'html': 'p',
-                    'elem': paragraphSpanElements(paragraph.spans, options)
-                });
+                // Hash prefix fixup?
+                if (options !== null && 'hashFn' in options) {
+                    headerId = options.hashFn(`#${headerId}`).slice(1);
+                }
             }
 
-        // Horizontal rule?
-        } else if ('hr' in markdownPart) {
-            partElements.push({'html': 'hr'});
-
-        // List?
-        } else if ('list' in markdownPart) {
-            const {list} = markdownPart;
-            partElements.push({
-                'html': 'start' in list ? 'ol' : 'ul',
-                'attr': 'start' in list && list.start > 1 ? {'start': `${list.start}`} : null,
-                'elem': list.items.map((item) => ({
-                    'html': 'li',
-                    'elem': markdownPartElements(item.parts, options)
-                }))
-            });
-
-        // Code block?
-        } else if ('codeBlock' in markdownPart) {
-            const {codeBlock} = markdownPart;
-
-            // Render the code block elements
-            if ('codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
-                partElements.push(options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines));
-            } else {
-                partElements.push(
-                    {'html': 'pre', 'elem': {'html': 'code', 'elem': codeBlock.lines.map((line) => ({'text': `${line}\n`}))}}
-                );
-            }
+            return {
+                'html': paragraph.style,
+                'attr': headerId !== null ? {'id': headerId} : null,
+                'elem': paragraphSpanElements(paragraph.spans, options)
+            };
         }
+
+        return {
+            'html': 'p',
+            'elem': paragraphSpanElements(paragraph.spans, options)
+        };
     }
 
-    return partElements;
+    // Horizontal rule?
+    // else if (partKey === 'hr')
+    return {'html': 'hr'};
 }
 
 
@@ -137,16 +205,18 @@ function markdownPartElements(parts, options) {
 function paragraphSpanElements(spans, options) {
     const spanElements = [];
     for (const span of spans) {
+        const [spanKey] = Object.keys(span);
+
         // Text span?
-        if ('text' in span) {
+        if (spanKey === 'text') {
             spanElements.push({'text': span.text});
 
         // Line break?
-        } else if ('br' in span) {
+        } else if (spanKey === 'br') {
             spanElements.push({'html': 'br'});
 
         // Style span?
-        } else if ('style' in span) {
+        } else if (spanKey === 'style') {
             const {style} = span;
             spanElements.push({
                 'html': style.style === 'italic' ? 'em' : 'strong',
@@ -154,18 +224,18 @@ function paragraphSpanElements(spans, options) {
             });
 
         // Link span?
-        } else if ('link' in span) {
+        } else if (spanKey === 'link') {
             const {link} = span;
             let {href} = link;
 
             // Hash-only link?
             if (href.startsWith('#')) {
-                if ('hashFn' in options) {
+                if (options !== null && 'hashFn' in options) {
                     href = options.hashFn(href);
                 }
 
             // Relative link fixup?
-            } else if ('url' in options && isRelativeURL(href)) {
+            } else if (options !== null && 'url' in options && isRelativeURL(href)) {
                 href = `${getBaseURL(options.url)}${href}`;
             }
 
@@ -180,12 +250,12 @@ function paragraphSpanElements(spans, options) {
             spanElements.push(linkElements);
 
         // Image span?
-        } else if ('image' in span) {
+        } else if (spanKey === 'image') {
             const {image} = span;
             let {src} = image;
 
             // Relative link fixup?
-            if ('url' in options && isRelativeURL(src)) {
+            if (options !== null && 'url' in options && isRelativeURL(src)) {
                 src = `${getBaseURL(options.url)}${src}`;
             }
 
@@ -199,6 +269,7 @@ function paragraphSpanElements(spans, options) {
             spanElements.push(imageElement);
         }
     }
+
     return spanElements;
 }
 

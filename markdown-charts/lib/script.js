@@ -4,7 +4,7 @@
 /** @module lib/script */
 
 import {encodeMarkdownText, parseMarkdown} from '../../markdown-model/lib/parser.js';
-import {executeScript} from '../../calc-script/lib/runtime.js';
+import {executeScriptAsync} from '../../calc-script/lib/runtimeAsync.js';
 import {markdownElements} from '../../markdown-model/lib/elements.js';
 import {parseScript} from '../../calc-script/lib/parser.js';
 
@@ -12,12 +12,13 @@ import {parseScript} from '../../calc-script/lib/parser.js';
 /**
  * markdown-script code block function
  *
+ * @async
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
  * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
  * @returns {Object} The generated element model
  */
-export function markdownScriptCodeBlock(language, lines, options = {}) {
+export async function markdownScriptCodeBlock(language, lines, options = {}) {
     // Get/create the script's runtime
     const runtime = 'runtime' in options && options.runtime !== null ? options.runtime
         : new MarkdownScriptRuntime({'fontSize': options ? options.fontSize : null});
@@ -30,13 +31,7 @@ export function markdownScriptCodeBlock(language, lines, options = {}) {
     // Execute the calculation script
     let errorMessage = null;
     try {
-        const scriptModel = parseScript(lines);
-        const timeBegin = performance.now();
-        executeScript(scriptModel, runtime.globals);
-        if ('logFn' in runtime.options) {
-            const timeEnd = performance.now();
-            runtime.options.logFn(`Script executed in ${(timeEnd - timeBegin).toFixed(1)} milliseconds`);
-        }
+        await executeScriptAsync(parseScript(lines), runtime.globals, options);
     } catch ({message}) {
         errorMessage = message;
     } finally {
@@ -83,30 +78,6 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
 
 
 /**
- * A MarkdownScriptRuntime options object
- *
- * @typedef {Object} MarkdownScriptRuntimeOptions
- * @property {module:lib/script~LogFn} [logFn] - The log function
- * @property {module:lib/script~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
- * @property {number} [fontSize] - The default font size, in points
- */
-
-/**
- * A log function
- *
- * @callback LogFn
- * @param {string} text - The log text
- */
-
-/**
- * A navigate timeout function
- *
- * @callback NavigateTimeoutFn
- * @param {string} url - The URL to navigate to
- * @param {number} delay - The navigation delay, in milliseconds
- */
-
-/**
  * @typedef {Object} ElementPart
  * @property {Object} drawing - SVG element model
  * @property {string[]} markdown - Markdown text lines
@@ -117,12 +88,12 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  * markdown-script runtime state
  *
  * @property {Object} globals - The global variables
- * @property {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
+ * @property {module:lib/util~ChartOptions} [options = {}] - The markdown-charts options
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
  */
 export class MarkdownScriptRuntime {
     /**
-     * @param {module:lib/script~MarkdownScriptRuntimeOptions} [options = {}] - The runtime options
+     * @param {module:lib/util~ChartOptions} [options = {}] - The runtime options
      */
     constructor(options = {}) {
         this.options = options;
@@ -154,7 +125,6 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
 
             // Utility functions
-            'log': (args) => this.log(...args),
             'setNavigateTimeout': (args) => this.setNavigateTimeout(...args)
         };
 
@@ -377,12 +347,6 @@ export class MarkdownScriptRuntime {
     drawVLine(py) {
         this.setDrawing();
         this.drawingPath.push(`V ${py.toFixed(svgPrecision)}`);
-    }
-
-    log(text) {
-        if ('logFn' in this.options && this.options.logFn !== null) {
-            this.options.logFn(text);
-        }
     }
 
     markdownPrint(lines) {
