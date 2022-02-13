@@ -3,7 +3,7 @@
 
 /** @module lib/script */
 
-import {encodeMarkdownText, parseMarkdown} from '../../markdown-model/lib/parser.js';
+import {encodeMarkdownText, getMarkdownTitle, parseMarkdown} from '../../markdown-model/lib/parser.js';
 import {executeScriptAsync} from '../../calc-script/lib/runtimeAsync.js';
 import {markdownElements} from '../../markdown-model/lib/elements.js';
 import {parseScript} from '../../calc-script/lib/parser.js';
@@ -123,6 +123,7 @@ export class MarkdownScriptRuntime {
             // Markdown functions
             'markdownEncode': (args) => encodeMarkdownText(...args),
             'markdownPrint': (args) => this.markdownPrint(args),
+            'markdownTitle': ([text]) => getMarkdownTitle(parseMarkdown(text)),
 
             // Utility functions
             'setNavigateTimeout': (args) => this.setNavigateTimeout(...args)
