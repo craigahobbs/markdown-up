@@ -43,10 +43,10 @@ const chartLineWidth = 3;
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The line chart element model
  */
-export function lineChartCodeBlock(language, lines, options = {}) {
+export function lineChartCodeBlock(language, lines, options = null) {
     return chartCodeBlock(language, lines, options, validateLineChart, lineChartElements);
 }
 
@@ -55,11 +55,11 @@ export function lineChartCodeBlock(language, lines, options = {}) {
  * Render a line chart
  *
  * @param {Object} lineChart - The line chart model
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The line chart element model
  */
-export async function lineChartElements(lineChart, options = {}) {
-    const chartFontSize = ('fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
+export async function lineChartElements(lineChart, options = null) {
+    const chartFontSize = (options !== null && 'fontSize' in options ? options.fontSize : defaultFontSize) * pixelsPerPoint;
 
     // Load the chart data
     const {data, types, variables} = (await loadChartData(lineChart, options));

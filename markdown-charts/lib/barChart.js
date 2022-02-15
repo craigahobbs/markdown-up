@@ -13,10 +13,10 @@ import {validateBarChart} from './model.js';
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The bar chart element model
  */
-export function barChartCodeBlock(language, lines, options = {}) {
+export function barChartCodeBlock(language, lines, options = null) {
     return chartCodeBlock(language, lines, options, validateBarChart, barChartElements);
 }
 
@@ -25,10 +25,10 @@ export function barChartCodeBlock(language, lines, options = {}) {
  * Render a bar chart
  *
  * @param {Object} barChart - The bar chart model
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The bar chart element model
  */
-export async function barChartElements(barChart, options = {}) {
+export async function barChartElements(barChart, options = null) {
     const {data} = await loadChartData(barChart, options);
     return {'html': 'pre', 'elem': {'text': JSON.stringify(data, null, 4)}};
 }

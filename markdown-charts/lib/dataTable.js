@@ -15,10 +15,10 @@ import {validateDataTable} from './model.js';
  *
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The data table element model
  */
-export function dataTableCodeBlock(language, lines, options = {}) {
+export function dataTableCodeBlock(language, lines, options = null) {
     return chartCodeBlock(language, lines, options, validateDataTable, dataTableElements);
 }
 
@@ -27,18 +27,18 @@ export function dataTableCodeBlock(language, lines, options = {}) {
  * Render a data table
  *
  * @param {Object} dataTable - The data table model
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The data table element model
  */
-export async function dataTableElements(dataTable, options = {}) {
+export async function dataTableElements(dataTable, options = null) {
     const {data, types} = await loadChartData(dataTable, options);
 
     // Create the markdownElements options
     const markdownElementsOptions = {};
-    if ('hashFn' in options) {
+    if (options !== null && 'hashFn' in options) {
         markdownElementsOptions.hashFn = options.hashFn;
     }
-    if ('url' in options) {
+    if (options !== null && 'url' in options) {
         markdownElementsOptions.url = options.url;
     }
 

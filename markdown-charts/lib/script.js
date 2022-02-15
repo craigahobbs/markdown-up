@@ -15,16 +15,19 @@ import {parseScript} from '../../calc-script/lib/parser.js';
  * @async
  * @param {string} language - The code block language
  * @param {string[]} lines - The code block's text lines
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {Object} The generated element model
  */
-export async function markdownScriptCodeBlock(language, lines, options = {}) {
+export async function markdownScriptCodeBlock(language, lines, options = null) {
     // Get/create the script's runtime
-    const runtime = 'runtime' in options && options.runtime !== null ? options.runtime
-        : new MarkdownScriptRuntime({'fontSize': options ? options.fontSize : null});
+    const runtime = (
+        options !== null && 'runtime' in options && options.runtime !== null
+            ? options.runtime
+            : new MarkdownScriptRuntime(options)
+    );
 
     // Add the options variables to the runtime's globals
-    if ('variables' in options) {
+    if (options !== null && 'variables' in options) {
         Object.assign(runtime.globals, options.variables);
     }
 
@@ -40,10 +43,10 @@ export async function markdownScriptCodeBlock(language, lines, options = {}) {
 
     // Create the markdownElements options
     const markdownElementsOptions = {'headerIds': true};
-    if ('hashFn' in options) {
+    if (options !== null && 'hashFn' in options) {
         markdownElementsOptions.hashFn = options.hashFn;
     }
-    if ('url' in options) {
+    if (options !== null && 'url' in options) {
         markdownElementsOptions.url = options.url;
     }
 
@@ -88,14 +91,14 @@ const defaultFontSizePx = 12 * pixelsPerPoint;
  * markdown-script runtime state
  *
  * @property {Object} globals - The global variables
- * @property {module:lib/util~ChartOptions} [options = {}] - The markdown-charts options
+ * @property {module:lib/util~ChartOptions} [options = null] - The markdown-charts options
  * @property {module:lib/script~ElementPart[]} elementParts - The element model parts to render
  */
 export class MarkdownScriptRuntime {
     /**
-     * @param {module:lib/util~ChartOptions} [options = {}] - The runtime options
+     * @param {module:lib/util~ChartOptions} [options = null] - The runtime options
      */
-    constructor(options = {}) {
+    constructor(options = null) {
         this.options = options;
 
         // The runtime's global variables
@@ -120,10 +123,38 @@ export class MarkdownScriptRuntime {
             'getTextWidth': (args) => this.drawTextWidth(...args),
             'setDrawingSize': (args) => this.setDrawingSize(...args),
 
+            // Local storage functions
+            'localStorageGetItem': ([key]) => (
+                options !== null && 'localStorage' in options ? options.localStorage.getItem(key) : null
+            ),
+            'localStorageSetItem': ([key, value]) => (
+                options !== null && 'localStorage' in options ? options.localStorage.setItem(key, value) : null
+            ),
+            'localStorageRemoveItem': ([key]) => (
+                options !== null && 'localStorage' in options ? options.localStorage.removeItem(key) : null
+            ),
+            'localStorageClear': () => (
+                options !== null && 'localStorage' in options ? options.localStorage.clear() : null
+            ),
+
             // Markdown functions
             'markdownEncode': (args) => encodeMarkdownText(...args),
             'markdownPrint': (args) => this.markdownPrint(args),
             'markdownTitle': ([text]) => getMarkdownTitle(parseMarkdown(text)),
+
+            // Session storage functions
+            'sessionStorageGetItem': ([key]) => (
+                options !== null && 'sessionStorage' in options ? options.sessionStorage.getItem(key) : null
+            ),
+            'sessionStorageSetItem': ([key, value]) => (
+                options !== null && 'sessionStorage' in options ? options.sessionStorage.setItem(key, value) : null
+            ),
+            'sessionStorageRemoveItem': ([key]) => (
+                options !== null && 'sessionStorage' in options ? options.sessionStorage.removeItem(key) : null
+            ),
+            'sessionStorageClear': () => (
+                options !== null && 'sessionStorage' in options ? options.sessionStorage.clear() : null
+            ),
 
             // Utility functions
             'setNavigateTimeout': (args) => this.setNavigateTimeout(...args)
@@ -146,7 +177,7 @@ export class MarkdownScriptRuntime {
         // Drawing text style
         this.drawingFontFamily = defaultFontFamily;
         this.drawingFontSizePx = (
-            'fontSize' in options && options.fontSize !== null ? options.fontSize * pixelsPerPoint : defaultFontSizePx
+            options !== null && 'fontSize' in options && options.fontSize !== null ? options.fontSize * pixelsPerPoint : defaultFontSizePx
         );
         this.drawingFontFill = 'black';
         this.drawingFontBold = false;
@@ -363,7 +394,7 @@ export class MarkdownScriptRuntime {
     }
 
     setNavigateTimeout(url, delay = 0) {
-        if ('navigateTimeoutFn' in this.options && this.navigateTimeoutFn !== null) {
+        if (this.options !== null && 'navigateTimeoutFn' in this.options && this.navigateTimeoutFn !== null) {
             this.options.navigateTimeoutFn(url, delay);
         }
     }

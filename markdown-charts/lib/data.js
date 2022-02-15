@@ -24,19 +24,23 @@ import {parseExpression} from '../../calc-script/lib/parser.js';
 /**
  * Load the chart's data
  *
+ * @async
  * @param {Object} chartModel - The chart model
- * @param {module:lib/util~ChartOptions} [options={}] - Chart options object
+ * @param {module:lib/util~ChartOptions} [options=null] - Chart options object
  * @returns {module:lib/data~LoadChartDataResult}
  */
-export async function loadChartData(chartModel, options = {}) {
+export async function loadChartData(chartModel, options = null) {
     // Compute the variable values
     const variables = {
         'markdownEncode': ([text]) => encodeMarkdownText(text),
         ...('var' in chartModel ? computeVariables(chartModel.var) : {}),
-        ...('variables' in options ? options.variables : {})
+        ...(options !== null && 'variables' in options ? options.variables : {})
     };
 
     // Load the data resources
+    if (options === null || !('fetchFn' in options)) {
+        throw new Error('loadChartData - fetch function is not defined');
+    }
     let {data, types} = await loadData(chartModel.data, options.fetchFn, ('url' in options ? options.url : null), variables);
 
     // Add calculated fields
@@ -89,6 +93,7 @@ export async function loadChartData(chartModel, options = {}) {
 /**
  * Load a data model
  *
+ * @async
  * @param {Object} dataModel - The data model
  * @param {module:lib/util~FetchFn} fetchFn - The URL fetch function
  * @param {string} [rootURL = null] - The root URL for determining relative data URL locations
