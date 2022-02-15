@@ -18,7 +18,7 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  * @property {number} [maxStatements] - The maximum number of statements, 0 for no maximum
  * @property {module:lib/util~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
  * @property {module:lib/script.MarkdownScriptRuntime} [runtime] - The markdown-script runtime state
- * @property {string} [url] - The markdown file URL
+ * @property {string} [url] - The URL used for resolving relative URLs
  * @property {Object} [variables] - The map of variable name to chart variable value
  */
 
