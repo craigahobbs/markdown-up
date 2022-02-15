@@ -66,9 +66,10 @@ export const expressionFunctions = {
 export const scriptFunctions = {
     // Array functions
     'arrayCopy': ([array]) => [...array],
-    'arrayGet': ([array, index]) => array[index],
+    'arrayGet': ([array, index]) => array.at(index),
     'arrayIndexOf': ([array, value, index = 0]) => array.indexOf(value, index),
     'arrayJoin': ([array, sep]) => array.join(sep),
+    'arrayLastIndexOf': ([array, value, index = 0]) => array.lastIndexOf(value, index),
     'arrayLength': ([array]) => array.length,
     'arrayNew': (args) => args,
     'arrayNewSize': ([size = 0, value = 0]) => new Array(size).fill(value),
@@ -87,9 +88,9 @@ export const scriptFunctions = {
     },
 
     // Fetch
-    'fetch': async ([url, fetchOptions = null], options) => {
+    'fetch': async ([url, init = null], options) => {
         const fetchFn = (options !== null && 'fetchFn' in options ? options.fetchFn : null);
-        const isText = (fetchOptions !== null && fetchOptions.type === 'text');
+        const isText = (init !== null && init.type === 'text');
 
         // If URL is relative, resolve it against the base URL, if any
         const resolveURL = (rURL) => (
@@ -103,30 +104,18 @@ export const scriptFunctions = {
 
         // Array of URLs?
         if (Array.isArray(url)) {
-            const responses = await Promise.all(url.map((fURL) => (fetchFn !== null ? fetchFn(resolveURL(fURL)) : null)));
+            const responses = await Promise.all(url.map((fURL) => (fetchFn !== null ? fetchFn(resolveURL(fURL), init) : null)));
             return Promise.all(responses.map(responseFn));
         }
 
         // Single URL
-        const response = (fetchFn !== null ? await fetchFn(resolveURL(url)) : null);
+        const response = (fetchFn !== null ? await fetchFn(resolveURL(url), init) : null);
         return (response !== null ? responseFn(response) : null);
     },
 
     // JSON functions
-    'jsonParse': ([text]) => {
-        try {
-            return JSON.parse(text);
-        } catch (error) {
-            return null;
-        }
-    },
-    'jsonStringify': ([obj, space]) => {
-        try {
-            return JSON.stringify(obj, null, space);
-        } catch (error) {
-            return null;
-        }
-    },
+    'jsonParse': ([text]) => JSON.parse(text),
+    'jsonStringify': ([obj, space]) => JSON.stringify(obj, null, space),
 
     // Object functions
     'objectCopy': ([obj]) => ({...obj}),

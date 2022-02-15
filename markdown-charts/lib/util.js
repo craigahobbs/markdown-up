@@ -27,6 +27,7 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  *
  * @callback FetchFn
  * @param {string} url - The URL to fetch
+ * @param {?Object} [init] - The fetch options
  * @returns {Promise} The fetch promise
  */
 
