@@ -1,4 +1,6 @@
-## 1.6.0 (2022-02-01)
+## 1.6.0 (2022-02-16)
+
+- [ec26a62](https://github.com/craigahobbs/markdown-up/commit/ec26a62) - update markdown-model
 
 - [d5716ef](https://github.com/craigahobbs/markdown-up/commit/d5716ef) - markdown-model 1.4
 
