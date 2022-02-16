@@ -11,6 +11,10 @@ import {chartModel} from 'markdown-charts/lib/model.js';
 import test from 'ava';
 
 
+// The JSDOM URL
+const jsdomURL = 'https://github.com/craigahobbs/markdown-up';
+
+
 // Helper function to create the menu burger elements
 function menuBurgerElements({
     menuURL = '#menu=1'
@@ -125,7 +129,7 @@ function menuElements({
 
 
 test('MarkdownUp, constructor', (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
     t.is(app.window, window);
     t.is(app.params, null);
@@ -138,7 +142,7 @@ test('MarkdownUp, constructor', (t) => {
 
 
 test('MarkdownUp, constructor options', (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'fontSize': 14,
         'lineHeight': 1.6,
@@ -156,7 +160,7 @@ test('MarkdownUp, constructor options', (t) => {
 
 
 test('MarkdownUp.preRender', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
@@ -188,7 +192,7 @@ test('MarkdownUp.preRender', async (t) => {
 
 
 test('MarkdownUp.main, help', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
     app.updateParams('cmd.help=Help');
     t.deepEqual(
@@ -208,7 +212,7 @@ test('MarkdownUp.main, help', async (t) => {
 
 
 test('MarkdownUp.main', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -239,7 +243,7 @@ test('MarkdownUp.main', async (t) => {
 
 
 test('MarkdownUp.main, url', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'sub/other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -344,7 +348,7 @@ test('MarkdownUp.main, url', async (t) => {
 
 
 test('MarkdownUp.main, fetch error', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': false, 'statusText': 'Not Found'};
@@ -365,7 +369,7 @@ test('MarkdownUp.main, fetch error', async (t) => {
 
 
 test('MarkdownUp.main, fetch error no status text', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': false, 'statusText': ''};
@@ -386,7 +390,7 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
 
 
 test('MarkdownUp.main, no title', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -417,7 +421,7 @@ test('MarkdownUp.main, no title', async (t) => {
 
 
 test('MarkdownUp.main, menu', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -448,7 +452,7 @@ test('MarkdownUp.main, menu', async (t) => {
 
 
 test('MarkdownUp.main, no menu', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -479,7 +483,7 @@ test('MarkdownUp.main, no menu', async (t) => {
 
 
 test('MarkdownUp.main, menu cycle and toggle', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -513,7 +517,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
 
 
 test('MarkdownUp.main, markdown', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
         t.is(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
@@ -542,7 +546,7 @@ test('MarkdownUp.main, markdown', async (t) => {
 
 
 test('markdown-charts, help', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
 
     app.updateParams('cmd.help=Bar');
@@ -593,7 +597,7 @@ test('markdown-charts, help', async (t) => {
 
 
 test('markdown-charts, bar chart', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # Bar Chart
@@ -627,7 +631,7 @@ test('markdown-charts, bar chart', async (t) => {
 
 
 test('markdown-charts, line chart', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # Line Chart
@@ -661,7 +665,7 @@ test('markdown-charts, line chart', async (t) => {
 
 
 test('markdown-charts, data table', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # Data Table
@@ -695,7 +699,7 @@ test('markdown-charts, data table', async (t) => {
 
 
 test('markdown-charts, markdown-script', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # markdown-script
@@ -730,7 +734,7 @@ log('Hello')
 
 
 test('markdown-charts, markdown-script debug', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # markdown-script
@@ -765,7 +769,7 @@ log('Hello')
 
 
 test('markdown-charts, variables', async (t) => {
-    const {window} = new JSDOM();
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # Data Table
