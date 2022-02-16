@@ -15,7 +15,7 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  *
  * @typedef {Object} ChartOptions
  * @property {number} [fontSize] - The chart font size, in points
- * @property {module:lib/util~HashFn} [hashFn] - The hash URL modifier function
+ * @property {module:lib/util~URLFn} [urlFn] - The URL modifier function
  * @property {Object} [localStorage] - The localStorage object
  * @property {module:lib/util~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
  * @property {module:lib/script.MarkdownScriptRuntime} [runtime] - The markdown-script runtime state
@@ -24,11 +24,11 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  */
 
 /**
- * The hash modifier function
+ * A URL modifier function
  *
- * @callback HashFn
- * @param {string} hashURL - The hash URL
- * @returns {string} The fixed-up hash URL
+ * @callback URLFn
+ * @param {string} url - The URL
+ * @returns {string} The modified URL
  */
 
 /**

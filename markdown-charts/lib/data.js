@@ -3,7 +3,6 @@
 
 /** @module lib/data */
 
-import {getBaseURL, isRelativeURL} from '../../markdown-model/lib/elements.js';
 import {parseCSV, parseCSVDatetime, parseCSVNumber} from './csv.js';
 import {compareValues} from './util.js';
 import {encodeMarkdownText} from '../../markdown-model/lib/parser.js';
@@ -41,7 +40,7 @@ export async function loadChartData(chartModel, options = null) {
     if (options === null || !('fetchFn' in options)) {
         throw new Error('loadChartData - fetch function is not defined');
     }
-    let {data, types} = await loadData(chartModel.data, options.fetchFn, ('url' in options ? options.url : null), variables);
+    let {data, types} = await loadData(chartModel.data, options.fetchFn, variables);
 
     // Add calculated fields
     if ('calc' in chartModel) {
@@ -96,20 +95,12 @@ export async function loadChartData(chartModel, options = null) {
  * @async
  * @param {Object} dataModel - The data model
  * @param {module:lib/util~FetchFn} fetchFn - The URL fetch function
- * @param {string} [rootURL = null] - The root URL for determining relative data URL locations
  * @param {Object} [variables = null] - Map of variables to variable value
  * @returns {module:lib/data~LoadDataResult}
  */
-export async function loadData(dataModel, fetchFn, rootURL = null, variables = null) {
-    // Load the data resources
-    const fixDataURL = (url) => {
-        if (rootURL !== null && isRelativeURL(url)) {
-            return `${getBaseURL(rootURL)}${url}`;
-        }
-        return url;
-    };
+export async function loadData(dataModel, fetchFn, variables = null) {
     const dataBases = [dataModel, ...('join' in dataModel ? dataModel.join : [])];
-    const dataURLs = dataBases.map((base) => fixDataURL(base.url));
+    const dataURLs = dataBases.map((base) => base.url);
     const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
 

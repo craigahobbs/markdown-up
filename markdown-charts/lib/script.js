@@ -43,11 +43,8 @@ export async function markdownScriptCodeBlock(language, lines, options = null) {
 
     // Create the markdownElements options
     const markdownElementsOptions = {'headerIds': true};
-    if (options !== null && 'hashFn' in options) {
-        markdownElementsOptions.hashFn = options.hashFn;
-    }
-    if (options !== null && 'url' in options) {
-        markdownElementsOptions.url = options.url;
+    if (options !== null && 'urlFn' in options) {
+        markdownElementsOptions.urlFn = options.urlFn;
     }
 
     // Render the element model parts

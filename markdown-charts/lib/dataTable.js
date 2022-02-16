@@ -35,11 +35,8 @@ export async function dataTableElements(dataTable, options = null) {
 
     // Create the markdownElements options
     const markdownElementsOptions = {};
-    if (options !== null && 'hashFn' in options) {
-        markdownElementsOptions.hashFn = options.hashFn;
-    }
-    if (options !== null && 'url' in options) {
-        markdownElementsOptions.url = options.url;
+    if (options !== null && 'urlFn' in options) {
+        markdownElementsOptions.urlFn = options.urlFn;
     }
 
     // Generate the data table's element model

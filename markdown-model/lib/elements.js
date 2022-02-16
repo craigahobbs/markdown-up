@@ -11,9 +11,8 @@ import {getMarkdownParagraphText} from './parser.js';
  *
  * @typedef {Object} MarkdownElementsOptions
  * @property {Object.<string, module:lib/elements~CodeBlockFn>} [codeBlocks] - The code block render-function map
- * @property {module:lib/elements~HashFn} [hashFn] - The hash URL modifier function
+ * @property {module:lib/elements~URLFn} [urlFn] - The URL modifier function
  * @property {boolean} [headerIds] - If true, generate header IDs
- * @property {string} [url] - Markdown file URL
  * @property {Set} [usedHeaderIds] - Set of used header IDs
  */
 
@@ -27,11 +26,11 @@ import {getMarkdownParagraphText} from './parser.js';
  */
 
 /**
- * A hash modifier function
+ * A URL modifier function
  *
- * @callback HashFn
- * @param {string} hashURL - The hash URL
- * @returns {string} The fixed-up hash URL
+ * @callback URLFn
+ * @param {string} url - The URL
+ * @returns {string} The modified URL
  */
 
 
@@ -176,9 +175,9 @@ function markdownElementsPartBase(part, options, usedHeaderIds) {
                 }
                 usedHeaderIds.add(headerId);
 
-                // Hash prefix fixup?
-                if (options !== null && 'hashFn' in options) {
-                    headerId = options.hashFn(`#${headerId}`).slice(1);
+                // Header ID hash URL fixup?
+                if (options !== null && 'urlFn' in options) {
+                    headerId = options.urlFn(`#${headerId}`).slice(1);
                 }
             }
 
@@ -228,15 +227,9 @@ function paragraphSpanElements(spans, options) {
             const {link} = span;
             let {href} = link;
 
-            // Hash-only link?
-            if (href.startsWith('#')) {
-                if (options !== null && 'hashFn' in options) {
-                    href = options.hashFn(href);
-                }
-
-            // Relative link fixup?
-            } else if (options !== null && 'url' in options && isRelativeURL(href)) {
-                href = `${getBaseURL(options.url)}${href}`;
+            // URL fixup?
+            if (options !== null && 'urlFn' in options) {
+                href = options.urlFn(href);
             }
 
             const linkElements = {
@@ -255,8 +248,8 @@ function paragraphSpanElements(spans, options) {
             let {src} = image;
 
             // Relative link fixup?
-            if (options !== null && 'url' in options && isRelativeURL(src)) {
-                src = `${getBaseURL(options.url)}${src}`;
+            if (options !== null && 'urlFn' in options) {
+                src = options.urlFn(src);
             }
 
             const imageElement = {
