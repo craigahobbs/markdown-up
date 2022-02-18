@@ -10,6 +10,33 @@ import {evaluateExpression} from '../../calc-script/lib/runtime.js';
 import {parseExpression} from '../../calc-script/lib/parser.js';
 
 
+// Data expression functions
+const dataExprFunctions = {
+    'markdownEncode': ([text]) => encodeMarkdownText(text)
+};
+
+
+// Helper function to create the data expression's variables argument
+function createDataVariables(chartModel, variables = null) {
+    const dataVariables = {...dataExprFunctions};
+
+    // Add the chart model variable expressions
+    if ('var' in chartModel) {
+        for (const varName of Object.keys(chartModel.var)) {
+            const varExpr = parseExpression(chartModel.var[varName]);
+            dataVariables[varName] = evaluateExpression(varExpr, dataVariables);
+        }
+    }
+
+    // Add the options variables
+    if (variables !== null) {
+        Object.assign(dataVariables, variables);
+    }
+
+    return dataVariables;
+}
+
+
 /**
  * The loadChartData result object
  *
@@ -29,12 +56,8 @@ import {parseExpression} from '../../calc-script/lib/parser.js';
  * @returns {module:lib/data~LoadChartDataResult}
  */
 export async function loadChartData(chartModel, options = null) {
-    // Compute the variable values
-    const variables = {
-        'markdownEncode': ([text]) => encodeMarkdownText(text),
-        ...('var' in chartModel ? computeVariables(chartModel.var) : {}),
-        ...(options !== null && 'variables' in options ? options.variables : {})
-    };
+    // Compute the data variable values
+    const variables = createDataVariables(chartModel, options !== null ? options.variables : null);
 
     // Load the data resources
     if (options === null || !('fetchFn' in options)) {
@@ -104,6 +127,9 @@ export async function loadData(dataModel, fetchFn, variables = null) {
     const dataResponses = await Promise.all(dataURLs.map((joinURL) => fetchFn(joinURL)));
     const dataTypes = await Promise.all(dataResponses.map((response, ixResponse) => dataResponseHandler(dataURLs[ixResponse], response)));
 
+    // Compute the data variable values
+    const dataVariables = variables ?? createDataVariables(null);
+
     // Join the data
     let [{data}] = dataTypes;
     const [{types}] = dataTypes;
@@ -132,7 +158,7 @@ export async function loadData(dataModel, fetchFn, variables = null) {
             // Bucket the right rows by the right expression value
             const rightCategoryRows = {};
             for (const row of rightData) {
-                const categoryKey = JSON.stringify(evaluateExpression(rightExpression, variables, row));
+                const categoryKey = JSON.stringify(evaluateExpression(rightExpression, dataVariables, row));
                 if (!(categoryKey in rightCategoryRows)) {
                     rightCategoryRows[categoryKey] = [];
                 }
@@ -150,7 +176,7 @@ export async function loadData(dataModel, fetchFn, variables = null) {
 
             data = [];
             for (const row of leftData) {
-                const categoryKey = JSON.stringify(evaluateExpression(leftExpression, variables, row));
+                const categoryKey = JSON.stringify(evaluateExpression(leftExpression, dataVariables, row));
                 if (categoryKey in rightCategoryRows) {
                     for (const rightRow of rightCategoryRows[categoryKey]) {
                         const joinRow = {...row};
@@ -276,26 +302,6 @@ export function validateData(data, csv = false) {
 
 
 /**
- * Compute a variable expression map
- *
- * @param {Object} variables - The variable expression map
- * @param {Object} [globals = {}] - The global variables
- * @returns {Object} The map of variable values
- */
-export function computeVariables(variables, globals = {}) {
-    const variableValues = {};
-
-    // Compute each variable expression
-    for (const varName of Object.keys(variables)) {
-        const varExpr = parseExpression(variables[varName]);
-        variableValues[varName] = evaluateExpression(varExpr, globals, variableValues);
-    }
-
-    return variableValues;
-}
-
-
-/**
  * Add a calculated field to each row of a data array
  *
  * @param {Object[]} data - The data array. Row objects are updated with the calculated field values.
@@ -308,10 +314,13 @@ export function addCalculatedField(data, name, expr, variables = null) {
     // Parse the calculation expression
     const calcExpr = parseExpression(expr);
 
+    // Compute the data variable values
+    const dataVariables = variables ?? createDataVariables(null);
+
     // Compute the calculated fields for each row
     let calcType = null;
     for (const row of data) {
-        const calcValue = evaluateExpression(calcExpr, variables, row);
+        const calcValue = evaluateExpression(calcExpr, dataVariables, row);
         row[name] = calcValue;
 
         // Determine the calculated field type
@@ -352,10 +361,13 @@ export function filterData(data, expr, variables = null) {
     // Parse the filter expression
     const filterExpr = parseExpression(expr);
 
+    // Compute the data variable values
+    const dataVariables = variables ?? createDataVariables(null);
+
     // Filter the data
     const filteredData = [];
     for (const row of data) {
-        if (evaluateExpression(filterExpr, variables, row)) {
+        if (evaluateExpression(filterExpr, dataVariables, row)) {
             filteredData.push(row);
         }
     }
