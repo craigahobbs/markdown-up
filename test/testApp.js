@@ -250,6 +250,8 @@ test('MarkdownUp.main, url', async (t) => {
             resolve(`\
 # Hello
 
+[Absolute link](https://foo.com/foo.html)
+
 [Relative link](foo.html)
 
 [Hash-id link](#hello)
@@ -278,6 +280,16 @@ test('MarkdownUp.main, url', async (t) => {
                 {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'url=sub%2Fother.md&hello'}, 'elem': [{'text': 'Hello'}]},
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': 'https://foo.com/foo.html'},
+                                'elem': [{'text': 'Absolute link'}]
+                            }
+                        ]
+                    },
                     {
                         'html': 'p',
                         'elem': [
