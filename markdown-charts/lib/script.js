@@ -4,9 +4,12 @@
 /** @module lib/script */
 
 import {encodeMarkdownText, getMarkdownTitle, parseMarkdown} from '../../markdown-model/lib/parser.js';
+import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
+import {UserTypeElements} from '../../schema-markdown-doc/lib/userTypeElements.js';
 import {executeScriptAsync} from '../../calc-script/lib/runtimeAsync.js';
 import {markdownElements} from '../../markdown-model/lib/elements.js';
 import {parseScript} from '../../calc-script/lib/parser.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**
@@ -52,8 +55,10 @@ export async function markdownScriptCodeBlock(language, lines, options = null) {
     for (const part of runtime.elementParts) {
         if ('drawing' in part) {
             elements.push({'html': 'p', 'elem': part.drawing});
-        } else {
+        } else if ('markdown' in part) {
             elements.push(markdownElements(parseMarkdown(part.markdown), markdownElementsOptions));
+        } else {
+            elements.push(part.elements);
         }
     }
     runtime.elementParts.length = 0;
@@ -139,6 +144,15 @@ export class MarkdownScriptRuntime {
             'markdownPrint': (args) => this.markdownPrint(args),
             'markdownTitle': ([text]) => getMarkdownTitle(parseMarkdown(text)),
 
+            // Schema functions
+            'schemaParse': (args) => {
+                const parser = new SchemaMarkdownParser();
+                parser.parse(args);
+                return parser.types;
+            },
+            'schemaValidate': ([types, typeName, value]) => validateType(types, typeName, value),
+            'schemaPrint': ([types, typeName]) => this.schemaPrint(types, typeName),
+
             // Session storage functions
             'sessionStorageGetItem': ([key]) => (
                 options !== null && 'sessionStorage' in options ? options.sessionStorage.getItem(key) : null
@@ -200,11 +214,23 @@ export class MarkdownScriptRuntime {
         return part.drawing;
     }
 
+    setElements(elements) {
+        const part = this.elementParts.length !== 0 ? this.elementParts[this.elementParts.length - 1] : null;
+        const isDrawing = part !== null && 'drawing' in part;
+        if (isDrawing) {
+            this.finishDrawingPath();
+        }
+        this.elementParts.push({'elements': elements});
+    }
+
     setMarkdown() {
         let part = this.elementParts.length !== 0 ? this.elementParts[this.elementParts.length - 1] : null;
+        const isDrawing = part !== null && 'drawing' in part;
+        if (isDrawing) {
+            this.finishDrawingPath();
+        }
         const isMarkdown = part !== null && 'markdown' in part;
         if (!isMarkdown) {
-            this.finishDrawingPath();
             part = {'markdown': []};
             this.elementParts.push(part);
         }
@@ -381,6 +407,12 @@ export class MarkdownScriptRuntime {
     markdownPrint(lines) {
         const markdownLines = this.setMarkdown();
         markdownLines.push(...lines);
+    }
+
+    schemaPrint(types, typeName) {
+        const params = (this.options !== null && 'params' in this.options && this.params !== null ? this.options.params : null);
+        const elements = (new UserTypeElements(params)).getElements(types, typeName);
+        this.setElements(elements);
     }
 
     setDrawingSize(width, height) {

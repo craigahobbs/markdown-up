@@ -15,11 +15,12 @@ import {renderElements} from '../../element-model/lib/elementModel.js';
  *
  * @typedef {Object} ChartOptions
  * @property {number} [fontSize] - The chart font size, in points
- * @property {module:lib/util~URLFn} [urlFn] - The URL modifier function
  * @property {Object} [localStorage] - The localStorage object
  * @property {module:lib/util~NavigateTimeoutFn} [navigateTimeoutFn] - The navigate timeout function
+ * @property {Object} [params] - The hash parameters object
  * @property {module:lib/script.MarkdownScriptRuntime} [runtime] - The markdown-script runtime state
  * @property {Object} [sessionStorage] - The sessionStorage object
+ * @property {module:lib/util~URLFn} [urlFn] - The URL modifier function
  * @property {Object} [variables] - The map of variable name to chart variable value
  */
 
