@@ -150,6 +150,10 @@ export class MarkdownScriptRuntime {
                 parser.parse(args);
                 return parser.types;
             },
+            'schemaParseString': ([text]) => {
+                const parser = new SchemaMarkdownParser(text);
+                return parser.types;
+            },
             'schemaValidate': ([types, typeName, value]) => validateType(types, typeName, value),
             'schemaPrint': ([types, typeName]) => this.schemaPrint(types, typeName),
 
