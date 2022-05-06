@@ -4,7 +4,7 @@
 /** @module lib/script */
 
 import {encodeMarkdownText, getMarkdownTitle, parseMarkdown} from '../../markdown-model/lib/parser.js';
-import {validateType, validateTypeModel} from '../../schema-markdown/lib/schema.js';
+import {validateType, validateTypeModelTypes} from '../../schema-markdown/lib/schema.js';
 import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
 import {UserTypeElements} from '../../schema-markdown-doc/lib/userTypeElements.js';
 import {executeScriptAsync} from '../../calc-script/lib/runtimeAsync.js';
@@ -157,7 +157,7 @@ export class MarkdownScriptRuntime {
             },
             'schemaTypeModel': () => typeModel.types,
             'schemaValidate': ([types, typeName, value]) => validateType(types, typeName, value),
-            'schemaValidateTypeModel': ([types]) => validateTypeModel(types),
+            'schemaValidateTypes': ([types]) => validateTypeModelTypes(types),
             'schemaPrint': ([types, typeName]) => this.schemaPrint(types, typeName),
 
             // Session storage functions
