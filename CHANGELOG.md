@@ -1,3 +1,7 @@
+## 2022-05-06 (1.7.0)
+
+- [38dea3c](https://github.com/craigahobbs/markdown-up/commit/38dea3c) - integrate markdown-charts
+
 ## 1.6.0 (2022-02-16)
 
 - [ec26a62](https://github.com/craigahobbs/markdown-up/commit/ec26a62) - update markdown-model
