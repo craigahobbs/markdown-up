@@ -19,6 +19,10 @@ $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-bui
 GHPAGES_SRC := build/app/
 
 
+# This project is alpha so don't check coverage
+C8_ARGS ?= --all --allowExternal --src lib/ --src test/
+
+
 # Include javascript-build
 include Makefile.base
 
@@ -50,7 +54,6 @@ app: build/npm.build
 		node_modules/calc-script \
 		node_modules/element-app \
 		node_modules/element-model \
-		node_modules/markdown-charts \
 		node_modules/markdown-model \
 		node_modules/markdown-model/static/markdown-model.css \
 		node_modules/schema-markdown \

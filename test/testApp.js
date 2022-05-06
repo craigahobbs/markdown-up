@@ -7,7 +7,6 @@ import {ElementApplication} from 'element-app/lib/app.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {UserTypeElements} from 'schema-markdown-doc/lib/userTypeElements.js';
-import {chartModel} from 'markdown-charts/lib/model.js';
 import test from 'ava';
 
 
@@ -48,7 +47,7 @@ function menuElements({
     fontSizeURL = '#fontSize=14&menu=1',
     lineHeightURL = '#lineHeight=1.4&menu=1',
     markdownURL = '#cmd.markdown=1&menu=1',
-    helpURL = '#cmd.help=Help&menu=1'
+    helpURL = '#cmd.help=1&menu=1'
 } = {}) {
     return {
         'html': 'div',
@@ -165,24 +164,24 @@ test('MarkdownUp.preRender', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#cmd.help=Help';
+    window.location.hash = '#cmd.help=1';
     const app = new MarkdownUp(window);
     await app.render();
-    t.is(window.document.title, 'markdown-up');
+    t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=Help&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
-    window.location.hash = '#cmd.help=Help&fontSize=14&lineHeight=1.4';
+    window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render();
-    t.is(window.document.title, 'markdown-up');
+    t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=Help&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '14pt'],
@@ -194,7 +193,7 @@ test('MarkdownUp.preRender', async (t) => {
 test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
-    app.updateParams('cmd.help=Help');
+    app.updateParams('cmd.help=1');
     t.deepEqual(
         ElementApplication.validateMain(await app.main()),
         {
@@ -203,7 +202,7 @@ test('MarkdownUp.main, help', async (t) => {
                 new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType),
                 null,
                 null,
-                menuBurgerElements({'menuURL': '#cmd.help=Help&menu=1'}),
+                menuBurgerElements({'menuURL': '#cmd.help=1&menu=1'}),
                 null
             ]
         }
@@ -520,7 +519,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
                     'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
                     'lineHeightURL': '#cmd.markdown=1&fontSize=18&lineHeight=1.4&menu=1',
                     'markdownURL': '#fontSize=18&menu=1',
-                    'helpURL': '#cmd.help=Help&fontSize=18&menu=1'
+                    'helpURL': '#cmd.help=1&fontSize=18&menu=1'
                 })
             ]
         }
@@ -557,58 +556,7 @@ test('MarkdownUp.main, markdown', async (t) => {
 });
 
 
-test('markdown-charts, help', async (t) => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window);
-
-    app.updateParams('cmd.help=Bar');
-    t.deepEqual(
-        ElementApplication.validateMain(await app.main()),
-        {
-            'title': null,
-            'elements': [
-                new UserTypeElements(app.params).getElements(chartModel.types, `BarChart`),
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.help=Bar&menu=1'}),
-                null
-            ]
-        }
-    );
-
-    app.updateParams('cmd.help=Line');
-    t.deepEqual(
-        ElementApplication.validateMain(await app.main()),
-        {
-            'title': null,
-            'elements': [
-                new UserTypeElements(app.params).getElements(chartModel.types, `LineChart`),
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.help=Line&menu=1'}),
-                null
-            ]
-        }
-    );
-
-    app.updateParams('cmd.help=Table');
-    t.deepEqual(
-        ElementApplication.validateMain(await app.main()),
-        {
-            'title': null,
-            'elements': [
-                new UserTypeElements(app.params).getElements(chartModel.types, `DataTable`),
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.help=Table&menu=1'}),
-                null
-            ]
-        }
-    );
-});
-
-
-test('markdown-charts, bar chart', async (t) => {
+test('markdown-bar-chart', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
@@ -642,7 +590,7 @@ test('markdown-charts, bar chart', async (t) => {
 });
 
 
-test('markdown-charts, line chart', async (t) => {
+test('markdown-line-chart', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
@@ -676,7 +624,7 @@ test('markdown-charts, line chart', async (t) => {
 });
 
 
-test('markdown-charts, data table', async (t) => {
+test('markdown-data-table', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
@@ -710,7 +658,7 @@ test('markdown-charts, data table', async (t) => {
 });
 
 
-test('markdown-charts, markdown-script', async (t) => {
+test('markdown-script', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
@@ -745,7 +693,7 @@ log('Hello')
 });
 
 
-test('markdown-charts, markdown-script debug', async (t) => {
+test('markdown-script debug', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
@@ -780,7 +728,7 @@ log('Hello')
 });
 
 
-test('markdown-charts, variables', async (t) => {
+test('markdown-script variables', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
