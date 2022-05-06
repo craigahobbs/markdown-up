@@ -157,7 +157,7 @@ export class MarkdownScriptRuntime {
             },
             'schemaTypeModel': () => typeModel.types,
             'schemaValidate': ([types, typeName, value]) => validateType(types, typeName, value),
-            'schemaValidateTypes': ([types]) => validateTypeModelTypes(types),
+            'schemaValidateTypeModel': ([types]) => validateTypeModelTypes(types),
             'schemaPrint': ([types, typeName]) => this.schemaPrint(types, typeName),
 
             // Session storage functions
