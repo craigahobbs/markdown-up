@@ -6,7 +6,8 @@
 import {ElementApplication} from 'element-app/lib/app.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
-import {UserTypeElements} from 'schema-markdown-doc/lib/userTypeElements.js';
+import {encodeQueryString} from 'schema-markdown/lib/encode.js';
+import {schemaMarkdownDoc} from 'schema-markdown-doc/lib/schemaMarkdownDoc.js';
 import test from 'ava';
 
 
@@ -199,7 +200,7 @@ test('MarkdownUp.main, help', async (t) => {
         {
             'title': null,
             'elements': [
-                new UserTypeElements(app.params).getElements(app.hashTypes, app.hashType),
+                schemaMarkdownDoc(app.hashTypes, app.hashType, {'params': encodeQueryString(app.params)}),
                 null,
                 null,
                 menuBurgerElements({'menuURL': '#cmd.help=1&menu=1'}),

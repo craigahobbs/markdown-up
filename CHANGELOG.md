@@ -1,3 +1,7 @@
+## 1.7.1 (2022-05-09)
+
+- [3ccb8b8](https://github.com/craigahobbs/markdown-up/commit/3ccb8b8) - schema-markdown-doc 1.4
+
 ## 2022-05-06 (1.7.0)
 
 - [38dea3c](https://github.com/craigahobbs/markdown-up/commit/38dea3c) - integrate markdown-charts
