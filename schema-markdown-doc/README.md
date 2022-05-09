@@ -3,30 +3,50 @@
 [![npm](https://img.shields.io/npm/v/schema-markdown-doc)](https://www.npmjs.com/package/schema-markdown-doc)
 [![GitHub](https://img.shields.io/github/license/craigahobbs/schema-markdown-doc)](https://github.com/craigahobbs/schema-markdown-doc/blob/main/LICENSE)
 
-[schema-markdown-doc Application](https://craigahobbs.github.io/schema-markdown-doc/)
+[schema-markdown-doc API Documentation](https://craigahobbs.github.io/schema-markdown-doc/)
 
-[schema-markdown-doc API Documentation](https://craigahobbs.github.io/schema-markdown-doc/doc/)
+The schema-markdown-doc package generates documentation for
+[Schema Markdown](https://github.com/craigahobbs/schema-markdown-js)
+schemas.
 
-**schema-markdown-doc** is a JavaScript viewer application for
-[Schema Markdown Type Models](https://craigahobbs.github.io/schema-markdown-doc/#name=TypeModel).
-Schema Markdown is a human-friendly schema definition language and validation package for
-[Python](https://github.com/craigahobbs/schema-markdown)
-and
-[JavaScript](https://github.com/craigahobbs/schema-markdown-js).
+The
+[schemaMarkdownDoc](https://craigahobbs.github.io/schema-markdown-doc/module-lib_schemaMarkdownDoc.html#.schemaMarkdownDoc)
+function generates the
+[element-model](https://github.com/craigahobbs/element-model)
+for a Schema Markdown user type's documentation. For example:
 
-To create a type model JSON file, use the
-[schema-markdown command-line compiler](https://craigahobbs.github.io/schema-markdown/tool.html):
+``` javascript
+import {SchemaMarkdownParser} from 'schema-markdown/lib/parser.js';
+import {schemaMarkdownDoc} from 'schema-markdown-doc/lib/schemaMarkdownDoc.js';
 
+const parser = new SchemaMarkdownParser(`\
+# My struct
+struct MyStruct
+
+    # My member
+    string member
+`);
+const elements = schemaMarkdownDoc(parser.types, 'MyStruct');
 ```
-$ python3 -m pip install schema-markdown
-$ schema-markdown compile model.smd -o model.json
+
+The element model is rendered using element-model's
+[renderElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
+function.
+
+``` javascript
+import {renderElements} from 'element-model/lib/elementModel.js';
+
+renderElements(window.document.body, elements);
 ```
 
-*Note:* [Schema Markdown](https://craigahobbs.github.io/schema-markdown/schema-markdown.html)
-files use the ".smd" extension.
 
-To host your type model's documentation, first, download the schema-markdown-doc application stub to
-the directory containing your type model JSON file:
+## The Schema Markdown Documentation Viewer
+
+[schema-markdown-doc Application](https://craigahobbs.github.io/schema-markdown-doc/app/)
+
+To host your Schema Markdown type model's documentation, first, download the schema-markdown-doc
+application stub to the directory containing your type model's Schema Markdown file (.smd) or JSON
+file:
 
 ```
 curl -O https://craigahobbs.github.io/schema-markdown-doc/static/index.html
@@ -35,49 +55,22 @@ curl -O https://craigahobbs.github.io/schema-markdown-doc/static/index.html
 To host locally, start a local static web server:
 
 ```
-$ python3 -m http.server
+python3 -m http.server
 ```
 
 By default, schema-markdown-doc renders the
-[Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/#name=TypeModel)
-itself. That's right; the Schema Markdown Type Model is used to define itself!
+[Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/app/).
 
-To open your type model JSON file, set the "url" hash parameter (i.e., "#url=model.json").
+To display documentation for your schema, set the "var.vURL" hash parameter (i.e., "#var.vURL='types.smd'").
 
-Alternatively, you can change the default type model JSON file by updating the schema-markdown-doc
-application stub. For example:
+Alternatively, you can change the default file URL by updating the schema-markdown-doc application
+stub. For example:
 
 ``` html
-    <script type="module">
-        import {SchemaMarkdownDoc} from 'https://craigahobbs.github.io/schema-markdown-doc/lib/app.js';
-        const app = new SchemaMarkdownDoc(window, 'model.json');
-        app.run();
-    </script>
-```
-
-
-## The Schema Markdown Documentation Component
-
-The schema-markdown-doc package contains the
-[UserTypeElements](https://craigahobbs.github.io/schema-markdown-doc/doc/module-lib_userTypeElements.UserTypeElements.html)
-component class for use with the
-[renderElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
-function from the
-[element-model](https://www.npmjs.com/package/element-model)
-package. For example:
-
-``` javascript
-import {SchemaMarkdownParser} from 'schema-markdown/parser.js';
-import {UserTypeElements} from 'schema-markdown-doc/userTypeElements.js';
-
-const parser = new smd.SchemaMarkdownParser(`\
-# My cool struct
-struct MyStruct
-
-    # My cool member
-    string member
-`);
-const elements = (new UserTypeElements()).getElements(parser.types, 'MyStruct');
+~~~ markdown-script
+include 'app.mds'
+await schemaMarkdownDoc('myTypes.smd', 'My Schema')
+~~~
 ```
 
 
@@ -88,5 +81,5 @@ It is developed using [javascript-build](https://github.com/craigahobbs/javascri
 and it was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme):
 
 ```
-template-specialize javascript-template/template/ schema-markdown-doc/ -k package schema-markdown-doc -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs'
+template-specialize javascript-template/template/ schema-markdown-doc/ -k package schema-markdown-doc -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs' -k noapp 1
 ```
