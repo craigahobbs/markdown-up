@@ -7,7 +7,7 @@
 
 **markdown-model** is a JavaScript Markdown parsing and rendering library. Underlying its
 functionality is the
-[Markdown Model](https://craigahobbs.github.io/markdown-model/doc/#name=Markdown),
+[Markdown Model](https://craigahobbs.github.io/markdown-model/model/#var.vType='Markdown'),
 an abstract model of a Markdown document.
 
 To parse a Markdown document and produce a Markdown model, use the

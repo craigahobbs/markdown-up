@@ -14,7 +14,7 @@ import {validateType} from '../../schema-markdown/lib/schema.js';
  * @returns {Object}
  */
 export function validateMarkdownModel(markdown) {
-    return validateType(markdownModel.types, 'Markdown', markdown);
+    return validateType(markdownModelTypes, 'Markdown', markdown);
 }
 
 
@@ -152,8 +152,5 @@ struct CodeBlock
 `;
 
 
-/** The Markdown schema-markdown model */
-export const markdownModel = {
-    'title': 'The Markdown Model',
-    'types': (new SchemaMarkdownParser(markdownModelSmd)).types
-};
+/** The Markdown schema-markdown type model */
+export const markdownModelTypes = (new SchemaMarkdownParser(markdownModelSmd)).types;
