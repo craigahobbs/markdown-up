@@ -12,7 +12,7 @@ schemas.
 The
 [schemaMarkdownDoc](https://craigahobbs.github.io/schema-markdown-doc/module-lib_schemaMarkdownDoc.html#.schemaMarkdownDoc)
 function generates the
-[element-model](https://github.com/craigahobbs/element-model)
+[element model](https://github.com/craigahobbs/element-model)
 for a Schema Markdown user type's documentation. For example:
 
 ``` javascript
@@ -42,14 +42,23 @@ renderElements(window.document.body, elements);
 
 ## The Schema Markdown Documentation Viewer
 
-[schema-markdown-doc Application](https://craigahobbs.github.io/schema-markdown-doc/app/)
-
 To host your Schema Markdown type model's documentation, first, download the schema-markdown-doc
 application stub to the directory containing your type model's Schema Markdown file (.smd) or JSON
-file:
+type model file:
 
 ```
 curl -O https://craigahobbs.github.io/schema-markdown-doc/static/index.html
+```
+
+By default, the schema-markdown-doc application stub displays documentation for "types.smd". You can
+override the resource URL and specify a schema title by updating the schema-markdown-doc application
+stub, "index.html". For example:
+
+```
+~~~ markdown-script
+include 'app.mds'
+await schemaMarkdownDoc('myTypes.smd', 'My Schema')
+~~~
 ```
 
 To host locally, start a local static web server:
@@ -58,20 +67,7 @@ To host locally, start a local static web server:
 python3 -m http.server
 ```
 
-By default, schema-markdown-doc renders the
-[Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/app/).
-
-To display documentation for your schema, set the "var.vURL" hash parameter (i.e., "#var.vURL='types.smd'").
-
-Alternatively, you can change the default file URL by updating the schema-markdown-doc application
-stub. For example:
-
-``` html
-~~~ markdown-script
-include 'app.mds'
-await schemaMarkdownDoc('myTypes.smd', 'My Schema')
-~~~
-```
+You can also override the resource URL by adding the "var.vURL" hash parameter (i.e., "#var.vURL='types.smd'").
 
 
 ## Development
