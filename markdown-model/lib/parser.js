@@ -194,7 +194,7 @@ export function parseMarkdown(markdown) {
                 closeParagraph();
 
             // Fenced code line?
-            } else if (paragraphFenced !== null && matchFenced === null) {
+            } else if (paragraphFenced !== null && (matchFenced === null || !paragraphFenced.startsWith(matchFenced.groups.fence))) {
                 // Add the code line
                 addLine(line, lineIndent, topIndent);
 
