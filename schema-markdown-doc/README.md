@@ -57,7 +57,7 @@ stub, "index.html". For example:
 ```
 ~~~ markdown-script
 include 'app.mds'
-await schemaMarkdownDoc('myTypes.smd', 'My Schema')
+schemaMarkdownDoc('myTypes.smd', 'My Schema')
 ~~~
 ```
 

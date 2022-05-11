@@ -16,7 +16,7 @@ const nbsp = String.fromCharCode(160);
  * The [schemaMarkdownDoc]{@link module:lib/schemaMarkdownDoc.schemaMarkdownDoc} options object
  *
  * @typedef {Object} SchemaMarkdownDocOptions
- * @property {string} [param] - The page's hash param string with tag removed
+ * @property {string} [params] - The page's hash param string with tag removed
  * @property {Object[]} [actionURLs] -
  *     The [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/app/#var.vType='ActionURL'} override
  */
@@ -62,7 +62,12 @@ export function schemaMarkdownDoc(types, typeName, options = null) {
 }
 
 
-function getURLNoteElements(urls) {
+/**
+ * Generate a Schema Markdown documentation URL note element model
+ *
+ * @param {Object[]} urls - The [actions URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/app/#var.vType='ActionURL'}
+ */
+export function schemaMarkdownDocURLNote(urls) {
     return urls === null || !urls.length ? null : {'html': 'p', 'attr': {'class': 'smd-note'}, 'elem': [
         {'html': 'b', 'elem': {'text': 'Note: '}},
         {'text': `The request is exposed at the following ${urls.length > 1 ? 'URLs:' : 'URL:'}`},
@@ -323,7 +328,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         return [
             titleElements(`action ${typeName}`),
             markdownElementsNull(action.doc),
-            getURLNoteElements(actionURLs),
+            schemaMarkdownDocURLNote(actionURLs),
 
             // Action types
             'path' in action ? userTypeElements(types, action.path, 'h2', options, 'Path Parameters') : null,
