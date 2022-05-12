@@ -58,7 +58,6 @@ app: build/npm.build
 		node_modules/markdown-model/static/markdown-model.css \
 		node_modules/schema-markdown \
 		node_modules/schema-markdown-doc \
-		node_modules/schema-markdown-doc/static/schema-markdown-doc.css \
 		build/app/
 
     # Fix imports
