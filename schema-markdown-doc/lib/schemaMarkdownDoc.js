@@ -62,22 +62,6 @@ export function schemaMarkdownDoc(types, typeName, options = null) {
 }
 
 
-/**
- * Generate a Schema Markdown documentation URL note element model
- *
- * @param {Object[]} urls - The [actions URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/app/#var.vType='ActionURL'}
- */
-export function schemaMarkdownDocURLNote(urls) {
-    return urls === null || !urls.length ? null : {'html': 'p', 'attr': {'class': 'smd-note'}, 'elem': [
-        {'html': 'b', 'elem': {'text': 'Note: '}},
-        {'text': `The request is exposed at the following ${urls.length > 1 ? 'URLs:' : 'URL:'}`},
-        {'html': 'ul', 'elem': urls.map((url) => ({'html': 'li', 'elem': [
-            {'html': 'a', 'attr': {'href': url.url}, 'elem': {'text': url.method ? `${url.method} ${url.url}` : url.url}}
-        ]}))}
-    ]};
-}
-
-
 function markdownElementsNull(text = null) {
     return text !== null ? markdownElements(parseMarkdown(text)) : null;
 }
@@ -127,12 +111,12 @@ function attrElements({type, attr = null, optional = false}) {
     }
 
     // Return the attributes element model
-    return !parts.length ? null : {'html': 'ul', 'attr': {'class': 'smd-attr-list'}, 'elem': parts.map(
-        (part) => ({
-            'html': 'li',
-            'elem': {'text': part.op ? `${part.lhs}${nbsp}${part.op}${nbsp}${part.rhs}` : part.lhs}
-        })
-    )};
+    return !parts.length ? null : parts.map(
+        (part, ixPart) => [
+            ixPart !== 0 ? {'html': 'br'} : null,
+            {'text': part.op ? `${part.lhs}${nbsp}${part.op}${nbsp}${part.rhs}` : part.lhs}
+        ]
+    );
 }
 
 
@@ -328,7 +312,19 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         return [
             titleElements(`action ${typeName}`),
             markdownElementsNull(action.doc),
-            schemaMarkdownDocURLNote(actionURLs),
+            actionURLs === null || !actionURLs.length ? null : [
+                {'html': 'p', 'elem': [
+                    {'html': 'b', 'elem': {'text': 'Note: '}},
+                    {'text': `The request is exposed at the following ${actionURLs.length === 1 ? 'URL:' : 'URLs:'}`}
+                ]},
+                actionURLs.map((url) => ({'html': 'p', 'elem': [
+                    {'text': `${nbsp}${nbsp}`},
+                    {
+                        'html': 'a',
+                        'attr': {'href': url.url}, 'elem': {'text': url.method ? `${url.method} ${url.url}` : url.url}
+                    }
+                ]}))
+            ],
 
             // Action types
             'path' in action ? userTypeElements(types, action.path, 'h2', options, 'Path Parameters') : null,
