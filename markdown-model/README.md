@@ -5,12 +5,11 @@
 
 [markdown-model API Documentation](https://craigahobbs.github.io/markdown-model/)
 
-**markdown-model** is a JavaScript Markdown parsing and rendering library. Underlying its
-functionality is the
-[Markdown Model](https://craigahobbs.github.io/markdown-model/model/#var.vType='Markdown'),
-an abstract model of a Markdown document.
+**markdown-model** is a JavaScript Markdown parsing and rendering library.
 
-To parse a Markdown document and produce a Markdown model, use the
+To parse a Markdown document and produce a
+[Markdown model](https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'),
+use the
 [parseMarkdown](https://craigahobbs.github.io/markdown-model/module-lib_parser.html#.parseMarkdown)
 function:
 
@@ -22,10 +21,10 @@ const markdownModel = parseMarkdown(markdownText);
 
 To render the Markdown model in a web browser, use the
 [markdownElements](https://craigahobbs.github.io/markdown-model/module-lib_elements.html#.markdownElements)
-component function with the
+function with the
 [renderElements](https://craigahobbs.github.io/element-model/module-lib_elementModel.html#.renderElements)
 function from the
-[element-model](https://www.npmjs.com/package/element-model)
+[element-model](https://github.com/craigahobbs/markdown-model)
 package:
 
 
@@ -37,7 +36,7 @@ renderElements(document.body, markdownElements(markdownModel));
 ```
 
 You can compute the title of a Markdown document from the Markdown model using the
-[getMarkdownTitle](https://craigahobbs.github.io/markdown-model/module-lib_markdownModel.html#.getMarkdownTitle)
+[getMarkdownTitle](https://craigahobbs.github.io/markdown-model/module-lib_parser.html#.getMarkdownTitle)
 function:
 
 ``` javascript
@@ -47,7 +46,7 @@ const markdownTitle = getMarkdownTitle(markdownModel);
 ```
 
 The
-[validateMarkdownModel](https://craigahobbs.github.io/markdown-model/module-lib_markdownModel.html#.validateMarkdownModel)
+[validateMarkdownModel](https://craigahobbs.github.io/markdown-model/module-lib_model.html#.validateMarkdownModel)
 function is used to validate Markdown models from untrusted sources or for testing the validity of any code that produces a Markdown model:
 
 ``` javascript
