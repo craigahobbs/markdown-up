@@ -94,7 +94,12 @@ export async function markdownElementsAsync(markdown, options = null) {
 
 // eslint-disable-next-line require-await
 async function markdownElementsPartsAsync(parts, options, usedHeaderIds) {
-    return Promise.all(parts.map((part) => markdownElementsPartAsync(part, options, usedHeaderIds)));
+    const elements = [];
+    for (const part of parts) {
+        // eslint-disable-next-line no-await-in-loop
+        elements.push(await markdownElementsPartAsync(part, options, usedHeaderIds));
+    }
+    return elements;
 }
 
 
@@ -104,7 +109,11 @@ async function markdownElementsPartAsync(part, options, usedHeaderIds) {
     // List?
     if (partKey === 'list') {
         const {items} = part.list;
-        const itemElements = await Promise.all(items.map((item) => markdownElementsPartsAsync(item.parts, options, usedHeaderIds)));
+        const itemElements = [];
+        for (const item of items) {
+            // eslint-disable-next-line no-await-in-loop
+            itemElements.push(await markdownElementsPartsAsync(item.parts, options, usedHeaderIds));
+        }
         return markdownElementsListPart(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
 
     // Code block?
