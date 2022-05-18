@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-up",
-    "version": "1.7.1",
+    "version": "1.7.2",
     "description": "JavaScript Markdown viewer application",
     "keywords": [
         "markdown",
@@ -23,7 +23,7 @@
     },
     "dependencies": {
         "calc-script": "~0.9",
-        "element-app": "~1.1",
+        "element-model": "~1.1",
         "markdown-model": "~1.4",
         "schema-markdown": "~1.1",
         "schema-markdown-doc": "~1.4"

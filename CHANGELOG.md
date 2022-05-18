@@ -1,3 +1,11 @@
+## 1.7.2 (2022-05-18)
+
+- [bb7daec](https://github.com/craigahobbs/markdown-up/commit/bb7daec) - eliminate element-app
+
+- [482c653](https://github.com/craigahobbs/markdown-up/commit/482c653) - use markdownElementsAsync
+
+- [3b2eda7](https://github.com/craigahobbs/markdown-up/commit/3b2eda7) - allow empty url arg, add markdownParse
+
 ## 1.7.1 (2022-05-09)
 
 - [3ccb8b8](https://github.com/craigahobbs/markdown-up/commit/3ccb8b8) - schema-markdown-doc 1.4
