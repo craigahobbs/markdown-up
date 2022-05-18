@@ -50,8 +50,7 @@ To view local Markdown files using markdown-up, try the
 
 ## Development
 
-markdown-up is an [Element Application](https://github.com/craigahobbs/element-app#readme).
-It is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
+markdown-up is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
 and it was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme):
 
 ```
