@@ -75,7 +75,7 @@ async function executeScriptHelperAsync(statements, globals, locals, options, st
         } else if (statementKey === 'function') {
             if (statement.function.async) {
                 // eslint-disable-next-line require-await
-                globals[statement.function.name] = async (args) => {
+                globals[statement.function.name] = async (args, optionsFn) => {
                     const funcLocals = {};
                     if ('args' in statement.function) {
                         const argsLength = args.length;
@@ -83,10 +83,10 @@ async function executeScriptHelperAsync(statements, globals, locals, options, st
                             funcLocals[statement.function.args[ixArg]] = (ixArg < argsLength ? args[ixArg] : null);
                         }
                     }
-                    return executeScriptHelperAsync(statement.function.statements, globals, funcLocals, options, statementCounter);
+                    return executeScriptHelperAsync(statement.function.statements, globals, funcLocals, optionsFn, statementCounter);
                 };
             } else {
-                globals[statement.function.name] = (args) => {
+                globals[statement.function.name] = (args, optionsFn) => {
                     const funcLocals = {};
                     if ('args' in statement.function) {
                         const argsLength = args.length;
@@ -94,7 +94,7 @@ async function executeScriptHelperAsync(statements, globals, locals, options, st
                             funcLocals[statement.function.args[ixArg]] = (ixArg < argsLength ? args[ixArg] : null);
                         }
                     }
-                    return executeScriptHelper(statement.function.statements, globals, funcLocals, options, statementCounter);
+                    return executeScriptHelper(statement.function.statements, globals, funcLocals, optionsFn, statementCounter);
                 };
             }
 
@@ -132,7 +132,9 @@ async function executeScriptHelperAsync(statements, globals, locals, options, st
         } else if (statementKey === 'include') {
             if (options !== null && 'fetchFn' in options) {
                 /* eslint-disable no-await-in-loop */
-                const includeURL = statement.include.url;
+                const includeURL = (
+                    options !== null && 'urlFn' in options ? options.urlFn(statement.include.url) : statement.include.url
+                );
                 const scriptResponse = await options.fetchFn(includeURL);
                 if (!scriptResponse.ok) {
                     throw new Error(`Could not include "${statement.include.url}"`);
