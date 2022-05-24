@@ -10,7 +10,7 @@
 ;;
 ;; (unless (package-installed-p 'mds-mode)
 ;;   (let ((mds-mode-file (make-temp-file "mds-mode")))
-;;     (url-copy-file "https://craigahobbs.github.com/markdown-up/extra/mds-mode.el" mds-mode-file t)
+;;     (url-copy-file "https://craigahobbs.github.io/markdown-up/extra/mds-mode.el" mds-mode-file t)
 ;;     (package-install-file mds-mode-file)
 ;;     (delete-file mds-mode-file)))
 ;; (add-to-list 'auto-mode-alist '("\\.mds?\\'" . mds-mode))
