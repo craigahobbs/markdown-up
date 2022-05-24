@@ -102,16 +102,12 @@ export const scriptFunctions = {
 
         // Array of URLs?
         if (Array.isArray(url)) {
-            const responses = await Promise.all(url.map((fURL) => {
-                const actualURL = (options !== null && 'urlFn' in options ? options.urlFn(fURL) : fURL);
-                return (fetchFn !== null ? fetchFn(actualURL, init) : null);
-            }));
+            const responses = await Promise.all(url.map((fURL) => (fetchFn !== null ? fetchFn(fURL, init) : null)));
             return Promise.all(responses.map(responseFn));
         }
 
         // Single URL
-        const actualURL = (options !== null && 'urlFn' in options ? options.urlFn(url) : url);
-        const response = (fetchFn !== null ? await fetchFn(actualURL, init) : null);
+        const response = (fetchFn !== null ? await fetchFn(url, init) : null);
         return (response !== null ? responseFn(response) : null);
     },
 
