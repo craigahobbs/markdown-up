@@ -33,6 +33,7 @@
         "true"
         )
       (list
+       `("\\('[^']+'\\)" 1 font-lock-string-face)
        (cons
         (regexp-opt
          '(
