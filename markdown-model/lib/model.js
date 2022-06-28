@@ -149,6 +149,9 @@ struct CodeBlock
 
     # The code block's text lines
     string[] lines
+
+    # The code block's starting line number
+    optional int(>= 1) startLineNumber
 `;
 
 

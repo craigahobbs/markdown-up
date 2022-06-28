@@ -145,7 +145,9 @@ export function parseMarkdown(markdown) {
     };
 
     // Process markdown text line by line
-    for (const markdownString of (typeof markdown === 'string' ? [markdown] : markdown)) {
+    let lineNumber = 0;
+    const markdownStrings = (typeof markdown === 'string' ? [markdown] : markdown);
+    for (const markdownString of markdownStrings) {
         for (const lineRaw of markdownString.split(rLineSplit)) {
             const line = lineRaw.replace('\t', '    ');
             const matchLine = line.match(rIndent);
@@ -157,6 +159,7 @@ export function parseMarkdown(markdown) {
             const matchList = emptyLine ? null : line.match(rList);
             const [topIndent] = parts[parts.length - 1];
             const codeBlockIndent = topIndent + 4;
+            lineNumber += 1;
 
             // Empty line?
             if (emptyLine) {
@@ -170,7 +173,7 @@ export function parseMarkdown(markdown) {
             // Code block start?
             } else if (paragraphFenced === null && !lines.length && lineIndent >= codeBlockIndent) {
                 // Add the code block part
-                paragraph = {'codeBlock': {}};
+                paragraph = {'codeBlock': {'startLineNumber': lineNumber}};
                 addPart(paragraph);
                 lines.push(line.slice(codeBlockIndent));
 
@@ -180,7 +183,7 @@ export function parseMarkdown(markdown) {
                 closeParagraph();
 
                 // Add the code block part
-                paragraph = {'codeBlock': {}};
+                paragraph = {'codeBlock': {'startLineNumber': lineNumber}};
                 if (typeof matchFenced.groups.language !== 'undefined') {
                     paragraph.codeBlock.language = matchFenced.groups.language;
                 }

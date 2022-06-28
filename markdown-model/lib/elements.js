@@ -10,8 +10,8 @@ import {getMarkdownParagraphText} from './parser.js';
  * The markdownElements function's options object
  *
  * @typedef {Object} MarkdownElementsOptions
- * @property {Object.<string, module:lib/elements~CodeBlockFn>} [codeBlocks] - The code block render-function map
- * @property {module:lib/elements~URLFn} [urlFn] - The URL modifier function
+ * @property {Object.<string, object>} [codeBlocks] - The [code block]{@link module:lib/elements~CodeBlockFn} render-function map
+ * @property {function} [urlFn] - The [URL modifier function]{@link module:lib/elements~URLFn}
  * @property {boolean} [headerIds] - If true, generate header IDs
  * @property {Set} [usedHeaderIds] - Set of used header IDs
  */
@@ -20,9 +20,15 @@ import {getMarkdownParagraphText} from './parser.js';
  * A code block render function
  *
  * @callback CodeBlockFn
- * @param {string} language - The code block language
- * @param {string[]} lines - The code blocks lines
+ * @param {object} codeBlock - The [code block model]{@link module:lib/elements~CodeBlock}
  * @returns {*} The code block's element model
+ */
+
+/**
+ * @typedef {Object} CodeBlock
+ * @property {string} language - The code block language
+ * @property {string[]} lines - The code blocks lines
+ * @property {number} [startLineNumber] - The code blocks lines
  */
 
 /**
@@ -38,7 +44,7 @@ import {getMarkdownParagraphText} from './parser.js';
  * Generate an element model from a markdown model.
  *
  * @param {Object} markdown - The markdown model
- * @param {?module:lib/elements~MarkdownElementsOptions} [options] - Options object
+ * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The markdown's element model
  */
 export function markdownElements(markdown, options = null) {
@@ -65,7 +71,7 @@ function markdownElementsPart(part, options, usedHeaderIds) {
     } else if (partKey === 'codeBlock') {
         const {codeBlock} = part;
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
-            return options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines);
+            return options.codeBlocks[codeBlock.language](codeBlock);
         }
         return markdownElementsCodeBlockPart(part);
     }
@@ -82,7 +88,7 @@ function markdownElementsPart(part, options, usedHeaderIds) {
  *
  * @async
  * @param {Object} markdown - The markdown model
- * @param {?module:lib/elements~MarkdownElementsOptions} [options] - Options object
+ * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The markdown's element model
  */
 // eslint-disable-next-line require-await
@@ -120,7 +126,7 @@ async function markdownElementsPartAsync(part, options, usedHeaderIds) {
     } else if (partKey === 'codeBlock') {
         const {codeBlock} = part;
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
-            return options.codeBlocks[codeBlock.language](codeBlock.language, codeBlock.lines);
+            return options.codeBlocks[codeBlock.language](codeBlock);
         }
         return markdownElementsCodeBlockPart(part);
     }
