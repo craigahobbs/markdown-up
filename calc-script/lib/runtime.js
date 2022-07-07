@@ -133,6 +133,10 @@ export function executeScriptHelper(statements, globals, locals, options) {
         // Expression
         } else if (statementKey === 'expr') {
             evaluateExpression(statement.expr.expr, globals, locals, options, false);
+
+        // Include?
+        } else if (statementKey === 'include') {
+            throw new CalcScriptRuntimeError(`Include of "${statement.include}" within non-async scope`);
         }
     }
 
@@ -184,7 +188,7 @@ export function evaluateExpression(expr, globals = {}, locals = null, options = 
         // "if" built-in function?
         const funcName = expr.function.name;
         if (funcName === 'if') {
-            const [valueExpr = null, trueExpr = null, falseExpr = null] = expr.function.args;
+            const [valueExpr = null, trueExpr = null, falseExpr = null] = expr.function.args ?? [];
             const value = (valueExpr !== null ? evaluateExpression(valueExpr, globals, locals, options, builtins) : false);
             const resultExpr = (value ? trueExpr : falseExpr);
             return resultExpr !== null ? evaluateExpression(resultExpr, globals, locals, options, builtins) : null;

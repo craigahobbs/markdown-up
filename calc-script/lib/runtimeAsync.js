@@ -8,6 +8,9 @@ import {defaultMaxStatements, expressionFunctions, scriptFunctions} from './libr
 import {parseScript} from './parser.js';
 
 
+/* eslint-disable no-await-in-loop */
+
+
 /**
  * Execute a calculation language script.
  *
@@ -58,7 +61,6 @@ async function executeScriptHelperAsync(statements, globals, locals, options) {
 
         // Assignment?
         if (statementKey === 'assign') {
-            // eslint-disable-next-line no-await-in-loop
             const exprValue = await evaluateExpressionAsync(statement.assign.expr, globals, locals, options, false);
             if (locals !== null) {
                 locals[statement.assign.name] = exprValue;
@@ -97,7 +99,6 @@ async function executeScriptHelperAsync(statements, globals, locals, options) {
         // Jump?
         } else if (statementKey === 'jump') {
             // Evaluate the expression (if any)
-            // eslint-disable-next-line no-await-in-loop
             if (!('expr' in statement.jump) || await evaluateExpressionAsync(statement.jump.expr, globals, locals, options, false)) {
                 // Find the label
                 if (statement.jump.label in labelIndexes) {
@@ -121,28 +122,50 @@ async function executeScriptHelperAsync(statements, globals, locals, options) {
 
         // Expression
         } else if (statementKey === 'expr') {
-            // eslint-disable-next-line no-await-in-loop
             await evaluateExpressionAsync(statement.expr.expr, globals, locals, options, false);
 
         // Include?
         } else if (statementKey === 'include') {
-            if ('fetchFn' in options) {
-                /* eslint-disable no-await-in-loop */
-                const includeURL = ('urlFn' in options ? options.urlFn(statement.include.url) : statement.include.url);
-                const scriptResponse = await options.fetchFn(includeURL);
-                if (!scriptResponse.ok) {
-                    throw new CalcScriptRuntimeError(`Could not include "${statement.include.url}"`);
+            const includeURL = ('urlFn' in options ? options.urlFn(statement.include) : statement.include);
+            const fetchFn = (options !== null && 'fetchFn' in options ? options.fetchFn : null);
+            const scriptResponse = (fetchFn !== null ? await options.fetchFn(includeURL) : null);
+            let errorMessage = (scriptResponse !== null && !scriptResponse.ok ? scriptResponse.statusText : null);
+            let scriptModel = null;
+            if (scriptResponse !== null && scriptResponse.ok) {
+                let scriptText = null;
+                try {
+                    scriptText = await scriptResponse.text();
+                } catch (error) {
+                    errorMessage = error.message;
                 }
-                const scriptModel = parseScript(await scriptResponse.text());
-                const includeOptions = {...options};
-                includeOptions.urlFn = (url) => (isRelativeURL(url) ? `${getBaseURL(includeURL)}${url}` : null);
-                await executeScriptHelperAsync(scriptModel.statements, globals, null, includeOptions);
-                /* eslint-enable no-await-in-loop */
+                if (scriptText !== null) {
+                    scriptModel = parseScript(scriptText);
+                }
             }
+            if (scriptModel === null) {
+                throw new CalcScriptRuntimeError(
+                    `Include of "${statement.include}" failed${errorMessage !== null ? ` with error: ${errorMessage}` : ''}`
+                );
+            }
+            const includeOptions = {...options};
+            includeOptions.urlFn = (url) => (isRelativeURL(url) ? `${getBaseURL(includeURL)}${url}` : url);
+            await executeScriptHelperAsync(scriptModel.statements, globals, null, includeOptions);
         }
     }
 
     return null;
+}
+
+
+export function isRelativeURL(url) {
+    return !rNotRelativeURL.test(url);
+}
+
+const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
+
+
+export function getBaseURL(url) {
+    return url.slice(0, url.lastIndexOf('/') + 1);
 }
 
 
@@ -161,12 +184,13 @@ async function executeScriptHelperAsync(statements, globals, locals, options) {
  * @throws [CalcScriptRuntimeError]{@link module:lib/runtime.CalcScriptRuntimeError}
  */
 export async function evaluateExpressionAsync(expr, globals = {}, locals = null, options = null, builtins = true) {
+    const [exprKey] = Object.keys(expr);
+
     // If this expression does not require async then evaluate non-async
-    if (!isAsyncExpr(expr, globals, locals)) {
+    const hasSubExpr = (exprKey !== 'number' && exprKey !== 'string' && exprKey !== 'variable');
+    if (hasSubExpr && !isAsyncExpr(expr, globals, locals)) {
         return evaluateExpression(expr, globals, locals, options, builtins);
     }
-
-    const [exprKey] = Object.keys(expr);
 
     // Number
     if (exprKey === 'number') {
@@ -199,8 +223,8 @@ export async function evaluateExpressionAsync(expr, globals = {}, locals = null,
         // "if" built-in function?
         const funcName = expr.function.name;
         if (funcName === 'if') {
-            const [valueExpr = null, trueExpr = null, falseExpr = null] = expr.function.args;
-            const value = (valueExpr !== null ? await evaluateExpressionAsync(valueExpr, globals, locals, options, builtins) : false);
+            const [valueExpr, trueExpr = null, falseExpr = null] = expr.function.args;
+            const value = await evaluateExpressionAsync(valueExpr, globals, locals, options, builtins);
             const resultExpr = (value ? trueExpr : falseExpr);
             return resultExpr !== null ? evaluateExpressionAsync(resultExpr, globals, locals, options, builtins) : null;
         }
@@ -221,7 +245,7 @@ export async function evaluateExpressionAsync(expr, globals = {}, locals = null,
         if (funcValue !== null) {
             // Call the function
             try {
-                return funcValue(funcArgs, options);
+                return await funcValue(funcArgs, options);
             } catch (error) {
                 // Propogate calc-script runtime errors
                 if (error instanceof CalcScriptRuntimeError) {
@@ -319,23 +343,11 @@ function isAsyncExpr(expr, globals, locals) {
         // Are any of the function argument expressions async?
         return 'args' in expr.function && expr.function.args.some((exprArg) => isAsyncExpr(exprArg, globals, locals));
     } else if (exprKey === 'binary') {
-        return isAsyncExpr(expr.binary.left, globals, locals) && isAsyncExpr(expr.binary.right, globals, locals);
+        return isAsyncExpr(expr.binary.left, globals, locals) || isAsyncExpr(expr.binary.right, globals, locals);
     } else if (exprKey === 'unary') {
         return isAsyncExpr(expr.unary.expr, globals, locals);
     } else if (exprKey === 'group') {
         return isAsyncExpr(expr.group, globals, locals);
     }
     return false;
-}
-
-
-export function isRelativeURL(url) {
-    return !rNotRelativeURL.test(url);
-}
-
-const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
-
-
-export function getBaseURL(url) {
-    return url.slice(0, url.lastIndexOf('/') + 1);
 }
