@@ -16,7 +16,6 @@ const rScriptFunctionEnd = /^\s*endfunction\s*$/;
 const rScriptLabel = /^\s*(?<name>[A-Za-z_]\w*)\s*:\s*$/;
 const rScriptJump = /^(?<jump>\s*(?:jump|jumpif\s*\((?<expr>.+)\)))\s+(?<name>[A-Za-z_]\w*)\s*$/;
 const rScriptReturn = /^(?<return>\s*return(?:\s+(?<expr>.+?))?)\s*$/;
-const rScriptExpr = /^\s*(?<expr>.+?)\s*$/;
 const rScriptInclude = /^\s*include\s+'(?<url>(?:\\'|[^'])*)'/;
 const rScriptIncludeDouble = /^\s*include\s+"(?<url>(?:\\"|[^"])*)"/;
 
@@ -57,16 +56,16 @@ export function parseScript(scriptText, startLineNumber = 1) {
         // Line continuation?
         const linePartNoContinuation = linePart.replace(rScriptContinuation, '');
         if (linePart !== linePartNoContinuation) {
-            lineContinuation.push(linePartNoContinuation);
+            lineContinuation.push(lineContinuation.length === 0 ? linePartNoContinuation.trimEnd() : linePartNoContinuation.trim());
             continue;
         } else if (isContinued) {
-            lineContinuation.push(linePartNoContinuation);
+            lineContinuation.push(linePartNoContinuation.trim());
         }
 
         // Join the continued script lines, if necessary
         let line;
         if (isContinued) {
-            line = lineContinuation.join('');
+            line = lineContinuation.join(' ');
             lineContinuation.length = 0;
         } else {
             line = linePart;
@@ -183,9 +182,8 @@ export function parseScript(scriptText, startLineNumber = 1) {
         }
 
         // Expression
-        const matchExpr = line.match(rScriptExpr);
         try {
-            const exprStatement = {'expr': {'expr': parseExpression(matchExpr.groups.expr)}};
+            const exprStatement = {'expr': {'expr': parseExpression(line)}};
             statements.push(exprStatement);
         } catch (error) {
             throw new CalcScriptParserError(error.error, line, error.columnNumber, startLineNumber + ixLine);
@@ -424,10 +422,33 @@ export class CalcScriptParserError extends Error {
      * @param {?number} [lineNumber=null] - The error line number
      */
     constructor(error, line, columnNumber = 1, lineNumber = null) {
+        // Parser error constants
+        const lineLengthMax = 120;
+        const lineSuffix = ' ...';
+        const linePrefix = '... ';
+
+        // Trim the error line, if necessary
+        let lineError = line;
+        let lineColumn = columnNumber;
+        if (line.length > lineLengthMax) {
+            const lineLeft = columnNumber - 1 - 0.5 * lineLengthMax;
+            const lineRight = lineLeft + lineLengthMax;
+            if (lineLeft < 0) {
+                lineError = line.slice(0, lineLengthMax) + lineSuffix;
+            } else if (lineRight > line.length) {
+                lineError = linePrefix + line.slice(line.length - lineLengthMax);
+                lineColumn -= lineLeft - linePrefix.length - (lineRight - line.length);
+            } else {
+                lineError = linePrefix + line.slice(lineLeft, lineRight) + lineSuffix;
+                lineColumn -= lineLeft - linePrefix.length;
+            }
+        }
+
+        // Format the message
         const message = `\
 ${error}${lineNumber !== null ? `, line number ${lineNumber}` : ''}:
-${line}
-${' '.repeat(columnNumber - 1)}^
+${lineError}
+${' '.repeat(lineColumn - 1)}^
 `;
         super(message);
         this.error = error;
