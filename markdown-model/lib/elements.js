@@ -157,13 +157,6 @@ function markdownElementsCodeBlockPart(part) {
 }
 
 
-// Regex for cleaning-up anchor text
-const rHeaderStart = /^[^a-z0-9]+/;
-const rHeaderEnd = /[^a-z0-9]+$/;
-const rHeaderIdRemove = /['"]/g;
-const rHeaderIdDash = /[^a-z0-9]+/g;
-
-
 function markdownElementsPartBase(part, options, usedHeaderIds) {
     const [partKey] = Object.keys(part);
 
@@ -174,9 +167,7 @@ function markdownElementsPartBase(part, options, usedHeaderIds) {
             // Determine the header ID, if requested
             let headerId = null;
             if (options !== null && 'headerIds' in options && options.headerIds) {
-                headerId = getMarkdownParagraphText(paragraph).toLowerCase().
-                    replace(rHeaderStart, '').replace(rHeaderEnd, '').
-                    replace(rHeaderIdRemove, '').replace(rHeaderIdDash, '-');
+                headerId = markdownHeaderId(getMarkdownParagraphText(paragraph));
 
                 // Duplicate header ID?
                 if (usedHeaderIds.has(headerId)) {
@@ -280,6 +271,24 @@ function paragraphSpanElements(spans, options) {
 
     return spanElements;
 }
+
+
+/**
+ * Generate a Markdown header ID from text
+ *
+ * @param {string} text - The text
+ * @returns {string}
+ */
+export function markdownHeaderId(text) {
+    return text.toLowerCase().
+        replace(rHeaderStart, '').replace(rHeaderEnd, '').
+        replace(rHeaderIdRemove, '').replace(rHeaderIdDash, '-');
+}
+
+const rHeaderStart = /^[^a-z0-9]+/;
+const rHeaderEnd = /[^a-z0-9]+$/;
+const rHeaderIdRemove = /['"]/g;
+const rHeaderIdDash = /[^a-z0-9]+/g;
 
 
 /**
