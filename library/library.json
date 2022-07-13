@@ -1,0 +1,347 @@
+{
+    "functions": [
+        {
+            "name": "documentReset",
+            "group": "Document",
+            "doc": [
+                "Reset the document. This is useful to call within callback functions that re-render the document."
+            ]
+        },
+        {
+            "name": "documentURL",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawArc",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawCircle",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawClose",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawEllipse",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawHLine",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawImage",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawLine",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawMove",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawOnClick",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawRect",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawStyle",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawText",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawTextStyle",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "drawVLine",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "elementModelRender",
+            "group": "Element Model",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getDocumentFontSize",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getDocumentInputValue",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getDrawingHeight",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getDrawingWidth",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getTextHeight",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getTextWidth",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getWindowHeight",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "getWindowWidth",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "localStorageClear",
+            "group": "Local Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "localStorageGet",
+            "group": "Local Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "localStorageRemove",
+            "group": "Local Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "localStorageSet",
+            "group": "Local Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "markdownEncode",
+            "group": "Markdown",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "markdownHeaderId",
+            "group": "Markdown",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "markdownParse",
+            "group": "Markdown",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "markdownPrint",
+            "group": "Markdown",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "markdownTitle",
+            "group": "Markdown",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "schemaParse",
+            "group": "Schema",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "schemaPrint",
+            "group": "Schema",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "schemaTypeModel",
+            "group": "Schema",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "schemaValidate",
+            "group": "Schema",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "schemaValidateTypeModel",
+            "group": "Schema",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "sessionStorageClear",
+            "group": "Session Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "sessionStorageGet",
+            "group": "Session Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "sessionStorageRemove",
+            "group": "Session Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "sessionStorageSet",
+            "group": "Session Storage",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setDocumentFocus",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setDocumentTitle",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setDrawingSize",
+            "group": "Drawing",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setWindowLocation",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setWindowResize",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        },
+        {
+            "name": "setWindowTimeout",
+            "group": "Document",
+            "doc": [
+                "TODO"
+            ]
+        }
+    ]
+}
