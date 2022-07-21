@@ -18,14 +18,14 @@ const nbsp = String.fromCharCode(160);
  * @typedef {Object} SchemaMarkdownDocOptions
  * @property {string} [params] - The page's hash param string with tag removed
  * @property {Object[]} [actionURLs] -
- *     The [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/app/#var.vType='ActionURL'} override
+ *     The [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL'} override
  */
 
 
 /**
  * Generate the Schema Markdown user type documentation element model
  *
- * @param {Object} types - The [user type map]{@link https://craigahobbs.github.io/schema-markdown-doc/app/#var.vType='Types'}
+ * @param {Object} types - The [user type map]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
  * @param {string} typeName - The type name for which to generate documentation
  * @param {?Object} [options = null] - The [options]{@link module:lib/schemaMarkdownDoc~SchemaMarkdownDocOptions} object
  * @returns {Object[]}
@@ -164,10 +164,10 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
     const userType = types[typeName];
 
     // Generate the header element models
-    const titleElements = (titleDefault) => ({
+    const titleElements = (defaultTitle, forceDefaultTitle = false) => ({
         'html': titleTag,
         'attr': {'id': typeHref(typeName, options)},
-        'elem': {'text': title !== null ? title : titleDefault}
+        'elem': {'text': forceDefaultTitle || title === null ? defaultTitle : title}
     });
 
     // Struct?
@@ -182,8 +182,9 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         const hasDoc = members !== null && Object.values(memberDocElem).some((docElem) => docElem !== null);
 
         // Return the struct documentation element model
+        const isUnion = ('union' in struct && struct.union);
         return [
-            titleElements('union' in struct && struct.union ? `union ${typeName}` : `struct ${typeName}`),
+            titleElements(isUnion ? `union ${typeName}` : `struct ${typeName}`, isUnion),
             !('bases' in struct) ? null : {'html': 'p', 'elem': [
                 {'text': 'Bases: '},
                 struct.bases.map((base, ixBase) => [
