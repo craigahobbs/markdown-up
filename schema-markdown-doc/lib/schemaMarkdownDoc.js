@@ -50,7 +50,7 @@ export function schemaMarkdownDoc(types, typeName, options = null) {
     // Return the user type's element model
     return [
         // The user type
-        userTypeElements(types, typeName, 'h1', options, typeName),
+        userTypeElements(types, typeName, 'h1', options),
 
         // Referenced types
         !filteredTypes.length ? null : [
@@ -164,10 +164,10 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
     const userType = types[typeName];
 
     // Generate the header element models
-    const titleElements = (defaultTitle, forceDefaultTitle = false) => ({
+    const titleElements = (defaultTitle) => ({
         'html': titleTag,
         'attr': {'id': typeHref(typeName, options)},
-        'elem': {'text': forceDefaultTitle || title === null ? defaultTitle : title}
+        'elem': {'text': title !== null ? title : defaultTitle}
     });
 
     // Struct?
@@ -184,7 +184,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         // Return the struct documentation element model
         const isUnion = ('union' in struct && struct.union);
         return [
-            titleElements(isUnion ? `union ${typeName}` : `struct ${typeName}`, isUnion),
+            titleElements(isUnion ? `union ${typeName}` : `struct ${typeName}`),
             !('bases' in struct) ? null : {'html': 'p', 'elem': [
                 {'text': 'Bases: '},
                 struct.bases.map((base, ixBase) => [
