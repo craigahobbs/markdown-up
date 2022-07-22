@@ -3,12 +3,12 @@
 
 /* eslint-disable id-length */
 
-import {chartModel, validateBarChart, validateDataTable, validateLineChart} from '../lib/model.js';
+import {chartTypes, validateBarChart, validateDataTable, validateLineChart} from '../lib/model.js';
 import test from 'ava';
 
 
 test('testModel.js tests placeholder', (t) => {
-    t.true(chartModel !== null);
+    t.true(chartTypes !== null);
     t.true(validateBarChart !== null);
     t.true(validateDataTable !== null);
     t.true(validateLineChart !== null);

@@ -134,7 +134,6 @@ test('MarkdownUp, constructor', (t) => {
     t.is(app.lineHeight, 1.2);
     t.is(app.menu, true);
     t.is(app.url, 'README.md');
-    t.is(app.setNavigateTimeoutId, null);
 });
 
 
@@ -152,7 +151,6 @@ test('MarkdownUp, constructor options', (t) => {
     t.is(app.lineHeight, 1.6);
     t.is(app.menu, false);
     t.is(app.url, 'CHANGELOG.md');
-    t.is(app.setNavigateTimeoutId, null);
 });
 
 
@@ -165,9 +163,9 @@ test('MarkdownUp, pre-render', async (t) => {
     window.location.hash = '#cmd.help=1';
     const app = new MarkdownUp(window);
     await app.render();
-    t.is(window.document.title, '');
+    t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=1&amp;type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '12pt'],
@@ -177,9 +175,9 @@ test('MarkdownUp, pre-render', async (t) => {
     window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render();
-    t.is(window.document.title, '');
+    t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">MarkdownUp</h1>'
+        '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '14pt'],
@@ -193,18 +191,21 @@ test('MarkdownUp.main, help', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('cmd.help=1');
     const result = await app.main();
-    t.deepEqual(result.elements[0][0][0], {'html': 'h1', 'attr': {'id': 'cmd.help=1&type_MarkdownUp'}, 'elem': {'text': 'MarkdownUp'}});
+    t.deepEqual(
+        result.elements[0][0][0],
+        {'html': 'h1', 'attr': {'id': 'cmd.help=1&type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
+    );
     result.elements[0] = '<helpElements>';
     t.deepEqual(
         result,
         {
-            'title': null,
+            'title': 'MarkdownUp',
             'elements': [
                 '<helpElements>',
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.help=1&menu=1'}),
-                null
+                [
+                    menuBurgerElements({'menuURL': '#cmd.help=1&menu=1'}),
+                    null
+                ]
             ]
         }
     );
@@ -230,12 +231,13 @@ test('MarkdownUp.main', async (t) => {
             'title': 'Hello',
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -276,7 +278,6 @@ test('MarkdownUp.main, url', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'url=sub%2Fother.md&hello'}, 'elem': [{'text': 'Hello'}]},
@@ -351,8 +352,10 @@ test('MarkdownUp.main, url', async (t) => {
                         ]
                     }
                 ],
-                menuBurgerElements({'menuURL': '#menu=1&url=sub%2Fother.md'}),
-                null
+                [
+                    menuBurgerElements({'menuURL': '#menu=1&url=sub%2Fother.md'}),
+                    null
+                ]
             ]
         }
     );
@@ -370,13 +373,16 @@ test('MarkdownUp.main, fetch error', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('');
-    let errorMessage = null;
-    try {
-        await app.main();
-    } catch ({message}) { /* c8 ignore next */
-        errorMessage = message;
-    }
-    t.is(errorMessage, 'Could not fetch "README.md", "Not Found"');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': 'MarkdownUp',
+            'elements': {
+                'html': 'p',
+                'elem': {'text': 'Error: Could not fetch "README.md" - "Not Found"'}
+            }
+        }
+    );
 });
 
 
@@ -391,13 +397,16 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('');
-    let errorMessage = null;
-    try {
-        await app.main();
-    } catch ({message}) { /* c8 ignore next */
-        errorMessage = message;
-    }
-    t.is(errorMessage, 'Could not fetch "README.md"');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': 'MarkdownUp',
+            'elements': {
+                'html': 'p',
+                'elem': {'text': 'Error: Could not fetch "README.md"'}
+            }
+        }
+    );
 });
 
 
@@ -420,12 +429,13 @@ test('MarkdownUp.main, no title', async (t) => {
             'title': null,
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -450,13 +460,14 @@ test('MarkdownUp.main, menu', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
-                menuBurgerElements({'menuURL': '#'}),
-                menuElements()
+                [
+                    menuBurgerElements({'menuURL': '#'}),
+                    menuElements()
+                ]
             ]
         }
     );
@@ -481,12 +492,10 @@ test('MarkdownUp.main, no menu', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
-                null,
                 null
             ]
         }
@@ -513,15 +522,15 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
             'title': null,
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.markdown=1&fontSize=18'}),
-                menuElements({
-                    'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
-                    'lineHeightURL': '#cmd.markdown=1&fontSize=18&lineHeight=1.4&menu=1',
-                    'markdownURL': '#fontSize=18&menu=1',
-                    'helpURL': '#cmd.help=1&fontSize=18&menu=1'
-                })
+                [
+                    menuBurgerElements({'menuURL': '#cmd.markdown=1&fontSize=18'}),
+                    menuElements({
+                        'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
+                        'lineHeightURL': '#cmd.markdown=1&fontSize=18&lineHeight=1.4&menu=1',
+                        'markdownURL': '#fontSize=18&menu=1',
+                        'helpURL': '#cmd.help=1&fontSize=18&menu=1'
+                    })
+                ]
             ]
         }
     );
@@ -547,10 +556,10 @@ test('MarkdownUp.main, markdown', async (t) => {
             'title': null,
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
-                null,
-                null,
-                menuBurgerElements({'menuURL': '#cmd.markdown=1&menu=1'}),
-                null
+                [
+                    menuBurgerElements({'menuURL': '#cmd.markdown=1&menu=1'}),
+                    null
+                ]
             ]
         }
     );
@@ -578,13 +587,14 @@ test('markdown-bar-chart', async (t) => {
             'title': 'Bar Chart',
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'bar-chart'}, 'elem': [{'text': 'Bar Chart'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -612,13 +622,14 @@ test('markdown-line-chart', async (t) => {
             'title': 'Line Chart',
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'line-chart'}, 'elem': [{'text': 'Line Chart'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -646,13 +657,14 @@ test('markdown-data-table', async (t) => {
             'title': 'Data Table',
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'data-table'}, 'elem': [{'text': 'Data Table'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -666,7 +678,7 @@ test('markdown-script', async (t) => {
 # markdown-script
 
 ~~~ markdown-script
-log('Hello')
+markdownPrint('Hello')
 ~~~
 `);
     })});
@@ -681,13 +693,18 @@ log('Hello')
             'title': 'markdown-script',
             'elements': [
                 null,
-                null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
-                    []
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'Hello'}]}
+                        ]
+                    ]
                 ],
-                menuBurgerElements(),
-                null
+                [
+                    menuBurgerElements(),
+                    null
+                ]
             ]
         }
     );
@@ -696,12 +713,18 @@ log('Hello')
 
 test('markdown-script debug', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    const logs = [];
+    window.console = {
+        'log': (message) => {
+            logs.push(message);
+        }
+    };
     const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
         resolve(`\
 # markdown-script
 
 ~~~ markdown-script
-log('Hello')
+debugLog('Hello')
 ~~~
 `);
     })});
@@ -715,17 +738,20 @@ log('Hello')
         {
             'title': 'markdown-script',
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'id': 'debug=1', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'debug=1&markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
-                    []
+                    null
                 ],
-                menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
-                null
+                [
+                    menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
+                    null
+                ]
             ]
         }
     );
+    t.is(logs.length, 2);
+    t.is(logs[0], 'Hello');
 });
 
 
@@ -749,14 +775,15 @@ test('markdown-script variables', async (t) => {
         {
             'title': 'Data Table',
             'elements': [
-                null,
                 {'html': 'div', 'attr': {'id': 'var.varName=5', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'var.varName=5&data-table'}, 'elem': [{'text': 'Data Table'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
-                menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
-                null
+                [
+                    menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
+                    null
+                ]
             ]
         }
     );

@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-up",
-    "version": "1.7.2",
+    "version": "1.7.3",
     "description": "JavaScript Markdown viewer application",
     "keywords": [
         "markdown",
@@ -22,17 +22,17 @@
         "test": "ava -v test/"
     },
     "dependencies": {
-        "calc-script": "~0.9",
+        "calc-script": "~1.0",
         "element-model": "~1.1",
         "markdown-model": "~1.4",
         "schema-markdown": "~1.1",
         "schema-markdown-doc": "~1.4"
     },
     "devDependencies": {
-        "ava": "~4.2",
+        "ava": "~4.3",
         "c8": "~7.11",
-        "eslint": "~8.14",
+        "eslint": "~8.19",
         "jsdoc": "~3.6",
-        "jsdom": "~19.0"
+        "jsdom": "~20.0"
     }
 }

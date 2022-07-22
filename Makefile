@@ -68,3 +68,6 @@ app: build/npm.build
 		sed -E "s/from '([^\.])/from '..\/\1/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
+
+    # Generate MarkdownScript library documentation
+	$(NODE_DOCKER) npx calcScriptDoc lib/script.js > build/app/library/library.json
