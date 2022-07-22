@@ -1,3 +1,7 @@
+## 1.7.4 (2022-07-22)
+
+- [a46ecae](https://github.com/craigahobbs/markdown-up/commit/a46ecae) - update readme
+
 ## 1.7.2 (2022-05-18)
 
 - [bb7daec](https://github.com/craigahobbs/markdown-up/commit/bb7daec) - eliminate element-app
