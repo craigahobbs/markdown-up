@@ -2,7 +2,7 @@
     "type": "module",
     "name": "markdown-up",
     "version": "1.7.3",
-    "description": "JavaScript Markdown viewer application",
+    "description": "MarkdownUp is a Markdown viewer",
     "keywords": [
         "markdown",
         "viewer"
