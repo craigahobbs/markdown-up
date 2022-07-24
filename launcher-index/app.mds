@@ -18,10 +18,10 @@ async function markdownUpLIndex()
 
     # Menu and title
     parent = objectGet(index, 'parent')
-    markdownPrint( \\\\
-        '[Root](#var=) |', \\\\
-        '[Parent](' + if(parent != null, "#var.vPath='" + stringEncodeURL(parent) + "'", '#var=') + ') |', \\\\
-        '[MarkdownUp](https://craigahobbs.github.io/markdown-up/)' \\\\
+    markdownPrint( \
+        '[Root](#var=) |', \
+        '[Parent](' + if(parent != null, "#var.vPath='" + stringEncodeURL(parent) + "'", '#var=') + ') |', \
+        '[MarkdownUp](https://craigahobbs.github.io/markdown-up/)' \
     )
     markdownPrint('# ' + title)
 
