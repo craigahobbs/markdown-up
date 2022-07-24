@@ -1,0 +1,58 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+#
+# The MarkdownUp launcher index application
+#
+
+
+async function markdownUpLIndex()
+    # Set the document title
+    title = 'MarkdownUp' + if(vPath != null, ' - ' + vPath, '')
+    setDocumentTitle(title)
+
+    # Fetch the index files/directories/parent API
+    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + stringEncodeURL(vPath), '')
+    index = fetch(index_url)
+
+    # Menu and title
+    parent = objectGet(index, 'parent')
+    markdownPrint( \\\\
+        '[Root](#var=) |', \\\\
+        '[Parent](' + if(parent != null, "#var.vPath='" + stringEncodeURL(parent) + "'", '#var=') + ') |', \\\\
+        '[MarkdownUp](https://craigahobbs.github.io/markdown-up/)' \\\\
+    )
+    markdownPrint('# ' + title)
+
+    # Render file links
+    files = objectGet(index, 'files')
+    jumpif (files == null) filesDone
+        markdownPrint('', '## Files')
+        ixFiles = 0
+        filesLoop:
+            jumpif (ixFiles >= arrayLength(files)) filesDone
+                file = arrayGet(files, ixFiles)
+                fileURL = if(vPath != null, vPath + '/', '') + file
+                markdownPrint('', '[' + markdownEncode(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
+            ixFiles = ixFiles + 1
+        jump filesLoop
+    filesDone:
+
+    # Render directory links
+    directories = objectGet(index, 'directories')
+    jumpif (directories == null) directoriesDone
+        markdownPrint('', '## Directories')
+        ixDirectories = 0
+        directoriesLoop:
+            jumpif (ixDirectories >= arrayLength(directories)) directoriesDone
+                directory = arrayGet(directories, ixDirectories)
+                directoryURL = if(vPath != null, vPath + '/', '') + directory
+                markdownPrint('', '[' + markdownEncode(directory) + "](#var.vPath='" + stringEncodeURL(directoryURL) + "')")
+            ixDirectories = ixDirectories + 1
+        jump directoriesLoop
+    directoriesDone:
+
+    # Empty path?
+    if(files == null && directories == null, markdownPrint('', 'No markdown files or sub-directories found'))
+endfunction
