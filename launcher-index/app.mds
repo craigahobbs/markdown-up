@@ -8,13 +8,14 @@
 
 
 async function markdownUpIndex()
-    # Set the document title
-    title = 'MarkdownUp' + if(vPath != null, ' - ' + vPath, '')
-    setDocumentTitle(title)
-
     # Fetch the index files/directories/parent API
     index_url = 'markdown_up_index' + if(vPath != null, '?path=' + stringEncodeURL(vPath), '')
     index = fetch(index_url)
+
+    # Set the document title
+    path = objectGet(index, 'path')
+    title = 'MarkdownUp - ' + path
+    setDocumentTitle(title)
 
     # Menu and title
     parent = objectGet(index, 'parent')
