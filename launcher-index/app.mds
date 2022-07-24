@@ -7,7 +7,7 @@
 #
 
 
-async function markdownUpLIndex()
+async function markdownUpIndex()
     # Set the document title
     title = 'MarkdownUp' + if(vPath != null, ' - ' + vPath, '')
     setDocumentTitle(title)
