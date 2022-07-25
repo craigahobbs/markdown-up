@@ -30,28 +30,28 @@ async function markdownUpIndex()
     files = objectGet(index, 'files')
     jumpif (files == null) filesDone
         markdownPrint('', '## Files')
-        ixFiles = 0
-        filesLoop:
-            jumpif (ixFiles >= arrayLength(files)) filesDone
-                file = arrayGet(files, ixFiles)
-                fileURL = if(vPath != null, vPath + '/', '') + file
-                markdownPrint('', '[' + markdownEncode(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
-            ixFiles = ixFiles + 1
-        jump filesLoop
+        ixFile = 0
+        fileLoop:
+            jumpif (ixFile >= arrayLength(files)) filesDone
+            file = arrayGet(files, ixFile)
+            fileURL = if(vPath != null, vPath + '/', '') + file
+            markdownPrint('', '[' + markdownEncode(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
+            ixFile = ixFile + 1
+        jump fileLoop
     filesDone:
 
     # Render directory links
     directories = objectGet(index, 'directories')
     jumpif (directories == null) directoriesDone
         markdownPrint('', '## Directories')
-        ixDirectories = 0
-        directoriesLoop:
-            jumpif (ixDirectories >= arrayLength(directories)) directoriesDone
-                directory = arrayGet(directories, ixDirectories)
-                directoryURL = if(vPath != null, vPath + '/', '') + directory
-                markdownPrint('', '[' + markdownEncode(directory) + "](#var.vPath='" + stringEncodeURL(directoryURL) + "')")
-            ixDirectories = ixDirectories + 1
-        jump directoriesLoop
+        ixDirectory = 0
+        directoryLoop:
+            jumpif (ixDirectory >= arrayLength(directories)) directoriesDone
+            directory = arrayGet(directories, ixDirectory)
+            directoryURL = if(vPath != null, vPath + '/', '') + directory
+            markdownPrint('', '[' + markdownEncode(directory) + "](#var.vPath='" + stringEncodeURL(directoryURL) + "')")
+            ixDirectory = ixDirectory + 1
+        jump directoryLoop
     directoriesDone:
 
     # Empty path?

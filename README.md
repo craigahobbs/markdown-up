@@ -60,6 +60,8 @@ The MarkdownUp application supports the following options:
 
 - **lineHeight** - The default line height, in em
 
+- **markdownText** - The default Markdown text
+
 - **menu** - If false, the application menu is hidden
 
 - **url** - The default Markdown resource URL
