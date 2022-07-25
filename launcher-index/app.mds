@@ -55,5 +55,5 @@ async function markdownUpIndex()
     directoriesDone:
 
     # Empty path?
-    if(files == null && directories == null, markdownPrint('', 'No markdown files or sub-directories found'))
+    if(files == null && directories == null, markdownPrint('', 'No Markdown files or sub-directories found'))
 endfunction
