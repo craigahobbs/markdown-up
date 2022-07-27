@@ -11,168 +11,543 @@
             "name": "documentURL",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Fix-up relative URLs"
+            ],
+            "args": [
+                {
+                    "name": "url",
+                    "doc": [
+                        "The URL"
+                    ]
+                }
+            ],
+            "return": [
+                "The fixed-up URL"
             ]
         },
         {
             "name": "drawArc",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw an arc"
+            ],
+            "args": [
+                {
+                    "name": "rx",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "ry",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "xAxisRotation",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "largeArcFlag",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "sweepFlag",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawCircle",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw a circle"
+            ],
+            "args": [
+                {
+                    "name": "cx",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "cy",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "radius",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawClose",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Close the current drawing path"
             ]
         },
         {
             "name": "drawEllipse",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw an ellipse"
+            ],
+            "args": [
+                {
+                    "name": "cx",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "cy",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "rx",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "ry",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawHLine",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw a horizontal line path"
+            ],
+            "args": [
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawImage",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw an image"
+            ],
+            "args": [
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "width",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "height",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "href",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawLine",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw a line path"
+            ],
+            "args": [
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawMove",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Move the path's drawing location"
+            ],
+            "args": [
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawOnClick",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Set the most recent drawing object's on-click callback function"
+            ],
+            "args": [
+                {
+                    "name": "callback",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "drawRect",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw a rectangle"
+            ],
+            "args": [
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "width",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "height",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "rx",
+                    "doc": [
+                        "TODO = null"
+                    ]
+                },
+                {
+                    "name": "ry",
+                    "doc": [
+                        "TODO = null"
+                    ]
+                }
             ]
         },
         {
             "name": "drawStyle",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Set the current drawing styles"
+            ],
+            "args": [
+                {
+                    "name": "stroke",
+                    "doc": [
+                        "TODO = 'black'"
+                    ]
+                },
+                {
+                    "name": "strokeWidth",
+                    "doc": [
+                        "TODO = 1"
+                    ]
+                },
+                {
+                    "name": "fill",
+                    "doc": [
+                        "TODO = 'none'"
+                    ]
+                },
+                {
+                    "name": "strokeDashArray",
+                    "doc": [
+                        "TODO = 'none'"
+                    ]
+                }
             ]
         },
         {
             "name": "drawText",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw text"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "px",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "textAnchor",
+                    "doc": [
+                        "TODO = 'middle'"
+                    ]
+                },
+                {
+                    "name": "dominantBaseline",
+                    "doc": [
+                        "TODO = 'middle'"
+                    ]
+                }
             ]
         },
         {
             "name": "drawTextStyle",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Set the current text drawing styles"
+            ],
+            "args": [
+                {
+                    "name": "fontSizePx",
+                    "doc": [
+                        "TODO = null"
+                    ]
+                },
+                {
+                    "name": "textFill",
+                    "doc": [
+                        "TODO = 'black'"
+                    ]
+                },
+                {
+                    "name": "bold",
+                    "doc": [
+                        "TODO = false"
+                    ]
+                },
+                {
+                    "name": "italic",
+                    "doc": [
+                        "TODO = false"
+                    ]
+                },
+                {
+                    "name": "fontFamily",
+                    "doc": [
+                        "TODO = defaultFontFamily"
+                    ]
+                }
             ]
         },
         {
             "name": "drawVLine",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Draw a vertical line path"
+            ],
+            "args": [
+                {
+                    "name": "py",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "elementModelRender",
             "group": "Element Model",
             "doc": [
-                "TODO"
+                "Render an [element model](https://craigahobbs.github.io/element-model/)"
+            ],
+            "args": [
+                {
+                    "name": "element",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "getDocumentFontSize",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Get the document font size"
+            ],
+            "return": [
+                "The document font size, in pixels"
             ]
         },
         {
             "name": "getDocumentInputValue",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Get an input element's value"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The element ID"
+                    ]
+                }
+            ],
+            "return": [
+                "The input element value or null if the element does not exist"
             ]
         },
         {
             "name": "getDrawingHeight",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Get the current drawing's height"
+            ],
+            "return": [
+                "The current drawing's height"
             ]
         },
         {
             "name": "getDrawingWidth",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Get the current drawing's width"
+            ],
+            "return": [
+                "The current drawing's width"
             ]
         },
         {
             "name": "getTextHeight",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Compute the text's height"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "width",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "The text's height"
             ]
         },
         {
             "name": "getTextWidth",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Compute the text's width"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "The text's width"
             ]
         },
         {
             "name": "getWindowHeight",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Get the browser window's height"
+            ],
+            "return": [
+                "The window height"
             ]
         },
         {
             "name": "getWindowWidth",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Get the browser window's width"
+            ],
+            "return": [
+                "The window width"
             ]
         },
         {
@@ -187,6 +562,17 @@
             "group": "Local Storage",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
@@ -194,12 +580,37 @@
             "group": "Local Storage",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "localStorageSet",
             "group": "Local Storage",
             "doc": [
+                "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "value",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
                 "TODO"
             ]
         },
@@ -208,12 +619,34 @@
             "group": "Markdown",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
             "name": "markdownHeaderId",
             "group": "Markdown",
             "doc": [
+                "TODO"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
                 "TODO"
             ]
         },
@@ -222,6 +655,17 @@
             "group": "Markdown",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "lines",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
@@ -229,12 +673,31 @@
             "group": "Markdown",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "lines",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "markdownTitle",
             "group": "Markdown",
             "doc": [
+                "TODO"
+            ],
+            "args": [
+                {
+                    "name": "markdownModel",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
                 "TODO"
             ]
         },
@@ -243,6 +706,17 @@
             "group": "Schema",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "lines",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
@@ -250,12 +724,35 @@
             "group": "Schema",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "types",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "typeName",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "actionURLs",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "schemaTypeModel",
             "group": "Schema",
             "doc": [
+                "TODO"
+            ],
+            "return": [
                 "TODO"
             ]
         },
@@ -264,12 +761,46 @@
             "group": "Schema",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "types",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "typeName",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "value",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
             "name": "schemaValidateTypeModel",
             "group": "Schema",
             "doc": [
+                "TODO"
+            ],
+            "args": [
+                {
+                    "name": "types",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
                 "TODO"
             ]
         },
@@ -285,6 +816,17 @@
             "group": "Session Storage",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
@@ -292,6 +834,14 @@
             "group": "Session Storage",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
@@ -299,48 +849,125 @@
             "group": "Session Storage",
             "doc": [
                 "TODO"
+            ],
+            "args": [
+                {
+                    "name": "key",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "value",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "return": [
+                "TODO"
             ]
         },
         {
             "name": "setDocumentFocus",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Set focus to an element"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The element ID"
+                    ]
+                }
             ]
         },
         {
             "name": "setDocumentTitle",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Set the document title"
+            ],
+            "args": [
+                {
+                    "name": "title",
+                    "doc": [
+                        "The document title"
+                    ]
+                }
             ]
         },
         {
             "name": "setDrawingSize",
             "group": "Drawing",
             "doc": [
-                "TODO"
+                "Set the current drawing's size"
+            ],
+            "args": [
+                {
+                    "name": "width",
+                    "doc": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "name": "height",
+                    "doc": [
+                        "TODO"
+                    ]
+                }
             ]
         },
         {
             "name": "setWindowLocation",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Navigate the browser window to a location URL"
+            ],
+            "args": [
+                {
+                    "name": "url",
+                    "doc": [
+                        "The URL"
+                    ]
+                }
             ]
         },
         {
             "name": "setWindowResize",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Set the browser window resize callback function"
+            ],
+            "args": [
+                {
+                    "name": "callback",
+                    "doc": [
+                        "The window resize callback function"
+                    ]
+                }
             ]
         },
         {
             "name": "setWindowTimeout",
             "group": "Document",
             "doc": [
-                "TODO"
+                "Set the browser window timeout callback function"
+            ],
+            "args": [
+                {
+                    "name": "callback",
+                    "doc": [
+                        "The window timeout callback function"
+                    ]
+                },
+                {
+                    "name": "delay",
+                    "doc": [
+                        "The delay, in milliseconds, to ellapse before calling the timeout"
+                    ]
+                }
             ]
         }
     ]
