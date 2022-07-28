@@ -100,7 +100,7 @@
            "log"
            "log10"
            "lower"
-           "markdownEncode"
+           "markdownEscape"
            "markdownParse"
            "markdownPrint"
            "markdownTitle"

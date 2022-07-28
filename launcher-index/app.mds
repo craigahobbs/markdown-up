@@ -35,7 +35,7 @@ async function markdownUpIndex()
             jumpif (ixFile >= arrayLength(files)) filesDone
             file = arrayGet(files, ixFile)
             fileURL = if(vPath != null, vPath + '/', '') + file
-            markdownPrint('', '[' + markdownEncode(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
+            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
             ixFile = ixFile + 1
         jump fileLoop
     filesDone:
@@ -49,7 +49,7 @@ async function markdownUpIndex()
             jumpif (ixDirectory >= arrayLength(directories)) directoriesDone
             directory = arrayGet(directories, ixDirectory)
             directoryURL = if(vPath != null, vPath + '/', '') + directory
-            markdownPrint('', '[' + markdownEncode(directory) + "](#var.vPath='" + stringEncodeURL(directoryURL) + "')")
+            markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + stringEncodeURL(directoryURL) + "')")
             ixDirectory = ixDirectory + 1
         jump directoryLoop
     directoriesDone:

@@ -296,11 +296,12 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         actionErrorTypes[actionErrorTypeName] = {'enum': actionErrorEnum};
 
         // If no URLs passed use the action's URLs
-        let actionURLs = (options !== null && 'actionURLs' in options ? options.actionURLs : null);
-        if (actionURLs === null && 'urls' in action) {
-            actionURLs = action.urls.map(({method = null, path = null}) => {
+        let actionURLs = null;
+        const rawActionURLs = (options !== null ? (options.actionURLs ?? null) : null) ?? action.urls ?? null;
+        if (rawActionURLs !== null) {
+            actionURLs = rawActionURLs.map(({method = null, path = null}) => {
                 const url = {
-                    'url': path !== null ? path : `/${typeName}`
+                    'path': path !== null ? path : `/${typeName}`
                 };
                 if (method !== null) {
                     url.method = method;
@@ -322,7 +323,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
                     {'text': `${nbsp}${nbsp}`},
                     {
                         'html': 'a',
-                        'attr': {'href': url.url}, 'elem': {'text': url.method ? `${url.method} ${url.url}` : url.url}
+                        'attr': {'href': url.path}, 'elem': {'text': url.method ? `${url.method} ${url.path}` : url.path}
                     }
                 ]}))
             ],

@@ -29,49 +29,49 @@
             "name": "drawArc",
             "group": "Drawing",
             "doc": [
-                "Draw an arc"
+                "Draw an arc curve from the current point to the coordinate x,y"
             ],
             "args": [
                 {
                     "name": "rx",
                     "doc": [
-                        "TODO"
+                        "The ellipse's X radius"
                     ]
                 },
                 {
                     "name": "ry",
                     "doc": [
-                        "TODO"
+                        "The ellipse's Y radius"
                     ]
                 },
                 {
-                    "name": "xAxisRotation",
+                    "name": "angle",
                     "doc": [
-                        "TODO"
+                        "The rotation (in degrees) of the ellipse relative to the x-axis"
                     ]
                 },
                 {
                     "name": "largeArcFlag",
                     "doc": [
-                        "TODO"
+                        "Either large arc (1) or small arc (0)"
                     ]
                 },
                 {
                     "name": "sweepFlag",
                     "doc": [
-                        "TODO"
+                        "Either clockwise turning arc (1) or counterclockwise turning arc (0)"
                     ]
                 },
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate"
                     ]
                 }
             ]
@@ -86,19 +86,19 @@
                 {
                     "name": "cx",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the center of the circle"
                     ]
                 },
                 {
                     "name": "cy",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the center of the circle"
                     ]
                 },
                 {
-                    "name": "radius",
+                    "name": "r",
                     "doc": [
-                        "TODO"
+                        "The radius of the circle"
                     ]
                 }
             ]
@@ -120,25 +120,25 @@
                 {
                     "name": "cx",
                     "doc": [
-                        "TODO"
+                        "The x position of the ellipse"
                     ]
                 },
                 {
                     "name": "cy",
                     "doc": [
-                        "TODO"
+                        "The y position of the ellipse"
                     ]
                 },
                 {
                     "name": "rx",
                     "doc": [
-                        "TODO"
+                        "The radius of the ellipse on the x axis"
                     ]
                 },
                 {
                     "name": "ry",
                     "doc": [
-                        "TODO"
+                        "The radius of the ellipse on the y axis"
                     ]
                 }
             ]
@@ -147,13 +147,13 @@
             "name": "drawHLine",
             "group": "Drawing",
             "doc": [
-                "Draw a horizontal line path"
+                "Draw a horizontal line from the current point to the end point"
             ],
             "args": [
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the end point"
                     ]
                 }
             ]
@@ -166,33 +166,33 @@
             ],
             "args": [
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x position of the image"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y position of the image"
                     ]
                 },
                 {
                     "name": "width",
                     "doc": [
-                        "TODO"
+                        "The width of the image"
                     ]
                 },
                 {
                     "name": "height",
                     "doc": [
-                        "TODO"
+                        "The height of the image"
                     ]
                 },
                 {
                     "name": "href",
                     "doc": [
-                        "TODO"
+                        "The image resource URL"
                     ]
                 }
             ]
@@ -201,19 +201,19 @@
             "name": "drawLine",
             "group": "Drawing",
             "doc": [
-                "Draw a line path"
+                "Draw a line from the current point to the end point"
             ],
             "args": [
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the end point"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the end point"
                     ]
                 }
             ]
@@ -222,19 +222,19 @@
             "name": "drawMove",
             "group": "Drawing",
             "doc": [
-                "Move the path's drawing location"
+                "Move the path's drawing point"
             ],
             "args": [
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the drawing point"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the drawing point"
                     ]
                 }
             ]
@@ -243,13 +243,13 @@
             "name": "drawOnClick",
             "group": "Drawing",
             "doc": [
-                "Set the most recent drawing object's on-click callback function"
+                "Set the most recent drawing object's on-click event handler"
             ],
             "args": [
                 {
                     "name": "callback",
                     "doc": [
-                        "TODO"
+                        "The click event callback function (x, y)"
                     ]
                 }
             ]
@@ -262,39 +262,39 @@
             ],
             "args": [
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the rectangle"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the rectangle"
                     ]
                 },
                 {
                     "name": "width",
                     "doc": [
-                        "TODO"
+                        "The width of the rectangle"
                     ]
                 },
                 {
                     "name": "height",
                     "doc": [
-                        "TODO"
+                        "The height of the rectangle"
                     ]
                 },
                 {
                     "name": "rx",
                     "doc": [
-                        "TODO = null"
+                        "Optional (default is null). The horizontal corner radius of the rectangle."
                     ]
                 },
                 {
                     "name": "ry",
                     "doc": [
-                        "TODO = null"
+                        "Optional (default is null). The vertical corner radius of the rectangle."
                     ]
                 }
             ]
@@ -309,25 +309,26 @@
                 {
                     "name": "stroke",
                     "doc": [
-                        "TODO = 'black'"
+                        "Optional (default is 'black'). The stroke color."
                     ]
                 },
                 {
                     "name": "strokeWidth",
                     "doc": [
-                        "TODO = 1"
+                        "Optional (default is 1). The stroke width."
                     ]
                 },
                 {
                     "name": "fill",
                     "doc": [
-                        "TODO = 'none'"
+                        "Optional (default is 'none'). The fill color."
                     ]
                 },
                 {
                     "name": "strokeDashArray",
                     "doc": [
-                        "TODO = 'none'"
+                        "Optional (default is 'none'). The stroke",
+                        "[dash array](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray#usage_notes)."
                     ]
                 }
             ]
@@ -342,31 +343,33 @@
                 {
                     "name": "text",
                     "doc": [
-                        "TODO"
+                        "The text to draw"
                     ]
                 },
                 {
-                    "name": "px",
+                    "name": "x",
                     "doc": [
-                        "TODO"
+                        "The x-coordinate of the text"
                     ]
                 },
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the text"
                     ]
                 },
                 {
                     "name": "textAnchor",
                     "doc": [
-                        "TODO = 'middle'"
+                        "Optional (default is 'middle'). The",
+                        "[text anchor](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/text-anchor#usage_notes) style."
                     ]
                 },
                 {
                     "name": "dominantBaseline",
                     "doc": [
-                        "TODO = 'middle'"
+                        "Optional (default is 'middle'). The",
+                        "[dominant baseline](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/dominant-baseline#usage_notes) style."
                     ]
                 }
             ]
@@ -381,31 +384,31 @@
                 {
                     "name": "fontSizePx",
                     "doc": [
-                        "TODO = null"
+                        "Optional (default is null, The default font size). The text font size, in pixels."
                     ]
                 },
                 {
                     "name": "textFill",
                     "doc": [
-                        "TODO = 'black'"
+                        "Optional (default is 'black'). The text fill color."
                     ]
                 },
                 {
                     "name": "bold",
                     "doc": [
-                        "TODO = false"
+                        "Optional (default is false). If true, text is bold."
                     ]
                 },
                 {
                     "name": "italic",
                     "doc": [
-                        "TODO = false"
+                        "Optional (default is false). If true, text is italic."
                     ]
                 },
                 {
                     "name": "fontFamily",
                     "doc": [
-                        "TODO = defaultFontFamily"
+                        "Optional (default is 'Arial, Helvetica, sans-serif'). The text font family."
                     ]
                 }
             ]
@@ -414,13 +417,13 @@
             "name": "drawVLine",
             "group": "Drawing",
             "doc": [
-                "Draw a vertical line path"
+                "Draw a vertical line from the current point to the end point"
             ],
             "args": [
                 {
-                    "name": "py",
+                    "name": "y",
                     "doc": [
-                        "TODO"
+                        "The y-coordinate of the end point"
                     ]
                 }
             ]
@@ -435,7 +438,7 @@
                 {
                     "name": "element",
                     "doc": [
-                        "TODO"
+                        "The [element model](https://craigahobbs.github.io/element-model/)"
                     ]
                 }
             ]
@@ -492,19 +495,19 @@
             "name": "getTextHeight",
             "group": "Drawing",
             "doc": [
-                "Compute the text's height"
+                "Compute the text's height to fit the width"
             ],
             "args": [
                 {
                     "name": "text",
                     "doc": [
-                        "TODO"
+                        "The text"
                     ]
                 },
                 {
                     "name": "width",
                     "doc": [
-                        "TODO"
+                        "The width of the text. If 0, the default font size (in pixels) is returned."
                     ]
                 }
             ],
@@ -522,7 +525,13 @@
                 {
                     "name": "text",
                     "doc": [
-                        "TODO"
+                        "The text"
+                    ]
+                },
+                {
+                    "name": "fontSizePx",
+                    "doc": [
+                        "The text font size, in pixels"
                     ]
                 }
             ],
@@ -537,7 +546,7 @@
                 "Get the browser window's height"
             ],
             "return": [
-                "The window height"
+                "The browser window's height"
             ]
         },
         {
@@ -547,45 +556,45 @@
                 "Get the browser window's width"
             ],
             "return": [
-                "The window width"
+                "The browser window's width"
             ]
         },
         {
             "name": "localStorageClear",
             "group": "Local Storage",
             "doc": [
-                "TODO"
+                "Clear all keys from the browser's local storage"
             ]
         },
         {
             "name": "localStorageGet",
             "group": "Local Storage",
             "doc": [
-                "TODO"
+                "Get a browser local storage key's value"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The key's local storage value string or null if the key does not exist"
             ]
         },
         {
             "name": "localStorageRemove",
             "group": "Local Storage",
             "doc": [
-                "TODO"
+                "Remove a browser local storage key"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 }
             ]
@@ -594,91 +603,88 @@
             "name": "localStorageSet",
             "group": "Local Storage",
             "doc": [
-                "TODO"
+                "Set a browser local storage key's value"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 },
                 {
                     "name": "value",
                     "doc": [
-                        "TODO"
+                        "The value string"
                     ]
                 }
-            ],
-            "return": [
-                "TODO"
             ]
         },
         {
-            "name": "markdownEncode",
+            "name": "markdownEscape",
             "group": "Markdown",
             "doc": [
-                "TODO"
+                "Escape text for inclusion in Markdown text"
             ],
             "args": [
                 {
                     "name": "text",
                     "doc": [
-                        "TODO"
+                        "The text to escape"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The escaped text"
             ]
         },
         {
             "name": "markdownHeaderId",
             "group": "Markdown",
             "doc": [
-                "TODO"
+                "Compute the header element ID for some text"
             ],
             "args": [
                 {
                     "name": "text",
                     "doc": [
-                        "TODO"
+                        "The text"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The header element ID"
             ]
         },
         {
             "name": "markdownParse",
             "group": "Markdown",
             "doc": [
-                "TODO"
+                "Parse Markdown text"
             ],
             "args": [
                 {
                     "name": "lines",
                     "doc": [
-                        "TODO"
+                        "The Markdown text lines (may contain nested arrays of un-split lines)"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The [Markdown model](https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown')"
             ]
         },
         {
             "name": "markdownPrint",
             "group": "Markdown",
             "doc": [
-                "TODO"
+                "Render Markdown text"
             ],
             "args": [
                 {
                     "name": "lines",
                     "doc": [
-                        "TODO"
+                        "The Markdown text lines (may contain nested arrays of un-split lines)"
                     ]
                 }
             ]
@@ -687,61 +693,63 @@
             "name": "markdownTitle",
             "group": "Markdown",
             "doc": [
-                "TODO"
+                "Compute the title of a [Markdown model](https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown')"
             ],
             "args": [
                 {
                     "name": "markdownModel",
                     "doc": [
-                        "TODO"
+                        "The [Markdown model](https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown')"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The Markdown title or null if there is no title"
             ]
         },
         {
             "name": "schemaParse",
             "group": "Schema",
             "doc": [
-                "TODO"
+                "Parse the [Schema Markdown](https://craigahobbs.github.io/schema-markdown/schema-markdown.html) text"
             ],
             "args": [
                 {
                     "name": "lines",
                     "doc": [
-                        "TODO"
+                        "The [Schema Markdown](https://craigahobbs.github.io/schema-markdown/schema-markdown.html)",
+                        "text lines (may contain nested arrays of un-split lines)"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The schema's [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ]
         },
         {
             "name": "schemaPrint",
             "group": "Schema",
             "doc": [
-                "TODO"
+                "Render a schema type's documentation"
             ],
             "args": [
                 {
                     "name": "types",
                     "doc": [
-                        "TODO"
+                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
                     ]
                 },
                 {
                     "name": "typeName",
                     "doc": [
-                        "TODO"
+                        "The type name"
                     ]
                 },
                 {
                     "name": "actionURLs",
                     "doc": [
-                        "TODO"
+                        "Optional (default is null). The",
+                        "[action URL overrides](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL')."
                     ]
                 }
             ]
@@ -750,96 +758,96 @@
             "name": "schemaTypeModel",
             "group": "Schema",
             "doc": [
-                "TODO"
+                "Get the [Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ],
             "return": [
-                "TODO"
+                "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ]
         },
         {
             "name": "schemaValidate",
             "group": "Schema",
             "doc": [
-                "TODO"
+                "Validate an object to a schema type"
             ],
             "args": [
                 {
                     "name": "types",
                     "doc": [
-                        "TODO"
+                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
                     ]
                 },
                 {
                     "name": "typeName",
                     "doc": [
-                        "TODO"
+                        "The type name"
                     ]
                 },
                 {
                     "name": "value",
                     "doc": [
-                        "TODO"
+                        "The object to validate"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The validated object or null if validation fails"
             ]
         },
         {
             "name": "schemaValidateTypeModel",
             "group": "Schema",
             "doc": [
-                "TODO"
+                "Validate a [Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ],
             "args": [
                 {
                     "name": "types",
                     "doc": [
-                        "TODO"
+                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The validated [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ]
         },
         {
             "name": "sessionStorageClear",
             "group": "Session Storage",
             "doc": [
-                "TODO"
+                "Clear all keys from the browser's session storage"
             ]
         },
         {
             "name": "sessionStorageGet",
             "group": "Session Storage",
             "doc": [
-                "TODO"
+                "Get a browser session storage key's value"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 }
             ],
             "return": [
-                "TODO"
+                "The key's session storage value string or null if the key does not exist"
             ]
         },
         {
             "name": "sessionStorageRemove",
             "group": "Session Storage",
             "doc": [
-                "TODO"
+                "Remove a browser session storage key"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 }
             ]
@@ -848,24 +856,21 @@
             "name": "sessionStorageSet",
             "group": "Session Storage",
             "doc": [
-                "TODO"
+                "Set a browser session storage key's value"
             ],
             "args": [
                 {
                     "name": "key",
                     "doc": [
-                        "TODO"
+                        "The key string"
                     ]
                 },
                 {
                     "name": "value",
                     "doc": [
-                        "TODO"
+                        "The value string"
                     ]
                 }
-            ],
-            "return": [
-                "TODO"
             ]
         },
         {
@@ -908,13 +913,13 @@
                 {
                     "name": "width",
                     "doc": [
-                        "TODO"
+                        "The width of the drawing"
                     ]
                 },
                 {
                     "name": "height",
                     "doc": [
-                        "TODO"
+                        "The height of the drawing"
                     ]
                 }
             ]
@@ -938,7 +943,7 @@
             "name": "setWindowResize",
             "group": "Document",
             "doc": [
-                "Set the browser window resize callback function"
+                "Set the browser window resize event handler"
             ],
             "args": [
                 {
@@ -953,7 +958,7 @@
             "name": "setWindowTimeout",
             "group": "Document",
             "doc": [
-                "Set the browser window timeout callback function"
+                "Set the browser window timeout event handler"
             ],
             "args": [
                 {
