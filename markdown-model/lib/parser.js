@@ -45,16 +45,16 @@ function getMarkdownSpanText(span) {
 
 
 /**
- * Encode a string for inclusion in Markdown text
+ * Escape a string for inclusion in Markdown text
  *
  * @param {string} text
  * @returns {string}
  */
-export function encodeMarkdownText(text) {
-    return text.replace(rEncodeMarkdownText, '\\$1');
+export function escapeMarkdownText(text) {
+    return text.replace(rEscapeMarkdownText, '\\$1');
 }
 
-const rEncodeMarkdownText = /([\\[\]()*])/g;
+const rEscapeMarkdownText = /([\\[\]()*])/g;
 
 
 // Markdown regex
