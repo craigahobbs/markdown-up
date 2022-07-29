@@ -35,7 +35,7 @@ async function markdownUpIndex()
             jumpif (ixFile >= arrayLength(files)) filesDone
             file = arrayGet(files, ixFile)
             fileURL = if(vPath != null, vPath + '/', '') + file
-            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + stringEncodeURL(fileURL) + ')')
+            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + stringEncodeURL(fileURL) + '&var=)')
             ixFile = ixFile + 1
         jump fileLoop
     filesDone:
