@@ -66,4 +66,4 @@ app: build/npm.build
 	done
 
     # Generate the library documentation
-	$(NODE_DOCKER) npx calcScriptDoc lib/script.js > build/app/library/library.json
+	$(NODE_DOCKER) npx calcScriptDoc lib/scriptLibrary.js > build/app/library/library.json
