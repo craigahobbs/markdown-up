@@ -154,7 +154,7 @@ test('MarkdownUp, constructor options', (t) => {
 });
 
 
-test('MarkdownUp, pre-render', async (t) => {
+test('MarkdownUp, run and render', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -162,7 +162,7 @@ test('MarkdownUp, pre-render', async (t) => {
 
     window.location.hash = '#cmd.help=1';
     const app = new MarkdownUp(window);
-    await app.render();
+    await app.run();
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
         '<h1 id="cmd.help=1&amp;type_MarkdownUp">struct MarkdownUp</h1>'
@@ -183,6 +183,305 @@ test('MarkdownUp, pre-render', async (t) => {
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
     ]);
+});
+
+
+test('MarkdownUp, render bad params', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#unknown=bad';
+    const app = new MarkdownUp(window);
+    await app.render();
+    t.is(window.document.title, 'MarkdownUp');
+    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+});
+
+
+test('MarkdownUp, render timeout', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.setTimeout and window.clearTimeout
+    const windowTimeout = {'id': 0};
+    window.setTimeout = (callback, delay) => {
+        if (delay === 0) {
+            // Ignore JSDOM call?
+            return 0;
+        }
+        windowTimeout.callback = callback;
+        windowTimeout.delay = delay;
+        windowTimeout.id += 1;
+        return windowTimeout.id;
+    };
+    window.clearTimeout = (timeoutId) => {
+        t.is(timeoutId, windowTimeout.id);
+        windowTimeout.callback = null;
+        windowTimeout.delay = null;
+    };
+
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function main()
+    setGlobal('count', count + 1)
+    markdownPrint('Hello ' + count)
+    if(count == 2, setWindowTimeout(main, 2000))
+endfunction
+
+count = 0
+setWindowTimeout(main, 1000)
+main()
+~~~
+`
+    });
+    window.location.hash = '#menu=1';
+    await app.render();
+    t.is(windowTimeout.delay, 1000);
+    t.is(app.runtimeTimeoutId, 1);
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<div id="menu=1" style="display=none"></div><p>Hello 1</p>'));
+
+    // Render again to test clearing the runtime timeout ID
+    window.location.hash = '#';
+    await app.render();
+    t.is(windowTimeout.delay, 1000);
+    t.is(app.runtimeTimeoutId, 2);
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+
+    // Call the timeout callback
+    windowTimeout.callback();
+    t.is(windowTimeout.delay, 2000);
+    t.is(app.runtimeTimeoutId, 3);
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
+
+    // Call the timeout callback again
+    windowTimeout.callback();
+    t.is(windowTimeout.delay, null);
+    t.is(app.runtimeTimeoutId, null);
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 3</p>'));
+});
+
+
+test('MarkdownUp, render resize', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.addEventListener and window.removeEventListener
+    const eventListener = {'resize': null};
+    window.addEventListener = (type, callback) => {
+        eventListener[type] = callback;
+    };
+    window.removeEventListener = (type, callback) => {
+        t.is(type, 'resize');
+        t.is(callback, eventListener[type]);
+        eventListener[type] = null;
+    };
+
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function main()
+    setGlobal('count', count + 1)
+    markdownPrint('Hello ' + count)
+endfunction
+
+count = 0
+setWindowResize(main)
+main()
+~~~
+`
+    });
+    window.location.hash = '#menu=1';
+    await app.render();
+    t.is(typeof eventListener.resize, 'function');
+    t.is(typeof app.runtimeWindowResize, 'function');
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<div id="menu=1" style="display=none"></div><p>Hello 1</p>'));
+
+    // Render again to test clearing the runtime resize event handler
+    window.location.hash = '#';
+    await app.render();
+    t.is(typeof eventListener.resize, 'function');
+    t.is(typeof app.runtimeWindowResize, 'function');
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+
+    // Call the resize callback
+    eventListener.resize();
+    t.is(typeof eventListener.resize, 'function');
+    t.is(typeof app.runtimeWindowResize, 'function');
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
+});
+
+
+test('MarkdownUp, render focus', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function main()
+    setGlobal('count', count + 1)
+    documentReset()
+    elementModelRender(objectNew( \
+        'html', 'input', \
+        'attr', objectNew( \
+            'id', 'test-input', \
+            'type', 'text', \
+            'value', 'Text ' + count \
+        ), \
+        'callback', objectNew('click', main) \
+    ))
+    setDocumentFocus('test-input')
+endfunction
+
+count = 0
+main()
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<input id="test-input" type="text" value="Text 1">'));
+
+    let testInput = window.document.getElementById('test-input');
+    t.is(testInput.value, 'Text 1');
+    t.is(testInput.selectionStart, 6);
+    t.is(testInput.selectionEnd, 6);
+
+    testInput.click();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<input id="test-input" type="text" value="Text 2">'));
+
+    testInput = window.document.getElementById('test-input');
+    t.is(testInput.value, 'Text 2');
+    t.is(testInput.selectionStart, 6);
+    t.is(testInput.selectionEnd, 6);
+});
+
+
+test('MarkdownUp, render location', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+setWindowLocation('#url=other')
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    t.is(window.location.href, `${jsdomURL}#url=other`);
+});
+
+
+test('MarkdownUp, render location callback', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function onClick()
+    documentReset()
+    markdownPrint('Hello')
+    setWindowLocation('#url=other')
+endfunction
+
+elementModelRender(objectNew( \
+    'html', 'span', \
+    'attr', objectNew('id', 'test-span'), \
+    'elem', objectNew('text', 'Click Here'), \
+    'callback', objectNew('click', onClick) \
+))
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<span id="test-span">Click Here</span>'));
+    t.is(window.location.href, `${jsdomURL}#`);
+
+    const testSpan = window.document.getElementById('test-span');
+    testSpan.click();
+
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
+    t.is(window.location.href, `${jsdomURL}#url=other`);
+});
+
+
+test('MarkdownUp, render location hash', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': ''});
+    window.location.hash = '#myid';
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    t.is(window.location.href, `${jsdomURL}#myid`);
+});
+
+
+test('MarkdownUp, render title', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+setDocumentTitle('Hello')
+markdownPrint('Hello')
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(window.document.title, 'Hello');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
+});
+
+
+test('MarkdownUp, render title callback', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function onClick()
+    setDocumentTitle('Hello')
+    documentReset()
+    markdownPrint('Hello')
+endfunction
+
+elementModelRender(objectNew( \
+    'html', 'span', \
+    'attr', objectNew('id', 'test-span'), \
+    'elem', objectNew('text', 'Click Here'), \
+    'callback', objectNew('click', onClick) \
+))
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<span id="test-span">Click Here</span>'));
+
+    const testSpan = window.document.getElementById('test-span');
+    testSpan.click();
+
+    t.is(window.document.title, 'Hello');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
 });
 
 
@@ -362,6 +661,83 @@ test('MarkdownUp.main, url', async (t) => {
 });
 
 
+test('MarkdownUp.main, fontSize', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
+~~~ markdown-script
+markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
+~~~
+`});
+    app.updateParams('fontSize=14');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
+                {'html': 'div', 'attr': {'id': 'fontSize=14', 'style': 'display=none'}},
+                [
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'fontSize = 18.67'}]}
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements({'menuURL': '#fontSize=14&menu=1'}),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, fetch script', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+markdownPrint(fetch('README.md', null, true))
+~~~
+`
+    });
+    app.updateParams('');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
+                null,
+                [
+                    [
+                        [
+                            {
+                                'html': 'h1',
+                                'attr': {'id': 'hello'},
+                                'elem': [{'text': 'Hello'}]
+                            }
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
 test('MarkdownUp.main, fetch error', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
@@ -412,16 +788,7 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
 
 test('MarkdownUp.main, no title', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('');
     t.deepEqual(
         await app.main(),
@@ -444,16 +811,7 @@ test('MarkdownUp.main, no title', async (t) => {
 
 test('MarkdownUp.main, menu', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('menu=1');
     t.deepEqual(
         await app.main(),
@@ -476,16 +834,7 @@ test('MarkdownUp.main, menu', async (t) => {
 
 test('MarkdownUp.main, no menu', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window, {'menu': false});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello', 'menu': false});
     app.updateParams('menu=1');
     t.deepEqual(
         await app.main(),
@@ -505,16 +854,7 @@ test('MarkdownUp.main, no menu', async (t) => {
 
 test('MarkdownUp.main, menu cycle and toggle', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('menu=1&fontSize=18&cmd.markdown=1');
     t.deepEqual(
         await app.main(),
@@ -539,16 +879,7 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
 
 test('MarkdownUp.main, markdown', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
-        t.is(url, 'README.md');
-        return {'ok': true, 'text': () => new Promise((resolve) => {
-            resolve('Hello');
-        })};
-    };
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('cmd.markdown=1');
     t.deepEqual(
         await app.main(),
@@ -566,126 +897,15 @@ test('MarkdownUp.main, markdown', async (t) => {
 });
 
 
-test('markdown-bar-chart', async (t) => {
+test('MarkdownUp.main, markdown-script', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
-# Bar Chart
-
-~~~ bar-chart
-~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
-    app.updateParams('');
-    t.deepEqual(
-        await app.main(),
-        {
-            'title': 'Bar Chart',
-            'elements': [
-                null,
-                [
-                    {'html': 'h1', 'attr': {'id': 'bar-chart'}, 'elem': [{'text': 'Bar Chart'}]},
-                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
-                ],
-                [
-                    menuBurgerElements(),
-                    null
-                ]
-            ]
-        }
-    );
-});
-
-
-test('markdown-line-chart', async (t) => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
-# Line Chart
-
-~~~ line-chart
-~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
-    app.updateParams('');
-    t.deepEqual(
-        await app.main(),
-        {
-            'title': 'Line Chart',
-            'elements': [
-                null,
-                [
-                    {'html': 'h1', 'attr': {'id': 'line-chart'}, 'elem': [{'text': 'Line Chart'}]},
-                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
-                ],
-                [
-                    menuBurgerElements(),
-                    null
-                ]
-            ]
-        }
-    );
-});
-
-
-test('markdown-data-table', async (t) => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
-# Data Table
-
-~~~ data-table
-~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
-    app.updateParams('');
-    t.deepEqual(
-        await app.main(),
-        {
-            'title': 'Data Table',
-            'elements': [
-                null,
-                [
-                    {'html': 'h1', 'attr': {'id': 'data-table'}, 'elem': [{'text': 'Data Table'}]},
-                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
-                ],
-                [
-                    menuBurgerElements(),
-                    null
-                ]
-            ]
-        }
-    );
-});
-
-
-test('markdown-script', async (t) => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
+    const app = new MarkdownUp(window, {'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
 markdownPrint('Hello')
 ~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+`});
     app.updateParams('');
     t.deepEqual(
         await app.main(),
@@ -711,7 +931,7 @@ markdownPrint('Hello')
 });
 
 
-test('markdown-script debug', async (t) => {
+test('MarkdownUp.main, markdown-script debug', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
     window.console = {
@@ -719,19 +939,13 @@ test('markdown-script debug', async (t) => {
             logs.push(message);
         }
     };
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
+    const app = new MarkdownUp(window, {'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
 debugLog('Hello')
 ~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
+`});
     app.updateParams('debug=1');
     t.deepEqual(
         await app.main(),
@@ -755,33 +969,146 @@ debugLog('Hello')
 });
 
 
-test('markdown-script variables', async (t) => {
+test('MarkdownUp.main, markdown-script variables', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = () => ({'ok': true, 'text': () => new Promise((resolve) => {
-        resolve(`\
+    const app = new MarkdownUp(window, {'markdownText': `\
+~~~ markdown-script
+markdownPrint('varName = ' + varName)
+~~~
+`});
+    app.updateParams('var.varName=5');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
+                {'html': 'div', 'attr': {'id': 'var.varName=5', 'style': 'display=none'}},
+                [
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'varName = 5'}]}
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, markdown-script runtime error', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
+~~~ markdown-script
+foobar()
+~~~
+`});
+    app.updateParams('');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
+                null,
+                [
+                    [
+                        null,
+                        {'html': 'pre', 'elem': {'text': 'Undefined function "foobar"'}}
+                    ]
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, markdown-bar-chart', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
+# Bar Chart
+
+~~~ bar-chart
+~~~
+`});
+    app.updateParams('');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': 'Bar Chart',
+            'elements': [
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'bar-chart'}, 'elem': [{'text': 'Bar Chart'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, markdown-line-chart', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
+# Line Chart
+
+~~~ line-chart
+~~~
+`});
+    app.updateParams('');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': 'Line Chart',
+            'elements': [
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'line-chart'}, 'elem': [{'text': 'Line Chart'}]},
+                    {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, markdown-data-table', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
 # Data Table
 
 ~~~ data-table
 ~~~
-`);
-    })});
-    window.fetch = (url) => new Promise((resolve) => {
-        resolve(fetchResolve(url));
-    });
-    const app = new MarkdownUp(window);
-    app.updateParams('var.varName=5');
+`});
+    app.updateParams('');
     t.deepEqual(
         await app.main(),
         {
             'title': 'Data Table',
             'elements': [
-                {'html': 'div', 'attr': {'id': 'var.varName=5', 'style': 'display=none'}},
+                null,
                 [
-                    {'html': 'h1', 'attr': {'id': 'var.varName=5&data-table'}, 'elem': [{'text': 'Data Table'}]},
+                    {'html': 'h1', 'attr': {'id': 'data-table'}, 'elem': [{'text': 'Data Table'}]},
                     {'html': 'p', 'elem': {'html': 'pre', 'elem': {'text': "Error: Required member 'data' missing"}}}
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
+                    menuBurgerElements(),
                     null
                 ]
             ]

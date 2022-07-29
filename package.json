@@ -22,11 +22,11 @@
         "test": "ava -v test/"
     },
     "dependencies": {
-        "calc-script": "~1.0",
+        "calc-script": "~1.1",
         "element-model": "~1.1",
-        "markdown-model": "~1.4",
+        "markdown-model": "~1.5",
         "schema-markdown": "~1.1",
-        "schema-markdown-doc": "~1.4"
+        "schema-markdown-doc": "~1.5"
     },
     "devDependencies": {
         "ava": "~4.3",

@@ -7,7 +7,7 @@ import {chartCodeBlock, compareValues, formatValue, parameterValue, valueParamet
 import test from 'ava';
 
 
-test('testScript.js tests placeholder', (t) => {
+test('testUtil.js tests placeholder', (t) => {
     t.true(chartCodeBlock !== null);
     t.true(compareValues !== null);
     t.true(formatValue !== null);

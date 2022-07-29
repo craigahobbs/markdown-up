@@ -19,10 +19,6 @@ $(eval $(call WGET, https://raw.githubusercontent.com/craigahobbs/javascript-bui
 GHPAGES_SRC := build/app/
 
 
-# This project is alpha so don't check coverage
-C8_ARGS ?= --all --allowExternal --src lib/ --src test/
-
-
 # Include javascript-build
 include Makefile.base
 
@@ -69,5 +65,5 @@ app: build/npm.build
 		mv $$FILE.tmp $$FILE; \
 	done
 
-    # Generate MarkdownScript library documentation
+    # Generate the library documentation
 	$(NODE_DOCKER) npx calcScriptDoc lib/script.js > build/app/library/library.json
