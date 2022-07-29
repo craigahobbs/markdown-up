@@ -408,7 +408,7 @@
                 {
                     "name": "fontFamily",
                     "doc": [
-                        "Optional (default is 'Arial, Helvetica, sans-serif'). The text font family."
+                        "Optional (default is null, the default font family). The text font family."
                     ]
                 }
             ]
