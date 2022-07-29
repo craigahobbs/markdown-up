@@ -4,7 +4,7 @@
             "name": "documentReset",
             "group": "Document",
             "doc": [
-                "Reset the document. This is useful to call within callback functions that re-render the document."
+                "Reset the document. This is useful within callback functions that re-render the document."
             ]
         },
         {
@@ -29,19 +29,19 @@
             "name": "drawArc",
             "group": "Drawing",
             "doc": [
-                "Draw an arc curve from the current point to the coordinate x,y"
+                "Draw an arc curve from the current point to the end point"
             ],
             "args": [
                 {
                     "name": "rx",
                     "doc": [
-                        "The ellipse's X radius"
+                        "The arc ellipse's x-radius"
                     ]
                 },
                 {
                     "name": "ry",
                     "doc": [
-                        "The ellipse's Y radius"
+                        "The arc ellipse's y-radius"
                     ]
                 },
                 {
@@ -65,13 +65,13 @@
                 {
                     "name": "x",
                     "doc": [
-                        "The x-coordinate"
+                        "The x-coordinate of the end point"
                     ]
                 },
                 {
                     "name": "y",
                     "doc": [
-                        "The y-coordinate"
+                        "The y-coordinate of the end point"
                     ]
                 }
             ]
@@ -120,25 +120,25 @@
                 {
                     "name": "cx",
                     "doc": [
-                        "The x position of the ellipse"
+                        "The x-coordinate of the center of the ellipse"
                     ]
                 },
                 {
                     "name": "cy",
                     "doc": [
-                        "The y position of the ellipse"
+                        "The y-coordinate of the center of the ellipse"
                     ]
                 },
                 {
                     "name": "rx",
                     "doc": [
-                        "The radius of the ellipse on the x axis"
+                        "The x-radius of the ellipse"
                     ]
                 },
                 {
                     "name": "ry",
                     "doc": [
-                        "The radius of the ellipse on the y axis"
+                        "The y-radius of the ellipse"
                     ]
                 }
             ]
@@ -168,13 +168,13 @@
                 {
                     "name": "x",
                     "doc": [
-                        "The x position of the image"
+                        "The x-coordinate of the center of the image"
                     ]
                 },
                 {
                     "name": "y",
                     "doc": [
-                        "The y position of the image"
+                        "The y-coordinate of the center of the image"
                     ]
                 },
                 {
@@ -228,13 +228,13 @@
                 {
                     "name": "x",
                     "doc": [
-                        "The x-coordinate of the drawing point"
+                        "The x-coordinate of the new drawing point"
                     ]
                 },
                 {
                     "name": "y",
                     "doc": [
-                        "The y-coordinate of the drawing point"
+                        "The y-coordinate of the new drawing point"
                     ]
                 }
             ]
@@ -249,7 +249,7 @@
                 {
                     "name": "callback",
                     "doc": [
-                        "The click event callback function (x, y)"
+                        "The on-click event callback function (x, y)"
                     ]
                 }
             ]
@@ -264,13 +264,13 @@
                 {
                     "name": "x",
                     "doc": [
-                        "The x-coordinate of the rectangle"
+                        "The x-coordinate of the top-left of the rectangle"
                     ]
                 },
                 {
                     "name": "y",
                     "doc": [
-                        "The y-coordinate of the rectangle"
+                        "The y-coordinate of the top-left of the rectangle"
                     ]
                 },
                 {
@@ -384,7 +384,7 @@
                 {
                     "name": "fontSizePx",
                     "doc": [
-                        "Optional (default is null, The default font size). The text font size, in pixels."
+                        "Optional (default is null, the default font size). The text font size, in pixels."
                     ]
                 },
                 {
@@ -432,13 +432,13 @@
             "name": "elementModelRender",
             "group": "Element Model",
             "doc": [
-                "Render an [element model](https://craigahobbs.github.io/element-model/)"
+                "Render an [element model](https://github.com/craigahobbs/element-model#readme)"
             ],
             "args": [
                 {
                     "name": "element",
                     "doc": [
-                        "The [element model](https://craigahobbs.github.io/element-model/)"
+                        "The [element model](https://github.com/craigahobbs/element-model#readme)"
                     ]
                 }
             ]
@@ -463,7 +463,7 @@
                 {
                     "name": "id",
                     "doc": [
-                        "The element ID"
+                        "The input element ID"
                     ]
                 }
             ],
@@ -581,7 +581,7 @@
                 }
             ],
             "return": [
-                "The key's local storage value string or null if the key does not exist"
+                "The local storage value string or null if the key does not exist"
             ]
         },
         {
@@ -642,7 +642,7 @@
             "name": "markdownHeaderId",
             "group": "Markdown",
             "doc": [
-                "Compute the header element ID for some text"
+                "Compute the Markdown header element ID for some text"
             ],
             "args": [
                 {
@@ -761,7 +761,7 @@
                 "Get the [Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ],
             "return": [
-                "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
+                "The [Schema Markdown Type Model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
             ]
         },
         {
@@ -804,7 +804,7 @@
                 {
                     "name": "types",
                     "doc": [
-                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
+                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types') to validate"
                     ]
                 }
             ],
@@ -834,7 +834,7 @@
                 }
             ],
             "return": [
-                "The key's session storage value string or null if the key does not exist"
+                "The session storage value string or null if the key does not exist"
             ]
         },
         {
@@ -898,7 +898,7 @@
                 {
                     "name": "title",
                     "doc": [
-                        "The document title"
+                        "The document title string"
                     ]
                 }
             ]
@@ -934,7 +934,7 @@
                 {
                     "name": "url",
                     "doc": [
-                        "The URL"
+                        "The new location URL"
                     ]
                 }
             ]
