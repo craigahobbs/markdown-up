@@ -20,8 +20,9 @@ async function markdownUpIndex()
     # Menu and title
     parent = objectGet(index, 'parent')
     markdownPrint( \
-        '[Root](#var=) |', \
-        '[Parent](' + if(parent != null, "#var.vPath='" + stringEncodeURL(parent) + "'", '#var=') + ') |', \
+        if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
+        if(vPath == null, 'Parent', \
+            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + stringEncodeURL(parent) + "'") + ')') + ' |', \
         '[MarkdownUp](https://craigahobbs.github.io/markdown-up/)' \
     )
     markdownPrint('# ' + title)
