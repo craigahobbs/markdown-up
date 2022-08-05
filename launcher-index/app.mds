@@ -23,7 +23,7 @@ async function markdownUpIndex()
         if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
         if(vPath == null, 'Parent', \
             '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + stringEncodeURL(parent) + "'") + ')') + ' |', \
-        '[MarkdownUp](https://craigahobbs.github.io/markdown-up/)' \
+        '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)' \
     )
     markdownPrint('# ' + title)
 
