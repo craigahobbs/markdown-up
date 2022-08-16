@@ -999,6 +999,13 @@ test('script library, markdownEscape', (t) => {
 });
 
 
+test('script library, markdownEscapeLinkURL', (t) => {
+    const runtime = testRuntime();
+    t.is(markdownScriptFunctions.markdownEscapeLinkURL(['https://foo.com/this and that'], runtime.options), 'https://foo.com/this%20and%20that');
+    t.is(markdownScriptFunctions.markdownEscapeLinkURL(['https://foo.com/this (and that)'], runtime.options), 'https://foo.com/this%20(and%20that%29');
+});
+
+
 test('script library, markdownHeaderId', (t) => {
     const runtime = testRuntime();
     t.is(markdownScriptFunctions.markdownHeaderId(['Hello*World!'], runtime.options), 'hello-world');
