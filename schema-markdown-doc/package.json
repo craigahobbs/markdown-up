@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown-doc",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "description": "Schema Markdown documentation library",
     "keywords": [
         "schema",
@@ -22,14 +22,14 @@
         "test": "ava -v test/"
     },
     "dependencies": {
-        "markdown-model": "~1.5",
+        "markdown-model": "~1.6",
         "schema-markdown": "~1.1"
     },
     "devDependencies": {
         "ava": "~4.3",
-        "c8": "~7.11",
+        "c8": "~7.12",
         "element-model": "~1.1",
-        "eslint": "~8.19",
+        "eslint": "~8.21",
         "jsdoc": "~3.6",
         "jsdom": "~20.0"
     }

@@ -639,6 +639,24 @@
             ]
         },
         {
+            "name": "markdownEscapeLinkURL",
+            "group": "Markdown",
+            "doc": [
+                "Escape a URL for inclusion in a Markdown link"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "The URL to escape"
+                    ]
+                }
+            ],
+            "return": [
+                "The escaped URL"
+            ]
+        },
+        {
             "name": "markdownHeaderId",
             "group": "Markdown",
             "doc": [

@@ -313,3 +313,27 @@ const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
 export function getBaseURL(url) {
     return url.slice(0, url.lastIndexOf('/') + 1);
 }
+
+
+/**
+ * Escape a string for inclusion in Markdown text
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function escapeMarkdownText(text) {
+    return text.replace(rEscapeMarkdownText, '\\$1');
+}
+
+const rEscapeMarkdownText = /([\\[\]()*])/g;
+
+
+/**
+ * Escape a URL for inclusion in a Markdown link
+ *
+ * @param {string} url
+ * @returns {string}
+ */
+export function escapeMarkdownLinkURL(url) {
+    return encodeURI(url).replaceAll(')', '%29');
+}

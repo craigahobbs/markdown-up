@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-model",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "description": "Markdown object model, parser, and renderer",
     "keywords": [
         "markdown",
@@ -28,9 +28,9 @@
     },
     "devDependencies": {
         "ava": "~4.3",
-        "c8": "~7.11",
+        "c8": "~7.12",
         "element-model": "~1.1",
-        "eslint": "~8.19",
+        "eslint": "~8.21",
         "jsdoc": "~3.6",
         "jsdom": "~20.0"
     }

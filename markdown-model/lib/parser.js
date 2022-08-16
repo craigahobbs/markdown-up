@@ -44,19 +44,6 @@ function getMarkdownSpanText(span) {
 }
 
 
-/**
- * Escape a string for inclusion in Markdown text
- *
- * @param {string} text
- * @returns {string}
- */
-export function escapeMarkdownText(text) {
-    return text.replace(rEscapeMarkdownText, '\\$1');
-}
-
-const rEscapeMarkdownText = /([\\[\]()*])/g;
-
-
 // Markdown regex
 const rLineSplit = /\r?\n/;
 const rIndent = /^(?<indent>\s*)(?<notIndent>.*)$/;
