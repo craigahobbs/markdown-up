@@ -63,6 +63,7 @@ test('script library, functions', (t) => {
             ['localStorageSet', true],
             ['localStorageRemove', true],
             ['markdownEscape', true],
+            ['markdownEscapeLinkURL', true],
             ['markdownHeaderId', true],
             ['markdownParse', true],
             ['markdownPrint', true],

@@ -24,7 +24,7 @@
     "dependencies": {
         "calc-script": "~1.1",
         "element-model": "~1.1",
-        "markdown-model": "~1.5",
+        "markdown-model": "~1.6",
         "schema-markdown": "~1.1",
         "schema-markdown-doc": "~1.5"
     },
