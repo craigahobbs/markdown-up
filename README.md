@@ -25,7 +25,7 @@ To host a Markdown resource, download the MarkdownUp application stub to the dir
 your Markdown files:
 
 ~~~
-curl -O https://craigahobbs.github.io/markdown-up/static/index.html
+curl -O https://craigahobbs.github.io/markdown-up/extra/index.html
 ~~~
 
 To test your Markdown page, start a local static web server:
