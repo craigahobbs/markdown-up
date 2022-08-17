@@ -1,3 +1,11 @@
+## 1.7.5 (2022-08-17)
+
+- [5b8bbde](https://github.com/craigahobbs/markdown-up/commit/5b8bbde) - move app stub to extra
+
+- [b322654](https://github.com/craigahobbs/markdown-up/commit/b322654) - factor script library functions to scriptLibrary.js
+
+- [73e9833](https://github.com/craigahobbs/markdown-up/commit/73e9833) - release markdown-script
+
 ## 1.7.4 (2022-07-22)
 
 - [a46ecae](https://github.com/craigahobbs/markdown-up/commit/a46ecae) - update readme
