@@ -4,6 +4,9 @@
  */
 
 
+@import 'markdown-model/static/markdown-model.css';
+
+
 /* Menu */
 .menu-burger {
     position: fixed;
