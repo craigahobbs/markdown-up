@@ -47,7 +47,7 @@ application stub to the directory containing your type model's Schema Markdown f
 type model file:
 
 ```
-curl -O https://craigahobbs.github.io/schema-markdown-doc/static/index.html
+curl -O https://craigahobbs.github.io/schema-markdown-doc/extra/index.html
 ```
 
 By default, the schema-markdown-doc application stub displays documentation for "types.smd". You can
