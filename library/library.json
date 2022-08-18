@@ -621,7 +621,7 @@
             ]
         },
         {
-            "name": "markdownEscape",
+            "name": "markdownEscapeText",
             "group": "Markdown",
             "doc": [
                 "Escape text for inclusion in Markdown text"
@@ -630,7 +630,7 @@
                 {
                     "name": "text",
                     "doc": [
-                        "The text to escape"
+                        "The text"
                     ]
                 }
             ],
@@ -639,21 +639,39 @@
             ]
         },
         {
-            "name": "markdownEscapeLinkURL",
+            "name": "markdownEscapeURL",
             "group": "Markdown",
             "doc": [
                 "Escape a URL for inclusion in a Markdown link"
             ],
             "args": [
                 {
-                    "name": "text",
+                    "name": "url",
                     "doc": [
-                        "The URL to escape"
+                        "The URL string"
                     ]
                 }
             ],
             "return": [
-                "The escaped URL"
+                "The escaped URL string"
+            ]
+        },
+        {
+            "name": "markdownEscapeURLComponent",
+            "group": "Markdown",
+            "doc": [
+                "Escape a URL component for inclusion in a Markdown link's URL"
+            ],
+            "args": [
+                {
+                    "name": "urlComponent",
+                    "doc": [
+                        "The URL component string"
+                    ]
+                }
+            ],
+            "return": [
+                "The escaped URL component string"
             ]
         },
         {

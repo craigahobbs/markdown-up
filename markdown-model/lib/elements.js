@@ -334,6 +334,17 @@ const rEscapeMarkdownText = /([\\[\]()*])/g;
  * @param {string} url
  * @returns {string}
  */
-export function escapeMarkdownLinkURL(url) {
+export function escapeMarkdownURL(url) {
     return encodeURI(url).replaceAll(')', '%29');
+}
+
+
+/**
+ * Escape a URL component for inclusion in a Markdown link URL
+ *
+ * @param {string} urlComponent
+ * @returns {string}
+ */
+export function escapeMarkdownURLComponent(urlComponent) {
+    return encodeURIComponent(urlComponent).replaceAll(')', '%29');
 }
