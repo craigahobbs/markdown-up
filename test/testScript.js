@@ -23,65 +23,6 @@ const testRuntime = () => {
 };
 
 
-test('script library, functions', (t) => {
-    t.deepEqual(
-        Object.entries(markdownScriptFunctions).map(([fnName, fn]) => [fnName, typeof fn === 'function']),
-        [
-            ['documentReset', true],
-            ['documentURL', true],
-            ['getDocumentFontSize', true],
-            ['getDocumentInputValue', true],
-            ['getWindowHeight', true],
-            ['getWindowWidth', true],
-            ['setDocumentFocus', true],
-            ['setDocumentTitle', true],
-            ['setWindowLocation', true],
-            ['setWindowResize', true],
-            ['setWindowTimeout', true],
-            ['drawArc', true],
-            ['drawCircle', true],
-            ['drawClose', true],
-            ['drawEllipse', true],
-            ['drawHLine', true],
-            ['drawImage', true],
-            ['drawLine', true],
-            ['drawMove', true],
-            ['drawOnClick', true],
-            ['drawRect', true],
-            ['drawStyle', true],
-            ['drawText', true],
-            ['drawTextStyle', true],
-            ['drawVLine', true],
-            ['getDrawingHeight', true],
-            ['getDrawingWidth', true],
-            ['getTextHeight', true],
-            ['getTextWidth', true],
-            ['setDrawingSize', true],
-            ['elementModelRender', true],
-            ['localStorageClear', true],
-            ['localStorageGet', true],
-            ['localStorageSet', true],
-            ['localStorageRemove', true],
-            ['markdownEscape', true],
-            ['markdownEscapeLinkURL', true],
-            ['markdownHeaderId', true],
-            ['markdownParse', true],
-            ['markdownPrint', true],
-            ['markdownTitle', true],
-            ['schemaParse', true],
-            ['schemaPrint', true],
-            ['schemaTypeModel', true],
-            ['schemaValidate', true],
-            ['schemaValidateTypeModel', true],
-            ['sessionStorageClear', true],
-            ['sessionStorageGet', true],
-            ['sessionStorageSet', true],
-            ['sessionStorageRemove', true]
-        ]
-    );
-});
-
-
 //
 // Document functions
 //
@@ -993,16 +934,23 @@ test('script library, localStorageRemove', (t) => {
 //
 
 
-test('script library, markdownEscape', (t) => {
+test('script library, markdownEscapeText', (t) => {
     const runtime = testRuntime();
-    t.is(markdownScriptFunctions.markdownEscape(['Hello*World!'], runtime.options), 'Hello\\*World!');
+    t.is(markdownScriptFunctions.markdownEscapeText(['Hello*World!'], runtime.options), 'Hello\\*World!');
 });
 
 
-test('script library, markdownEscapeLinkURL', (t) => {
+test('script library, markdownEscapeURL', (t) => {
     const runtime = testRuntime();
-    t.is(markdownScriptFunctions.markdownEscapeLinkURL(['https://foo.com/this and that'], runtime.options), 'https://foo.com/this%20and%20that');
-    t.is(markdownScriptFunctions.markdownEscapeLinkURL(['https://foo.com/this (and that)'], runtime.options), 'https://foo.com/this%20(and%20that%29');
+    t.is(markdownScriptFunctions.markdownEscapeURL(['https://foo.com/this & that'], runtime.options), 'https://foo.com/this%20&%20that');
+    t.is(markdownScriptFunctions.markdownEscapeURL(['https://foo.com/this (& that)'], runtime.options), 'https://foo.com/this%20(&%20that%29');
+});
+
+
+test('script library, markdownEscapeURLComponent', (t) => {
+    const runtime = testRuntime();
+    t.is(markdownScriptFunctions.markdownEscapeURLComponent(['https://foo.com/this & that'], runtime.options), 'https%3A%2F%2Ffoo.com%2Fthis%20%26%20that');
+    t.is(markdownScriptFunctions.markdownEscapeURLComponent(['https://foo.com/this (& that)'], runtime.options), 'https%3A%2F%2Ffoo.com%2Fthis%20(%26%20that%29');
 });
 
 
