@@ -9,7 +9,7 @@
 
 async function markdownUpIndex()
     # Fetch the index files/directories/parent API
-    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + markdownEscapeURLComponent(vPath), '')
+    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + encodeURIComponent(vPath), '')
     index = fetch(index_url)
 
     # Set the document title
@@ -22,7 +22,7 @@ async function markdownUpIndex()
     markdownPrint( \
         if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
         if(vPath == null, 'Parent', \
-            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + markdownEscapeURLComponent(parent) + "'") + ')') + ' |', \
+            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + encodeURIComponent(parent) + "'") + ')') + ' |', \
         '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)' \
     )
     markdownPrint('# ' + title)
@@ -36,7 +36,7 @@ async function markdownUpIndex()
             jumpif (ixFile >= arrayLength(files)) filesDone
             file = arrayGet(files, ixFile)
             fileURL = if(vPath != null, vPath + '/', '') + file
-            markdownPrint('', '[' + markdownEscapeText(file) + '](#url=' + markdownEscapeURLComponent(fileURL) + '&var=)')
+            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + encodeURIComponent(fileURL) + '&var=)')
             ixFile = ixFile + 1
         jump fileLoop
     filesDone:
@@ -50,7 +50,7 @@ async function markdownUpIndex()
             jumpif (ixDirectory >= arrayLength(directories)) directoriesDone
             directory = arrayGet(directories, ixDirectory)
             directoryURL = if(vPath != null, vPath + '/', '') + directory
-            markdownPrint('', '[' + markdownEscapeText(directory) + "](#var.vPath='" + markdownEscapeURLComponent(directoryURL) + "')")
+            markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + encodeURIComponent(directoryURL) + "')")
             ixDirectory = ixDirectory + 1
         jump directoryLoop
     directoriesDone:

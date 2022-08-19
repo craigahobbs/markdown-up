@@ -934,23 +934,9 @@ test('script library, localStorageRemove', (t) => {
 //
 
 
-test('script library, markdownEscapeText', (t) => {
+test('script library, markdownEscape', (t) => {
     const runtime = testRuntime();
-    t.is(markdownScriptFunctions.markdownEscapeText(['Hello*World!'], runtime.options), 'Hello\\*World!');
-});
-
-
-test('script library, markdownEscapeURL', (t) => {
-    const runtime = testRuntime();
-    t.is(markdownScriptFunctions.markdownEscapeURL(['https://foo.com/this & that'], runtime.options), 'https://foo.com/this%20&%20that');
-    t.is(markdownScriptFunctions.markdownEscapeURL(['https://foo.com/this (& that)'], runtime.options), 'https://foo.com/this%20(&%20that%29');
-});
-
-
-test('script library, markdownEscapeURLComponent', (t) => {
-    const runtime = testRuntime();
-    t.is(markdownScriptFunctions.markdownEscapeURLComponent(['https://foo.com/this & that'], runtime.options), 'https%3A%2F%2Ffoo.com%2Fthis%20%26%20that');
-    t.is(markdownScriptFunctions.markdownEscapeURLComponent(['https://foo.com/this (& that)'], runtime.options), 'https%3A%2F%2Ffoo.com%2Fthis%20(%26%20that%29');
+    t.is(markdownScriptFunctions.markdownEscape(['Hello*World!'], runtime.options), 'Hello\\*World!');
 });
 
 
