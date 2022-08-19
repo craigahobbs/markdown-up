@@ -3,7 +3,7 @@
 
 /** @module lib/model */
 
-import {SchemaMarkdownParser} from '../../schema-markdown/lib/parser.js';
+import {parseSchemaMarkdown} from '../../schema-markdown/lib/parser.js';
 import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
@@ -18,8 +18,8 @@ export function validateMarkdownModel(markdown) {
 }
 
 
-// The Markdown model defined using Schema Markdown
-const markdownModelSmd = `\
+/** The Markdown schema-markdown type model */
+export const markdownModelTypes = parseSchemaMarkdown(`\
 # Markdown document struct
 struct Markdown
 
@@ -152,8 +152,4 @@ struct CodeBlock
 
     # The code block's starting line number
     optional int(>= 1) startLineNumber
-`;
-
-
-/** The Markdown schema-markdown type model */
-export const markdownModelTypes = (new SchemaMarkdownParser(markdownModelSmd)).types;
+`);

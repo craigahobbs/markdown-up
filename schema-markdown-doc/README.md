@@ -16,17 +16,17 @@ function generates the
 for a Schema Markdown user type's documentation. For example:
 
 ``` javascript
-import {SchemaMarkdownParser} from 'schema-markdown/lib/parser.js';
+import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import {schemaMarkdownDoc} from 'schema-markdown-doc/lib/schemaMarkdownDoc.js';
 
-const parser = new SchemaMarkdownParser(`\
+const types = parseSchemaMarkdown(`\
 # My struct
 struct MyStruct
 
     # My member
     string member
 `);
-const elements = schemaMarkdownDoc(parser.types, 'MyStruct');
+const elements = schemaMarkdownDoc(types, 'MyStruct');
 ```
 
 The element model is rendered using element-model's
