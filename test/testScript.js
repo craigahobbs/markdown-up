@@ -996,7 +996,7 @@ test('script library, markdownTitle', (t) => {
 
 test('script library, schemaParse', (t) => {
     const runtime = testRuntime();
-    t.deepEqual(markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', ['', '  # An integer\n  int a']], runtime.options), {
+    t.deepEqual(markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options), {
         'MyStruct': {
             'struct': {
                 'name': 'MyStruct',
@@ -1017,7 +1017,7 @@ test('script library, schemaParse', (t) => {
 test('script library, schemaPrint', (t) => {
     const runtime = testRuntime();
     runtime.options.params = '';
-    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', ['', '  # An integer\n  int a']], runtime.options);
+    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options);
     markdownScriptFunctions.schemaPrint([types, 'MyStruct'], runtime.options);
     const elements = runtime.resetElements();
     t.deepEqual(elements[0][0][0], {
@@ -1049,7 +1049,7 @@ test('script library, schemaTypeModel', (t) => {
 
 test('script library, schemaValidate', (t) => {
     const runtime = testRuntime();
-    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', ['', '  # An integer\n  int a']], runtime.options);
+    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options);
     t.deepEqual(markdownScriptFunctions.schemaValidate([types, 'MyStruct', {'a': 5}], runtime.options), {'a': 5});
 });
 
