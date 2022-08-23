@@ -25,8 +25,8 @@ const nbsp = String.fromCharCode(160);
 /**
  * Generate the Schema Markdown user type documentation element model
  *
- * @param {Object} types - The [user type map]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
- * @param {string} typeName - The type name for which to generate documentation
+ * @param {Object} types - The [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
+ * @param {string} typeName - The type name
  * @param {?Object} [options = null] - The [options]{@link module:lib/schemaMarkdownDoc~SchemaMarkdownDocOptions} object
  * @returns {Object[]}
  */
