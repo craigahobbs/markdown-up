@@ -148,6 +148,23 @@ export const scriptFunctions = {
     // $return: The hour
     'datetimeHour': ([datetime]) => (datetime instanceof Date ? datetime.getHours() : null),
 
+    // $function: datetimeISOFormat
+    // $group: Datetime
+    // $doc: Format the datetime as an ISO date/time string
+    // $arg datetime: The datetime
+    // $arg isDate: If true, format the datetime as an ISO date
+    // $return: The formatted datetime string
+    'datetimeISOFormat': ([datetime, isDate = false]) => {
+        let result = null;
+        if (datetime instanceof Date) {
+            result = datetime.toISOString();
+            if (isDate) {
+                result = result.slice(0, result.indexOf('T'));
+            }
+        }
+        return result;
+    },
+
     // $function: datetimeMinute
     // $group: Datetime
     // $doc: Get the number of minutes of a datetime
@@ -428,7 +445,7 @@ export const scriptFunctions = {
     // $arg url: The resource URL or array of URLs
     // $arg options: Optional (default is null). The [fetch options](https://developer.mozilla.org/en-US/docs/Web/API/fetch#parameters).
     // $arg isText: Optional (default is false). If true, retrieve the resource as text.
-    // $return: The resource object/string or array of objects/strings; null if an error occured.
+    // $return: The resource object/string or array of objects/strings; null if an error occurred.
     'fetch': async ([url, fetchOptions = null, isText = false], options) => {
         const fetchFn = (options !== null && 'fetchFn' in options ? options.fetchFn : null);
 
