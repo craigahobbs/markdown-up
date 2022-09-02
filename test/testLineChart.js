@@ -1127,10 +1127,10 @@ test('lineChartElements, lines', (t) => {
     const lineChart = {
         'x': 'A',
         'y': ['B'],
-        'xline': [{'value': 1}, {'value': 4, 'label': 'x-value'}],
-        'yline': [{'value': 1}, {'value': 4, 'label': 'y-value'}],
-        'xtick': {'count': 0},
-        'ytick': {'count': 0}
+        'xLines': [{'value': 1}, {'value': 4, 'label': 'x-value'}],
+        'yLines': [{'value': 1}, {'value': 4, 'label': 'y-value'}],
+        'xTicks': {'count': 0},
+        'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
@@ -1368,10 +1368,10 @@ test('lineChartElements, lines no label', (t) => {
     const lineChart = {
         'x': 'A',
         'y': ['B'],
-        'xline': [{'value': 4, 'label': ''}],
-        'yline': [{'value': 4, 'label': ''}],
-        'xtick': {'count': 0},
-        'ytick': {'count': 0}
+        'xLines': [{'value': 4, 'label': ''}],
+        'yLines': [{'value': 4, 'label': ''}],
+        'xTicks': {'count': 0},
+        'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
@@ -1491,10 +1491,10 @@ test('lineChartElements, lines extend axis', (t) => {
     const lineChart = {
         'x': 'A',
         'y': ['B'],
-        'xline': [{'value': 0}, {'value': 6}],
-        'yline': [{'value': 0}, {'value': 6}],
-        'xtick': {'count': 0},
-        'ytick': {'count': 0}
+        'xLines': [{'value': 0}, {'value': 6}],
+        'yLines': [{'value': 0}, {'value': 6}],
+        'xTicks': {'count': 0},
+        'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
@@ -1733,8 +1733,8 @@ test('lineChartElements, title', (t) => {
         'x': 'A',
         'y': ['B'],
         'title': 'Hello!',
-        'xtick': {'count': 0},
-        'ytick': {'count': 0}
+        'xTicks': {'count': 0},
+        'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
@@ -1866,8 +1866,8 @@ test('lineChartElements, axis ticks', (t) => {
     const lineChart = {
         'x': 'A',
         'y': ['B'],
-        'xtick': {'count': 5, 'skip': 2, 'start': 0, 'end': 10},
-        'ytick': {'count': 6, 'skip': 2, 'start': -1, 'end': 9}
+        'xTicks': {'count': 5, 'skip': 2, 'start': 0, 'end': 10},
+        'yTicks': {'count': 6, 'skip': 2, 'start': -1, 'end': 9}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
@@ -2178,8 +2178,8 @@ test('lineChartElements, axis ticks one', (t) => {
     const lineChart = {
         'x': 'A',
         'y': ['B'],
-        'xtick': {'count': 1},
-        'ytick': {'count': 1}
+        'xTicks': {'count': 1},
+        'yTicks': {'count': 1}
     };
     validateLineChart(lineChart);
     t.deepEqual(lineChartElements(data, lineChart), {
