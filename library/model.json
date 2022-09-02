@@ -1,0 +1,385 @@
+{
+    "DataTable": {
+        "struct": {
+            "name": "DataTable",
+            "doc": [
+                "A data table model"
+            ],
+            "docGroup": "Data Table",
+            "members": [
+                {
+                    "name": "fields",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The table's fields"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "categories",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The table's category fields"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "markdown",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The \"categories\" and \"fields\" to be rendered as Markdown text"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "precision",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "attr": {
+                        "gte": 0
+                    },
+                    "doc": [
+                        "The numeric formatting precision (default is 2)"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "datetime",
+                    "type": {
+                        "user": "DataTableDatetimeFormat"
+                    },
+                    "doc": [
+                        "The datetime format"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "DataTableDatetimeFormat": {
+        "enum": {
+            "name": "DataTableDatetimeFormat",
+            "doc": [
+                "A datetime format"
+            ],
+            "docGroup": "Data Table",
+            "values": [
+                {
+                    "name": "year",
+                    "doc": [
+                        "ISO datetime year format"
+                    ]
+                },
+                {
+                    "name": "month",
+                    "doc": [
+                        "ISO datetime month format"
+                    ]
+                },
+                {
+                    "name": "day",
+                    "doc": [
+                        "ISO datetime day format"
+                    ]
+                }
+            ]
+        }
+    },
+    "LineChart": {
+        "struct": {
+            "name": "LineChart",
+            "doc": [
+                "A line chart model"
+            ],
+            "docGroup": "Line Chart",
+            "members": [
+                {
+                    "name": "title",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The chart title"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "width",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "doc": [
+                        "The chart width"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "height",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "doc": [
+                        "The chart height"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "precision",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "attr": {
+                        "gte": 0
+                    },
+                    "doc": [
+                        "The numeric formatting precision (default is 2)"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "datetime",
+                    "type": {
+                        "user": "LineChartDatetimeFormat"
+                    },
+                    "doc": [
+                        "The datetime format"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "x",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The line chart's X-axis field"
+                    ]
+                },
+                {
+                    "name": "y",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The line chart's Y-axis fields"
+                    ]
+                },
+                {
+                    "name": "color",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The color encoding field"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "xtick",
+                    "type": {
+                        "user": "LineChartAxisTicks"
+                    },
+                    "doc": [
+                        "The X-axis tick mark"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "ytick",
+                    "type": {
+                        "user": "LineChartAxisTicks"
+                    },
+                    "doc": [
+                        "The Y-axis tick mark"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "xline",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "user": "LineChartAxisAnnotation"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The X-axis annotations"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "yline",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "user": "LineChartAxisAnnotation"
+                            }
+                        }
+                    },
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The Y-axis annotations"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "LineChartAxisTicks": {
+        "struct": {
+            "name": "LineChartAxisTicks",
+            "doc": [
+                "The axis tick mark model"
+            ],
+            "docGroup": "Line Chart",
+            "members": [
+                {
+                    "name": "count",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "attr": {
+                        "gte": 0
+                    },
+                    "doc": [
+                        "The count of evenly-spaced tick marks. The default is 3."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "start",
+                    "type": {
+                        "builtin": "object"
+                    },
+                    "doc": [
+                        "The field value of the first tick mark. Default is the minimum field value."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "end",
+                    "type": {
+                        "builtin": "object"
+                    },
+                    "doc": [
+                        "The field value of the last tick mark. Default is the maximum field value."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "skip",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "attr": {
+                        "gt": 0
+                    },
+                    "doc": [
+                        "The number of tick mark labels to skip after a rendered label"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "LineChartAxisAnnotation": {
+        "struct": {
+            "name": "LineChartAxisAnnotation",
+            "doc": [
+                "An axis annotation"
+            ],
+            "docGroup": "Line Chart",
+            "members": [
+                {
+                    "name": "value",
+                    "type": {
+                        "builtin": "object"
+                    },
+                    "doc": [
+                        "The axis field value"
+                    ]
+                },
+                {
+                    "name": "label",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The annotation label"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "LineChartDatetimeFormat": {
+        "enum": {
+            "name": "LineChartDatetimeFormat",
+            "doc": [
+                "A datetime format"
+            ],
+            "docGroup": "Line Chart",
+            "values": [
+                {
+                    "name": "year",
+                    "doc": [
+                        "ISO datetime year format"
+                    ]
+                },
+                {
+                    "name": "month",
+                    "doc": [
+                        "ISO datetime month format"
+                    ]
+                },
+                {
+                    "name": "day",
+                    "doc": [
+                        "ISO datetime day format"
+                    ]
+                }
+            ]
+        }
+    }
+}

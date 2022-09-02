@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>The MarkdownUp Library</title>
+        <title>The MarkdownUp Library Models</title>
         <meta charset="UTF-8">
-        <meta name="description" content="The MarkdownUp Library">
+        <meta name="description" content="The MarkdownUp Library Models">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
     </head>
     <body>
@@ -14,11 +15,8 @@
         const app = new MarkdownUp(window, {
             'markdownText': `\
 ~~~ markdown-script
-include 'https://craigahobbs.github.io/calc-script/library/app.mds'
-calcScriptLibraryDoc('library.json', 'The MarkdownUp Library', arrayNew( \\
-    arrayNew('CalcScript', 'https://craigahobbs.github.io/calc-script/library/'), \\
-    arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
-))
+include 'https://craigahobbs.github.io/schema-markdown-doc/doc/app.mds'
+schemaMarkdownDoc('model.json', 'The MarkdownUp Library Models')
 ~~~
 `});
         app.run();
