@@ -5,6 +5,7 @@
             "doc": [
                 "A data aggregation specification"
             ],
+            "docGroup": "Aggregation",
             "members": [
                 {
                     "name": "categories",
@@ -48,6 +49,7 @@
             "doc": [
                 "An aggregation measure specification"
             ],
+            "docGroup": "Aggregation",
             "members": [
                 {
                     "name": "field",
@@ -86,6 +88,7 @@
             "doc": [
                 "An aggregation function"
             ],
+            "docGroup": "Aggregation",
             "values": [
                 {
                     "name": "average",
@@ -331,7 +334,7 @@
                     "optional": true
                 },
                 {
-                    "name": "xtick",
+                    "name": "xTicks",
                     "type": {
                         "user": "LineChartAxisTicks"
                     },
@@ -341,7 +344,7 @@
                     "optional": true
                 },
                 {
-                    "name": "ytick",
+                    "name": "yTicks",
                     "type": {
                         "user": "LineChartAxisTicks"
                     },
@@ -351,7 +354,7 @@
                     "optional": true
                 },
                 {
-                    "name": "xline",
+                    "name": "xLines",
                     "type": {
                         "array": {
                             "type": {
@@ -368,7 +371,7 @@
                     "optional": true
                 },
                 {
-                    "name": "yline",
+                    "name": "yLines",
                     "type": {
                         "array": {
                             "type": {
