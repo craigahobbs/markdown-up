@@ -517,12 +517,14 @@ test('formatValue, date', (t) => {
 test('formatValue, date year', (t) => {
     t.is(formatValue(new Date(Date.UTC(2022, 5, 30, 12)), null, 'year'), '2022');
     t.is(formatValue(new Date(Date.UTC(2022, 7, 30, 12)), null, 'year'), '2023');
+    t.is(formatValue(new Date(Date.UTC(2022, 0, 1, 12)), null, 'year'), '2022');
 });
 
 
 test('formatValue, date month', (t) => {
-    t.is(formatValue(new Date(Date.UTC(2022, 7, 1, 12)), null, 'month'), '2022-08');
-    t.is(formatValue(new Date(Date.UTC(2022, 7, 30, 12)), null, 'month'), '2022-09');
+    t.is(formatValue(new Date(Date.UTC(2022, 7, 1)), null, 'month'), '2022-08');
+    t.is(formatValue(new Date(Date.UTC(2022, 7, 30)), null, 'month'), '2022-09');
+    t.is(formatValue(new Date(Date.UTC(2022, 0, 1)), null, 'month'), '2022-01');
 });
 
 
