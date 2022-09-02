@@ -14,27 +14,9 @@
                     ]
                 },
                 {
-                    "name": "fieldName",
+                    "name": "aggregation",
                     "doc": [
-                        "The name of the field to aggregate"
-                    ]
-                },
-                {
-                    "name": "func",
-                    "doc": [
-                        "Optional (default is \"average\"). The aggregation function. Valid values are \"average\", \"count\", \"max\", \"min\", and \"sum\"."
-                    ]
-                },
-                {
-                    "name": "categories",
-                    "doc": [
-                        "Optional (default is null). The aggregation category field names."
-                    ]
-                },
-                {
-                    "name": "aggregateName",
-                    "doc": [
-                        "Optional (default is null). The aggregated field name. If null, \"fieldName\" is used."
+                        "The [aggregation model](model.html#var.vName='Aggregation')"
                     ]
                 }
             ],
