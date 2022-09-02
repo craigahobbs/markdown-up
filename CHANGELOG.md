@@ -1,3 +1,5 @@
+# Changelog
+
 ## 1.7.5 (2022-08-17)
 
 - [5b8bbde](https://github.com/craigahobbs/markdown-up/commit/5b8bbde) - move app stub to extra

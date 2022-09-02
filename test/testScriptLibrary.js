@@ -7,7 +7,7 @@ import {markdownScriptFunctions} from '../lib/scriptLibrary.js';
 import test from 'ava';
 
 
-/* eslint-disable id-length, max-len */
+/* eslint-disable id-length */
 
 
 // Generic test runtime options
@@ -21,6 +21,453 @@ const testRuntime = () => {
     options.runtime = new MarkdownScriptRuntime(options);
     return options.runtime;
 };
+
+
+//
+// Data functions
+//
+
+
+test('script library, dataAggregate', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataAggregate([data, 'b', 'sum', ['a'], 'sum_b'], runtime.options), [
+        {'a': 1, 'sum_b': 7},
+        {'a': 2, 'sum_b': 5}
+    ]);
+});
+
+
+test('script library, dataCalculatedField', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataCalculatedField([data, 'c', 'a * b'], runtime.options), [
+        {'a': 1, 'b': 3, 'c': 3},
+        {'a': 1, 'b': 4, 'c': 4},
+        {'a': 2, 'b': 5, 'c': 10}
+    ]);
+});
+
+
+test('script library, dataCalculatedField variables', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    const variables = {'d': 2};
+    t.deepEqual(markdownScriptFunctions.dataCalculatedField([data, 'c', 'b * d', variables], runtime.options), [
+        {'a': 1, 'b': 3, 'c': 6},
+        {'a': 1, 'b': 4, 'c': 8},
+        {'a': 2, 'b': 5, 'c': 10}
+    ]);
+});
+
+
+test('script library, dataFilter', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataFilter([data, 'b > 3'], runtime.options), [
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataFilter variables', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    const variables = {'d': 3};
+    t.deepEqual(markdownScriptFunctions.dataFilter([data, 'b > d', variables], runtime.options), [
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataJoin', (t) => {
+    const runtime = testRuntime();
+    const leftData = [
+        {'a': 1, 'b': 5},
+        {'a': 1, 'b': 6},
+        {'a': 2, 'b': 7},
+        {'a': 3, 'b': 8}
+    ];
+    const rightData = [
+        {'a': 1, 'c': 10},
+        {'a': 2, 'c': 11},
+        {'a': 2, 'c': 12}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataJoin([leftData, rightData, 'a'], runtime.options), [
+        {'a': 1, 'b': 5, 'a2': 1, 'c': 10},
+        {'a': 1, 'b': 6, 'a2': 1, 'c': 10},
+        {'a': 2, 'b': 7, 'a2': 2, 'c': 11},
+        {'a': 2, 'b': 7, 'a2': 2, 'c': 12},
+        {'a': 3, 'b': 8}
+    ]);
+});
+
+
+test('script library, dataJoin options', (t) => {
+    const runtime = testRuntime();
+    const leftData = [
+        {'a': 1, 'b': 5},
+        {'a': 1, 'b': 6},
+        {'a': 2, 'b': 7},
+        {'a': 3, 'b': 8}
+    ];
+    const rightData = [
+        {'a': 2, 'c': 10},
+        {'a': 4, 'c': 11},
+        {'a': 4, 'c': 12}
+    ];
+    t.deepEqual(
+        markdownScriptFunctions.dataJoin([leftData, rightData, 'a', 'a / denominator', true, {'denominator': 2}], runtime.options),
+        [
+            {'a': 1, 'b': 5, 'a2': 2, 'c': 10},
+            {'a': 1, 'b': 6, 'a2': 2, 'c': 10},
+            {'a': 2, 'b': 7, 'a2': 4, 'c': 11},
+            {'a': 2, 'b': 7, 'a2': 4, 'c': 12}
+        ]
+    );
+});
+
+
+test('script library, dataLineChart', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 1}
+    ];
+    const lineChart = {'x': 'a', 'y': ['b']};
+    t.deepEqual(markdownScriptFunctions.dataLineChart([data, lineChart], runtime.options), undefined);
+    t.is(runtime.drawingWidth, 640);
+    t.is(runtime.drawingHeight, 320);
+    t.deepEqual(runtime.resetElements(), [
+        {
+            'html': 'p',
+            'elem': {
+                'svg': 'svg',
+                'attr': {'width': 640, 'height': 320},
+                'elem': [
+                    {
+                        'svg': 'rect',
+                        'attr': {'width': 640, 'height': 320, 'fill': 'white'}
+                    },
+                    null,
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'style': 'font-weight: bold',
+                            'x': '16.000',
+                            'y': '136.725',
+                            'transform': 'rotate(-90 16.000, 136.725)',
+                            'text-anchor': 'middle',
+                            'dominant-baseline': 'hanging'
+                        },
+                        'elem': {'text': 'b'}
+                    },
+                    [
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 63.150 255.950 H 58.150'}
+                            },
+                            null
+                        ],
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 63.150 136.725 H 58.150'}
+                            },
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'lightgray', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 63.150 136.725 H 624.000'}
+                            }
+                        ],
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 63.150 17.500 H 58.150'}
+                            },
+                            null
+                        ]
+                    ],
+                    [
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '54.400',
+                                'y': '255.950',
+                                'text-anchor': 'end',
+                                'dominant-baseline': 'auto'
+                            },
+                            'elem': {'text': '1'}
+                        },
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '54.400',
+                                'y': '136.725',
+                                'text-anchor': 'end',
+                                'dominant-baseline': 'middle'
+                            },
+                            'elem': {'text': '2'}
+                        },
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '54.400',
+                                'y': '17.500',
+                                'text-anchor': 'end',
+                                'dominant-baseline': 'hanging'
+                            },
+                            'elem': {'text': '3'}
+                        }
+                    ],
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'style': 'font-weight: bold',
+                            'x': '344.575',
+                            'y': '304.000',
+                            'text-anchor': 'middle',
+                            'dominant-baseline': 'auto'
+                        },
+                        'elem': {'text': 'a'}
+                    },
+                    [
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 65.150 257.950 V 262.950'}
+                            },
+                            null
+                        ],
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 344.575 257.950 V 262.950'}
+                            },
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'lightgray', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 344.575 257.950 V 17.500'}
+                            }
+                        ],
+                        [
+                            {
+                                'svg': 'path',
+                                'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 624.000 257.950 V 262.950'}
+                            },
+                            null
+                        ]
+                    ],
+                    [
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '65.150',
+                                'y': '266.700',
+                                'text-anchor': 'start',
+                                'dominant-baseline': 'hanging'
+                            },
+                            'elem': {'text': '1'}
+                        },
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '344.575',
+                                'y': '266.700',
+                                'text-anchor': 'middle',
+                                'dominant-baseline': 'hanging'
+                            },
+                            'elem': {'text': '1.50'}
+                        },
+                        {
+                            'svg': 'text',
+                            'attr': {
+                                'font-family': 'Arial, Helvetica, sans-serif',
+                                'font-size': '16.000px',
+                                'fill': 'black',
+                                'x': '624.000',
+                                'y': '266.700',
+                                'text-anchor': 'end',
+                                'dominant-baseline': 'hanging'
+                            },
+                            'elem': {'text': '2'}
+                        }
+                    ],
+                    {
+                        'svg': 'path',
+                        'attr': {'stroke': 'black', 'stroke-width': '1.000', 'fill': 'none', 'd': 'M 63.150 17.000 V 257.950 H 624.500'}
+                    },
+                    [
+                        {
+                            'svg': 'path',
+                            'attr': {'stroke': '#1f77b4', 'stroke-width': '3.000', 'fill': 'none', 'd': 'M 65.150 17.500 L 624.000 255.950'}
+                        }
+                    ],
+                    [],
+                    [],
+                    null
+                ]
+            }
+        }
+    ]);
+});
+
+
+test('script library, dataParseCSV', (t) => {
+    const runtime = testRuntime();
+    const text = `\
+a,b
+1,3
+`;
+    const text2 = `\
+1,4
+2,5
+`;
+    t.deepEqual(markdownScriptFunctions.dataParseCSV([text, text2], runtime.options), [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataSort', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5},
+        {'a': 3, 'b': 6},
+        {'a': 4, 'b': 7}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataSort([data, [['a', true], ['b']]], runtime.options), [
+        {'a': 4, 'b': 7},
+        {'a': 3, 'b': 6},
+        {'a': 2, 'b': 5},
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4}
+    ]);
+});
+
+
+test('script library, dataTable', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 1}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataTable([data], runtime.options), undefined);
+    t.deepEqual(runtime.resetElements(), [
+        {
+            'html': 'table',
+            'elem': [
+                {
+                    'html': 'tr',
+                    'elem': [[], [{'html': 'th', 'elem': {'text': 'a'}}, {'html': 'th', 'elem': {'text': 'b'}}]]
+                },
+                [
+                    {
+                        'html': 'tr',
+                        'elem': [[], [{'html': 'td', 'elem': {'text': '1'}}, {'html': 'td', 'elem': {'text': '3'}}]]
+                    },
+                    {
+                        'html': 'tr',
+                        'elem': [[], [{'html': 'td', 'elem': {'text': '2'}}, {'html': 'td', 'elem': {'text': '1'}}]]
+                    }
+                ]
+            ]
+        }
+    ]);
+});
+
+
+test('script library, dataTable model', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 1}
+    ];
+    const dataTable = {'fields': ['a']};
+    t.deepEqual(markdownScriptFunctions.dataTable([data, dataTable], runtime.options), undefined);
+    t.deepEqual(runtime.resetElements(), [
+        {
+            'html': 'table',
+            'elem': [
+                {
+                    'html': 'tr',
+                    'elem': [[], [{'html': 'th', 'elem': {'text': 'a'}}]]
+                },
+                [
+                    {
+                        'html': 'tr',
+                        'elem': [[], [{'html': 'td', 'elem': {'text': '1'}}]]
+                    },
+                    {
+                        'html': 'tr',
+                        'elem': [[], [{'html': 'td', 'elem': {'text': '2'}}]]
+                    }
+                ]
+            ]
+        }
+    ]);
+});
+
+
+test('script library, dataValidate', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': '1', 'b': 3},
+        {'a': '1', 'b': 4},
+        {'a': '2', 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataValidate([data], runtime.options), [
+        {'a': '1', 'b': 3},
+        {'a': '1', 'b': 4},
+        {'a': '2', 'b': 5}
+    ]);
+});
 
 
 //
@@ -167,6 +614,7 @@ test('script library, drawArc', (t) => {
                     {
                         'svg': 'path',
                         'attr': {
+                            // eslint-disable-next-line max-len
                             'd': 'M 0.00000000 25.00000000 A 25.00000000 25.00000000 0.00000000 0 0 50.00000000 25.00000000 A 25.00000000 25.00000000 0.00000000 1 1 100.00000000 25.00000000',
                             'fill': 'none',
                             'stroke': 'black',

@@ -66,3 +66,16 @@ app: build/npm.build
 
     # Generate the library documentation
 	$(NODE_DOCKER) npx calcScriptDoc lib/scriptLibrary.js > build/app/library/library.json
+
+    # Generate the library model documentation
+	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json
+
+
+# JavaScript to generate the library model documentation
+define LIBRARY_MODEL
+import {dataTableTypes} from "./lib/dataTable.js";
+import {lineChartTypes} from "./lib/lineChart.js";
+const types = {...dataTableTypes, ...lineChartTypes};
+console.log(JSON.stringify(types, null, 4));
+endef
+export LIBRARY_MODEL
