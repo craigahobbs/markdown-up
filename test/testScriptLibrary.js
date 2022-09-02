@@ -35,7 +35,13 @@ test('script library, dataAggregate', (t) => {
         {'a': 1, 'b': 4},
         {'a': 2, 'b': 5}
     ];
-    t.deepEqual(markdownScriptFunctions.dataAggregate([data, 'b', 'sum', ['a'], 'sum_b'], runtime.options), [
+    const aggregation = {
+        'categories': ['a'],
+        'measures': [
+            {'field': 'b', 'function': 'sum', 'name': 'sum_b'}
+        ]
+    };
+    t.deepEqual(markdownScriptFunctions.dataAggregate([data, aggregation], runtime.options), [
         {'a': 1, 'sum_b': 7},
         {'a': 2, 'sum_b': 5}
     ]);

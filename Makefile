@@ -73,9 +73,10 @@ app: build/npm.build
 
 # JavaScript to generate the library model documentation
 define LIBRARY_MODEL
+import {aggregationTypes} from "./lib/data.js";
 import {dataTableTypes} from "./lib/dataTable.js";
 import {lineChartTypes} from "./lib/lineChart.js";
-const types = {...dataTableTypes, ...lineChartTypes};
+const types = {...aggregationTypes, ...dataTableTypes, ...lineChartTypes};
 console.log(JSON.stringify(types, null, 4));
 endef
 export LIBRARY_MODEL

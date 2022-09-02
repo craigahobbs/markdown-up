@@ -5,8 +5,9 @@
 
 import {
     addCalculatedField, aggregateData, compareValues, filterData, formatValue, joinData,
-    parameterValue, parseCSV, sortData, validateData, valueParameter
+    parameterValue, parseCSV, sortData, validateAggregation, validateData, valueParameter
 } from '../lib/data.js';
+import {ValidationError} from 'schema-markdown/lib/schema.js';
 import test from 'ava';
 
 
@@ -352,13 +353,40 @@ test('filterData, variables', (t) => {
 });
 
 
+test('validateAggregation', (t) => {
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'average'},
+            {'field': 'C', 'function': 'average', 'name': 'Average(C)'}
+        ]
+    };
+    t.deepEqual(validateAggregation(aggregation), aggregation);
+});
+
+
+test('validateAggregation, error', (t) => {
+    const aggregation = {};
+    const error = t.throws(() => {
+        validateAggregation(aggregation);
+    }, {'instanceOf': ValidationError});
+    t.is(error.message, "Required member 'measures' missing");
+});
+
+
 test('aggregateData', (t) => {
     const data = [
         {'A': 1, 'B': 1, 'C': 4},
         {'A': 1, 'B': 1, 'C': 5},
         {'A': 1, 'B': 1}
     ];
-    t.deepEqual(aggregateData(data, 'C'), [
+    const aggregation = {
+        'measures': [
+            {'field': 'C', 'function': 'average'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
         {'C': 3}
     ]);
 });
@@ -375,29 +403,19 @@ test('aggregateData, categories', (t) => {
         {'A': 2, 'B': 1, 'C': 10},
         {'A': 2, 'B': 2}
     ];
-    t.deepEqual(aggregateData(data, 'C', 'average', ['A', 'B']), [
-        {'A': 1, 'B': 1, 'C': 3},
-        {'A': 1, 'B': 2, 'C': 7.5},
-        {'A': 2, 'B': 1, 'C': 9.5},
-        {'A': 2, 'B': 2, 'C': 0}
-    ]);
-    t.deepEqual(aggregateData(data, 'C', 'average', ['A', 'B'], 'Average(C)'), [
-        {'A': 1, 'B': 1, 'Average(C)': 3},
-        {'A': 1, 'B': 2, 'Average(C)': 7.5},
-        {'A': 2, 'B': 1, 'Average(C)': 9.5},
-        {'A': 2, 'B': 2, 'Average(C)': 0}
-    ]);
-});
-
-
-test('aggregateData, empty categories', (t) => {
-    const data = [
-        {'A': 1, 'B': 1, 'C': 4},
-        {'A': 1, 'B': 1, 'C': 5},
-        {'A': 1, 'B': 1}
-    ];
-    t.deepEqual(aggregateData(data, 'C', 'average', []), [
-        {'C': 3}
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'average'},
+            {'field': 'C', 'function': 'average', 'name': 'Average(C)'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
+        {'A': 1, 'B': 1, 'C': 3, 'Average(C)': 3},
+        {'A': 1, 'B': 2, 'C': 7.5, 'Average(C)': 7.5},
+        {'A': 2, 'B': 1, 'C': 9.5, 'Average(C)': 9.5},
+        {'A': 2, 'B': 2, 'C': 0, 'Average(C)': 0}
     ]);
 });
 
@@ -413,7 +431,14 @@ test('aggregateData, count', (t) => {
         {'A': 2, 'B': 1, 'C': 10},
         {'A': 2, 'B': 2}
     ];
-    t.deepEqual(aggregateData(data, 'C', 'count', ['A', 'B']), [
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'count'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
         {'A': 1, 'B': 1, 'C': 3},
         {'A': 1, 'B': 2, 'C': 2},
         {'A': 2, 'B': 1, 'C': 2},
@@ -433,7 +458,14 @@ test('aggregateData, max', (t) => {
         {'A': 2, 'B': 1, 'C': 10},
         {'A': 2, 'B': 2}
     ];
-    t.deepEqual(aggregateData(data, 'C', 'max', ['A', 'B']), [
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'max'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
         {'A': 1, 'B': 1, 'C': 6},
         {'A': 1, 'B': 2, 'C': 8},
         {'A': 2, 'B': 1, 'C': 10},
@@ -453,7 +485,14 @@ test('aggregateData, min', (t) => {
         {'A': 2, 'B': 1, 'C': 10},
         {'A': 2, 'B': 2}
     ];
-    t.deepEqual(aggregateData(data, 'C', 'min', ['A', 'B']), [
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'min'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
         {'A': 1, 'B': 1, 'C': null},
         {'A': 1, 'B': 2, 'C': 7},
         {'A': 2, 'B': 1, 'C': 9},
@@ -473,7 +512,14 @@ test('aggregateData, sum', (t) => {
         {'A': 2, 'B': 1, 'C': 10},
         {'A': 2, 'B': 2}
     ];
-    t.deepEqual(aggregateData(data, 'C', 'sum', ['A', 'B']), [
+    const aggregation = {
+        'categories': ['A', 'B'],
+        'measures': [
+            {'field': 'C', 'function': 'sum'}
+        ]
+    };
+    validateAggregation(aggregation);
+    t.deepEqual(aggregateData(data, aggregation), [
         {'A': 1, 'B': 1, 'C': 11},
         {'A': 1, 'B': 2, 'C': 15},
         {'A': 2, 'B': 1, 'C': 19},
