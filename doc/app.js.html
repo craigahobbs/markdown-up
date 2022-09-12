@@ -1,19 +1,47 @@
-// Licensed under the MIT License
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 /** @module lib/app */
 
 import {MarkdownScriptRuntime, markdownScriptCodeBlock} from './script.js';
-import {decodeQueryString, encodeQueryString} from '../schema-markdown/lib/encode.js';
-import {getBaseURL, isRelativeURL, markdownElementsAsync} from '../markdown-model/lib/elements.js';
-import {getMarkdownTitle, parseMarkdown} from '../markdown-model/lib/parser.js';
-import {evaluateExpression} from '../calc-script/lib/runtime.js';
+import {decodeQueryString, encodeQueryString} from 'schema-markdown/lib/encode.js';
+import {getBaseURL, isRelativeURL, markdownElementsAsync} from 'markdown-model/lib/elements.js';
+import {getMarkdownTitle, parseMarkdown} from 'markdown-model/lib/parser.js';
+import {evaluateExpression} from 'calc-script/lib/runtime.js';
 import {markdownScriptFunctions} from './scriptLibrary.js';
-import {parseExpression} from '../calc-script/lib/parser.js';
-import {parseSchemaMarkdown} from '../schema-markdown/lib/parser.js';
-import {renderElements} from '../element-model/lib/elementModel.js';
-import {schemaMarkdownDoc} from '../schema-markdown-doc/lib/schemaMarkdownDoc.js';
-import {validateType} from '../schema-markdown/lib/schema.js';
+import {parseExpression} from 'calc-script/lib/parser.js';
+import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
+import {renderElements} from 'element-model/lib/elementModel.js';
+import {schemaMarkdownDoc} from 'schema-markdown-doc/lib/schemaMarkdownDoc.js';
+import {validateType} from 'schema-markdown/lib/schema.js';
 
 
 // The application's hash parameter type model
@@ -37,10 +65,10 @@ struct MarkdownUp
     optional int(== 1) menu
 
     # The font size
-    optional int(>= 8, <= 18) fontSize
+    optional int(>= 8, &lt;= 18) fontSize
 
     # The line height
-    optional int(>= 1, <= 2) lineHeight
+    optional int(>= 1, &lt;= 2) lineHeight
 
     # Variable expressions
     optional string{} var
@@ -124,7 +152,7 @@ export class MarkdownUp {
             this.updateParams();
 
             // Skip the render if the page params haven't changed
-            if (paramsPrev !== null && JSON.stringify(paramsPrev) === JSON.stringify(this.params)) {
+            if (paramsPrev !== null &amp;&amp; JSON.stringify(paramsPrev) === JSON.stringify(this.params)) {
                 return;
             }
         } catch ({message}) {
@@ -142,11 +170,11 @@ export class MarkdownUp {
         }
 
         // Set the font size
-        const fontSize = (this.params !== null && 'fontSize' in this.params ? this.params.fontSize : this.fontSize);
+        const fontSize = (this.params !== null &amp;&amp; 'fontSize' in this.params ? this.params.fontSize : this.fontSize);
         this.window.document.documentElement.style.setProperty('--markdown-model-font-size', `${fontSize}pt`);
 
         // Set the line height
-        const lineHeight = (this.params !== null && 'lineHeight' in this.params ? this.params.lineHeight : this.lineHeight);
+        const lineHeight = (this.params !== null &amp;&amp; 'lineHeight' in this.params ? this.params.lineHeight : this.lineHeight);
         this.window.document.documentElement.style.setProperty('--markdown-model-line-height', `${lineHeight}em`);
 
         // Set the window title
@@ -176,14 +204,14 @@ export class MarkdownUp {
 
         // Navigate?
         // Note: This is done after render since it may have no effect (in which case we need to render)
-        if ('location' in result && result.location !== null) {
+        if ('location' in result &amp;&amp; result.location !== null) {
             this.window.location.href = result.location;
             return;
         }
 
         // If there is a URL hash ID, re-navigate to go there since it was just rendered. After the
         // first render, re-render is short-circuited by the unchanged hash param check above.
-        if (!isError && getHashID(this.window.location.hash) !== null) {
+        if (!isError &amp;&amp; getHashID(this.window.location.hash) !== null) {
             this.window.location.href = this.window.location.hash;
         }
     }
@@ -209,7 +237,7 @@ export class MarkdownUp {
         }
 
         // Clear the window resize event handler
-        if (clearResize && this.runtimeWindowResize !== null) {
+        if (clearResize &amp;&amp; this.runtimeWindowResize !== null) {
             this.window.removeEventListener('resize', this.runtimeWindowResize);
             this.runtimeWindowResize = null;
         }
@@ -230,7 +258,7 @@ export class MarkdownUp {
 
     async main() {
         // Help?
-        if ('cmd' in this.params && 'help' in this.params.cmd) {
+        if ('cmd' in this.params &amp;&amp; 'help' in this.params.cmd) {
             return {
                 'title': 'MarkdownUp',
                 'elements': [
@@ -241,10 +269,10 @@ export class MarkdownUp {
         }
 
         // Get the Markdown text
-        const urlOverride = 'url' in this.params && this.params.url !== '';
+        const urlOverride = 'url' in this.params &amp;&amp; this.params.url !== '';
         const url = urlOverride ? this.params.url : this.url;
         let markdownText = null;
-        if (this.markdownText !== null && !urlOverride) {
+        if (this.markdownText !== null &amp;&amp; !urlOverride) {
             ({markdownText} = this);
         } else {
             // Fetch the Markdown text resource URL
@@ -267,7 +295,7 @@ export class MarkdownUp {
         const markdownTitle = getMarkdownTitle(markdownModel);
 
         // Display the Markdown?
-        if ('cmd' in this.params && 'markdown' in this.params.cmd) {
+        if ('cmd' in this.params &amp;&amp; 'markdown' in this.params.cmd) {
             return {
                 'title': markdownTitle,
                 'elements': [
@@ -328,7 +356,7 @@ export class MarkdownUp {
         const scriptOptions = {
             // eslint-disable-next-line require-await
             'fetchFn': async (fetchURL, options) => this.window.fetch(fetchURL, options),
-            'fontSize': (this.params !== null && 'fontSize' in this.params ? this.params.fontSize : this.fontSize),
+            'fontSize': (this.params !== null &amp;&amp; 'fontSize' in this.params ? this.params.fontSize : this.fontSize),
             'params': this.params,
             'urlFn': (url) => this.modifyURL(url, resourceURL),
             'window': this.window
@@ -398,14 +426,14 @@ export class MarkdownUp {
         if (url.startsWith('#')) {
             // Fixup the "url" param if its relative
             const hashParams = decodeQueryString(url.slice(1));
-            if ('url' in hashParams && hashParams.url !== '' && isRelativeURL(hashParams.url)) {
+            if ('url' in hashParams &amp;&amp; hashParams.url !== '' &amp;&amp; isRelativeURL(hashParams.url)) {
                 hashParams.url = `${getBaseURL(resourceURL)}${hashParams.url}`;
             }
 
             // Encode hash parameters with a hash ID
             const paramString = encodeQueryString({...this.params, ...hashParams});
             const hashID = getHashID(url);
-            return `#${paramString}${hashID !== null && paramString !== '' ? '&' : ''}${hashID !== null ? hashID : ''}`;
+            return `#${paramString}${hashID !== null &amp;&amp; paramString !== '' ? '&amp;' : ''}${hashID !== null ? hashID : ''}`;
         }
 
         // Relative URL?
@@ -478,7 +506,7 @@ export class MarkdownUp {
 
     linkCommandToggle(command, value) {
         const params = {...this.params};
-        if ('cmd' in this.params && command in this.params.cmd) {
+        if ('cmd' in this.params &amp;&amp; command in this.params.cmd) {
             delete params.cmd;
         } else {
             params.cmd = {};
@@ -506,7 +534,7 @@ function getHashID(url) {
     return matchId !== null ? matchId[1] : null;
 }
 
-const rHashId = /[#&]([^=]+)$/;
+const rHashId = /[#&amp;]([^=]+)$/;
 
 
 // Icon sizes
@@ -576,3 +604,26 @@ const helpSVGElements = {
         'attr': {'d': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22', 'stroke': 'black', 'stroke-width': '3', 'fill': 'none'}
     }
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_data.html">lib/data</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a>
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

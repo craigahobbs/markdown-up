@@ -52,21 +52,6 @@ To view a different Markdown resource, set the application's
 (i.e., "http://127.0.0.1:8000#url=other.md").
 
 
-### MarkdownUp Application Options
-
-The MarkdownUp application supports the following options:
-
-- **fontSize** - The default font size, in points
-
-- **lineHeight** - The default line height, in em
-
-- **markdownText** - The default Markdown text
-
-- **menu** - If false, the application menu is hidden
-
-- **url** - The default Markdown resource URL
-
-
 ## Development
 
 MarkdownUp is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)

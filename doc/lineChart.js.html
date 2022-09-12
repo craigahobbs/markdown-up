@@ -1,11 +1,39 @@
-// Licensed under the MIT License
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lineChart.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lineChart.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 /** @module lib/lineChart */
 
 import {compareValues, formatValue, parameterValue, valueParameter} from './data.js';
-import {parseSchemaMarkdown} from '../schema-markdown/lib/parser.js';
-import {validateType} from '../schema-markdown/lib/schema.js';
+import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
+import {validateType} from 'schema-markdown/lib/schema.js';
 
 
 // The line chart model's Schema Markdown
@@ -175,7 +203,7 @@ const chartLineWidth = 3;
  * @returns {Object} The line chart [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
 export function lineChartElements(data, lineChart, options = null) {
-    const chartFontSize = pixelsPerPoint * (options !== null && 'fontSize' in options ? options.fontSize : chartFontDefaultSize);
+    const chartFontSize = pixelsPerPoint * (options !== null &amp;&amp; 'fontSize' in options ? options.fontSize : chartFontDefaultSize);
     const xField = lineChart.x;
     const yFields = lineChart.y;
     const colorField = lineChart.color ?? null;
@@ -204,13 +232,13 @@ export function lineChartElements(data, lineChart, options = null) {
                 colorValueSet.add(rowKey);
                 const xRow = row[xField] ?? null;
                 const yRow = row[yField] ?? null;
-                if (xRow !== null && yRow !== null) {
+                if (xRow !== null &amp;&amp; yRow !== null) {
                     if (!(rowKey in pointsMap)) {
                         pointsMap[rowKey] = [];
                     }
                     pointsMap[rowKey].push([xRow, yRow]);
                     xMin = (xMin === null ? xRow : xMin);
-                    yMin = (yMin === null ? yRow : (yRow < yMin ? yRow : yMin));
+                    yMin = (yMin === null ? yRow : (yRow &lt; yMin ? yRow : yMin));
                     xMax = xRow;
                     yMax = (yMax === null ? yRow : (yRow > yMax ? yRow : yMax));
                 }
@@ -220,7 +248,7 @@ export function lineChartElements(data, lineChart, options = null) {
         // Add the points
         const colorValues = Array.from(colorValueSet.values()).sort();
         const colorValueCount = colorValues.length;
-        for (let ixColorValue = 0; ixColorValue < colorValueCount; ixColorValue += 1) {
+        for (let ixColorValue = 0; ixColorValue &lt; colorValueCount; ixColorValue += 1) {
             const colorValue = colorValues[ixColorValue];
             const color = categoricalColors[ixColorValue % categoricalColors.length];
             const points = pointsMap[colorValue];
@@ -229,7 +257,7 @@ export function lineChartElements(data, lineChart, options = null) {
     } else {
         // Create a line for each y-field
         const fieldCount = yFields.length;
-        for (let ixField = 0; ixField < fieldCount; ixField += 1) {
+        for (let ixField = 0; ixField &lt; fieldCount; ixField += 1) {
             const yField = yFields[ixField];
             const color = categoricalColors[ixField % categoricalColors.length];
             const points = [];
@@ -239,10 +267,10 @@ export function lineChartElements(data, lineChart, options = null) {
             for (const row of data) {
                 const xRow = row[xField] ?? null;
                 const yRow = row[yField] ?? null;
-                if (xRow !== null && yRow !== null) {
+                if (xRow !== null &amp;&amp; yRow !== null) {
                     points.push([xRow, yRow]);
                     xMin = (xMin === null ? xRow : xMin);
-                    yMin = (yMin === null ? yRow : (yRow < yMin ? yRow : yMin));
+                    yMin = (yMin === null ? yRow : (yRow &lt; yMin ? yRow : yMin));
                     xMax = xRow;
                     yMax = (yMax === null ? yRow : (yRow > yMax ? yRow : yMax));
                 }
@@ -262,29 +290,29 @@ export function lineChartElements(data, lineChart, options = null) {
 
     // Compute Y-axis tick values
     const yAxisTicks = [];
-    const yTickCount = ('yTicks' in lineChart && 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount);
-    const yTickSkip = ('yTicks' in lineChart && 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1);
-    const yTickStart = ('yTicks' in lineChart && 'start' in lineChart.yTicks ? lineChart.yTicks.start : yMin);
-    const yTickEnd = ('yTicks' in lineChart && 'end' in lineChart.yTicks ? lineChart.yTicks.end : yMax);
-    for (let ixTick = 0; ixTick < yTickCount; ixTick++) {
+    const yTickCount = ('yTicks' in lineChart &amp;&amp; 'count' in lineChart.yTicks ? lineChart.yTicks.count : defaultYAxisTickCount);
+    const yTickSkip = ('yTicks' in lineChart &amp;&amp; 'skip' in lineChart.yTicks ? lineChart.yTicks.skip + 1 : 1);
+    const yTickStart = ('yTicks' in lineChart &amp;&amp; 'start' in lineChart.yTicks ? lineChart.yTicks.start : yMin);
+    const yTickEnd = ('yTicks' in lineChart &amp;&amp; 'end' in lineChart.yTicks ? lineChart.yTicks.end : yMax);
+    for (let ixTick = 0; ixTick &lt; yTickCount; ixTick++) {
         const yTickParam = yTickCount === 1 ? 0 : ixTick / (yTickCount - 1);
         const yTickValue = parameterValue(yTickParam, yTickStart, yTickEnd);
         yAxisTicks.push([yTickValue, (ixTick % yTickSkip) !== 0 ? '' : formatValue(yTickValue, lineChart.precision, lineChart.datetime)]);
-        yMin = (yTickValue < yMin ? yTickValue : yMin);
+        yMin = (yTickValue &lt; yMin ? yTickValue : yMin);
         yMax = (yTickValue > yMax ? yTickValue : yMax);
     }
 
     // Compute X-axis tick values
     const xAxisTicks = [];
-    const xTickCount = ('xTicks' in lineChart && 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount);
-    const xTickSkip = ('xTicks' in lineChart && 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1);
-    const xTickStart = ('xTicks' in lineChart && 'start' in lineChart.xTicks ? lineChart.xTicks.start : xMin);
-    const xTickEnd = ('xTicks' in lineChart && 'end' in lineChart.xTicks ? lineChart.xTicks.end : xMax);
-    for (let ixTick = 0; ixTick < xTickCount; ixTick++) {
+    const xTickCount = ('xTicks' in lineChart &amp;&amp; 'count' in lineChart.xTicks ? lineChart.xTicks.count : defaultXAxisTickCount);
+    const xTickSkip = ('xTicks' in lineChart &amp;&amp; 'skip' in lineChart.xTicks ? lineChart.xTicks.skip + 1 : 1);
+    const xTickStart = ('xTicks' in lineChart &amp;&amp; 'start' in lineChart.xTicks ? lineChart.xTicks.start : xMin);
+    const xTickEnd = ('xTicks' in lineChart &amp;&amp; 'end' in lineChart.xTicks ? lineChart.xTicks.end : xMax);
+    for (let ixTick = 0; ixTick &lt; xTickCount; ixTick++) {
         const xTickParam = xTickCount === 1 ? 0 : ixTick / (xTickCount - 1);
         const xTickValue = parameterValue(xTickParam, xTickStart, xTickEnd);
         xAxisTicks.push([xTickValue, (ixTick % xTickSkip) !== 0 ? '' : formatValue(xTickValue, lineChart.precision, lineChart.datetime)]);
-        xMin = (xTickValue < xMin ? xTickValue : xMin);
+        xMin = (xTickValue &lt; xMin ? xTickValue : xMin);
         xMax = (xTickValue > xMax ? xTickValue : xMax);
     }
 
@@ -297,7 +325,7 @@ export function lineChartElements(data, lineChart, options = null) {
                 yAnnotationValue,
                 annotation.label ?? formatValue(yAnnotationValue, lineChart.precision, lineChart.datetime)
             ]);
-            yMin = (yAnnotationValue < yMin ? yAnnotationValue : yMin);
+            yMin = (yAnnotationValue &lt; yMin ? yAnnotationValue : yMin);
             yMax = (yAnnotationValue > yMax ? yAnnotationValue : yMax);
         }
     }
@@ -311,7 +339,7 @@ export function lineChartElements(data, lineChart, options = null) {
                 xAnnotationValue,
                 annotation.label ?? formatValue(xAnnotationValue, lineChart.precision, lineChart.datetime)
             ]);
-            xMin = (xAnnotationValue < xMin ? xAnnotationValue : xMin);
+            xMin = (xAnnotationValue &lt; xMin ? xAnnotationValue : xMin);
             xMax = (xAnnotationValue > xMax ? xAnnotationValue : xMax);
         }
     }
@@ -363,7 +391,7 @@ export function lineChartElements(data, lineChart, options = null) {
         const labelWidth = label.length * chartFontWidthRatio * colorLegendFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
-    const colorLegendX = yFields.length === 1 && !('color' in lineChart) ? null : Math.max(
+    const colorLegendX = yFields.length === 1 &amp;&amp; !('color' in lineChart) ? null : Math.max(
         chartWidth - chartBorderSize - colorLegendLabelWidth - colorLegendSampleWidth,
         0.6 * chartWidth
     );
@@ -449,7 +477,7 @@ export function lineChartElements(data, lineChart, options = null) {
             yAxisTicks.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
                 const hasLabel = yLabel !== '';
-                const hasLine = !hasLabel || (yPoint > yAxisLabelTop && yPoint < yAxisLabelBottom);
+                const hasLine = !hasLabel || (yPoint > yAxisLabelTop &amp;&amp; yPoint &lt; yAxisLabelBottom);
                 return [
                     !hasLabel ? null : {
                         'svg': 'path',
@@ -485,7 +513,7 @@ export function lineChartElements(data, lineChart, options = null) {
                         'x': svgValue(yAxisX - axisTickLength - yAxisTickGap),
                         'y': svgValue(yPoint),
                         'text-anchor': 'end',
-                        'dominant-baseline': (yPoint > yAxisLabelBottom ? 'auto' : (yPoint < yAxisLabelTop ? 'hanging' : 'middle'))
+                        'dominant-baseline': (yPoint > yAxisLabelBottom ? 'auto' : (yPoint &lt; yAxisLabelTop ? 'hanging' : 'middle'))
                     },
                     'elem': {'text': yLabel}
                 };
@@ -511,7 +539,7 @@ export function lineChartElements(data, lineChart, options = null) {
             xAxisTicks.map(([xCoord, xLabel]) => {
                 const xPoint = chartPointX(xCoord);
                 const hasLabel = xLabel !== '';
-                const hasLine = !hasLabel || (xPoint > xAxisLabelLeft && xPoint < xAxisLabelRight);
+                const hasLine = !hasLabel || (xPoint > xAxisLabelLeft &amp;&amp; xPoint &lt; xAxisLabelRight);
                 return [
                     !hasLabel ? null : {
                         'svg': 'path',
@@ -546,7 +574,7 @@ export function lineChartElements(data, lineChart, options = null) {
                         'fill': axisColor,
                         'x': svgValue(xPoint),
                         'y': svgValue(xAxisY + axisTickLength + xAxisTickGap),
-                        'text-anchor': (xPoint < xAxisLabelLeft ? 'start' : (xPoint > xAxisLabelRight ? 'end' : 'middle')),
+                        'text-anchor': (xPoint &lt; xAxisLabelLeft ? 'start' : (xPoint > xAxisLabelRight ? 'end' : 'middle')),
                         'dominant-baseline': 'hanging'
                     },
                     'elem': {'text': xLabel}
@@ -579,7 +607,7 @@ export function lineChartElements(data, lineChart, options = null) {
             // Y-axis annotations
             yAxisAnnotations.map(([yCoord, yLabel]) => {
                 const yPoint = chartPointY(yCoord);
-                const isUnder = yPoint < 0.5 * (chartTop + chartBottom);
+                const isUnder = yPoint &lt; 0.5 * (chartTop + chartBottom);
                 const labelWidth = 2 * annotationLabelMargin + yLabel.length * chartFontWidthRatio * annotationLabelFontSize;
                 const labelY = isUnder
                     ? yPoint + annotationLineWidth + yAnnotationLabelOffsetY
@@ -696,3 +724,26 @@ export function lineChartElements(data, lineChart, options = null) {
         ]
     };
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_data.html">lib/data</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.11</a>
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

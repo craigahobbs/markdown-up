@@ -339,7 +339,7 @@
                         "user": "LineChartAxisTicks"
                     },
                     "doc": [
-                        "The X-axis tick mark"
+                        "The X-axis tick marks"
                     ],
                     "optional": true
                 },
@@ -349,7 +349,7 @@
                         "user": "LineChartAxisTicks"
                     },
                     "doc": [
-                        "The Y-axis tick mark"
+                        "The Y-axis tick marks"
                     ],
                     "optional": true
                 },
@@ -417,7 +417,7 @@
                         "builtin": "object"
                     },
                     "doc": [
-                        "The field value of the first tick mark. Default is the minimum field value."
+                        "The value of the first tick mark. Default is the minimum axis value."
                     ],
                     "optional": true
                 },
@@ -427,7 +427,7 @@
                         "builtin": "object"
                     },
                     "doc": [
-                        "The field value of the last tick mark. Default is the maximum field value."
+                        "The value of the last tick mark. Default is the maximum axis value."
                     ],
                     "optional": true
                 },
@@ -461,7 +461,7 @@
                         "builtin": "object"
                     },
                     "doc": [
-                        "The axis field value"
+                        "The axis value"
                     ]
                 },
                 {
