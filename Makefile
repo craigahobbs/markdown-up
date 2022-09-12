@@ -38,7 +38,7 @@ run: app
 
 .PHONY: app
 commit: app
-app: build/npm.build
+app: doc
 	rm -rf build/app/
 	mkdir -p build/app/
 
@@ -52,6 +52,7 @@ app: build/npm.build
 		node_modules/markdown-model \
 		node_modules/schema-markdown \
 		node_modules/schema-markdown-doc \
+		build/doc \
 		build/app/
 
     # Fix imports
