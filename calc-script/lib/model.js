@@ -22,16 +22,7 @@ struct CalcScript
 union ScriptStatement
 
     # An expression
-    Expression expr
-
-    # A variable assignment
-    AssignmentStatement assign
-
-    # A function definition
-    FunctionStatement function
-
-    # A label definition
-    string label
+    ExpressionStatement expr
 
     # A jump statement
     JumpStatement jump
@@ -39,8 +30,34 @@ union ScriptStatement
     # A return statement
     ReturnStatement return
 
+    # A label definition
+    string label
+
+    # A function definition
+    FunctionStatement function
+
     # An include statement
     string include
+
+
+# An expression statement
+struct ExpressionStatement
+
+    # The variable name to assign the expression value
+    optional string name
+
+    # The expression to evaluate
+    Expression expr
+
+
+# A jump statement
+struct JumpStatement
+
+    # The label to jump to
+    string label
+
+    # The test expression
+    optional Expression expr
 
 
 # A return statement
@@ -50,17 +67,7 @@ struct ReturnStatement
     optional Expression expr
 
 
-# A script variable assignment statement
-struct AssignmentStatement
-
-    # The variable name
-    string name
-
-    # The expression to assign to the variable
-    Expression expr
-
-
-# A script function statement
+# A function definition statement
 struct FunctionStatement
 
     # If true, the function is defined as async
@@ -74,16 +81,6 @@ struct FunctionStatement
 
     # The function's statements
     ScriptStatement[] statements
-
-
-# A script jump statement
-struct JumpStatement
-
-    # The label to jump to
-    string label
-
-    # The test expression
-    optional Expression expr
 
 
 # An expression
@@ -126,19 +123,47 @@ struct BinaryExpression
 
 # A binary expression operator
 enum BinaryExpressionOperator
+
+    # Exponentiation
     "**"
+
+    # Multiplication
     "*"
+
+    # Division
     "/"
+
+    # Remainder
     "%"
+
+    # Addition
     "+"
+
+    # Subtraction
     "-"
+
+    # Less than or equal
     "<="
+
+    # Less than
     "<"
+
+    # Greater than or equal
     ">="
+
+    # Greater than
     ">"
+
+    # Equal
     "=="
+
+    # Not equal
     "!="
+
+    # Logical AND
     "&&"
+
+    # Logical OR
     "||"
 
 
@@ -154,7 +179,11 @@ struct UnaryExpression
 
 # A unary expression operator
 enum UnaryExpressionOperator
+
+    # Unary negation
     "-"
+
+    # Logical NOT
     "!"
 
 
