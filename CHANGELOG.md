@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8 (2022-09-20)
+
+- [142cf4f](https://github.com/craigahobbs/markdown-up/commit/142cf4f) - update readme - add "Dynamic Markdown Applications" section
+
 ## 1.7.5 (2022-08-17)
 
 - [5b8bbde](https://github.com/craigahobbs/markdown-up/commit/5b8bbde) - move app stub to extra
