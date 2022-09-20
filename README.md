@@ -59,9 +59,9 @@ allowing you to build lightweight, client-rendered web applications with no HTML
 single dependency (MarkdownUp). The "markdown-script" fenced code blocks are interpreted as the
 [CalcScript programming language](https://craigahobbs.github.io/calc-script/language/).
 In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
-parse CSV, render data tables, draw line charts, and more. For more information, see
-[the MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/) and
-[the CalcScript Library](https://craigahobbs.github.io/calc-script/library/).
+parse CSV, render data tables, draw line charts, and more. For more information, see the
+[MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/) and the
+[CalcScript Library](https://craigahobbs.github.io/calc-script/library/).
 
 For example:
 
@@ -109,7 +109,7 @@ Click here to [see the example in action](https://craigahobbs.github.io/markdown
 
 ### Links
 
-- [Dynamic Markdown Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
+- [MarkdownUp Application Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
 - [The CalcScript Language](https://craigahobbs.github.io/calc-script/language/)
 - [The CalcScript Library](https://craigahobbs.github.io/calc-script/library/)
 - [The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
