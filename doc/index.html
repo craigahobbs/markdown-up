@@ -76,6 +76,65 @@ application stub file, index.html. For example:</p>
 <p>To view a different Markdown resource, set the application's
 <a href="https://craigahobbs.github.io/markdown-up/#cmd.help=1">&quot;url&quot; hash parameter</a>
 (i.e., &quot;http://127.0.0.1:8000#url=other.md&quot;).</p>
+<h2>Dynamic Markdown Applications</h2>
+<p>Using MarkdownUp's &quot;markdown-script&quot; fenced code blocks, you can dynamically generate Markdown,
+allowing you to build lightweight, client-rendered web applications with no HTML, no CSS, and a
+single dependency (MarkdownUp). The &quot;markdown-script&quot; fenced code blocks are interpreted as the
+<a href="https://craigahobbs.github.io/calc-script/language/">CalcScript programming language</a>.
+In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
+parse CSV, render data tables, draw line charts, and more. For more information, see
+<a href="https://craigahobbs.github.io/markdown-up/library/">the MarkdownUp Library</a> and
+<a href="https://craigahobbs.github.io/calc-script/library/">the CalcScript Library</a>.</p>
+<p>For example:</p>
+<pre class="prettyprint source"><code># MarkdownUp Dynamic Markdown Example
+
+~~~ markdown-script
+# Variable arguments
+helloCount = if(vCount != null, vCount, 5)
+
+# Constants
+width = 140
+height = 40
+borderSize = 5
+borderColor = 'blue'
+
+# Render the more/less menu
+markdownPrint( \
+    '', \
+    if(helloCount &lt;= 1, 'Less', '[Less](#var.vCount=' + (helloCount - 1) + ')') + ' | ', \
+    '[More](#var.vCount=' + (helloCount + 1) + ')' \
+)
+
+# Render many hellos
+ixHello = 0
+helloLoop:
+    # Render the hello title
+    helloTitle = 'Hello #' + (ixHello + 1)
+    markdownPrint('', '## ' + helloTitle)
+
+    # Render the hello drawing
+    setDrawingSize(width, height)
+    drawStyle(borderColor, borderSize)
+    drawRect(0.5 * borderSize, 0.5 * borderSize, width - borderSize, height - borderSize)
+    drawTextStyle(0.67 * height, null, true)
+    drawText(helloTitle, 0.5 * width, 0.55 * height)
+
+    ixHello = ixHello + 1
+jumpif (ixHello &lt; helloCount) helloLoop
+~~~
+</code></pre>
+<p>Click here to <a href="https://craigahobbs.github.io/markdown-up/#url=DynamicMarkdownExample.md">see the example in action</a>.</p>
+<h3>Links</h3>
+<ul>
+<li><a href="https://craigahobbs.github.io/#url=MarkdownUpApplications.md">Dynamic Markdown Examples</a></li>
+<li><a href="https://craigahobbs.github.io/calc-script/language/">The CalcScript Language</a></li>
+<li><a href="https://craigahobbs.github.io/calc-script/library/">The CalcScript Library</a></li>
+<li><a href="https://craigahobbs.github.io/markdown-up/library/">The MarkdownUp Library</a></li>
+</ul>
+<h2>The MarkdownUp Package</h2>
+<p>The <a href="https://www.npmjs.com/package/markdown-up">markdown-up package</a> contains functions for parsing
+CSV, manipulating data, and rendering tables and charts. For more information, refer to the
+<a href="https://craigahobbs.github.io/markdown-up/doc/">MarkdownUp package documentation</a>.</p>
 <h2>Development</h2>
 <p>MarkdownUp is developed using <a href="https://github.com/craigahobbs/javascript-build#readme">javascript-build</a>
 and it was started using <a href="https://github.com/craigahobbs/javascript-template#readme">javascript-template</a>:</p>
