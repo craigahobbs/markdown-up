@@ -52,6 +52,76 @@ To view a different Markdown resource, set the application's
 (i.e., "http://127.0.0.1:8000#url=other.md").
 
 
+## Dynamic Markdown Applications
+
+Using MarkdownUp's "markdown-script" fenced code blocks, you can dynamically generate Markdown,
+allowing you to build lightweight, client-rendered web applications with no HTML, no CSS, and a
+single dependency (MarkdownUp). The "markdown-script" fenced code blocks are interpreted as the
+[CalcScript programming language](https://craigahobbs.github.io/calc-script/language/).
+In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
+parse CSV, render data tables, draw line charts, and more. For more information, see
+[the MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/) and
+[the CalcScript Library](https://craigahobbs.github.io/calc-script/library/).
+
+For example:
+
+```
+# MarkdownUp Dynamic Markdown Example
+
+~~~ markdown-script
+# Variable arguments
+helloCount = if(vCount != null, vCount, 5)
+
+# Constants
+width = 140
+height = 40
+borderSize = 5
+borderColor = 'blue'
+
+# Render the more/less menu
+markdownPrint( \
+    '', \
+    if(helloCount <= 1, 'Less', '[Less](#var.vCount=' + (helloCount - 1) + ')') + ' | ', \
+    '[More](#var.vCount=' + (helloCount + 1) + ')' \
+)
+
+# Render many hellos
+ixHello = 0
+helloLoop:
+    # Render the hello title
+    helloTitle = 'Hello #' + (ixHello + 1)
+    markdownPrint('', '## ' + helloTitle)
+
+    # Render the hello drawing
+    setDrawingSize(width, height)
+    drawStyle(borderColor, borderSize)
+    drawRect(0.5 * borderSize, 0.5 * borderSize, width - borderSize, height - borderSize)
+    drawTextStyle(0.67 * height, null, true)
+    drawText(helloTitle, 0.5 * width, 0.55 * height)
+
+    ixHello = ixHello + 1
+jumpif (ixHello < helloCount) helloLoop
+~~~
+```
+
+Click here to [see the example in action](https://craigahobbs.github.io/markdown-up/#url=DynamicMarkdownExample.md).
+
+
+### Links
+
+- [Dynamic Markdown Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
+- [The CalcScript Language](https://craigahobbs.github.io/calc-script/language/)
+- [The CalcScript Library](https://craigahobbs.github.io/calc-script/library/)
+- [The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
+
+
+## The MarkdownUp Package
+
+The [markdown-up package](https://www.npmjs.com/package/markdown-up) contains functions for parsing
+CSV, manipulating data, and rendering tables and charts. For more information, refer to the
+[MarkdownUp package documentation](https://craigahobbs.github.io/markdown-up/doc/).
+
+
 ## Development
 
 MarkdownUp is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
