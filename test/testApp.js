@@ -965,7 +965,53 @@ debugLog('Hello')
         }
     );
     t.is(logs.length, 2);
-    t.is(logs[0], 'Hello');
+    t.deepEqual(logs.filter((message) => !message.startsWith('Script executed in ')), ['Hello']);
+});
+
+
+test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const logs = [];
+    window.console = {
+        'log': (message) => {
+            logs.push(message);
+        }
+    };
+    const app = new MarkdownUp(window, {'markdownText': `\
+# markdown-script
+
+~~~ markdown-script
+~~~
+
+~~~ markdown-script
+~~~
+`});
+    app.updateParams('debug=1');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': 'markdown-script',
+            'elements': [
+                {'html': 'div', 'attr': {'id': 'debug=1', 'style': 'display=none'}},
+                [
+                    {'html': 'h1', 'attr': {'id': 'debug=1&markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    null,
+                    null
+                ],
+                [
+                    menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
+                    null
+                ]
+            ]
+        }
+    );
+    t.is(logs.length, 6);
+    t.deepEqual(logs.filter((message) => !message.startsWith('Script executed in ')), [
+        'Warnings for the script at line number 4:',
+        '    Empty script',
+        'Warnings for the script at line number 7:',
+        '    Empty script'
+    ]);
 });
 
 
