@@ -107,6 +107,21 @@ jumpif (ixHello < helloCount) helloLoop
 Click here to [see the example in action](https://craigahobbs.github.io/markdown-up/#url=DynamicMarkdownExample.md).
 
 
+### Debug Mode
+
+Debug mode enables logging output using the
+[debugLog function](https://craigahobbs.github.io/calc-script/library/#var.vName='debugLog').
+For example:
+
+~~~ calcscript
+debugLog('Hello debug')
+~~~
+
+Add the "#debug=1" hash parameter to the application URL to turn on debug mode.
+Debug mode also enables the CalcScript linter, which performs static code analysis on your code and
+reports warnings for any issues found.
+
+
 ### Links
 
 - [MarkdownUp Application Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
