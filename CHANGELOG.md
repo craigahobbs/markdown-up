@@ -1,6 +1,10 @@
 # Changelog
 
-## 1.8 (2022-09-20)
+## 1.8.1 (2022-09-21)
+
+- [6ce5fd7](https://github.com/craigahobbs/markdown-up/commit/6ce5fd7) - show calcscript lint warnings in debug mode
+
+## 1.8.0 (2022-09-20)
 
 - [142cf4f](https://github.com/craigahobbs/markdown-up/commit/142cf4f) - update readme - add "Dynamic Markdown Applications" section
 
