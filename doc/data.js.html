@@ -475,6 +475,41 @@ export function sortData(data, sorts) {
 }
 
 
+/**
+ * Top data rows
+ *
+ * @param {Object[]} data - The data array
+ * @param {number} count - The number of rows to keep
+ * @param {?string[]} [categoryFields = null] - The category fields
+ * @returns {Object[]} The top data array
+ */
+export function topData(data, count, categoryFields = null) {
+    // Bucket rows by category
+    const categoryRows = {};
+    const categoryOrder = [];
+    for (const row of data) {
+        const categoryKey = categoryFields === null ? ''
+            : JSON.stringify(categoryFields.map((field) => (field in row ? row[field] : null)));
+        if (!(categoryKey in categoryRows)) {
+            categoryRows[categoryKey] = [];
+            categoryOrder.push(categoryKey);
+        }
+        categoryRows[categoryKey].push(row);
+    }
+    // Take only the top rows
+    const dataTop = [];
+    const topCount = count;
+    for (const categoryKey of categoryOrder) {
+        const categoryKeyRows = categoryRows[categoryKey];
+        const categoryKeyLength = categoryKeyRows.length;
+        for (let ixRow = 0; ixRow &lt; topCount &amp;&amp; ixRow &lt; categoryKeyLength; ixRow++) {
+            dataTop.push(categoryKeyRows[ixRow]);
+        }
+    }
+    return dataTop;
+}
+
+
 // Helper function to format labels
 export function formatValue(value, precision = null, datetime = null) {
     if (value instanceof Date) {
