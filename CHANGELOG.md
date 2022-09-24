@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.2 (2022-09-24)
+
+- [4f563c6](https://github.com/craigahobbs/markdown-up/commit/4f563c6) - add dataTop function
+
 ## 1.8.1 (2022-09-21)
 
 - [6ce5fd7](https://github.com/craigahobbs/markdown-up/commit/6ce5fd7) - show calcscript lint warnings in debug mode
