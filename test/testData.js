@@ -5,7 +5,7 @@
 
 import {
     addCalculatedField, aggregateData, compareValues, filterData, formatValue, joinData,
-    parameterValue, parseCSV, sortData, validateAggregation, validateData, valueParameter
+    parameterValue, parseCSV, sortData, topData, validateAggregation, validateData, valueParameter
 } from '../lib/data.js';
 import {ValidationError} from 'schema-markdown/lib/schema.js';
 import test from 'ava';
@@ -548,6 +548,37 @@ test('sortData', (t) => {
         {'A': 1, 'B': 1, 'C': 6},
         {'A': 1, 'B': 2, 'C': 8},
         {'B': 2, 'C': 7}
+    ]);
+});
+
+
+test('topData', (t) => {
+    const data = [
+        {'A': 'abc', 'B': 1, 'C': 1},
+        {'A': 'abc', 'B': 1, 'C': 2},
+        {'A': 'abc', 'B': 1, 'C': 3},
+        {'A': 'abc', 'B': 2, 'C': 1},
+        {'A': 'abc', 'B': 2, 'C': 2},
+        {'A': 'def', 'B': 1, 'C': 1},
+        {'A': 'ghi', 'C': 1}
+    ];
+    t.deepEqual(topData(data, 2, ['A', 'B']), [
+        {'A': 'abc', 'B': 1, 'C': 1},
+        {'A': 'abc', 'B': 1, 'C': 2},
+        {'A': 'abc', 'B': 2, 'C': 1},
+        {'A': 'abc', 'B': 2, 'C': 2},
+        {'A': 'def', 'B': 1, 'C': 1},
+        {'A': 'ghi', 'C': 1}
+    ]);
+    t.deepEqual(topData(data, 1, ['A']), [
+        {'A': 'abc', 'B': 1, 'C': 1},
+        {'A': 'def', 'B': 1, 'C': 1},
+        {'A': 'ghi', 'C': 1}
+    ]);
+    t.deepEqual(topData(data, 3), [
+        {'A': 'abc', 'B': 1, 'C': 1},
+        {'A': 'abc', 'B': 1, 'C': 2},
+        {'A': 'abc', 'B': 1, 'C': 3}
     ]);
 });
 

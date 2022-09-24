@@ -461,6 +461,29 @@ test('script library, dataTable model', (t) => {
 });
 
 
+test('script library, dataTop', (t) => {
+    const runtime = testRuntime();
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5},
+        {'a': 3, 'b': 6},
+        {'a': 4, 'b': 7}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataTop([data, 3], runtime.options), [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ]);
+    t.deepEqual(markdownScriptFunctions.dataTop([data, 1, ['a']], runtime.options), [
+        {'a': 1, 'b': 3},
+        {'a': 2, 'b': 5},
+        {'a': 3, 'b': 6},
+        {'a': 4, 'b': 7}
+    ]);
+});
+
+
 test('script library, dataValidate', (t) => {
     const runtime = testRuntime();
     const data = [
