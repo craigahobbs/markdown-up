@@ -49,23 +49,30 @@ import {getMarkdownParagraphText} from './parser.js';
  */
 export function markdownElements(markdown, options = null) {
     const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
-    return markdownElementsParts(markdown.parts, options, usedHeaderIds);
+    return markdownPartsElements(markdown.parts, options, usedHeaderIds);
 }
 
 
-function markdownElementsParts(parts, options, usedHeaderIds) {
-    return parts.map((part) => markdownElementsPart(part, options, usedHeaderIds));
+function markdownPartsElements(parts, options, usedHeaderIds) {
+    return parts.map((part) => markdownPartElements(part, options, usedHeaderIds));
 }
 
 
-function markdownElementsPart(part, options, usedHeaderIds) {
+function markdownPartElements(part, options, usedHeaderIds) {
     const [partKey] = Object.keys(part);
 
     // List?
     if (partKey === 'list') {
         const {items} = part.list;
-        const itemElements = items.map((item) => markdownElementsParts(item.parts, options, usedHeaderIds));
-        return markdownElementsListPart(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+        const itemElements = items.map((item) => markdownPartsElements(item.parts, options, usedHeaderIds));
+        return markdownListPartElements(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+
+    // Block quote?
+    } else if (partKey === 'quote') {
+        return {
+            'html': 'blockquote',
+            'elem': markdownPartsElements(part.quote.parts, options, usedHeaderIds)
+        };
 
     // Code block?
     } else if (partKey === 'codeBlock') {
@@ -73,10 +80,10 @@ function markdownElementsPart(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return markdownElementsCodeBlockPart(part);
+        return markdownCodeBlockPartElements(part);
     }
 
-    return markdownElementsPartBase(part, options, usedHeaderIds);
+    return markdownPartElementsBase(part, options, usedHeaderIds);
 }
 
 
@@ -94,22 +101,22 @@ function markdownElementsPart(part, options, usedHeaderIds) {
 // eslint-disable-next-line require-await
 export async function markdownElementsAsync(markdown, options = null) {
     const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
-    return markdownElementsPartsAsync(markdown.parts, options, usedHeaderIds);
+    return markdownPartsElementsAsync(markdown.parts, options, usedHeaderIds);
 }
 
 
 // eslint-disable-next-line require-await
-async function markdownElementsPartsAsync(parts, options, usedHeaderIds) {
+async function markdownPartsElementsAsync(parts, options, usedHeaderIds) {
     const elements = [];
     for (const part of parts) {
         // eslint-disable-next-line no-await-in-loop
-        elements.push(await markdownElementsPartAsync(part, options, usedHeaderIds));
+        elements.push(await markdownPartElementsAsync(part, options, usedHeaderIds));
     }
     return elements;
 }
 
 
-async function markdownElementsPartAsync(part, options, usedHeaderIds) {
+async function markdownPartElementsAsync(part, options, usedHeaderIds) {
     const [partKey] = Object.keys(part);
 
     // List?
@@ -118,9 +125,16 @@ async function markdownElementsPartAsync(part, options, usedHeaderIds) {
         const itemElements = [];
         for (const item of items) {
             // eslint-disable-next-line no-await-in-loop
-            itemElements.push(await markdownElementsPartsAsync(item.parts, options, usedHeaderIds));
+            itemElements.push(await markdownPartsElementsAsync(item.parts, options, usedHeaderIds));
         }
-        return markdownElementsListPart(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+        return markdownListPartElements(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
+
+    // Block quote?
+    } else if (partKey === 'quote') {
+        return {
+            'html': 'blockquote',
+            'elem': await markdownPartsElementsAsync(part.quote.parts, options, usedHeaderIds)
+        };
 
     // Code block?
     } else if (partKey === 'codeBlock') {
@@ -128,14 +142,14 @@ async function markdownElementsPartAsync(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return markdownElementsCodeBlockPart(part);
+        return markdownCodeBlockPartElements(part);
     }
 
-    return markdownElementsPartBase(part, options, usedHeaderIds);
+    return markdownPartElementsBase(part, options, usedHeaderIds);
 }
 
 
-function markdownElementsListPart(part, listItemElements) {
+function markdownListPartElements(part, listItemElements) {
     const {list} = part;
     return {
         'html': 'start' in list ? 'ol' : 'ul',
@@ -145,7 +159,7 @@ function markdownElementsListPart(part, listItemElements) {
 }
 
 
-function markdownElementsCodeBlockPart(part) {
+function markdownCodeBlockPartElements(part) {
     const {codeBlock} = part;
     return {
         'html': 'pre',
@@ -157,7 +171,7 @@ function markdownElementsCodeBlockPart(part) {
 }
 
 
-function markdownElementsPartBase(part, options, usedHeaderIds) {
+function markdownPartElementsBase(part, options, usedHeaderIds) {
     const [partKey] = Object.keys(part);
 
     // Paragraph?
@@ -197,6 +211,37 @@ function markdownElementsPartBase(part, options, usedHeaderIds) {
         return {
             'html': 'p',
             'elem': paragraphSpanElements(paragraph.spans, options)
+        };
+
+    // Table?
+    } else if (partKey === 'table') {
+        const {table} = part;
+        return {
+            'html': 'table',
+            'elem': [
+                {
+                    'html': 'thead',
+                    'elem': {
+                        'html': 'tr',
+                        'elem': table.headers.map((header, ixHeader) => ({
+                            'html': 'th',
+                            'attr': {'style': `text-align: ${ixHeader < table.aligns.length ? table.aligns[ixHeader] : 'left'}`},
+                            'elem': paragraphSpanElements(header, options)
+                        }))
+                    }
+                },
+                !('rows' in table) ? null : ({
+                    'html': 'tbody',
+                    'elem': table.rows.map((row) => ({
+                        'html': 'tr',
+                        'elem': row.map((cell, ixCell) => ({
+                            'html': 'td',
+                            'attr': {'style': `text-align: ${ixCell < table.aligns.length ? table.aligns[ixCell] : 'left'}`},
+                            'elem': paragraphSpanElements(cell, options)
+                        }))
+                    }))
+                })
+            ]
         };
     }
 
@@ -266,6 +311,10 @@ function paragraphSpanElements(spans, options) {
                 imageElement.attr.title = image.title;
             }
             spanElements.push(imageElement);
+
+        // Code span?
+        } else if (spanKey === 'code') {
+            spanElements.push({'html': 'code', 'elem': {'text': span.code}});
         }
     }
 

@@ -20,30 +20,36 @@ export function validateMarkdownModel(markdown) {
 
 /** The Markdown schema-markdown type model */
 export const markdownModelTypes = parseSchemaMarkdown(`\
-# Markdown document struct
+# Markdown document
 struct Markdown
 
     # The markdown document's parts
     MarkdownPart[] parts
 
 
-# Markdown document part struct
+# Markdown document part
 union MarkdownPart
 
     # A paragraph
     Paragraph paragraph
 
     # A horizontal rule (value is ignored)
-    object(nullable) hr
+    int(== 1) hr
 
     # A list
     List list
 
+    # A block quote
+    BlockQuote quote
+
     # A code block
     CodeBlock codeBlock
 
+    # A table
+    Table table
 
-# Paragraph markdown part struct
+
+# Paragraph markdown part
 struct Paragraph
 
     # The paragraph style
@@ -63,14 +69,79 @@ enum ParagraphStyle
     h6
 
 
-# Paragraph span struct
+# List markdown part
+struct List
+
+    # The list is numbered and this is starting number
+    optional int(>= 0) start
+
+    # The list's items
+    ListItem[len > 0] items
+
+
+# List item
+struct ListItem
+
+    # The list's parts
+    MarkdownPart[len > 0] parts
+
+
+# Block quote markdown part
+struct BlockQuote
+
+    # The block quote's parts
+    MarkdownPart[] parts
+
+
+# Code block markdown part
+struct CodeBlock
+
+    # The code block's language
+    optional string(len > 0) language
+
+    # The code block's text lines
+    string[] lines
+
+    # The code block's starting line number
+    optional int(>= 1) startLineNumber
+
+
+# Table markdown part
+struct Table
+
+    # The table header cell array
+    TableRow headers
+
+    # The table cell alignment array
+    TableAlignment[len > 0] aligns
+
+    # The table data
+    optional TableRow[len > 0] rows
+
+
+# Table cell alignment
+enum TableAlignment
+    left
+    right
+    center
+
+
+# A table row
+typedef TableCell[len > 0] TableRow
+
+
+# A table cell
+typedef Span[len > 0] TableCell
+
+
+# Paragraph span
 union Span
 
     # Text span
     string(len > 0) text
 
     # Line break (value is ignored)
-    object(nullable) br
+    int(== 1) br
 
     # Style span
     StyleSpan style
@@ -81,8 +152,11 @@ union Span
     # Image span
     ImageSpan image
 
+    # Code span
+    string(len > 0) code
 
-# Style span struct
+
+# Style span
 struct StyleSpan
 
     # The span's character style
@@ -98,7 +172,7 @@ enum CharacterStyle
     italic
 
 
-# Link span struct
+# Link span
 struct LinkSpan
 
     # The link's URL
@@ -111,7 +185,7 @@ struct LinkSpan
     Span[len > 0] spans
 
 
-# Image span struct
+# Image span
 struct ImageSpan
 
     # The image URL
@@ -122,34 +196,4 @@ struct ImageSpan
 
     # The image's title
     optional string(len > 0) title
-
-
-# List markdown part struct
-struct List
-
-    # The list is numbered and this is starting number
-    optional int(>= 0) start
-
-    # The list's items
-    ListItem[len > 0] items
-
-
-# List item struct
-struct ListItem
-
-    # The markdown document's parts
-    MarkdownPart[len > 0] parts
-
-
-# Code block markdown part struct
-struct CodeBlock
-
-    # The code block's language
-    optional string(len > 0) language
-
-    # The code block's text lines
-    string[] lines
-
-    # The code block's starting line number
-    optional int(>= 1) startLineNumber
 `);

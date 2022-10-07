@@ -52,6 +52,12 @@ const rHeadingAlt = /^\s*(?<heading>=+|-+)\s*$/;
 const rHorizontal = /^(?:(?:\s*\*){3,}|(?:\s*-){3,}|(?:\s*_){3,})\s*$/;
 const rFenced = /^(?<fence>\s*(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
 const rList = /^(?<indent>\s*(?<mark>-|\*|\+|[0-9]\.|[1-9][0-9]+\.)\s+)(?<line>.*?)\s*$/;
+const rQuote = /^(?<indent>\s{0,3}>\s?)/;
+const rTable = /^\s*(?::?-+:?\s*)?(?:\|\s*:?-+:?\s*)+(?:\|\s*)?$/g;
+const rTableRow = /^\s*(?:(?:\\\||[^|])+\s*)?(?:\|\s*(?:\\\||[^|])*?\s*)+(?:\|\s*)?/g;
+const rTableRowTrim = /^\s*\|?/;
+const rTableCell = /^\s*(?<cell>(?:\\\||[^|])*?)\s*\|/;
+const rTableEscape = /\\(\\|)/g;
 
 
 /**
@@ -66,6 +72,7 @@ export function parseMarkdown(markdown) {
     let paragraph = null;
     let paragraphFenced = null;
     let lines = [];
+    let table = null;
 
     // Helper function to add a markdown part
     const addPart = (part) => {
@@ -80,18 +87,26 @@ export function parseMarkdown(markdown) {
 
     // Helper function to close the current part
     const closeParagraph = (paragraphStyle = null) => {
-        // Code block?
+        // Code block or block quote?
         if (paragraph !== null) {
-            // Strip trailing blank lines
-            let ixLine;
-            for (ixLine = lines.length - 1; ixLine >= 0; ixLine--) {
-                if (lines[ixLine] !== '') {
-                    break;
+            if ('quote' in paragraph) {
+                // Parse the block quote markdown
+                paragraph.quote.parts = parseMarkdown(lines).parts;
+            } else {
+                // Strip trailing blank lines
+                let ixLine;
+                for (ixLine = lines.length - 1; ixLine >= 0; ixLine--) {
+                    if (lines[ixLine] !== '') {
+                        break;
+                    }
                 }
+
+                // Set the code block lines
+                paragraph.codeBlock.lines = lines.slice(0, ixLine + 1);
             }
-            paragraph.codeBlock.lines = lines.splice(0, ixLine + 1);
             paragraph = null;
             paragraphFenced = null;
+            lines = [];
         } else if (lines.length) {
             // Paragraph
             const paragraphPart = {'paragraph': {'spans': paragraphSpans(lines.join('\n'))}};
@@ -99,8 +114,9 @@ export function parseMarkdown(markdown) {
                 paragraphPart.paragraph.style = paragraphStyle;
             }
             addPart(paragraphPart);
+            lines = [];
         }
-        lines = [];
+        table = null;
     };
 
     // Helper function to get the correct [indent, list, listIndent] tuple for the given indent
@@ -119,8 +135,8 @@ export function parseMarkdown(markdown) {
     // Helper function to add a paragraph line
     const addLine = (line, lineIndent, codeBlockIndent) => {
         if (lines.length) {
-            // Code block line? If so, trip the indent
-            if (paragraph !== null) {
+            // Code block line? If so, strip the indent
+            if (paragraph !== null && 'codeBlock' in paragraph) {
                 lines.push(line.slice(codeBlockIndent));
             } else {
                 lines.push(line);
@@ -136,7 +152,7 @@ export function parseMarkdown(markdown) {
     const markdownStrings = (typeof markdown === 'string' ? [markdown] : markdown);
     for (const markdownString of markdownStrings) {
         for (const lineRaw of markdownString.split(rLineSplit)) {
-            const line = lineRaw.replace('\t', '    ');
+            const line = lineRaw.replaceAll('\t', '    ');
             const matchLine = line.match(rIndent);
             const lineIndent = matchLine.groups.indent.length;
             const emptyLine = matchLine.groups.notIndent === '';
@@ -150,10 +166,11 @@ export function parseMarkdown(markdown) {
 
             // Empty line?
             if (emptyLine) {
-                // Close any open paragraph
-                if (paragraph !== null) {
+                // Code block?
+                if (paragraph !== null && 'codeBlock' in paragraph) {
                     addLine(line, lineIndent, topIndent);
                 } else {
+                    // Close any open paragraph
                     closeParagraph();
                 }
 
@@ -163,6 +180,23 @@ export function parseMarkdown(markdown) {
                 paragraph = {'codeBlock': {'startLineNumber': lineNumber}};
                 addPart(paragraph);
                 lines.push(line.slice(codeBlockIndent));
+
+            // Block quote?
+            } else if (paragraphFenced === null && rQuote.test(line)) {
+                // Close any open paragraph
+                if (paragraph === null || !('quote' in paragraph)) {
+                    closeParagraph();
+                }
+
+                // Create the block quote part
+                if (paragraph === null) {
+                    paragraph = {'quote': {}};
+                    addPart(paragraph);
+                }
+
+                // Add the block quote line
+                const matchQuote = line.match(rQuote);
+                lines.push(line.slice(matchQuote.groups.indent.length));
 
             // Fenced code start?
             } else if (paragraphFenced === null && matchFenced !== null && lineIndent < codeBlockIndent) {
@@ -211,7 +245,7 @@ export function parseMarkdown(markdown) {
 
                 // Add the heading paragraph markdown part
                 updateParts(lineIndent);
-                addPart({'hr': null});
+                addPart({'hr': 1});
 
             // List?
             } else if (matchList !== null && lineIndent < codeBlockIndent) {
@@ -240,13 +274,56 @@ export function parseMarkdown(markdown) {
 
             // Text line
             } else {
-                // End code block first?
-                if (paragraph !== null && lineIndent < codeBlockIndent) {
-                    closeParagraph();
+                // Table?
+                if (table !== null) {
+                    // Table row?
+                    const matchTableRow = line.match(rTableRow);
+                    if (matchTableRow !== null) {
+                        if (!('rows' in table.table)) {
+                            table.table.rows = [];
+                        }
+                        const cells = parseTableCells(line);
+                        if (cells.length > table.table.headers.length) {
+                            cells.length = table.table.headers.length;
+                        }
+                        table.table.rows.push(cells.map((cell) => paragraphSpans(cell)));
+                    } else {
+                        table = null;
+                    }
+                } else {
+                    // Table delimiter following a table header?
+                    const tableHeader = (lines.length ? lines[lines.length - 1] : null);
+                    const matchTable = line.match(rTable);
+                    const matchTableHeader = (matchTable !== null && lineIndent < codeBlockIndent ? tableHeader.match(rTableRow) : null);
+                    if (matchTableHeader !== null) {
+                        // Does the table header match the delimiter?
+                        const headers = parseTableCells(tableHeader).map((cell) => paragraphSpans(cell));
+                        const aligns = parseTableCells(line).map(
+                            (cell) => (cell.endsWith(':') ? (cell.startsWith(':') ? 'center' : 'right') : 'left')
+                        );
+                        if (headers.length === aligns.length) {
+                            // Remove the table header line and close the open paragraph
+                            lines.length -= 1;
+                            closeParagraph();
+
+                            // Add the table markdown part
+                            table = {'table': {headers, aligns}};
+                            updateParts(lineIndent);
+                            addPart(table);
+                        }
+                    }
                 }
 
-                // Add the paragraph line
-                addLine(line, lineIndent, codeBlockIndent);
+                // Add the line to the paragraph
+                if (table === null) {
+                    // End code block?
+                    if (paragraph !== null && 'codeBlock' in paragraph && lineIndent < codeBlockIndent) {
+                        closeParagraph();
+                    }
+
+                    // Add the paragraph line
+                    addLine(line, lineIndent, codeBlockIndent);
+                }
             }
         }
     }
@@ -255,6 +332,22 @@ export function parseMarkdown(markdown) {
     closeParagraph();
 
     return {'parts': markdownParts};
+}
+
+
+function parseTableCells(line) {
+    const cells = [];
+    let matchCell;
+    let lineText = line.replace(rTableRowTrim, '');
+    while ((matchCell = lineText.match(rTableCell)) !== null) {
+        cells.push(matchCell.groups.cell.replaceAll(rTableEscape, '$1'));
+        lineText = lineText.slice(matchCell[0].length);
+    }
+    lineText = lineText.trim();
+    if (lineText !== '') {
+        cells.push(lineText);
+    }
+    return cells;
 }
 
 
@@ -267,9 +360,12 @@ const rSpans = new RegExp(
         '(?<linkAlt><)(?<linkAltHref>[[a-z]+:[^\\s]*?)>|' +
         '(?<boldItalic>\\*{3})(?!\\s)(?<boldItalicText>[\\s\\S]*?[^\\s]\\**)\\*{3}|' +
         '(?<bold>\\*{2})(?!\\s)(?<boldText>[\\s\\S]*?[^\\s]\\**)\\*{2}|' +
-        '(?<italic>\\*)(?!\\s)(?<italicText>[\\s\\S]*?[^\\s]\\**)\\*',
+        '(?<italic>\\*)(?!\\s)(?<italicText>[\\s\\S]*?[^\\s]\\**)\\*|' +
+        '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
     'mg'
 );
+const rSpanNewlinesEnd = /[\r\n]$/;
+const rSpanNewlines = /[\r\n]/g;
 
 
 // Helper function to translate markdown paragraph text to a markdown paragraph span model array
@@ -286,7 +382,7 @@ function paragraphSpans(text) {
 
         // Line break?
         if (typeof match.groups.br !== 'undefined') {
-            spans.push({'br': null});
+            spans.push({'br': 1});
 
         // Link-image span?
         } else if (typeof match.groups.linkImg !== 'undefined') {
@@ -327,6 +423,11 @@ function paragraphSpans(text) {
         // Italic style-span
         } else if (match.groups.italic === '*') {
             spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(match.groups.italicText)}});
+
+        // Code span
+        } else if (typeof match.groups.code !== 'undefined') {
+            const codeText = match.groups.codeText.replace(rSpanNewlinesEnd, '').replaceAll(rSpanNewlines, ' ');
+            spans.push({'code': codeText});
         }
 
         ixSearch = match.index + match[0].length;
@@ -341,7 +442,6 @@ function paragraphSpans(text) {
 }
 
 
-// Helper function to remove escapes from a string
 function removeEscapes(text) {
     return text.replace(rEscape, '$1');
 }
