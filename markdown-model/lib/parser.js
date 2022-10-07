@@ -190,8 +190,8 @@ export function parseMarkdown(markdown) {
 
                 // Create the block quote part
                 if (paragraph === null) {
-                    updateParts(lineIndent);
                     paragraph = {'quote': {}};
+                    updateParts(lineIndent);
                     addPart(paragraph);
                 }
 
@@ -210,6 +210,7 @@ export function parseMarkdown(markdown) {
                     paragraph.codeBlock.language = matchFenced.groups.language;
                 }
                 paragraphFenced = matchFenced.groups.fence;
+                updateParts(lineIndent);
                 addPart(paragraph);
 
             // Fenced code end?
