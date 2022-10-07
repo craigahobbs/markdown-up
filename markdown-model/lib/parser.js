@@ -190,6 +190,7 @@ export function parseMarkdown(markdown) {
 
                 // Create the block quote part
                 if (paragraph === null) {
+                    updateParts(lineIndent);
                     paragraph = {'quote': {}};
                     addPart(paragraph);
                 }
