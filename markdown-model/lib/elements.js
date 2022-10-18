@@ -269,7 +269,7 @@ function paragraphSpanElements(spans, options) {
         } else if (spanKey === 'style') {
             const {style} = span;
             spanElements.push({
-                'html': style.style === 'italic' ? 'em' : 'strong',
+                'html': (style.style === 'strikethrough' ? 'del' : (style.style === 'italic' ? 'em' : 'strong')),
                 'elem': paragraphSpanElements(style.spans, options)
             });
 

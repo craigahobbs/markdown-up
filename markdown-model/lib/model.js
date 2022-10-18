@@ -170,6 +170,7 @@ struct StyleSpan
 enum CharacterStyle
     bold
     italic
+    strikethrough
 
 
 # Link span

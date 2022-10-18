@@ -354,7 +354,7 @@ function parseTableCells(line) {
 
 
 // Markdown span regex
-const rEscape = /\\(\\|\*|_|\{|\}|\[|\]|\(|\)|#|\+|-|\.|!)/g;
+const rEscape = /\\(\\|\*|_|\{|\}|\[|\]|\(|\)|#|\+|-|\.|!|~)/g;
 const rSpans = new RegExp(
     '(?<br>\\s{2}$)|' +
         '(?<linkImg>\\[!\\[)(?<linkImgText>[\\s\\S]*?)\\]\\((?<linkImgHrefImg>[\\s\\S]*?)\\)\\]\\((?<linkImgHref>[^\\s]+?)\\)|' +
@@ -366,6 +366,7 @@ const rSpans = new RegExp(
         '(?<italicPre>\\\\\\*)?(?<italic>\\*)(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*|' +
         // eslint-disable-next-line max-len
         '(?<italicuPre>\\\\_|[A-Za-z0-9])?(?<italicu>_)(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9])|' +
+        '(?<strike>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strike>(?!~)|' +
         '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
     'mg'
 );
@@ -442,6 +443,10 @@ function paragraphSpans(text) {
                 }
                 spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText)}});
             }
+
+        // Strikethrough style-span
+        } else if (typeof match.groups.strike !== 'undefined') {
+            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(match.groups.strikeText)}});
 
         // Code span
         } else if (typeof match.groups.code !== 'undefined') {
