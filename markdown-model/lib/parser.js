@@ -360,9 +360,12 @@ const rSpans = new RegExp(
         '(?<linkImg>\\[!\\[)(?<linkImgText>[\\s\\S]*?)\\]\\((?<linkImgHrefImg>[\\s\\S]*?)\\)\\]\\((?<linkImgHref>[^\\s]+?)\\)|' +
         '(?<link>!?\\[)(?<linkText>[\\s\\S]*?)\\]\\((?<linkHref>[^\\s]+?)(?:\\s*"(?<linkTitle>[\\s\\S]*?)"\\s*)?\\)|' +
         '(?<linkAlt><)(?<linkAltHref>[[a-z]+:[^\\s]*?)>|' +
-        '(?<boldItalic>\\*{3})(?!\\s)(?<boldItalicText>[\\s\\S]*?[^\\s]\\**)\\*{3}|' +
-        '(?<bold>\\*{2})(?!\\s)(?<boldText>[\\s\\S]*?[^\\s]\\**)\\*{2}|' +
-        '(?<italic>\\*)(?!\\s)(?<italicText>[\\s\\S]*?[^\\s]\\**)\\*|' +
+        '(?<boldPre>\\\\\\*)?(?<bold>\\*{2})(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2}|' +
+        // eslint-disable-next-line max-len
+        '(?<bolduPre>\\\\_|[A-Za-z0-9])?(?<boldu>_{2})(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9])|' +
+        '(?<italicPre>\\\\\\*)?(?<italic>\\*)(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*|' +
+        // eslint-disable-next-line max-len
+        '(?<italicuPre>\\\\_|[A-Za-z0-9])?(?<italicu>_)(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9])|' +
         '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
     'mg'
 );
@@ -401,7 +404,7 @@ function paragraphSpans(text) {
             spans.push(span);
 
         // Link span (alternate syntax)?
-        } else if (match.groups.linkAlt === '<') {
+        } else if (typeof match.groups.linkAlt !== 'undefined') {
             spans.push({'link': {'href': removeEscapes(match.groups.linkAltHref), 'spans': paragraphSpans(match.groups.linkAltHref)}});
 
         // Image span?
@@ -412,19 +415,33 @@ function paragraphSpans(text) {
             }
             spans.push(span);
 
-        // Bold-italic style-span
-        } else if (match.groups.boldItalic === '***') {
-            spans.push({'style': {'style': 'bold', 'spans': [
-                {'style': {'style': 'italic', 'spans': paragraphSpans(match.groups.boldItalicText)}}
-            ]}});
-
         // Bold style-span
-        } else if (match.groups.bold === '**') {
-            spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(match.groups.boldText)}});
+        } else if (typeof match.groups.bold !== 'undefined' || typeof match.groups.boldu !== 'undefined') {
+            const boldPre = match.groups.boldPre ?? match.groups.bolduPre ?? null;
+            const bold = match.groups.bold ?? match.groups.boldu;
+            const boldText = match.groups.boldText ?? match.groups.bolduText;
+            if (bold === '__' && boldPre !== null && boldPre !== '\\_') {
+                spans.push({'text': `${boldPre}${bold}${boldText}${bold}`});
+            } else {
+                if (boldPre !== null) {
+                    spans.push({'text': removeEscapes(boldPre)});
+                }
+                spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText)}});
+            }
 
         // Italic style-span
-        } else if (match.groups.italic === '*') {
-            spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(match.groups.italicText)}});
+        } else if (typeof match.groups.italic !== 'undefined' || typeof match.groups.italicu !== 'undefined') {
+            const italicPre = match.groups.italicPre ?? match.groups.italicuPre ?? null;
+            const italic = match.groups.italic ?? match.groups.italicu;
+            const italicText = match.groups.italicText ?? match.groups.italicuText;
+            if (italic === '_' && italicPre !== null && italicPre !== '\\_') {
+                spans.push({'text': `${italicPre}${italic}${italicText}${italic}`});
+            } else {
+                if (italicPre !== null) {
+                    spans.push({'text': removeEscapes(italicPre)});
+                }
+                spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText)}});
+            }
 
         // Code span
         } else if (typeof match.groups.code !== 'undefined') {

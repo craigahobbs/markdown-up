@@ -119,19 +119,19 @@ struct Table
     optional TableRow[len > 0] rows
 
 
-# Table cell alignment
-enum TableAlignment
-    left
-    right
-    center
-
-
 # A table row
 typedef TableCell[len > 0] TableRow
 
 
 # A table cell
 typedef Span[len > 0] TableCell
+
+
+# Table cell alignment
+enum TableAlignment
+    left
+    right
+    center
 
 
 # Paragraph span
