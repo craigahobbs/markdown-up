@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "A schema definition and validation library",
     "keywords": [
         "schema",
@@ -26,7 +26,7 @@
     "devDependencies": {
         "ava": "~4.3",
         "c8": "~7.12",
-        "eslint": "~8.21",
+        "eslint": "~8.24",
         "jsdoc": "~3.6",
         "jsdom": "~20.0"
     }
