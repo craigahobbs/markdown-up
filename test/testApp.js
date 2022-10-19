@@ -964,8 +964,10 @@ debugLog('Hello')
             ]
         }
     );
-    t.is(logs.length, 2);
-    t.deepEqual(logs.filter((message) => !message.startsWith('Script executed in ')), ['Hello']);
+    t.deepEqual(logs.slice(0, logs.length - 1), [
+        'Hello'
+    ]);
+    t.true(logs[logs.length - 1].startsWith('Script executed in '));
 });
 
 
@@ -1043,6 +1045,56 @@ markdownPrint('varName = ' + varName)
             ]
         }
     );
+});
+
+
+test('MarkdownUp.main, markdown-script variables error', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const logs = [];
+    window.console = {
+        'log': (message) => {
+            logs.push(message);
+        }
+    };
+    const app = new MarkdownUp(
+        window,
+        {
+            'markdownText': `\
+~~~ markdown-script
+markdownPrint('varName = ' + varName)
+~~~
+`
+        }
+    );
+    app.updateParams('debug=1&var.varName=foo%20bar');
+    t.deepEqual(
+        await app.main(),
+        {
+            'title': null,
+            'elements': [
+                {'html': 'div', 'attr': {'id': 'debug=1&var.varName=foo%20bar', 'style': 'display=none'}},
+                [
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'varName = null'}]}
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements({'menuURL': '#debug=1&menu=1&var.varName=foo%20bar'}),
+                    null
+                ]
+            ]
+        }
+    );
+    t.deepEqual(logs.slice(0, logs.length - 1), [
+        `\
+Error evaluating variable "varName" expression "foo bar": Syntax error:
+foo bar
+   ^
+`
+    ]);
+    t.true(logs[logs.length - 1].startsWith('Script executed in '));
 });
 
 
