@@ -353,18 +353,26 @@ export class MarkdownUp {
         };
 
         // Add log function, if debugging
+        let logFn = null;
         if ('debug' in this.params) {
-            scriptOptions.logFn = (text) => {
+            logFn = (text) => {
                 this.window.console.log(text);
             };
+            scriptOptions.logFn = logFn;
         }
 
         // Add hash parameter variables, if any
         if ('var' in this.params) {
             scriptOptions.variables = {};
             for (const varName of Object.keys(this.params.var)) {
-                const varExpr = parseExpression(this.params.var[varName]);
-                scriptOptions.variables[varName] = evaluateExpression(varExpr, scriptOptions.variables);
+                const varExprStr = this.params.var[varName];
+                try {
+                    scriptOptions.variables[varName] = evaluateExpression(parseExpression(varExprStr), scriptOptions.variables);
+                } catch ({message}) {
+                    if (logFn !== null) {
+                        logFn(`Error evaluating variable "${varName}" expression "${varExprStr}": ${message}`);
+                    }
+                }
             }
         }
 
