@@ -12,7 +12,7 @@
     position: fixed;
     top: 0;
     right: 0;
-    margin: 10px;
+    margin: 6px;
 }
 .menu {
     position: fixed;
@@ -25,14 +25,14 @@
     border: 2px solid black;
 }
 .menu > a {
-    margin: 24px 12px 0 12px;
+    margin: 12px 6px 0 6px;
     line-height: 0;
 }
 .menu > a:first-child {
-    margin-top: 20px;
+    margin-top: 14px;
 }
 .menu > a:last-child {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 @media print
 {

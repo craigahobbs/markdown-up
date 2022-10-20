@@ -117,9 +117,10 @@ For example:
 debugLog('Hello debug')
 ~~~
 
-Add the "#debug=1" hash parameter to the application URL to turn on debug mode.
 Debug mode also enables the CalcScript linter, which performs static code analysis on your code and
 reports warnings for any issues found.
+
+To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.
 
 
 ### Links
