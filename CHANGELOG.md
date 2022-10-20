@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.3 (2022-10-20)
+
+- [d0e7716](https://github.com/craigahobbs/markdown-up/commit/d0e7716) - menu improvements
+
+- [6616878](https://github.com/craigahobbs/markdown-up/commit/6616878) - fix lineHeight hash param type, handle application variable hash argument parsing and evaluation errors
+
 ## 1.8.2 (2022-09-24)
 
 - [4f563c6](https://github.com/craigahobbs/markdown-up/commit/4f563c6) - add dataTop function
