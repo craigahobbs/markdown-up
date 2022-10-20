@@ -13,63 +13,116 @@ const jsdomURL = 'https://github.com/craigahobbs/markdown-up';
 
 
 // Helper function to create the menu burger elements
-function menuBurgerElements({
-    menuURL = '#menu=1'
-} = {}) {
-    return {
-        'html': 'div',
-        'attr': {'class': 'menu-burger'},
-        'elem': [
-            {
-                'html': 'a',
-                'attr': {'href': menuURL, 'aria-label': 'Menu'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': '24', 'height': '24', 'viewBox': '0 0 24 24'},
+const menuBurgerElements = {
+    'html': 'div',
+    'attr': {'class': 'menu-burger'},
+    'elem': {
+        'html': 'a',
+        'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Menu'},
+        'elem': {
+            'svg': 'svg',
+            'attr': {'width': 32, 'height': 32},
+            'elem': [
+                {
+                    'svg': 'g',
+                    'attr': {'transform': 'translate(4.000, 4.000)'},
                     'elem': {
-                        'svg': 'path',
-                        'attr': {
-                            'd': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19',
-                            'fill': 'none', 'stroke': 'black', 'stroke-width': '3'
-                        }
+                        'svg': 'svg',
+                        'attr': {'width': '24.000', 'height': '24.000', 'viewBox': '0 0 24 24'},
+                        'elem': [
+                            {
+                                'svg': 'path',
+                                'attr': {
+                                    'fill': 'none',
+                                    'stroke': 'black',
+                                    'stroke-width': 3,
+                                    'd': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
+                                }
+                            }
+                        ]
                     }
                 }
-            }
-        ]
-    };
-}
+            ]
+        }
+    }
+};
 
 
 // Helper function to create the menu elements
-function menuElements({
-    fontSizeURL = '#fontSize=14&menu=1',
-    lineHeightURL = '#lineHeight=1.4&menu=1',
-    markdownURL = '#cmd.markdown=1&menu=1',
-    helpURL = '#cmd.help=1&menu=1'
-} = {}) {
+function menuElements(viewMarkdown = false) {
+    const markdownIcon = [
+        {
+            'svg': 'g',
+            'attr': {'transform': 'translate(6.000, 6.000)'},
+            'elem': {
+                'svg': 'svg',
+                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                'elem': [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'fill': 'none',
+                            'stroke': (viewMarkdown ? 'white' : 'black'),
+                            'stroke-width': 3,
+                            'd': 'M4,2 L20,2 L20,22 L4,22 Z'
+                        }
+                    },
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'fill': 'none',
+                            'stroke': (viewMarkdown ? 'white' : 'black'),
+                            'stroke-width': 2,
+                            'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
+                        }
+                    }
+                ]
+            }
+        }
+    ];
+    if (viewMarkdown) {
+        markdownIcon.unshift({
+            'svg': 'rect',
+            'attr': {'fill': 'black', 'height': 48, 'stroke': 'none', 'width': 48}
+        });
+    }
     return {
         'html': 'div',
         'attr': {'class': 'menu'},
         'elem': [
             {
                 'html': 'a',
-                'attr': {'href': markdownURL, 'aria-label': 'Show Markdown'},
+                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Show Markdown'},
                 'elem': {
                     'svg': 'svg',
-                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': markdownIcon
+                }
+            },
+            {
+                'html': 'a',
+                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Cycle font size'},
+                'elem': {
+                    'svg': 'svg',
+                    'attr': {'width': 48, 'height': 48},
                     'elem': [
                         {
-                            'svg': 'path',
-                            'attr': {
-                                'd': 'M4,2 L20,2 L20,22 L4,22 Z',
-                                'fill': 'none', 'stroke': 'black', 'stroke-width': '3'
-                            }
-                        },
-                        {
-                            'svg': 'path',
-                            'attr': {
-                                'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5',
-                                'fill': 'none', 'stroke': 'black', 'stroke-width': '2'
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': 'black',
+                                            'stroke-width': 4,
+                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14'
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ]
@@ -77,51 +130,122 @@ function menuElements({
             },
             {
                 'html': 'a',
-                'attr': {'href': fontSizeURL, 'aria-label': 'Font size'},
+                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Cycle line height'},
                 'elem': {
                     'svg': 'svg',
-                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
-                    'elem': {
-                        'svg': 'path',
-                        'attr': {
-                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
-                            'fill': 'none', 'stroke': 'black', 'stroke-width': '4'
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': [
+                        {
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': 'black',
+                                            'stroke-width': 2,
+                                            'd': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
+                                        }
+                                    }
+                                ]
+                            }
                         }
-                    }
+                    ]
                 }
             },
             {
                 'html': 'a',
-                'attr': {'href': lineHeightURL, 'aria-label': 'Line height'},
+                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Debug'},
                 'elem': {
                     'svg': 'svg',
-                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
-                    'elem': {
-                        'svg': 'path',
-                        'attr': {
-                            'd': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21',
-                            'fill': 'none', 'stroke': 'black', 'stroke-width': '2'
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': [
+                        {
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': 'black',
+                                            'stroke-width': 3,
+                                            // eslint-disable-next-line max-len
+                                            'd': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
+                                        }
+                                    }
+                                ]
+                            }
                         }
-                    }
+                    ]
                 }
             },
             {
                 'html': 'a',
-                'attr': {'href': helpURL, 'aria-label': 'Help'},
+                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Help'},
                 'elem': {
                     'svg': 'svg',
-                    'attr': {'width': '36', 'height': '36', 'viewBox': '0 0 24 24'},
-                    'elem': {
-                        'svg': 'path',
-                        'attr': {
-                            'd': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22',
-                            'fill': 'none', 'stroke': 'black', 'stroke-width': '3'
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': [
+                        {
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': 'black',
+                                            'stroke-width': 3,
+                                            'd': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
+                                        }
+                                    }
+                                ]
+                            }
                         }
-                    }
+                    ]
                 }
             }
         ]
     };
+}
+
+
+// Helper function to remove an element model's callbacks
+function deleteElementCallbacks(elements) {
+    if (Array.isArray(elements)) {
+        for (const element of elements) {
+            deleteElementCallbacks(element);
+        }
+    } else if (elements !== null && typeof elements === 'object') {
+        if ('elements' in elements) {
+            deleteElementCallbacks(elements.elements);
+        } else {
+            if ('callback' in elements) {
+                delete elements.callback;
+            }
+            if ('elem' in elements) {
+                deleteElementCallbacks(elements.elem);
+            }
+        }
+    }
+    return elements;
+}
+
+
+function sleep(ms) {
+    // eslint-disable-next-line no-promise-executor-return
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 
@@ -160,24 +284,27 @@ test('MarkdownUp, run and render', async (t) => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#cmd.help=1';
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     const app = new MarkdownUp(window);
     await app.run();
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;type_MarkdownUp">struct MarkdownUp</h1>'
+        '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
-    window.location.hash = '#cmd.help=1&fontSize=14&lineHeight=1.4';
+    window.location.hash = '#';
+    window.localStorage.setItem('MarkdownUp', '{"fontSize": 14, "lineHeight": 1.4}');
+    window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     documentElementStyleSetPropertyCalls.length = 0;
-    await app.render();
+    await app.render(true);
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
-        '<h1 id="cmd.help=1&amp;fontSize=14&amp;lineHeight=1.4&amp;type_MarkdownUp">struct MarkdownUp</h1>'
+        '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-font-size', '14pt'],
@@ -201,6 +328,168 @@ test('MarkdownUp, render bad params', async (t) => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
+});
+
+
+test('MarkdownUp, render menu toggle', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#';
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), null);
+
+    // Click the menu button and wait for the render
+    let [menuButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    menuButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+
+    // Click the menu button again
+    [menuButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    menuButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{}');
+});
+
+
+test('MarkdownUp, render menu view toggle', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the Markdown menu button and wait for the render
+    let [, markdownButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    markdownButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<div class="markdown">Hello!</div>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
+
+    // Click the Markdown menu button again
+    [, markdownButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    markdownButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+});
+
+
+test('MarkdownUp, render menu cycle', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the Markdown menu button and wait for the render
+    let [, , markdownButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    markdownButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '14pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the Markdown menu button again to cycle-over
+    [, , markdownButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    markdownButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '16pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":16}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+});
+
+
+test('MarkdownUp, render menu cycle overflow', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#';
+    window.localStorage.setItem('MarkdownUp', '{"fontSize": 18}');
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '18pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the Markdown menu button and wait for the render
+    const [, , markdownButton] = window.document.getElementsByTagName('a');
+    window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    markdownButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-font-size', '8pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
@@ -240,16 +529,18 @@ main()
 ~~~
 `
     });
-    window.location.hash = '#menu=1';
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     await app.render();
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 1);
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<div id="menu=1" style="display=none"></div><p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime timeout ID
     window.location.hash = '#';
-    await app.render();
+    window.sessionStorage.setItem('MarkdownUp', '{}');
+    await app.render(true);
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 2);
     t.is(window.document.title, '');
@@ -301,16 +592,18 @@ main()
 ~~~
 `
     });
-    window.location.hash = '#menu=1';
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     await app.render();
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<div id="menu=1" style="display=none"></div><p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime resize event handler
     window.location.hash = '#';
-    await app.render();
+    window.sessionStorage.setItem('MarkdownUp', '{}');
+    await app.render(true);
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
@@ -488,11 +781,11 @@ elementModelRender(objectNew( \
 test('MarkdownUp.main, help', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
-    app.updateParams('cmd.help=1');
-    const result = await app.main();
+    app.updateParams(null, null, '{"view": "help"}');
+    const result = deleteElementCallbacks(await app.main());
     t.deepEqual(
         result.elements[0][0][0],
-        {'html': 'h1', 'attr': {'id': 'cmd.help=1&type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
+        {'html': 'h1', 'attr': {'id': 'type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
     );
     result.elements[0] = '<helpElements>';
     t.deepEqual(
@@ -502,12 +795,22 @@ test('MarkdownUp.main, help', async (t) => {
             'elements': [
                 '<helpElements>',
                 [
-                    menuBurgerElements({'menuURL': '#cmd.help=1&menu=1'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
         }
     );
+});
+
+
+test('MarkdownUp.updateParams, invalid session/local storage', (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window);
+    app.updateParams('', 'BAD', 'BAD');
+    t.deepEqual(app.params, {});
+    t.deepEqual(app.paramsLocal, {});
+    t.deepEqual(app.paramsSession, {});
 });
 
 
@@ -525,7 +828,7 @@ test('MarkdownUp.main', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'Hello',
             'elements': [
@@ -534,7 +837,7 @@ test('MarkdownUp.main', async (t) => {
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements(),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -573,7 +876,7 @@ test('MarkdownUp.main, url', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('url=sub%2Fother.md');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'Hello',
             'elements': [
@@ -652,7 +955,7 @@ test('MarkdownUp.main, url', async (t) => {
                     }
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#menu=1&url=sub%2Fother.md'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -668,13 +971,13 @@ test('MarkdownUp.main, fontSize', async (t) => {
 markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
 ~~~
 `});
-    app.updateParams('fontSize=14');
+    app.updateParams(null, '{"fontSize": 14}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'id': 'fontSize=14', 'style': 'display=none'}},
+                null,
                 [
                     [
                         [
@@ -683,7 +986,7 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
                     ]
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#fontSize=14&menu=1'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -712,7 +1015,7 @@ markdownPrint(fetch('README.md', null, true))
     });
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
@@ -729,7 +1032,7 @@ markdownPrint(fetch('README.md', null, true))
                     ]
                 ],
                 [
-                    menuBurgerElements(),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -750,7 +1053,7 @@ test('MarkdownUp.main, fetch error', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'MarkdownUp',
             'elements': {
@@ -774,7 +1077,7 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
     const app = new MarkdownUp(window);
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'MarkdownUp',
             'elements': {
@@ -791,7 +1094,7 @@ test('MarkdownUp.main, no title', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
@@ -800,7 +1103,7 @@ test('MarkdownUp.main, no title', async (t) => {
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements(),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -812,18 +1115,18 @@ test('MarkdownUp.main, no title', async (t) => {
 test('MarkdownUp.main, menu', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('menu=1');
+    app.updateParams('', null, '{"menu": 1}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
+                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#'}),
+                    menuBurgerElements,
                     menuElements()
                 ]
             ]
@@ -835,13 +1138,13 @@ test('MarkdownUp.main, menu', async (t) => {
 test('MarkdownUp.main, no menu', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello', 'menu': false});
-    app.updateParams('menu=1');
+    app.updateParams('', null, '{"menu": 1}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'id': 'menu=1', 'style': 'display=none'}},
+                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
@@ -855,21 +1158,16 @@ test('MarkdownUp.main, no menu', async (t) => {
 test('MarkdownUp.main, menu cycle and toggle', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('menu=1&fontSize=18&cmd.markdown=1');
+    app.updateParams('', '{"fontSize": 18}', '{"menu": 1, "view": "markdown"}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
-                    menuBurgerElements({'menuURL': '#cmd.markdown=1&fontSize=18'}),
-                    menuElements({
-                        'fontSizeURL': '#cmd.markdown=1&fontSize=8&menu=1',
-                        'lineHeightURL': '#cmd.markdown=1&fontSize=18&lineHeight=1.4&menu=1',
-                        'markdownURL': '#fontSize=18&menu=1',
-                        'helpURL': '#cmd.help=1&fontSize=18&menu=1'
-                    })
+                    menuBurgerElements,
+                    menuElements(true)
                 ]
             ]
         }
@@ -880,15 +1178,15 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
 test('MarkdownUp.main, markdown', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('cmd.markdown=1');
+    app.updateParams('', null, '{"view": "markdown"}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
-                    menuBurgerElements({'menuURL': '#cmd.markdown=1&menu=1'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -908,7 +1206,7 @@ markdownPrint('Hello')
 `});
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
             'elements': [
@@ -922,7 +1220,7 @@ markdownPrint('Hello')
                     ]
                 ],
                 [
-                    menuBurgerElements(),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -946,19 +1244,19 @@ test('MarkdownUp.main, markdown-script debug', async (t) => {
 debugLog('Hello')
 ~~~
 `});
-    app.updateParams('debug=1');
+    app.updateParams('', null, '{"debug": 1}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
             'elements': [
-                {'html': 'div', 'attr': {'id': 'debug=1', 'style': 'display=none'}},
+                null,
                 [
-                    {'html': 'h1', 'attr': {'id': 'debug=1&markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
                     null
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -988,20 +1286,20 @@ test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
 ~~~ markdown-script
 ~~~
 `});
-    app.updateParams('debug=1');
+    app.updateParams('', null, '{"debug": 1}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
             'elements': [
-                {'html': 'div', 'attr': {'id': 'debug=1', 'style': 'display=none'}},
+                null,
                 [
-                    {'html': 'h1', 'attr': {'id': 'debug=1&markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
                     null,
                     null
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#debug=1&menu=1'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -1026,7 +1324,7 @@ markdownPrint('varName = ' + varName)
 `});
     app.updateParams('var.varName=5');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
@@ -1039,7 +1337,7 @@ markdownPrint('varName = ' + varName)
                     ]
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#menu=1&var.varName=5'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -1066,13 +1364,13 @@ markdownPrint('varName = ' + varName)
 `
         }
     );
-    app.updateParams('debug=1&var.varName=foo%20bar');
+    app.updateParams('var.varName=foo%20bar', null, '{"debug": 1}');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'id': 'debug=1&var.varName=foo%20bar', 'style': 'display=none'}},
+                {'html': 'div', 'attr': {'id': 'var.varName=foo%20bar', 'style': 'display=none'}},
                 [
                     [
                         [
@@ -1081,7 +1379,7 @@ markdownPrint('varName = ' + varName)
                     ]
                 ],
                 [
-                    menuBurgerElements({'menuURL': '#debug=1&menu=1&var.varName=foo%20bar'}),
+                    menuBurgerElements,
                     null
                 ]
             ]
@@ -1107,7 +1405,7 @@ foobar()
 `});
     app.updateParams('');
     t.deepEqual(
-        await app.main(),
+        deleteElementCallbacks(await app.main()),
         {
             'title': null,
             'elements': [
@@ -1119,7 +1417,7 @@ foobar()
                     ]
                 ],
                 [
-                    menuBurgerElements(),
+                    menuBurgerElements,
                     null
                 ]
             ]
