@@ -13,99 +13,62 @@ const jsdomURL = 'https://github.com/craigahobbs/markdown-up';
 
 
 // Helper function to create the menu burger elements
-const menuBurgerElements = {
-    'html': 'div',
-    'attr': {'class': 'menu-burger'},
-    'elem': {
-        'html': 'a',
-        'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Menu'},
+function menuBurgerElements({darkMode = false} = {}) {
+    return {
+        'html': 'div',
+        'attr': {'class': 'menu-burger'},
         'elem': {
-            'svg': 'svg',
-            'attr': {'width': 32, 'height': 32},
-            'elem': [
-                {
-                    'svg': 'g',
-                    'attr': {'transform': 'translate(4.000, 4.000)'},
-                    'elem': {
-                        'svg': 'svg',
-                        'attr': {'width': '24.000', 'height': '24.000', 'viewBox': '0 0 24 24'},
-                        'elem': [
-                            {
-                                'svg': 'path',
-                                'attr': {
-                                    'fill': 'none',
-                                    'stroke': 'black',
-                                    'stroke-width': 3,
-                                    'd': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
-    }
-};
-
-
-// Helper function to create the menu elements
-function menuElements(viewMarkdown = false) {
-    const markdownIcon = [
-        {
-            'svg': 'g',
-            'attr': {'transform': 'translate(6.000, 6.000)'},
+            'html': 'div',
+            'attr': {'style': 'cursor: pointer; user-select: none;'},
             'elem': {
                 'svg': 'svg',
-                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                'attr': {'width': 32, 'height': 32},
                 'elem': [
+                    null,
                     {
-                        'svg': 'path',
-                        'attr': {
-                            'fill': 'none',
-                            'stroke': (viewMarkdown ? 'white' : 'black'),
-                            'stroke-width': 3,
-                            'd': 'M4,2 L20,2 L20,22 L4,22 Z'
-                        }
-                    },
-                    {
-                        'svg': 'path',
-                        'attr': {
-                            'fill': 'none',
-                            'stroke': (viewMarkdown ? 'white' : 'black'),
-                            'stroke-width': 2,
-                            'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
+                        'svg': 'g',
+                        'attr': {'transform': 'translate(4.000, 4.000)'},
+                        'elem': {
+                            'svg': 'svg',
+                            'attr': {'width': '24.000', 'height': '24.000', 'viewBox': '0 0 24 24'},
+                            'elem': [
+                                {
+                                    'svg': 'path',
+                                    'attr': {
+                                        'fill': 'none',
+                                        'stroke': (darkMode ? 'white' : 'black'),
+                                        'stroke-width': 3,
+                                        'd': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
+                                    }
+                                },
+                                null
+                            ]
                         }
                     }
                 ]
             }
         }
-    ];
-    if (viewMarkdown) {
-        markdownIcon.unshift({
-            'svg': 'rect',
-            'attr': {'fill': 'black', 'height': 48, 'stroke': 'none', 'width': 48}
-        });
-    }
+    };
+}
+
+
+// Helper function to create the menu elements
+function menuElements({darkMode = false, viewMarkdown = false} = {}) {
     return {
         'html': 'div',
         'attr': {'class': 'menu'},
         'elem': [
             {
-                'html': 'a',
-                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Show Markdown'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': markdownIcon
-                }
-            },
-            {
-                'html': 'a',
-                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Cycle font size'},
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
                 'elem': {
                     'svg': 'svg',
                     'attr': {'width': 48, 'height': 48},
                     'elem': [
+                        !viewMarkdown ? null : {
+                            'svg': 'rect',
+                            'attr': {'fill': 'black', 'height': 48, 'stroke': 'none', 'width': 48}
+                        },
                         {
                             'svg': 'g',
                             'attr': {'transform': 'translate(6.000, 6.000)'},
@@ -117,9 +80,18 @@ function menuElements(viewMarkdown = false) {
                                         'svg': 'path',
                                         'attr': {
                                             'fill': 'none',
-                                            'stroke': 'black',
-                                            'stroke-width': 4,
-                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14'
+                                            'stroke': (darkMode || viewMarkdown ? 'white' : 'black'),
+                                            'stroke-width': 3,
+                                            'd': 'M4,2 L20,2 L20,22 L4,22 Z'
+                                        }
+                                    },
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': (darkMode || viewMarkdown ? 'white' : 'black'),
+                                            'stroke-width': 2,
+                                            'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
                                         }
                                     }
                                 ]
@@ -129,12 +101,16 @@ function menuElements(viewMarkdown = false) {
                 }
             },
             {
-                'html': 'a',
-                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Cycle line height'},
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
                 'elem': {
                     'svg': 'svg',
                     'attr': {'width': 48, 'height': 48},
                     'elem': [
+                        !darkMode ? null : {
+                            'svg': 'rect',
+                            'attr': {'fill': 'white', 'height': 48, 'stroke': 'none', 'width': 48}
+                        },
                         {
                             'svg': 'g',
                             'attr': {'transform': 'translate(6.000, 6.000)'},
@@ -147,6 +123,69 @@ function menuElements(viewMarkdown = false) {
                                         'attr': {
                                             'fill': 'none',
                                             'stroke': 'black',
+                                            'stroke-width': 3,
+                                            'd': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
+                                        }
+                                    },
+                                    null
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
+                'elem': {
+                    'svg': 'svg',
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': [
+                        null,
+                        {
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': (darkMode ? 'white' : 'black'),
+                                            'stroke-width': 4,
+                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14'
+                                        }
+                                    },
+                                    null
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
+                'elem': {
+                    'svg': 'svg',
+                    'attr': {'width': 48, 'height': 48},
+                    'elem': [
+                        null,
+                        {
+                            'svg': 'g',
+                            'attr': {'transform': 'translate(6.000, 6.000)'},
+                            'elem': {
+                                'svg': 'svg',
+                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
+                                'elem': [
+                                    null,
+                                    {
+                                        'svg': 'path',
+                                        'attr': {
+                                            'fill': 'none',
+                                            'stroke': (darkMode ? 'white' : 'black'),
                                             'stroke-width': 2,
                                             'd': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
                                         }
@@ -158,12 +197,13 @@ function menuElements(viewMarkdown = false) {
                 }
             },
             {
-                'html': 'a',
-                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Debug'},
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
                 'elem': {
                     'svg': 'svg',
                     'attr': {'width': 48, 'height': 48},
                     'elem': [
+                        null,
                         {
                             'svg': 'g',
                             'attr': {'transform': 'translate(6.000, 6.000)'},
@@ -175,12 +215,13 @@ function menuElements(viewMarkdown = false) {
                                         'svg': 'path',
                                         'attr': {
                                             'fill': 'none',
-                                            'stroke': 'black',
+                                            'stroke': (darkMode ? 'white' : 'black'),
                                             'stroke-width': 3,
                                             // eslint-disable-next-line max-len
                                             'd': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
                                         }
-                                    }
+                                    },
+                                    null
                                 ]
                             }
                         }
@@ -188,12 +229,13 @@ function menuElements(viewMarkdown = false) {
                 }
             },
             {
-                'html': 'a',
-                'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': 'Help'},
+                'html': 'div',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
                 'elem': {
                     'svg': 'svg',
                     'attr': {'width': 48, 'height': 48},
                     'elem': [
+                        null,
                         {
                             'svg': 'g',
                             'attr': {'transform': 'translate(6.000, 6.000)'},
@@ -205,11 +247,12 @@ function menuElements(viewMarkdown = false) {
                                         'svg': 'path',
                                         'attr': {
                                             'fill': 'none',
-                                            'stroke': 'black',
+                                            'stroke': (darkMode ? 'white' : 'black'),
                                             'stroke-width': 3,
                                             'd': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
                                         }
-                                    }
+                                    },
+                                    null
                                 ]
                             }
                         }
@@ -293,12 +336,13 @@ test('MarkdownUp, run and render', async (t) => {
         '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
     window.location.hash = '#';
-    window.localStorage.setItem('MarkdownUp', '{"fontSize": 14, "lineHeight": 1.4}');
+    window.localStorage.setItem('MarkdownUp', '{"darkMode": 1, "fontSize": 14, "lineHeight": 1.4}');
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render(true);
@@ -307,6 +351,7 @@ test('MarkdownUp, run and render', async (t) => {
         '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '1'],
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
     ]);
@@ -325,6 +370,7 @@ test('MarkdownUp, render bad params', async (t) => {
     t.is(window.document.title, 'MarkdownUp');
     t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -343,6 +389,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -350,7 +397,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), null);
 
     // Click the menu button and wait for the render
-    let [menuButton] = window.document.getElementsByTagName('a');
+    let [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
@@ -359,7 +406,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 
     // Click the menu button again
-    [menuButton] = window.document.getElementsByTagName('a');
+    [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
@@ -382,6 +429,7 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -389,7 +437,7 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
-    let [, markdownButton] = window.document.getElementsByTagName('a');
+    let [, , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
@@ -398,13 +446,53 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
 
     // Click the Markdown menu button again
-    [, markdownButton] = window.document.getElementsByTagName('a');
+    [, , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), null);
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+});
+
+
+test('MarkdownUp, render menu dark mode toggle', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    t.is(window.document.title, '');
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    t.is(window.localStorage.getItem('MarkdownUp'), null);
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the dark mode menu button and wait for the render
+    let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    window.document.body.innerHTML = '';
+    darkModeButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), '{"darkMode":1}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the dark mode menu button again
+    [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    window.document.body.innerHTML = '';
+    darkModeButton.click();
+    await sleep(0);
+    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.is(window.localStorage.getItem('MarkdownUp'), '{}');
+    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
@@ -421,6 +509,7 @@ test('MarkdownUp, render menu cycle', async (t) => {
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -428,13 +517,14 @@ test('MarkdownUp, render menu cycle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
-    let [, , markdownButton] = window.document.getElementsByTagName('a');
+    let [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -442,13 +532,14 @@ test('MarkdownUp, render menu cycle', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button again to cycle-over
-    [, , markdownButton] = window.document.getElementsByTagName('a');
+    [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '16pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -471,6 +562,7 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '18pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -478,13 +570,14 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
-    const [, , markdownButton] = window.document.getElementsByTagName('a');
+    const [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '8pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
@@ -795,7 +888,7 @@ test('MarkdownUp.main, help', async (t) => {
             'elements': [
                 '<helpElements>',
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -837,7 +930,7 @@ test('MarkdownUp.main', async (t) => {
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -955,7 +1048,7 @@ test('MarkdownUp.main, url', async (t) => {
                     }
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -986,7 +1079,7 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1032,7 +1125,7 @@ markdownPrint(fetch('README.md', null, true))
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1103,7 +1196,7 @@ test('MarkdownUp.main, no title', async (t) => {
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1126,7 +1219,7 @@ test('MarkdownUp.main, menu', async (t) => {
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     menuElements()
                 ]
             ]
@@ -1166,8 +1259,8 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
-                    menuBurgerElements,
-                    menuElements(true)
+                    menuBurgerElements(),
+                    menuElements({'viewMarkdown': true})
                 ]
             ]
         }
@@ -1186,8 +1279,31 @@ test('MarkdownUp.main, markdown', async (t) => {
             'elements': [
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, darkMode', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    app.updateParams('', '{"darkMode": 1}', '{"menu": 1}');
+    t.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': null,
+            'elements': [
+                null,
+                [
+                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
+                ],
+                [
+                    menuBurgerElements({'darkMode': 1}),
+                    menuElements({'darkMode': 1})
                 ]
             ]
         }
@@ -1220,7 +1336,7 @@ markdownPrint('Hello')
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1256,7 +1372,7 @@ debugLog('Hello')
                     null
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1299,7 +1415,7 @@ test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
                     null
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1337,7 +1453,7 @@ markdownPrint('varName = ' + varName)
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1379,7 +1495,7 @@ markdownPrint('varName = ' + varName)
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1417,7 +1533,7 @@ foobar()
                     ]
                 ],
                 [
-                    menuBurgerElements,
+                    menuBurgerElements(),
                     null
                 ]
             ]
