@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.4 (2022-10-27)
+
+- [f7a74b2](https://github.com/craigahobbs/markdown-up/commit/f7a74b2) - add dark mode
+
 ## 1.8.3 (2022-10-20)
 
 - [d0e7716](https://github.com/craigahobbs/markdown-up/commit/d0e7716) - menu improvements
