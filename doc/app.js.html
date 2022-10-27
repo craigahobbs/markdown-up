@@ -65,6 +65,9 @@ struct MarkdownUp
 # The MarkdownUp local storage JSON schema
 struct MarkdownUpLocal
 
+    # If set, dark mode is enabled
+    optional int(== 1) darkMode
+
     # The font size
     optional int(>= 8, &lt;= 18) fontSize
 
@@ -78,10 +81,10 @@ struct MarkdownUpSession
     # Optional command
     optional MarkdownUpView view
 
-    # The menu visibility (default is collapsed)
+    # If set, the menu is expanded (default is collapsed)
     optional int(== 1) menu
 
-    # If true, enable debug behavior
+    # If set, enable debug behavior
     optional int(== 1) debug
 
 
@@ -100,6 +103,7 @@ enum MarkdownUpView
  * The MarkdownUp application options
  *
  * @typedef {Object} MarkdownUpOptions
+ * @property {boolean} [darkMode = false] - If true, use dark mode by default
  * @property {number} [fontSize = 12] - The font size, in points
  * @property {number} [lineHeight = 1.2] - The line height, in em
  * @property {?string} [markdownText = null] - The default Markdown text
@@ -123,6 +127,7 @@ export class MarkdownUp {
         this.params = null;
         this.paramsLocal = null;
         this.paramsSession = null;
+        this.darkMode = (options !== null ? options.darkMode : null) ?? false;
         this.fontSize = (options !== null ? options.fontSize : null) ?? 12;
         this.lineHeight = (options !== null ? options.lineHeight : null) ?? 1.2;
         this.markdownText = (options !== null ? options.markdownText : null) ?? null;
@@ -168,6 +173,10 @@ export class MarkdownUp {
         if (!isError) {
             result = await this.main();
         }
+
+        // Set the colors
+        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
+        this.window.document.documentElement.style.setProperty('--markdown-model-dark-mode', isDarkMode ? '1' : '0');
 
         // Set the font size
         const fontSize = this.paramsLocal.fontSize ?? this.fontSize;
@@ -481,7 +490,11 @@ export class MarkdownUp {
             {
                 'html': 'div',
                 'attr': {'class': 'menu-burger'},
-                'elem': this.menuValueToggle('menu', menuSVGElements, 'Menu')
+                'elem': this.menuValueToggle('menu', {
+                    'size': 32,
+                    'noCheck': true,
+                    'path': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
+                })
             },
 
             // Popup menu
@@ -489,73 +502,124 @@ export class MarkdownUp {
                 'html': 'div',
                 'attr': {'class': 'menu'},
                 'elem': [
-                    this.menuViewToggle('markdown', markdownSVGElements, 'Show Markdown'),
-                    this.menuValueCycle('fontSize', fontSizeSVGElements, 'Cycle font size', this.fontSize, 2),
-                    this.menuValueCycle('lineHeight', lineHeightSVGElements, 'Cycle line height', this.lineHeight, 0.2),
-                    this.menuValueToggle('debug', debugSVGElements, 'Debug'),
-                    this.menuViewToggle('help', helpSVGElements, 'Help')
+                    this.menuViewToggle('markdown', {
+                        'path': 'M4,2 L20,2 L20,22 L4,22 Z',
+                        'path2': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
+                    }),
+                    this.menuValueToggle('darkMode', {
+                        'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
+                    }, true),
+                    this.menuValueCycle('fontSize', this.fontSize, 2, {
+                        'path': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
+                        'strokeWidth': 4
+                    }),
+                    this.menuValueCycle('lineHeight', this.lineHeight, 0.2, {
+                        'path2': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
+                    }),
+                    this.menuValueToggle('debug', {
+                        'path': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
+                            'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
+                    }),
+                    this.menuViewToggle('help', {
+                        'path': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
+                    })
                 ]
             }
         ];
     }
 
 
-    menuValueToggle(value, svgElements, ariaLabel) {
-        return {
-            'html': 'a',
-            'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': ariaLabel},
-            'elem': svgElements(value in this.paramsSession),
-            'callback': (element) => {
-                element.addEventListener('click', () => {
-                    if (value in this.paramsSession) {
-                        delete this.paramsSession[value];
-                    } else {
-                        this.paramsSession[value] = 1;
-                    }
-                    this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
-                    this.render(true);
-                });
-            }
-        };
+    menuValueToggle(valueName, icon, isLocal = false) {
+        const params = (isLocal ? this.paramsLocal : this.paramsSession);
+        icon.checked = valueName in params;
+        return this.menuButton(
+            () => {
+                if (valueName in params) {
+                    delete params[valueName];
+                } else {
+                    params[valueName] = 1;
+                }
+                const storage = (isLocal ? this.window.localStorage : this.window.sessionStorage);
+                storage.setItem('MarkdownUp', JSON.stringify(params));
+                this.render(true);
+            },
+            icon
+        );
     }
 
 
-    menuViewToggle(value, svgElements, ariaLabel) {
-        return {
-            'html': 'a',
-            'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': ariaLabel},
-            'elem': svgElements(this.paramsSession.view === value),
-            'callback': (element) => {
-                element.addEventListener('click', () => {
-                    if (this.paramsSession.view === value) {
-                        delete this.paramsSession.view;
-                    } else {
-                        this.paramsSession.view = value;
-                    }
-                    this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
-                    this.render(true);
-                });
-            }
-        };
+    menuViewToggle(viewValue, icon) {
+        icon.checked = this.paramsSession.view === viewValue;
+        return this.menuButton(
+            () => {
+                if (this.paramsSession.view === viewValue) {
+                    delete this.paramsSession.view;
+                } else {
+                    this.paramsSession.view = viewValue;
+                }
+                this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
+                this.render(true);
+            },
+            icon
+        );
     }
 
 
-    menuValueCycle(valueName, svgElements, ariaLabel, valueDefault, valueDelta) {
+    menuValueCycle(valueName, valueDefault, valueDelta, icon) {
+        return this.menuButton(
+            () => {
+                const {attr} = markdownUpTypes.MarkdownUpLocal.struct.members.find((member) => member.name === valueName);
+                let valueNew = (this.paramsLocal[valueName] ?? valueDefault) + valueDelta;
+                if (valueNew > attr.lte) {
+                    valueNew = attr.gte;
+                }
+                this.paramsLocal[valueName] = valueNew;
+                this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
+                this.render(true);
+            },
+            icon
+        );
+    }
+
+
+    menuButton(onClick, {checked = false, noCheck = false, path = null, path2 = null, strokeWidth = 3, size = 48}) {
+        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
+        const stroke = (isDarkMode ? (checked &amp;&amp; !noCheck ? 'black' : 'white') : (checked &amp;&amp; !noCheck ? 'white' : 'black'));
+        const borderSize = (0.125 * size).toFixed(3);
+        const innerSize = (0.75 * size).toFixed(3);
         return {
-            'html': 'a',
-            'attr': {'style': 'cursor: pointer; user-select: none;', 'aria-label': ariaLabel},
-            'elem': svgElements(),
-            'callback': (element) => {
-                element.addEventListener('click', () => {
-                    const {attr} = markdownUpTypes.MarkdownUpLocal.struct.members.find((member) => member.name === valueName);
-                    let valueNew = (this.paramsLocal[valueName] ?? valueDefault) + valueDelta;
-                    if (valueNew > attr.lte) {
-                        valueNew = attr.gte;
+            'html': 'div',
+            'attr': {'style': 'cursor: pointer; user-select: none;'},
+            'elem': {
+                'svg': 'svg',
+                'attr': {'width': size, 'height': size},
+                'elem': [
+                    !checked || noCheck ? null : {
+                        'svg': 'rect',
+                        'attr': {'fill': (isDarkMode ? 'white' : 'black'), 'stroke': 'none', 'width': size, 'height': size}
+                    },
+                    {
+                        'svg': 'g',
+                        'attr': {'transform': `translate(${borderSize}, ${borderSize})`},
+                        'elem': {
+                            'svg': 'svg',
+                            'attr': {'width': innerSize, 'height': innerSize, 'viewBox': '0 0 24 24'},
+                            'elem': [
+                                path === null ? null : {
+                                    'svg': 'path',
+                                    'attr': {'fill': 'none', 'stroke': stroke, 'stroke-width': strokeWidth, 'd': path}
+                                },
+                                path2 === null ? null : {
+                                    'svg': 'path',
+                                    'attr': {'fill': 'none', 'stroke': stroke, 'stroke-width': strokeWidth - 1, 'd': path2}
+                                }
+                            ]
+                        }
                     }
-                    this.paramsLocal[valueName] = valueNew;
-                    this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
-                    this.render(true);
-                });
+                ]
+            },
+            'callback': (element) => {
+                element.addEventListener('click', onClick);
             }
         };
     }
@@ -569,61 +633,6 @@ function getHashID(url) {
 }
 
 const rHashId = /[#&amp;]([^=]+)$/;
-
-
-// Menu icons
-const menuSVGElements = () => menuSVGHelper('M3,5 L21,5 M3,12 L21,12 M3,19 L21,19', false, 3, null, 32);
-const debugSVGElements = (isChecked) => menuSVGHelper(
-    'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 M15,9 L20,6 M15,12 L21,12 M15,15 L20,18',
-    isChecked
-);
-const fontSizeSVGElements = () => menuSVGHelper('M4,22 L10,2 L14,2 L20,22 M6,14 L18,14', false, 4);
-const helpSVGElements = (isChecked) => menuSVGHelper('M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22', isChecked);
-const lineHeightSVGElements = () => menuSVGHelper('M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21', false, 2);
-const markdownSVGElements = (isChecked) => (
-    menuSVGHelper('M4,2 L20,2 L20,22 L4,22 Z', isChecked, 3, 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5')
-);
-
-
-// Menu SVG helper function
-function menuSVGHelper(pathD, isChecked = false, strokeWidth = 3, pathD2 = null, iconSize = 48) {
-    const borderSize = (0.125 * iconSize).toFixed(3);
-    const innerSize = (0.75 * iconSize).toFixed(3);
-    const iconElems = [
-        {
-            'svg': 'path',
-            'attr': {'fill': 'none', 'stroke': (isChecked ? 'white' : 'black'), 'stroke-width': strokeWidth, 'd': pathD}
-        }
-    ];
-    const svg = {
-        'svg': 'svg',
-        'attr': {'width': iconSize, 'height': iconSize},
-        'elem': [
-            {
-                'svg': 'g',
-                'attr': {'transform': `translate(${borderSize}, ${borderSize})`},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': innerSize, 'height': innerSize, 'viewBox': '0 0 24 24'},
-                    'elem': iconElems
-                }
-            }
-        ]
-    };
-    if (isChecked) {
-        svg.elem.unshift({
-            'svg': 'rect',
-            'attr': {'fill': 'black', 'stroke': 'none', 'width': iconSize, 'height': iconSize}
-        });
-    }
-    if (pathD2 !== null) {
-        iconElems.push({
-            'svg': 'path',
-            'attr': {'fill': 'none', 'stroke': (isChecked ? 'white' : 'black'), 'stroke-width': strokeWidth - 1, 'd': pathD2}
-        });
-    }
-    return svg;
-}
 </code></pre>
         </article>
     </section>

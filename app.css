@@ -7,6 +7,21 @@
 @import 'markdown-model/static/markdown-model.css';
 
 
+/* Color variables */
+:root {
+    --markdown-up-menu-backbround: rgb(
+        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
+        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
+        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode))
+    );
+    --markdown-up-menu-border: rgb(
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode))
+    );
+}
+
+
 /* Menu */
 .menu-burger {
     position: fixed;
@@ -21,18 +36,18 @@
     display: flex;
     flex-direction: column;
     max-width: max-content;
-    background: whitesmoke;
-    border: 2px solid black;
+    background: var(--markdown-up-menu-backbround);
+    border: 2px solid var(--markdown-up-menu-border);
 }
-.menu > a {
-    margin: 12px 6px 0 6px;
+.menu > div {
+    margin: 8px 6px 0 6px;
     line-height: 0;
 }
-.menu > a:first-child {
-    margin-top: 14px;
+.menu > div:first-child {
+    margin-top: 10px;
 }
-.menu > a:last-child {
-    margin-bottom: 14px;
+.menu > div:last-child {
+    margin-bottom: 10px;
 }
 @media print
 {

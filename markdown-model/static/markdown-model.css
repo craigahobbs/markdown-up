@@ -6,6 +6,41 @@
 
 /* Variables */
 :root {
+    /* Color variables */
+    --markdown-model-dark-mode: 0;
+    --markdown-model-light-mode: calc(1 - var(--markdown-model-dark-mode));
+    --markdown-model-color-foreground: rgb(
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
+        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-link: rgb(
+        calc(0 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
+        calc(130 * var(--markdown-model-dark-mode) + 80 * var(--markdown-model-light-mode)),
+        calc(220 * var(--markdown-model-dark-mode) + 144 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-background: rgb(
+        calc(0 * var(--markdown-model-dark-mode) + 255 * var(--markdown-model-light-mode)),
+        calc(0 * var(--markdown-model-dark-mode) + 255 * var(--markdown-model-light-mode)),
+        calc(0 * var(--markdown-model-dark-mode) + 255 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-background-pre: rgb(
+        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
+        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
+        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-background-code: rgb(
+        calc(80 * var(--markdown-model-dark-mode) + 230 * var(--markdown-model-light-mode)),
+        calc(80 * var(--markdown-model-dark-mode) + 230 * var(--markdown-model-light-mode)),
+        calc(80 * var(--markdown-model-dark-mode) + 230 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-border: rgb(
+        calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode)),
+        calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode)),
+        calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode))
+    );
+
+    /* Font size and line height variables */
     --markdown-model-font-size: 12pt;
     --markdown-model-line-height: 1.2em;
 }
@@ -18,18 +53,18 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, hr, blockquote, pre, code, a, 
     border: 0;
     outline: 0;
     font-size: 1em;
-    line-height: calc(var(--markdown-model-line-height));
-    color: black;
+    line-height: var(--markdown-model-line-height);
+    color: var(--markdown-model-color-foreground);
     vertical-align: baseline;
 }
 html {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: calc(var(--markdown-model-font-size));
+    font-size: var(--markdown-model-font-size);
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
 }
 body {
-    background-color: white;
+    background-color: var(--markdown-model-color-background);
     margin: 1.5em;
 }
 h1, h2, h3, h4, h5, h6 {
@@ -58,31 +93,32 @@ hr {
     margin-right: 0.25em;
     border-top-width: thin;
     border-top-style: solid;
-    border-top-color: #c0c0c0;
+    border-top-color: var(--markdown-model-color-border);
 }
 blockquote {
-    margin-top: 1em;
+    margin-top: 0.5em;
     padding-left: 1em;
-    border-left: 0.25em solid #c0c0c0;
+    border-left: 0.25em solid var(--markdown-model-color-border);
 }
 pre {
-    background-color: #f5f5f5;
+    background-color: var(--markdown-model-color-background-pre);
     font-family: Courier New, monospace;
     font-size: 0.9rem;
     margin: 1em;
     padding: 0.5em;
     border-width: 1px;
     border-style: solid;
-    border-color: #c0c0c0;
+    border-color: var(--markdown-model-color-border);
     border-radius: 4px;
     overflow-x: scroll;
 }
 pre > code {
+    background-color: var(--markdown-model-color-background-pre);
     padding: 0;
     white-space: pre;
 }
 code {
-    background-color:  #f5f5f5;
+    background-color: var(--markdown-model-color-background-code);
     font-family: Courier New, monospace;
     font-size: 0.9rem;
     padding: 0.2em 0.4em;
@@ -90,7 +126,7 @@ code {
     white-space: pre-wrap;
 }
 a {
-    color: #005090;
+    color: var(--markdown-model-color-link);
     text-decoration: none;
 }
 a:hover {
