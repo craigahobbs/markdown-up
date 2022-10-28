@@ -1005,6 +1005,9 @@
                         "[action URL overrides](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL')."
                     ]
                 }
+            ],
+            "return": [
+                "The schema type's documentation [element model](https://github.com/craigahobbs/element-model#readme)"
             ]
         },
         {
