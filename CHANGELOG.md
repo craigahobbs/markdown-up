@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.6 (2022-10-28)
+
+- [f8890b4](https://github.com/craigahobbs/markdown-up/commit/f8890b4) - add globals application option
+
 ## 1.8.5 (2022-10-28)
 
 - [56cf288](https://github.com/craigahobbs/markdown-up/commit/56cf288) - add schemaElements function
