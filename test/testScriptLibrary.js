@@ -4,6 +4,7 @@
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownScriptRuntime} from '../lib/script.js';
 import {markdownScriptFunctions} from '../lib/scriptLibrary.js';
+import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import test from 'ava';
 
 
@@ -1471,70 +1472,126 @@ test('script library, markdownTitle', (t) => {
 //
 
 
-test('script library, schemaParse', (t) => {
+test('script library, schemaElements', (t) => {
     const runtime = testRuntime();
-    t.deepEqual(markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options), {
-        'MyStruct': {
-            'struct': {
-                'name': 'MyStruct',
-                'doc': ['My struct'],
-                'members': [
+    runtime.options.params = '';
+    const types = parseSchemaMarkdown(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a']);
+    const elements = markdownScriptFunctions.schemaElements([types, 'MyStruct'], runtime.options);
+    t.deepEqual(elements, [
+        [
+            {'html': 'h1', 'attr': {'id': 'type_MyStruct'}, 'elem': {'text': 'struct MyStruct'}},
+            null,
+            [
+                {'html': 'p', 'elem': [{'text': 'My struct'}]}
+            ],
+            {
+                'html': 'table',
+                'elem': [
                     {
-                        'name': 'a',
-                        'doc': ['An integer'],
-                        'type': {'builtin': 'int'}
-                    }
+                        'html': 'tr',
+                        'elem': [
+                            {'html': 'th', 'elem': {'text': 'Name'}},
+                            {'html': 'th', 'elem': {'text': 'Type'}},
+                            null,
+                            {'html': 'th', 'elem': {'text': 'Description'}}
+                        ]
+                    },
+                    [
+                        {
+                            'html': 'tr',
+                            'elem': [
+                                {'html': 'td', 'elem': {'text': 'a'}},
+                                {'html': 'td', 'elem': {'text': 'int'}},
+                                null,
+                                {'html': 'td', 'elem': [{'html': 'p', 'elem': [{'text': 'An integer'}]}]}
+                            ]
+                        }
+                    ]
                 ]
             }
-        }
-    });
+        ],
+        null
+    ]);
 });
 
 
-test('script library, schemaPrint', (t) => {
+test('script library, schemaElements action URLs', (t) => {
     const runtime = testRuntime();
     runtime.options.params = '';
-    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options);
-    markdownScriptFunctions.schemaPrint([types, 'MyStruct'], runtime.options);
-    const elements = runtime.resetElements();
-    t.deepEqual(elements[0][0][0], {
-        'html': 'h1',
-        'attr': {'id': 'type_MyStruct'},
-        'elem': {'text': 'struct MyStruct'}
-    });
-});
-
-
-test('script library, schemaPrint action URLs', (t) => {
-    const runtime = testRuntime();
-    runtime.options.params = '';
-    const types = markdownScriptFunctions.schemaParse(['# My action', 'action MyAction', '  urls', '  GET /'], runtime.options);
-    markdownScriptFunctions.schemaPrint([types, 'MyAction', [{'method': 'POST', 'path': '/foo'}]], runtime.options);
-    const elements = runtime.resetElements();
-    t.deepEqual(elements[0][0][2][1][0].elem[1], {
-        'html': 'a',
-        'attr': {'href': '/foo'},
-        'elem': {'text': 'POST /foo'}
-    });
-});
-
-
-test('script library, schemaTypeModel', (t) => {
-    const runtime = testRuntime();
-    t.true('Types' in markdownScriptFunctions.schemaTypeModel([], runtime.options));
-});
-
-test('script library, schemaValidate', (t) => {
-    const runtime = testRuntime();
-    const types = markdownScriptFunctions.schemaParse(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a'], runtime.options);
-    t.deepEqual(markdownScriptFunctions.schemaValidate([types, 'MyStruct', {'a': 5}], runtime.options), {'a': 5});
-});
-
-
-test('script library, schemaValidateTypeModel', (t) => {
-    const runtime = testRuntime();
-    const typeModel = markdownScriptFunctions.schemaTypeModel([], runtime.options);
-    t.deepEqual(markdownScriptFunctions.schemaValidateTypeModel([typeModel], runtime.options), typeModel);
+    const types = parseSchemaMarkdown(['# My action', 'action MyAction', '  urls', '  GET /']);
+    const elements = markdownScriptFunctions.schemaElements([types, 'MyAction', [{'method': 'POST', 'path': '/foo'}]], runtime.options);
+    t.deepEqual(elements, [
+        [
+            {'html': 'h1', 'attr': {'id': 'type_MyAction'}, 'elem': {'text': 'action MyAction'}},
+            [
+                {'html': 'p', 'elem': [{'text': 'My action'}]}
+            ],
+            [
+                {
+                    'html': 'p',
+                    'elem': [
+                        {'html': 'b', 'elem': {'text': 'Note: '}},
+                        {'text': 'The request is exposed at the following URL:'}
+                    ]
+                },
+                [
+                    {'html': 'p', 'elem': [{'text': '  '}, {'html': 'a', 'attr': {'href': '/foo'}, 'elem': {'text': 'POST /foo'}}]}
+                ]
+            ],
+            null,
+            null,
+            null,
+            null,
+            [
+                {'html': 'h2', 'attr': {'id': 'type_MyAction_errors'}, 'elem': {'text': 'Error Codes'}},
+                null,
+                null,
+                [
+                    {'html': 'p', 'elem': [{'text': 'If an application error occurs, the response is of the form:'}]},
+                    {
+                        'html': 'pre',
+                        'elem': {
+                            'html': 'code',
+                            'elem': [
+                                {'text': '{\n'},
+                                {'text': '    "error": "<code>",\n'},
+                                {'text': '    "message": "<message>"\n'},
+                                {'text': '}\n'}
+                            ]
+                        }
+                    },
+                    {'html': 'p', 'elem': [{'text': '"message" is optional. "<code>" is one of the following values:'}]}
+                ],
+                {
+                    'html': 'table',
+                    'elem': [
+                        {
+                            'html': 'tr',
+                            'elem': [
+                                {'html': 'th', 'elem': {'text': 'Value'}},
+                                {'html': 'th', 'elem': {'text': 'Description'}}
+                            ]
+                        },
+                        [
+                            {
+                                'html': 'tr',
+                                'elem': [
+                                    {'html': 'td', 'elem': {'text': 'UnexpectedError'}},
+                                    {
+                                        'html': 'td',
+                                        'elem': [
+                                            {'html': 'p', 'elem': [{'text': 'An unexpected error occurred while processing the request'}]}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            ]
+        ],
+        null
+    ]);
 });
 
 
