@@ -1345,6 +1345,37 @@ markdownPrint('Hello')
 });
 
 
+test('MarkdownUp.main, markdown-script globals', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'globals': {'message': 'Globals'}, 'markdownText': `\
+~~~ markdown-script
+markdownPrint(message)
+~~~
+`});
+    app.updateParams('');
+    t.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': null,
+            'elements': [
+                null,
+                [
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'Globals'}]}
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
 test('MarkdownUp.main, markdown-script debug', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
