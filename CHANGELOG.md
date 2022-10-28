@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.5 (2022-10-28)
+
+- [56cf288](https://github.com/craigahobbs/markdown-up/commit/56cf288) - add schemaElements function
+
 ## 1.8.4 (2022-10-27)
 
 - [f7a74b2](https://github.com/craigahobbs/markdown-up/commit/f7a74b2) - add dark mode
