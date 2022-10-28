@@ -1008,34 +1008,6 @@
             ]
         },
         {
-            "name": "schemaPrint",
-            "group": "Schema",
-            "doc": [
-                "Render a schema type's documentation"
-            ],
-            "args": [
-                {
-                    "name": "types",
-                    "doc": [
-                        "The [type model](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types')"
-                    ]
-                },
-                {
-                    "name": "typeName",
-                    "doc": [
-                        "The type name"
-                    ]
-                },
-                {
-                    "name": "actionURLs",
-                    "doc": [
-                        "Optional (default is null). The",
-                        "[action URL overrides](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL')."
-                    ]
-                }
-            ]
-        },
-        {
             "name": "sessionStorageClear",
             "group": "Session Storage",
             "doc": [
