@@ -105,6 +105,7 @@ enum MarkdownUpView
  * @typedef {Object} MarkdownUpOptions
  * @property {boolean} [darkMode = false] - If true, use dark mode by default
  * @property {number} [fontSize = 12] - The font size, in points
+ * @property {?Object} [globals = null] - Global script runtime variables
  * @property {number} [lineHeight = 1.2] - The line height, in em
  * @property {?string} [markdownText = null] - The default Markdown text
  * @property {boolean} [menu = true] - If true, show the menu
@@ -129,6 +130,7 @@ export class MarkdownUp {
         this.paramsSession = null;
         this.darkMode = (options !== null ? options.darkMode : null) ?? false;
         this.fontSize = (options !== null ? options.fontSize : null) ?? 12;
+        this.globals = (options !== null ? options.globals : null) ?? null;
         this.lineHeight = (options !== null ? options.lineHeight : null) ?? 1.2;
         this.markdownText = (options !== null ? options.markdownText : null) ?? null;
         this.menu = (options !== null ? options.menu : null) ?? true;
@@ -421,6 +423,9 @@ export class MarkdownUp {
         // Create the markdown-script runtime
         const runtime = new MarkdownScriptRuntime(scriptOptions);
         scriptOptions.globals = {...markdownScriptFunctions};
+        if (this.globals !== null) {
+            Object.assign(scriptOptions.globals, this.globals);
+        }
         scriptOptions.runtime = runtime;
         scriptOptions.runtimeUpdateFn = () => {
             // Did script set the document title?
