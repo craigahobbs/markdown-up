@@ -44,6 +44,17 @@
     --markdown-model-font-size: 12pt;
     --markdown-model-line-height: 1.2em;
 }
+@media print
+{
+    :root {
+        --markdown-model-color-foreground: rgb(0, 0, 0);
+        --markdown-model-color-link: rgb(0, 80, 144);
+        --markdown-model-color-background: rgb(255, 255, 255);
+        --markdown-model-color-background-pre: rgb(245, 245, 245);
+        --markdown-model-color-background-code: rgb(230, 230, 230);
+        --markdown-model-color-border: rgb(192, 192, 192);
+    }
+}
 
 
 /* CSS reset */
