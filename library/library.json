@@ -984,7 +984,7 @@
             "group": "Schema",
             "doc": [
                 "Get a schema type's documentation [element model](https://github.com/craigahobbs/element-model#readme).",
-                "Render the element model with the [elementModelRender function](#var.vName='elementModelRender')."
+                "Render the element model with the [elementModelRender](#var.vName='elementModelRender') function."
             ],
             "args": [
                 {
