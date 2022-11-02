@@ -1,14 +1,16 @@
-# MarkdownUp Dynamic Markdown Example
+# Dynamic Markdown Example
 
 ~~~ markdown-script
 # Variable arguments
-helloCount = if(vCount != null, vCount, 5)
+helloCount = if(vCount != null, vCount, 3)
 
 # Constants
-width = 140
-height = 40
+width = 200
+height = 60
 borderSize = 5
-borderColor = 'blue'
+borderColor = 'red'
+fillColor = 'blue'
+textColor = 'white'
 
 # Render the more/less menu
 markdownPrint( \
@@ -26,9 +28,9 @@ helloLoop:
 
     # Render the hello drawing
     setDrawingSize(width, height)
-    drawStyle(borderColor, borderSize)
+    drawStyle(borderColor, borderSize, fillColor)
     drawRect(0.5 * borderSize, 0.5 * borderSize, width - borderSize, height - borderSize)
-    drawTextStyle(0.67 * height, null, true)
+    drawTextStyle(0.67 * height, textColor, true)
     drawText(helloTitle, 0.5 * width, 0.55 * height)
 
     ixHello = ixHello + 1
