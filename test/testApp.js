@@ -1345,6 +1345,54 @@ markdownPrint('Hello')
 });
 
 
+test('MarkdownUp.main, markdown-script invalid markdown line', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': `\
+# markdown-script
+
+~~~ markdown-script
+markdownPrint('1')
+~~~
+
+~~~ markdown-script
+markdownPrint(null)
+~~~
+
+~~~ markdown-script
+markdownPrint('2')
+~~~
+`});
+    app.updateParams('');
+    t.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': 'markdown-script',
+            'elements': [
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': '1'}]}
+                        ]
+                    ],
+                    [],
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': '2'}]}
+                        ]
+                    ]
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+});
+
+
 test('MarkdownUp.main, markdown-script globals', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'globals': {'message': 'Globals'}, 'markdownText': `\
