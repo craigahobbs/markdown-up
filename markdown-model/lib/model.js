@@ -83,7 +83,7 @@ struct List
 struct ListItem
 
     # The list's parts
-    MarkdownPart[len > 0] parts
+    MarkdownPart[] parts
 
 
 # Block quote markdown part
