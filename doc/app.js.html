@@ -33,9 +33,9 @@
 
 import {MarkdownScriptRuntime, markdownScriptCodeBlock} from './script.js';
 import {decodeQueryString, encodeQueryString} from 'schema-markdown/lib/encode.js';
-import {getBaseURL, isRelativeURL, markdownElementsAsync} from 'markdown-model/lib/elements.js';
 import {getMarkdownTitle, parseMarkdown} from 'markdown-model/lib/parser.js';
 import {evaluateExpression} from 'calc-script/lib/runtime.js';
+import {markdownElementsAsync} from 'markdown-model/lib/elements.js';
 import {markdownScriptFunctions} from './scriptLibrary.js';
 import {parseExpression} from 'calc-script/lib/parser.js';
 import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
@@ -638,6 +638,20 @@ function getHashID(url) {
 }
 
 const rHashId = /[#&amp;]([^=]+)$/;
+
+
+// Test if a URL is relative
+function isRelativeURL(url) {
+    return !rNotRelativeURL.test(url);
+}
+
+const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
+
+
+// Get a URL's base URL
+function getBaseURL(url) {
+    return url.slice(0, url.lastIndexOf('/') + 1);
+}
 </code></pre>
         </article>
     </section>
