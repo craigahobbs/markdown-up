@@ -5,6 +5,19 @@
 
 
 /**
+ * Escape a string for inclusion in Markdown text
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function escapeMarkdownText(text) {
+    return text.replace(rEscapeMarkdownText, '\\$1');
+}
+
+const rEscapeMarkdownText = /([\\[\]()<>"'*_~`#=+|-])/g;
+
+
+/**
  * Get a Markdown model's title. Returns null if no title is found.
  *
  * @param {Object} markdown - The markdown model
@@ -47,10 +60,10 @@ function getMarkdownSpanText(span) {
 // Markdown regex
 const rLineSplit = /\r?\n/;
 const rIndent = /^(?<indent>\s*)(?<notIndent>.*)$/;
-const rHeading = /^\s{0,3}(?<heading>#{1,6})\s+(?<text>.*?)\s*$/;
+const rHeading = /^\s{0,3}(?<heading>#{1,6})\s+(?<text>.*?)(?:\s+#+)?\s*$/;
 const rHeadingAlt = /^\s{0,3}(?<heading>=+|-+)\s*$/;
 const rHorizontal = /^\s{0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/;
-const rFenced = /^(?<fence>\s{0,3}(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
+const rFenced = /^(?<indent>\s{0,3})(?<fence>(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
 const rList = /^(?<indent>\s{0,3}(?<mark>-|\*|\+|[0-9][.)]|[1-9][0-9]+[.)])\s)(?<line>.*?)$/;
 const rQuote = /^(?<indent>\s{0,3}>\s?)/;
 const rTable = /^\s{0,3}(?::?-+:?\s*)?(?:\|\s*:?-+:?\s*)+(?:\|\s*)?$/g;
@@ -74,6 +87,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
     let paragraphLineNumber = null;
     let tablePart = null;
     let fencedMark = null;
+    let fencedIndent = null;
     let listIndent = null;
     let lineNumber = startLineNumber - 1;
 
@@ -155,8 +169,9 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
                     typeof matchFenced.groups.language === 'undefined') {
                     closeParagraph();
                     fencedMark = null;
+                    fencedIndent = null;
                 } else {
-                    paragraphLines.push(line);
+                    paragraphLines.push(line.slice(Math.min(fencedIndent, lineIndent)));
                 }
                 continue;
             }
@@ -174,7 +189,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
             }
 
             // New code block?
-            if (lineIndent >= 4 && (emptyLinePrev || tablePart !== null)) {
+            if (lineIndent >= 4 && (emptyLinePrev || paragraphLines.length === 0)) {
                 closeParagraph();
                 paragraphPart = {'codeBlock': {'startLineNumber': lineNumber}};
                 markdownParts.push(paragraphPart);
@@ -193,6 +208,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
                 markdownParts.push(paragraphPart);
                 paragraphLineNumber = lineNumber + 1;
                 fencedMark = matchFenced.groups.fence;
+                fencedIndent = matchFenced.groups.indent.length;
                 continue;
             }
 
@@ -326,6 +342,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
 }
 
 
+// Helper function to parse a table line's cells
 function parseTableCells(line) {
     const cells = [];
     let matchCell;
@@ -343,20 +360,26 @@ function parseTableCells(line) {
 
 
 // Markdown span regex
-const rEscape = /\\(\\|\*|_|\{|\}|\[|\]|\(|\)|#|\+|-|\.|!|~)/g;
+const rPartLinkText = '(?<linkText>(?:\\\\\\]|(?!\\\\\\]|\\])[\\s\\S])*?)';
+const rPartLinkHrefTitle = '\\([\\s\\n\\r]*(?<linkHref>(?!<)(?:\\\\\\)|(?!\\\\\\))[^ \\n])*?|<(?:\\\\>|(?!\\\\>)[^>\\n])*?>)' +
+      '(?:[\\s\\n\\r]+(?<linkTitle>' +
+      '"(?:\\\\"|(?!\\\\"|")[\\s\\S])*?"|' +
+      "'(?:\\\\'|(?!\\\\'|')[\\s\\S])*?'|" +
+      '\\((?:\\\\\\)|(?!\\\\\\)|\\))[\\s\\S])*?\\)' +
+      ')[\\s\\n\\r]*)?\\)';
 const rSpans = new RegExp(
-    '(?<br>\\s{2}$)|' +
-        '(?<linkImg>\\[!\\[)(?<linkImgText>[\\s\\S]*?)\\]\\((?<linkImgHrefImg>[\\s\\S]*?)\\)\\]\\((?<linkImgHref>[^\\s]+?)\\)|' +
-        '(?<link>!?\\[)(?<linkText>[\\s\\S]*?)\\]\\((?<linkHref>[^\\s]+?)(?:\\s*"(?<linkTitle>[\\s\\S]*?)"\\s*)?\\)|' +
-        '(?<linkAlt><)(?<linkAltHref>[[a-z]+:[^\\s]*?)>|' +
-        '(?<boldPre>\\\\\\*)?(?<bold>\\*{2})(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2}|' +
-        // eslint-disable-next-line max-len
-        '(?<bolduPre>\\\\_|[A-Za-z0-9])?(?<boldu>_{2})(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9])|' +
-        '(?<italicPre>\\\\\\*)?(?<italic>\\*)(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*|' +
-        // eslint-disable-next-line max-len
-        '(?<italicuPre>\\\\_|[A-Za-z0-9])?(?<italicu>_)(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9])|' +
-        '(?<strike>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strike>(?!~)|' +
-        '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
+    // eslint-disable-next-line prefer-template
+    '(?<br>(?: {2,}|\\\\)\\r?\\n)|' +
+    '(?<linkImg>\\[[\\s\\n\\r]*!\\[)' + `${rPartLinkText}\\]${rPartLinkHrefTitle}[\\s\\n\\r]*\\]`.replaceAll('<link', '<linkImg') +
+        `${rPartLinkHrefTitle}|`.replaceAll('<link', '<linkImgLink') +
+    `(?<link>!?\\[)${rPartLinkText}\\]${rPartLinkHrefTitle}|` +
+    '(?<linkAlt><)(?<linkAltHref>(?<linkAltScheme>[[A-Za-z]{3,}:|[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@)[^ \\n]+)>|' +
+    '(?<bold>\\*{2})(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2}|' +
+    '(?<boldu>_{2})(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9])|' +
+    '(?<italic>\\*)(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*|' +
+    '(?<italicu>_)(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9])|' +
+    '(?<strike>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strike>(?!~)|' +
+    '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
     'mg'
 );
 const rSpanNewlinesEnd = /[\r\n]$/;
@@ -379,65 +402,58 @@ function paragraphSpans(text) {
         if (typeof match.groups.br !== 'undefined') {
             spans.push({'br': 1});
 
-        // Link-image span?
+        // Link-image?
         } else if (typeof match.groups.linkImg !== 'undefined') {
-            const imgSpan = {'image': {'src': removeEscapes(match.groups.linkImgHrefImg), 'alt': removeEscapes(match.groups.linkImgText)}};
-            const span = {'link': {'href': removeEscapes(match.groups.linkImgHref), 'spans': [imgSpan]}};
-            spans.push(span);
-
-        // Link span?
-        } else if (match.groups.link === '[') {
-            const span = {'link': {'href': removeEscapes(match.groups.linkHref), 'spans': paragraphSpans(match.groups.linkText)}};
-            if (typeof match.groups.linkTitle !== 'undefined') {
-                span.link.title = removeEscapes(match.groups.linkTitle);
+            const [linkImgText, linkImgHref, linkImgTitle] = getLinkText(match, 'linkImg');
+            const [, linkImgLinkHref, linkImgLinkTitle] = getLinkText(match, 'linkImgLink');
+            const imgSpan = {'image': {'src': linkImgHref, 'alt': linkImgText}};
+            if (linkImgTitle !== null) {
+                imgSpan.image.title = linkImgTitle;
+            }
+            const span = {'link': {'href': linkImgLinkHref, 'spans': [imgSpan]}};
+            if (linkImgLinkTitle !== null) {
+                span.link.title = removeEscapes(linkImgLinkTitle);
             }
             spans.push(span);
 
-        // Link span (alternate syntax)?
+        // Link or image?
+        } else if (typeof match.groups.link !== 'undefined') {
+            const [linkText, linkHref, linkTitle] = getLinkText(match, 'link');
+            let span;
+            if (match.groups.link.startsWith('!')) {
+                span = {'image': {'src': linkHref, 'alt': linkText}};
+                if (linkTitle !== null) {
+                    span.image.title = linkTitle;
+                }
+            } else {
+                span = {'link': {'href': linkHref, 'spans': paragraphSpans(linkText)}};
+                if (linkTitle !== null) {
+                    span.link.title = removeEscapes(linkTitle);
+                }
+            }
+            spans.push(span);
+
+        // Link (alternate syntax)?
         } else if (typeof match.groups.linkAlt !== 'undefined') {
-            spans.push({'link': {'href': removeEscapes(match.groups.linkAltHref), 'spans': paragraphSpans(match.groups.linkAltHref)}});
+            const {linkAltScheme} = match.groups;
+            const linkAltHref = (linkAltScheme.endsWith('@') ? `mailto:${match.groups.linkAltHref}` : match.groups.linkAltHref);
+            spans.push({'link': {'href': linkAltHref, 'spans': [{'text': linkAltHref}]}});
 
-        // Image span?
-        } else if (match.groups.link === '![') {
-            const span = {'image': {'src': removeEscapes(match.groups.linkHref), 'alt': removeEscapes(match.groups.linkText)}};
-            if (typeof match.groups.linkTitle !== 'undefined') {
-                span.image.title = removeEscapes(match.groups.linkTitle);
-            }
-            spans.push(span);
-
-        // Bold style-span
+        // Bold style?
         } else if (typeof match.groups.bold !== 'undefined' || typeof match.groups.boldu !== 'undefined') {
-            const boldPre = match.groups.boldPre ?? match.groups.bolduPre ?? null;
-            const bold = match.groups.bold ?? match.groups.boldu;
             const boldText = match.groups.boldText ?? match.groups.bolduText;
-            if (bold === '__' && boldPre !== null && boldPre !== '\\_') {
-                spans.push({'text': `${boldPre}${bold}${boldText}${bold}`});
-            } else {
-                if (boldPre !== null) {
-                    spans.push({'text': removeEscapes(boldPre)});
-                }
-                spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText)}});
-            }
+            spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText)}});
 
-        // Italic style-span
+        // Italic style?
         } else if (typeof match.groups.italic !== 'undefined' || typeof match.groups.italicu !== 'undefined') {
-            const italicPre = match.groups.italicPre ?? match.groups.italicuPre ?? null;
-            const italic = match.groups.italic ?? match.groups.italicu;
             const italicText = match.groups.italicText ?? match.groups.italicuText;
-            if (italic === '_' && italicPre !== null && italicPre !== '\\_') {
-                spans.push({'text': `${italicPre}${italic}${italicText}${italic}`});
-            } else {
-                if (italicPre !== null) {
-                    spans.push({'text': removeEscapes(italicPre)});
-                }
-                spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText)}});
-            }
+            spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText)}});
 
-        // Strikethrough style-span
+        // Strikethrough style?
         } else if (typeof match.groups.strike !== 'undefined') {
             spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(match.groups.strikeText)}});
 
-        // Code span
+        // Code?
         } else if (typeof match.groups.code !== 'undefined') {
             const codeText = match.groups.codeText.replace(rSpanNewlinesEnd, '').replaceAll(rSpanNewlines, ' ');
             spans.push({'code': codeText});
@@ -455,6 +471,97 @@ function paragraphSpans(text) {
 }
 
 
-function removeEscapes(text) {
-    return text.replace(rEscape, '$1');
+// Helper function to get a link/image span's [text, href, title]
+function getLinkText(match, prefix) {
+    let text = match.groups[`${prefix}Text`] ?? null;
+    text = (text !== null ? removeEscapes(text) : null);
+    let href = match.groups[`${prefix}Href`];
+    href = removeEscapes(href.startsWith('<') ? href.slice(1, href.length - 1) : href, true);
+    let title = match.groups[`${prefix}Title`] ?? null;
+    title = (title !== null ? removeEscapes(title.slice(1, title.length - 1)) : null);
+    return [text, href, title];
 }
+
+
+// Helper function to remove span text escapes and replace character references
+function removeEscapes(text, href = false) {
+    return text.replace(href ? rEscapeHref : rEscape, '$1').
+        replace(rEntityRef, (match, entity) => {
+            const entityChar = entityRefs[entity] ?? null;
+            return entityChar !== null ? entityChar : match;
+        }).
+        replace(rDecimalRef, (match, decimal) => String.fromCharCode(parseInt(decimal, 10))).
+        replace(rHexRef, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+
+// Escape and entity regex
+const rEscape = /\\([!-~])/g;
+const rEscapeHref = /\\([!-/:-@[-`{-~])/g;
+const rEntityRef = /&([A-Za-z]+[0-9]*);/g;
+const rDecimalRef = /&#([0-9]{1,7});/g;
+const rHexRef = /&#[Xx]([A-Fa-f0-9]{1,6});/g;
+const entityRefs = {
+    'acute': '\xb4',
+    'amp': '\x26',
+    'apos': '\x27',
+    'bdquo': '\u201e',
+    'brvbar': '\xa6',
+    'cedil': '\xb8',
+    'cent': '\xa2',
+    'copy': '\xa9',
+    'curren': '\xa4',
+    'dagger': '\u2020',
+    'Dagger': '\u2021',
+    'deg': '\xb0',
+    'divide': '\xf7',
+    'emsp': '\u2003',
+    'ensp': '\u2002',
+    'euro': '\u20ac',
+    'frac12': '\xbd',
+    'frac14': '\xbc',
+    'frac34': '\xbe',
+    'gt': '\x3e',
+    'hellip': '\u2026',
+    'iexcl': '\xa1',
+    'iquest': '\xbf',
+    'laquo': '\xab',
+    'ldquo': '\u201c',
+    'lrm': '\u200e',
+    'lsaquo': '\u2039',
+    'lsquo': '\u2018',
+    'lt': '\x3c',
+    'macr': '\xaf',
+    'mdash': '\u2014',
+    'micro': '\xb5',
+    'middot': '\xb7',
+    'nbsp': '\xa0',
+    'ndash': '\u2013',
+    'not': '\xac',
+    'ordf': '\xaa',
+    'ordm': '\xba',
+    'para': '\xb6',
+    'permil': '\u2030',
+    'plusmn': '\xb1',
+    'pound': '\xa3',
+    'quot': '\x22',
+    'raquo': '\xbb',
+    'rdquo': '\u201d',
+    'reg': '\xae',
+    'rlm': '\u200f',
+    'rsaquo': '\u203a',
+    'rsquo': '\u2019',
+    'sbquo': '\u201a',
+    'sect': '\xa7',
+    'shy': '\xad',
+    'sup1': '\xb9',
+    'sup2': '\xb2',
+    'sup3': '\xb3',
+    'thinsp': '\u2009',
+    'times': '\xd7',
+    'trade': '\u2122',
+    'uml': '\xa8',
+    'yen': '\xa5',
+    'zwj': '\u200d',
+    'zwnj': '\u200c'
+};

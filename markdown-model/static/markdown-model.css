@@ -100,9 +100,10 @@ h1:first-child, h2:first-child, h3:first-child, h4:first-child, h5:first-child, 
 }
 hr {
     margin-top: 1.6em;
+    margin-bottom: 1.6em;
     margin-left: 0.25em;
     margin-right: 0.25em;
-    border-top-width: thin;
+    border-top-width: 0.25em;
     border-top-style: solid;
     border-top-color: var(--markdown-model-color-border);
 }

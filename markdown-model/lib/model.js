@@ -56,7 +56,7 @@ struct Paragraph
     optional ParagraphStyle style
 
     # The paragraph span array
-    Span[len > 0] spans
+    Span[] spans
 
 
 # Paragraph style enum
@@ -177,24 +177,24 @@ enum CharacterStyle
 struct LinkSpan
 
     # The link's URL
-    string(len > 0) href
+    string href
 
     # The image's title
     optional string(len > 0) title
 
     # The contained spans
-    Span[len > 0] spans
+    Span[] spans
 
 
 # Image span
 struct ImageSpan
 
     # The image URL
-    string(len > 0) src
-
-    # The image's alternate text
-    string(len > 0) alt
+    string src
 
     # The image's title
     optional string(len > 0) title
+
+    # The image's alternate text
+    string alt
 `);
