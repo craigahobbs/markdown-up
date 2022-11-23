@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.7 (2022-11-23)
+
+- [0355284](https://github.com/craigahobbs/markdown-up/commit/0355284) - markdown-model 1.7
+
+- [2bb8550](https://github.com/craigahobbs/markdown-up/commit/2bb8550) - fix markdownPrint with invalid markdown line
+
 ## 1.8.6 (2022-10-28)
 
 - [f8890b4](https://github.com/craigahobbs/markdown-up/commit/f8890b4) - add globals application option
