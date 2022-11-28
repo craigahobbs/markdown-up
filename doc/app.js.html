@@ -170,12 +170,6 @@ export class MarkdownUp {
             isError = true;
         }
 
-        // Call the application main and validate the result
-        this.clearRuntimeCallbacks();
-        if (!isError) {
-            result = await this.main();
-        }
-
         // Set the colors
         const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
         this.window.document.documentElement.style.setProperty('--markdown-model-dark-mode', isDarkMode ? '1' : '0');
@@ -187,6 +181,12 @@ export class MarkdownUp {
         // Set the line height
         const lineHeight = this.paramsLocal.lineHeight ?? this.lineHeight;
         this.window.document.documentElement.style.setProperty('--markdown-model-line-height', `${lineHeight}em`);
+
+        // Call the application main and validate the result
+        this.clearRuntimeCallbacks();
+        if (!isError) {
+            result = await this.main();
+        }
 
         // Set the window title
         const title = result.title ?? null;
