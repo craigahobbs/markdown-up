@@ -124,7 +124,7 @@ typedef TableCell[len > 0] TableRow
 
 
 # A table cell
-typedef Span[len > 0] TableCell
+typedef Span[] TableCell
 
 
 # Table cell alignment
@@ -152,6 +152,9 @@ union Span
     # Image span
     ImageSpan image
 
+    # Link reference span
+    LinkRef linkRef
+
     # Code span
     string(len > 0) code
 
@@ -163,7 +166,7 @@ struct StyleSpan
     CharacterStyle style
 
     # The contained spans
-    Span[len > 0] spans
+    Span[] spans
 
 
 # Character style enum
@@ -197,4 +200,11 @@ struct ImageSpan
 
     # The image's alternate text
     string alt
+
+
+# Link reference span
+struct LinkRef
+
+    # The link reference link span or its text's spans (if reference not found)
+    Span[] spans
 `);

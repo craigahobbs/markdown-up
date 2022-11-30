@@ -59,15 +59,16 @@ function getMarkdownSpanText(span) {
 
 // Markdown regex
 const rLineSplit = /\r?\n/;
-const rIndent = /^(?<indent>\s*)(?<notIndent>.*)$/;
-const rHeading = /^\s{0,3}(?<heading>#{1,6})\s+(?<text>.*?)(?:\s+#+)?\s*$/;
-const rHeadingAlt = /^\s{0,3}(?<heading>=+|-+)\s*$/;
-const rHorizontal = /^\s{0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/;
-const rFenced = /^(?<indent>\s{0,3})(?<fence>(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
-const rList = /^(?<indent>\s{0,3}(?<mark>-|\*|\+|[0-9][.)]|[1-9][0-9]+[.)])\s)(?<line>.*?)$/;
-const rQuote = /^(?<indent>\s{0,3}>\s?)/;
-const rTable = /^\s{0,3}(?::?-+:?\s*)?(?:\|\s*:?-+:?\s*)+(?:\|\s*)?$/g;
-const rTableRow = /^\s{0,3}(?:(?:\\\||[^|])+\s*)?(?:\|\s*(?:\\\||[^|])*?\s*)+(?:\|\s*)?/g;
+const rParagraphEmpty = /^\s*$/;
+const rIndent = /^(?<indent> *)(?<notIndent>.*)$/;
+const rHeading = /^ {0,3}(?<heading>#{1,6})\s+(?<text>.*?)(?:\s+#+)?\s*$/;
+const rHeadingAlt = /^ {0,3}(?<heading>=+|-+)\s*$/;
+const rHorizontal = /^ {0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/;
+const rFenced = /^(?<indent> {0,3})(?<fence>(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
+const rList = /^(?<indent> {0,3}(?<mark>-|\*|\+|[0-9][.)]|[1-9][0-9]+[.)])\s)(?<line>.*?)$/;
+const rQuote = /^(?<indent> {0,3}>\s?)/;
+const rTable = /^ {0,3}(?::?-+:?\s*)?(?:\|\s*:?-+:?\s*)+(?:\|\s*)?$/g;
+const rTableRow = /^ {0,3}(?:(?:\\\||[^|])+\s*)?(?:\|\s*(?:\\\||[^|])*?\s*)+(?:\|\s*)?/g;
 const rTableRowTrim = /^\s*\|?/;
 const rTableCell = /^\s*(?<cell>(?:\\\||[^|])*?)\s*\|/;
 const rTableEscape = /\\(\\|)/g;
@@ -81,6 +82,11 @@ const rTableEscape = /\\(\\|)/g;
  * @returns {Object} The markdown model
  */
 export function parseMarkdown(markdown, startLineNumber = 1) {
+    return parseMarkdownInternal(markdown, startLineNumber, null);
+}
+
+export function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
+    const linkRefs = linkRefsRaw ?? {'defs': {}, 'links': []};
     const markdownParts = [];
     let paragraphLines = [];
     let paragraphPart = null;
@@ -96,14 +102,14 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
         // Block quote "paragraph"
         if (paragraphPart !== null && 'quote' in paragraphPart) {
             // Parse the block quote's Markdown lines
-            paragraphPart.quote.parts = parseMarkdown(paragraphLines, paragraphLineNumber).parts;
+            paragraphPart.quote.parts = parseMarkdownInternal(paragraphLines, paragraphLineNumber, linkRefs).parts;
             paragraphLines = [];
 
         // List item "paragraph"?
         } else if (paragraphPart !== null && 'list' in paragraphPart) {
             // Parse the list item's Markdown lines
             const {items} = paragraphPart.list;
-            items[items.length - 1].parts = parseMarkdown(paragraphLines, paragraphLineNumber).parts;
+            items[items.length - 1].parts = parseMarkdownInternal(paragraphLines, paragraphLineNumber, linkRefs).parts;
             paragraphLines = [];
 
         // Code block "paragraph"?
@@ -122,12 +128,29 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
 
         // Ordinary (or header) paragraph...
         } else if (paragraphLines.length) {
-            // Add the new paragraph part
-            const part = {'paragraph': {'spans': paragraphSpans(paragraphLines.join('\n'))}};
-            if (paragraphStyle !== null) {
-                part.paragraph.style = paragraphStyle;
+            // Process link reference definitions
+            const text = paragraphLines.join('\n').replaceAll(rLinkDef, (match, ...matchArgs) => {
+                const groups = matchArgs[matchArgs.length - 1];
+                const [linkText, linkHref, linkTitle] = getLinkText(groups, 'link');
+                const linkRefKey = getLinkRefKey(linkText);
+                if (linkRefKey === '') {
+                    return match;
+                }
+                if (!(linkRefKey in linkRefs.defs)) {
+                    linkRefs.defs[linkRefKey] = {linkText, linkHref, linkTitle};
+                }
+                return '';
+            });
+
+            // Parse the paragraph spans (if there's any text left)
+            if (paragraphStyle !== null || !rParagraphEmpty.test(text)) {
+                const partSpans = paragraphSpans(text, linkRefs);
+                const part = {'paragraph': {'spans': partSpans}};
+                if (paragraphStyle !== null) {
+                    part.paragraph.style = paragraphStyle;
+                }
+                markdownParts.push(part);
             }
-            markdownParts.push(part);
             paragraphLines = [];
         }
 
@@ -290,7 +313,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
                     if (cells.length > tablePart.table.headers.length) {
                         cells.length = tablePart.table.headers.length;
                     }
-                    tablePart.table.rows.push(cells.map((cell) => paragraphSpans(cell)));
+                    tablePart.table.rows.push(cells.map((cell) => paragraphSpans(cell, linkRefs)));
                     continue;
                 } else {
                     tablePart = null;
@@ -302,7 +325,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
                 const matchTableHeader = (tableHeader !== null && matchTable !== null ? tableHeader.match(rTableRow) : null);
                 if (matchTableHeader !== null) {
                     // Does the table header match the delimiter?
-                    const headers = parseTableCells(tableHeader).map((cell) => paragraphSpans(cell));
+                    const headers = parseTableCells(tableHeader).map((cell) => paragraphSpans(cell, linkRefs));
                     const aligns = parseTableCells(line).map(
                         (cell) => (cell.endsWith(':') ? (cell.startsWith(':') ? 'center' : 'right') : 'left')
                     );
@@ -322,10 +345,9 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
             // End code block?
             if (paragraphPart !== null && 'codeBlock' in paragraphPart) {
                 closeParagraph();
-            }
 
             // End list?
-            if (listIndent !== null && emptyLinePrev) {
+            } else if (listIndent !== null && emptyLinePrev) {
                 closeParagraph();
                 listIndent = null;
             }
@@ -337,6 +359,30 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
 
     // Close current paragraph
     closeParagraph();
+
+    // Resolve link references
+    if (linkRefsRaw === null) {
+        for (const linkRef of linkRefs.links) {
+            if (linkRef.refKey in linkRefs.defs) {
+                const {linkHref, linkTitle = null} = linkRefs.defs[linkRef.refKey];
+                const {linkSpan = null} = linkRef;
+                if (linkSpan !== null) {
+                    linkSpan.link.href = linkHref;
+                    if (linkTitle !== null) {
+                        linkSpan.link.title = linkTitle;
+                    }
+                    linkRef.linkRefSpan.linkRef.spans = [linkSpan];
+                } else {
+                    const {imageSpan} = linkRef;
+                    imageSpan.image.src = linkHref;
+                    if (linkTitle !== null) {
+                        imageSpan.image.title = linkTitle;
+                    }
+                    linkRef.linkRefSpan.linkRef.spans = [imageSpan];
+                }
+            }
+        }
+    }
 
     return {'parts': markdownParts};
 }
@@ -360,37 +406,50 @@ function parseTableCells(line) {
 
 
 // Markdown span regex
-const rPartLinkText = '(?<linkText>(?:\\\\\\]|(?!\\\\\\]|\\])[\\s\\S])*?)';
-const rPartLinkHrefTitle = '\\([\\s\\n\\r]*(?<linkHref>(?!<)(?:\\\\\\)|(?!\\\\\\))[^ \\n])*?|<(?:\\\\>|(?!\\\\>)[^>\\n])*?>)' +
+const rLinkText = '(?<linkText>(?:\\\\\\]|(?!\\\\\\]|\\])[\\s\\S])*?)';
+const rLinkHrefTitle = '[\\s\\n\\r]*(?<linkHref>(?!<)(?:\\\\\\)|(?!\\\\\\))[^ \\n])*?|<(?:\\\\>|(?!\\\\>)[^>\\n])*?>)' +
       '(?:[\\s\\n\\r]+(?<linkTitle>' +
       '"(?:\\\\"|(?!\\\\"|")[\\s\\S])*?"|' +
       "'(?:\\\\'|(?!\\\\'|')[\\s\\S])*?'|" +
       '\\((?:\\\\\\)|(?!\\\\\\)|\\))[\\s\\S])*?\\)' +
-      ')[\\s\\n\\r]*)?\\)';
+      ')[\\s\\n\\r]*)?';
 const rSpans = new RegExp(
     // eslint-disable-next-line prefer-template
     '(?<br>(?: {2,}|\\\\)\\r?\\n)|' +
-    '(?<linkImg>\\[[\\s\\n\\r]*!\\[)' + `${rPartLinkText}\\]${rPartLinkHrefTitle}[\\s\\n\\r]*\\]`.replaceAll('<link', '<linkImg') +
-        `${rPartLinkHrefTitle}|`.replaceAll('<link', '<linkImgLink') +
-    `(?<link>!?\\[)${rPartLinkText}\\]${rPartLinkHrefTitle}|` +
-    '(?<linkAlt><)(?<linkAltHref>(?<linkAltScheme>[[A-Za-z]{3,}:|[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@)[^ \\n]+)>|' +
-    '(?<bold>\\*{2})(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2}|' +
-    '(?<boldu>_{2})(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9])|' +
-    '(?<italic>\\*)(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*|' +
-    '(?<italicu>_)(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9])|' +
-    '(?<strike>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strike>(?!~)|' +
-    '(?<code>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<code>`+|(?!\\k<codeSp>\\k<code>(?!`))[\\s\\S])*)\\k<codeSp>\\k<code>(?!`)',
+    `(?<linkImg>\\[[\\s\\n\\r]*!\\[${rLinkText.replaceAll('<link', '<linkImg')}\\]` +
+        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImg')}\\)[\\s\\n\\r]*\\]` +
+        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImgLink')}\\))|` +
+    `(?<linkImgRef>\\[(?<linkImgRefFull>[\\s\\n\\r]*!(?:\\[${rLinkText.replaceAll('<link', '<linkImgRefImg')}\\])?` +
+        `\\[${rLinkText.replaceAll('<link', '<linkImgRef')}\\])[\\s\\n\\r]*\\]` +
+        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImgRefLink')}\\))|` +
+    `(?<linkRefImg>\\[[\\s\\n\\r]*!\\[${rLinkText.replaceAll('<link', '<linkRefImg')}\\]` +
+        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkRefImg')}\\)[\\s\\n\\r]*\\]` +
+        `\\[${rLinkText.replaceAll('<link', '<linkRefImgLink')}\\])|` +
+    `(?<linkRefImgRef>\\[(?<linkRefImgRefFull>[\\s\\n\\r]*!(?:\\[${rLinkText.replaceAll('<link', '<linkRefImgRefImg')}\\])?` +
+        `\\[${rLinkText.replaceAll('<link', '<linkRefImgRef')}\\])[\\s\\n\\r]*\\]` +
+        `\\[${rLinkText.replaceAll('<link', '<linkRefImgRefLink')}\\])|` +
+    `(?<link>!?\\[${rLinkText}\\]\\(${rLinkHrefTitle}\\))|` +
+    `(?<linkRef>!?(?:\\[${rLinkText.replaceAll('<link', '<linkRefOther')}\\])?\\[${rLinkText.replaceAll('<link', '<linkRef')}\\])|` +
+    '(?<linkAlt><(?<linkAltHref>(?<linkAltScheme>[[A-Za-z]{3,}:|[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@)[^ \\n]+)>)|' +
+    '(?<bold>\\*{2}(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2})|' +
+    '(?<boldu>_{2}(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9]))|' +
+    '(?<italic>\\*(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*)|' +
+    '(?<italicu>_(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9]))|' +
+    '(?<strike>(?<strikeT>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strikeT>(?!~))|' +
+    '(?<code>(?<codeT>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<codeT>`+|(?!\\k<codeSp>\\k<codeT>(?!`))[\\s\\S])*)' +
+        '\\k<codeSp>\\k<codeT>(?!`))',
     'mg'
 );
-const rSpanNewlinesEnd = /[\r\n]$/;
-const rSpanNewlines = /[\r\n]/g;
+const rLinkDef = new RegExp(`^ {0,3}\\[${rLinkText}\\]:[\\s\\n\\r]*${rLinkHrefTitle.replace(')*?|', ')+?|')}$`, 'mg');
+const rLinkRefSpace = /\s+/g;
+const rCodeNewlinesEnd = /[\r\n]$/;
+const rCodeNewlines = /[\r\n]/g;
 
 
 // Helper function to translate markdown paragraph text to a markdown paragraph span model array
-function paragraphSpans(text) {
-    const spans = [];
-
+function paragraphSpans(text, linkRefs) {
     // Iterate the span matches
+    const spans = [];
     let ixSearch = 0;
     for (const match of text.matchAll(rSpans)) {
         // Add any preceding text
@@ -402,36 +461,50 @@ function paragraphSpans(text) {
         if (typeof match.groups.br !== 'undefined') {
             spans.push({'br': 1});
 
-        // Link-image?
+        // Link with inline image?
         } else if (typeof match.groups.linkImg !== 'undefined') {
-            const [linkImgText, linkImgHref, linkImgTitle] = getLinkText(match, 'linkImg');
-            const [, linkImgLinkHref, linkImgLinkTitle] = getLinkText(match, 'linkImgLink');
-            const imgSpan = {'image': {'src': linkImgHref, 'alt': linkImgText}};
-            if (linkImgTitle !== null) {
-                imgSpan.image.title = linkImgTitle;
-            }
-            const span = {'link': {'href': linkImgLinkHref, 'spans': [imgSpan]}};
-            if (linkImgLinkTitle !== null) {
-                span.link.title = removeEscapes(linkImgLinkTitle);
-            }
-            spans.push(span);
+            const [linkImgText, linkImgHref, linkImgTitle] = getLinkText(match.groups, 'linkImg');
+            const [, linkImgLinkHref, linkImgLinkTitle] = getLinkText(match.groups, 'linkImgLink');
+            const imgSpan = createImageSpan(linkImgHref, linkImgText, linkImgTitle);
+            spans.push(createLinkSpan(linkImgLinkHref, [imgSpan], linkImgLinkTitle));
+
+        // Link with inline image reference
+        } else if (typeof match.groups.linkImgRef !== 'undefined') {
+            const {linkImgRefText, linkImgRefImgText, linkImgRefFull} = match.groups;
+            const [, linkImgRefLinkHref, linkImgRefLinkTitle] = getLinkText(match.groups, 'linkImgRefLink');
+            const imgSpan = createImageRefSpan(linkImgRefText, linkImgRefImgText, linkImgRefFull, linkRefs, true);
+            spans.push(createLinkSpan(linkImgRefLinkHref, [imgSpan], linkImgRefLinkTitle));
+
+        // Link reference with inline image
+        } else if (typeof match.groups.linkRefImg !== 'undefined') {
+            const [linkRefImgText, linkRefImgHref, linkRefImgTitle] = getLinkText(match.groups, 'linkRefImg');
+            const {linkRefImgLinkText} = match.groups;
+            const imgSpan = createImageSpan(linkRefImgHref, linkRefImgText, linkRefImgTitle);
+            spans.push(createLinkRefSpan(linkRefImgLinkText, [imgSpan], match[0], linkRefs, true));
+
+        // Link reference with inline image reference
+        } else if (typeof match.groups.linkRefImgRef !== 'undefined') {
+            const {linkRefImgRefText, linkRefImgRefImgText, linkRefImgRefFull, linkRefImgRefLinkText} = match.groups;
+            const imgSpan = createImageRefSpan(linkRefImgRefText, linkRefImgRefImgText, linkRefImgRefFull, linkRefs, true);
+            spans.push(createLinkRefSpan(linkRefImgRefLinkText, [imgSpan], match[0], linkRefs, true));
 
         // Link or image?
         } else if (typeof match.groups.link !== 'undefined') {
-            const [linkText, linkHref, linkTitle] = getLinkText(match, 'link');
-            let span;
+            const [linkText, linkHref, linkTitle] = getLinkText(match.groups, 'link');
             if (match.groups.link.startsWith('!')) {
-                span = {'image': {'src': linkHref, 'alt': linkText}};
-                if (linkTitle !== null) {
-                    span.image.title = linkTitle;
-                }
+                spans.push(createImageSpan(linkHref, linkText, linkTitle));
             } else {
-                span = {'link': {'href': linkHref, 'spans': paragraphSpans(linkText)}};
-                if (linkTitle !== null) {
-                    span.link.title = removeEscapes(linkTitle);
-                }
+                spans.push(createLinkSpan(linkHref, linkText, linkTitle, linkRefs));
             }
-            spans.push(span);
+
+        // Link reference?
+        } else if (typeof match.groups.linkRef !== 'undefined') {
+            const {linkRefText, linkRefOtherText = null} = match.groups;
+            if (match.groups.linkRef.startsWith('!')) {
+                spans.push(createImageRefSpan(linkRefText, linkRefOtherText, match[0], linkRefs));
+            } else {
+                spans.push(createLinkRefSpan(linkRefText, linkRefOtherText, match[0], linkRefs));
+            }
 
         // Link (alternate syntax)?
         } else if (typeof match.groups.linkAlt !== 'undefined') {
@@ -442,20 +515,20 @@ function paragraphSpans(text) {
         // Bold style?
         } else if (typeof match.groups.bold !== 'undefined' || typeof match.groups.boldu !== 'undefined') {
             const boldText = match.groups.boldText ?? match.groups.bolduText;
-            spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText)}});
+            spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText, linkRefs)}});
 
         // Italic style?
         } else if (typeof match.groups.italic !== 'undefined' || typeof match.groups.italicu !== 'undefined') {
             const italicText = match.groups.italicText ?? match.groups.italicuText;
-            spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText)}});
+            spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText, linkRefs)}});
 
         // Strikethrough style?
         } else if (typeof match.groups.strike !== 'undefined') {
-            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(match.groups.strikeText)}});
+            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(match.groups.strikeText, linkRefs)}});
 
         // Code?
         } else if (typeof match.groups.code !== 'undefined') {
-            const codeText = match.groups.codeText.replace(rSpanNewlinesEnd, '').replaceAll(rSpanNewlines, ' ');
+            const codeText = match.groups.codeText.replace(rCodeNewlinesEnd, '').replaceAll(rCodeNewlines, ' ');
             spans.push({'code': codeText});
         }
 
@@ -472,14 +545,84 @@ function paragraphSpans(text) {
 
 
 // Helper function to get a link/image span's [text, href, title]
-function getLinkText(match, prefix) {
-    let text = match.groups[`${prefix}Text`] ?? null;
-    text = (text !== null ? removeEscapes(text) : null);
-    let href = match.groups[`${prefix}Href`];
+function getLinkText(matchGroups, prefix) {
+    const text = matchGroups[`${prefix}Text`] ?? null;
+    let href = matchGroups[`${prefix}Href`];
     href = removeEscapes(href.startsWith('<') ? href.slice(1, href.length - 1) : href, true);
-    let title = match.groups[`${prefix}Title`] ?? null;
-    title = (title !== null ? removeEscapes(title.slice(1, title.length - 1)) : null);
+    let title = matchGroups[`${prefix}Title`] ?? null;
+    title = (title !== null ? removeEscapes(title.slice(1, title.length - 1), true) : null);
     return [text, href, title];
+}
+
+
+// Helper function to cleanup an image span's alt text and title
+function getImageAltText(text) {
+    return removeEscapes(text, true).replaceAll(rLinkRefSpace, ' ');
+}
+
+
+// Helper function to get a link reference key
+function getLinkRefKey(text) {
+    return text.trim().replaceAll(rLinkRefSpace, ' ').toLowerCase();
+}
+
+
+// Helper function to create a link span
+function createLinkSpan(href, text, title, linkRefs) {
+    const linkSpan = {'link': {
+        'href': href,
+        'spans': (Array.isArray(text) ? text : paragraphSpans(text, linkRefs))
+    }};
+    if (title !== null) {
+        linkSpan.link.title = title;
+    }
+    return linkSpan;
+}
+
+
+// Helper function to create an image span
+function createImageSpan(src, alt, title) {
+    const imageSpan = {'image': {'src': src, 'alt': getImageAltText(alt)}};
+    if (title !== null) {
+        imageSpan.image.title = title;
+    }
+    return imageSpan;
+}
+
+
+// Helper function to create a link reference span
+function createLinkRefSpan(refText, optText, fullText, linkRefs, textFallback = false) {
+    const linkRefSpan = {'linkRef': {'spans': createFallbackSpan(fullText, linkRefs, textFallback)}};
+    linkRefs.links.push({
+        'refKey': getLinkRefKey(refText),
+        'linkSpan': {'link': {
+            'spans': (Array.isArray(optText) ? optText : paragraphSpans(optText ?? refText, linkRefs))
+        }},
+        linkRefSpan
+    });
+    return linkRefSpan;
+}
+
+
+// Helper function to create an image reference span
+function createImageRefSpan(refText, optText, fullText, linkRefs, textFallback = false) {
+    const linkRefSpan = {'linkRef': {'spans': createFallbackSpan(fullText, linkRefs, textFallback)}};
+    linkRefs.links.push({
+        'refKey': getLinkRefKey(refText),
+        'imageSpan': {'image': {'alt': getImageAltText(optText ?? refText)}},
+        linkRefSpan
+    });
+    return linkRefSpan;
+}
+
+
+// Helper function to create a link/image reference span's fallback span
+function createFallbackSpan(text, linkRefs, textFallback) {
+    if (textFallback) {
+        return [{'text': text}];
+    }
+    const linkRefFullText = `${text.slice(0, text.length - 1)}\\${text.slice(text.length - 1)}`;
+    return paragraphSpans(linkRefFullText, linkRefs);
 }
 
 

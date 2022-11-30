@@ -312,6 +312,11 @@ function paragraphSpanElements(spans, options) {
             }
             spanElements.push(imageElement);
 
+        // Link reference span?
+        } else if (spanKey === 'linkRef') {
+            const {linkRef} = span;
+            spanElements.push(...paragraphSpanElements(linkRef.spans, options));
+
         // Code span?
         } else if (spanKey === 'code') {
             spanElements.push({'html': 'code', 'elem': {'text': span.code}});
