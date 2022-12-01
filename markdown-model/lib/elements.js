@@ -305,7 +305,7 @@ function paragraphSpanElements(spans, options) {
 
             const imageElement = {
                 'html': 'img',
-                'attr': {'src': src, 'alt': image.alt}
+                'attr': {'src': src, 'alt': image.alt, 'style': 'max-width: 100%;'}
             };
             if ('title' in image) {
                 imageElement.attr.title = image.title;
