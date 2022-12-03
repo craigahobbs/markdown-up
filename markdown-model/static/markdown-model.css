@@ -126,6 +126,7 @@ pre {
 }
 pre > code {
     background-color: var(--markdown-model-color-background-pre);
+    font-size: 0.9rem;
     padding: 0;
     white-space: pre;
 }
