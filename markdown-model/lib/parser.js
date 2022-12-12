@@ -65,7 +65,7 @@ const rHeading = /^ {0,3}(?<heading>#{1,6})\s+(?<text>.*?)(?:\s+#+)?\s*$/;
 const rHeadingAlt = /^ {0,3}(?<heading>=+|-+)\s*$/;
 const rHorizontal = /^ {0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/;
 const rFenced = /^(?<indent> {0,3})(?<fence>(?:`{3,}|~{3,}))(?:\s*(?<language>.+?))?\s*$/;
-const rList = /^(?<indent> {0,3}(?<mark>-|\*|\+|[0-9][.)]|[1-9][0-9]+[.)])\s)(?<line>.*?)$/;
+const rList = /^(?<indent> {0,3}(?<mark>-|\*|\+|[0-9][.)]|[1-9][0-9]+[.)])\s)(?<line>.*)$/;
 const rQuote = /^(?<indent> {0,3}>\s?)/;
 const rTable = /^ {0,3}(?::?-+:?\s*)?(?:\|\s*:?-+:?\s*)+(?:\|\s*)?$/g;
 const rTableRow = /^ {0,3}(?:(?:\\\||[^|])+\s*)?(?:\|\s*(?:\\\||[^|])*?\s*)+(?:\|\s*)?/g;
@@ -129,18 +129,26 @@ export function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
         // Ordinary (or header) paragraph...
         } else if (paragraphLines.length) {
             // Process link reference definitions
-            const text = paragraphLines.join('\n').replaceAll(rLinkDef, (match, ...matchArgs) => {
-                const groups = matchArgs[matchArgs.length - 1];
-                const [linkText, linkHref, linkTitle] = getLinkText(groups, 'link');
+            let text = paragraphLines.join('\n');
+            let matchLinkDef = text.match(rLinkDef);
+            while (matchLinkDef !== null) {
+                const [linkText, linkHref, linkTitle] = getLinkText(matchLinkDef.groups, 'link');
+
+                // Empty link reference key? If so, do nothing...
                 const linkRefKey = getLinkRefKey(linkText);
                 if (linkRefKey === '') {
-                    return match;
+                    break;
                 }
+
+                // Record the link reference definition (unless its already defined)
                 if (!(linkRefKey in linkRefs.defs)) {
                     linkRefs.defs[linkRefKey] = {linkText, linkHref, linkTitle};
                 }
-                return '';
-            });
+
+                // Check for more link reference definitions
+                text = text.slice(matchLinkDef[0].length);
+                matchLinkDef = text.match(rLinkDef);
+            }
 
             // Parse the paragraph spans (if there's any text left)
             if (paragraphStyle !== null || !rParagraphEmpty.test(text)) {
@@ -406,44 +414,48 @@ function parseTableCells(line) {
 
 
 // Markdown span regex
-const rLinkText = '(?<linkText>(?:\\\\\\]|(?!\\\\\\]|\\])[\\s\\S])*?)';
-const rLinkHrefTitle = '[\\s\\n\\r]*(?<linkHref>(?!<)(?:\\\\\\)|(?!\\\\\\))[^ \\n])*?|<(?:\\\\>|(?!\\\\>)[^>\\n])*?>)' +
-      '(?:[\\s\\n\\r]+(?<linkTitle>' +
-      '"(?:\\\\"|(?!\\\\"|")[\\s\\S])*?"|' +
-      "'(?:\\\\'|(?!\\\\'|')[\\s\\S])*?'|" +
-      '\\((?:\\\\\\)|(?!\\\\\\)|\\))[\\s\\S])*?\\)' +
-      ')[\\s\\n\\r]*)?';
+const rLinkText = '(?<linkText>(?:\\\\.|[^\\\\\\]])*)';
+const rLinkHref = '[ \\r\\n]*(?<linkHref>' +
+      '<(?:\\\\[^\\r\\n]|[^\\r\\n>\\\\])*>|' +
+      '(?!<)(?:\\\\[^ \\r\\n]|[^ \\r\\n\\\\)])*' +
+      ')' +
+      '(?:[ \\r\\n]+(?<linkTitle>' +
+      '"(?:\\\\.|[^\\\\"])*"|' +
+      "'(?:\\\\.|[^\\\\'])*'|" +
+      '\\((?:\\\\.|[^\\\\)])*\\)' +
+      '))?[ \\r\\n]*';
 const rSpans = new RegExp(
     // eslint-disable-next-line prefer-template
     '(?<br>(?: {2,}|\\\\)\\r?\\n)|' +
-    `(?<linkImg>\\[[\\s\\n\\r]*!\\[${rLinkText.replaceAll('<link', '<linkImg')}\\]` +
-        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImg')}\\)[\\s\\n\\r]*\\]` +
-        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImgLink')}\\))|` +
-    `(?<linkImgRef>\\[(?<linkImgRefFull>[\\s\\n\\r]*!(?:\\[${rLinkText.replaceAll('<link', '<linkImgRefImg')}\\])?` +
-        `\\[${rLinkText.replaceAll('<link', '<linkImgRef')}\\])[\\s\\n\\r]*\\]` +
-        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkImgRefLink')}\\))|` +
-    `(?<linkRefImg>\\[[\\s\\n\\r]*!\\[${rLinkText.replaceAll('<link', '<linkRefImg')}\\]` +
-        `\\(${rLinkHrefTitle.replaceAll('<link', '<linkRefImg')}\\)[\\s\\n\\r]*\\]` +
+    `(?<linkImg>\\[\\s*!\\[${rLinkText.replaceAll('<link', '<linkImg')}\\]` +
+        `\\(${rLinkHref.replaceAll('<link', '<linkImg')}\\)\\s*\\]` +
+        `\\(${rLinkHref.replaceAll('<link', '<linkImgLink')}\\))|` +
+    `(?<linkImgRef>\\[(?<linkImgRefFull>\\s*!(?:\\[${rLinkText.replaceAll('<link', '<linkImgRefImg')}\\])?` +
+        `\\[${rLinkText.replaceAll('<link', '<linkImgRef')}\\])\\s*\\]` +
+        `\\(${rLinkHref.replaceAll('<link', '<linkImgRefLink')}\\))|` +
+    `(?<linkRefImg>\\[\\s*!\\[${rLinkText.replaceAll('<link', '<linkRefImg')}\\]` +
+        `\\(${rLinkHref.replaceAll('<link', '<linkRefImg')}\\)\\s*\\]` +
         `\\[${rLinkText.replaceAll('<link', '<linkRefImgLink')}\\])|` +
-    `(?<linkRefImgRef>\\[(?<linkRefImgRefFull>[\\s\\n\\r]*!(?:\\[${rLinkText.replaceAll('<link', '<linkRefImgRefImg')}\\])?` +
-        `\\[${rLinkText.replaceAll('<link', '<linkRefImgRef')}\\])[\\s\\n\\r]*\\]` +
+    `(?<linkRefImgRef>\\[(?<linkRefImgRefFull>\\s*!(?:\\[${rLinkText.replaceAll('<link', '<linkRefImgRefImg')}\\])?` +
+        `\\[${rLinkText.replaceAll('<link', '<linkRefImgRef')}\\])\\s*\\]` +
         `\\[${rLinkText.replaceAll('<link', '<linkRefImgRefLink')}\\])|` +
-    `(?<link>!?\\[${rLinkText}\\]\\(${rLinkHrefTitle}\\))|` +
+    `(?<link>!?\\[${rLinkText}\\]\\(${rLinkHref}\\))|` +
     `(?<linkRef>!?(?:\\[${rLinkText.replaceAll('<link', '<linkRefOther')}\\])?\\[${rLinkText.replaceAll('<link', '<linkRef')}\\])|` +
-    '(?<linkAlt><(?<linkAltHref>(?<linkAltScheme>[[A-Za-z]{3,}:|[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@)[^ \\n]+)>)|' +
-    '(?<bold>\\*{2}(?!\\**\\s)(?<boldText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s])\\**)\\*{2})|' +
-    '(?<boldu>_{2}(?!_*\\s)(?<bolduText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s])_*)_{2}(?!_*[A-Za-z0-9]))|' +
-    '(?<italic>\\*(?!\\**\\s)(?<italicText>(?:\\\\\\*|(?!\\\\\\*)[\\s\\S])*?(?:\\\\\\*|[^\\\\\\s]))\\*)|' +
-    '(?<italicu>_(?!_*\\s)(?<italicuText>(?:\\\\_|(?!\\\\_)[\\s\\S])*?(?:\\\\_|[^\\\\\\s]))_(?!_*[A-Za-z0-9]))|' +
-    '(?<strike>(?<strikeT>~{1,2})(?!~)(?<strikeText>(?:\\\\~|(?!\\\\~)[\\s\\S])*?(?:\\\\~|[^\\\\~]))\\k<strikeT>(?!~))|' +
-    '(?<code>(?<codeT>`+)(?!`)(?<codeSp> )?(?<codeText>(?:\\k<codeT>`+|(?!\\k<codeSp>\\k<codeT>(?!`))[\\s\\S])*)' +
-        '\\k<codeSp>\\k<codeT>(?!`))',
-    'mg'
+    '(?<linkAlt><(?<linkAltScheme>[[A-Za-z]{3,}:|[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@)[^ \\r\\n]+>)|' +
+    '(?<bold>\\*{2,}(?!\\**\\s)(?:[^\\s\\\\*]|\\\\.|\\s+(?!\\*{2,})|\\*(?!\\*))+\\*{2,})|' +
+    '(?<italic>\\*(?!\\**\\s)(?:[^\\s\\\\*]|\\\\.|\\s+(?!\\*))+\\*)|' +
+    '(?<boldu>_{2,}(?!_*\\s)(?:[^\\s\\\\_]|\\\\.|\\s+(?!_{2,})|_(?!_))+_{2,}(?!_*[A-Za-z0-9]))|' +
+    '(?<italicu>_(?!_*\\s)(?:[^\\s\\\\_]|\\\\.|\\s+(?!_))+_(?!_*[A-Za-z0-9]))|' +
+    '(?<strike2>~~(?!~)(?!\\s)(?:[^\\s\\\\~]|\\\\.|\\s+(?!~~)|~(?!~))+~~(?!~))|' +
+    '(?<strike>~(?!~)(?!\\s)(?:[^\\s\\\\~]|\\\\.|\\s+(?!~))+~(?!~))|' +
+    '(?<code>(?<codeT>`+)(?!`)(?:[^`]|(?!\\k<codeT>[^`])`+)*\\k<codeT>(?!`))',
+    'g'
 );
-const rLinkDef = new RegExp(`^ {0,3}\\[${rLinkText}\\]:[\\s\\n\\r]*${rLinkHrefTitle.replace(')*?|', ')+?|')}$`, 'mg');
+const rLinkDef = new RegExp(`^ {0,3}\\[${rLinkText}\\]:[ \\r\\n]*${rLinkHref.replace(')])*)', '])+)')}(\\r?\\n|$)`);
 const rLinkRefSpace = /\s+/g;
-const rCodeNewlinesEnd = /[\r\n]$/;
-const rCodeNewlines = /[\r\n]/g;
+const rCodeSpaces = /^ (.+) $/;
+const rCodeNewlines = /\r?\n/g;
+const rCodeNewlinesEnd = /\r?\n$/;
 
 
 // Helper function to translate markdown paragraph text to a markdown paragraph span model array
@@ -452,84 +464,97 @@ function paragraphSpans(text, linkRefs) {
     const spans = [];
     let ixSearch = 0;
     for (const match of text.matchAll(rSpans)) {
+        const matchGroups = match.groups;
+
         // Add any preceding text
         if (ixSearch < match.index) {
             spans.push({'text': removeEscapes(text.slice(ixSearch, match.index))});
         }
 
         // Line break?
-        if (typeof match.groups.br !== 'undefined') {
+        if (typeof matchGroups.br !== 'undefined') {
             spans.push({'br': 1});
 
         // Link with inline image?
-        } else if (typeof match.groups.linkImg !== 'undefined') {
-            const [linkImgText, linkImgHref, linkImgTitle] = getLinkText(match.groups, 'linkImg');
-            const [, linkImgLinkHref, linkImgLinkTitle] = getLinkText(match.groups, 'linkImgLink');
+        } else if (typeof matchGroups.linkImg !== 'undefined') {
+            const [linkImgText, linkImgHref, linkImgTitle] = getLinkText(matchGroups, 'linkImg');
+            const [, linkImgLinkHref, linkImgLinkTitle] = getLinkText(matchGroups, 'linkImgLink');
             const imgSpan = createImageSpan(linkImgHref, linkImgText, linkImgTitle);
             spans.push(createLinkSpan(linkImgLinkHref, [imgSpan], linkImgLinkTitle));
 
         // Link with inline image reference
-        } else if (typeof match.groups.linkImgRef !== 'undefined') {
-            const {linkImgRefText, linkImgRefImgText, linkImgRefFull} = match.groups;
-            const [, linkImgRefLinkHref, linkImgRefLinkTitle] = getLinkText(match.groups, 'linkImgRefLink');
+        } else if (typeof matchGroups.linkImgRef !== 'undefined') {
+            const {linkImgRefText, linkImgRefImgText, linkImgRefFull} = matchGroups;
+            const [, linkImgRefLinkHref, linkImgRefLinkTitle] = getLinkText(matchGroups, 'linkImgRefLink');
             const imgSpan = createImageRefSpan(linkImgRefText, linkImgRefImgText, linkImgRefFull, linkRefs, true);
             spans.push(createLinkSpan(linkImgRefLinkHref, [imgSpan], linkImgRefLinkTitle));
 
         // Link reference with inline image
-        } else if (typeof match.groups.linkRefImg !== 'undefined') {
-            const [linkRefImgText, linkRefImgHref, linkRefImgTitle] = getLinkText(match.groups, 'linkRefImg');
-            const {linkRefImgLinkText} = match.groups;
+        } else if (typeof matchGroups.linkRefImg !== 'undefined') {
+            const [linkRefImgText, linkRefImgHref, linkRefImgTitle] = getLinkText(matchGroups, 'linkRefImg');
+            const {linkRefImgLinkText} = matchGroups;
             const imgSpan = createImageSpan(linkRefImgHref, linkRefImgText, linkRefImgTitle);
             spans.push(createLinkRefSpan(linkRefImgLinkText, [imgSpan], match[0], linkRefs, true));
 
         // Link reference with inline image reference
-        } else if (typeof match.groups.linkRefImgRef !== 'undefined') {
-            const {linkRefImgRefText, linkRefImgRefImgText, linkRefImgRefFull, linkRefImgRefLinkText} = match.groups;
+        } else if (typeof matchGroups.linkRefImgRef !== 'undefined') {
+            const {linkRefImgRefText, linkRefImgRefImgText, linkRefImgRefFull, linkRefImgRefLinkText} = matchGroups;
             const imgSpan = createImageRefSpan(linkRefImgRefText, linkRefImgRefImgText, linkRefImgRefFull, linkRefs, true);
             spans.push(createLinkRefSpan(linkRefImgRefLinkText, [imgSpan], match[0], linkRefs, true));
 
         // Link or image?
-        } else if (typeof match.groups.link !== 'undefined') {
-            const [linkText, linkHref, linkTitle] = getLinkText(match.groups, 'link');
-            if (match.groups.link.startsWith('!')) {
+        } else if (typeof matchGroups.link !== 'undefined') {
+            const [linkText, linkHref, linkTitle] = getLinkText(matchGroups, 'link');
+            if (matchGroups.link.startsWith('!')) {
                 spans.push(createImageSpan(linkHref, linkText, linkTitle));
             } else {
                 spans.push(createLinkSpan(linkHref, linkText, linkTitle, linkRefs));
             }
 
         // Link reference?
-        } else if (typeof match.groups.linkRef !== 'undefined') {
-            const {linkRefText, linkRefOtherText = null} = match.groups;
-            if (match.groups.linkRef.startsWith('!')) {
+        } else if (typeof matchGroups.linkRef !== 'undefined') {
+            const {linkRefText, linkRefOtherText = null} = matchGroups;
+            if (matchGroups.linkRef.startsWith('!')) {
                 spans.push(createImageRefSpan(linkRefText, linkRefOtherText, match[0], linkRefs));
             } else {
                 spans.push(createLinkRefSpan(linkRefText, linkRefOtherText, match[0], linkRefs));
             }
 
         // Link (alternate syntax)?
-        } else if (typeof match.groups.linkAlt !== 'undefined') {
-            const {linkAltScheme} = match.groups;
-            const linkAltHref = (linkAltScheme.endsWith('@') ? `mailto:${match.groups.linkAltHref}` : match.groups.linkAltHref);
-            spans.push({'link': {'href': linkAltHref, 'spans': [{'text': linkAltHref}]}});
+        } else if (typeof matchGroups.linkAlt !== 'undefined') {
+            const {linkAlt, linkAltScheme} = matchGroups;
+            const linkAltHref = linkAlt.slice(1, linkAlt.length - 1);
+            const linkHref = (linkAltScheme.endsWith('@') ? `mailto:${linkAltHref}` : linkAltHref);
+            spans.push({'link': {'href': linkHref, 'spans': [{'text': linkHref}]}});
 
         // Bold style?
-        } else if (typeof match.groups.bold !== 'undefined' || typeof match.groups.boldu !== 'undefined') {
-            const boldText = match.groups.boldText ?? match.groups.bolduText;
+        } else if (typeof matchGroups.bold !== 'undefined' || typeof matchGroups.boldu !== 'undefined') {
+            const bold = matchGroups.bold ?? matchGroups.boldu;
+            const boldText = bold.slice(2, bold.length - 2);
             spans.push({'style': {'style': 'bold', 'spans': paragraphSpans(boldText, linkRefs)}});
 
         // Italic style?
-        } else if (typeof match.groups.italic !== 'undefined' || typeof match.groups.italicu !== 'undefined') {
-            const italicText = match.groups.italicText ?? match.groups.italicuText;
+        } else if (typeof matchGroups.italic !== 'undefined' || typeof matchGroups.italicu !== 'undefined') {
+            const italic = matchGroups.italic ?? matchGroups.italicu;
+            const italicText = italic.slice(1, italic.length - 1);
             spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText, linkRefs)}});
 
-        // Strikethrough style?
-        } else if (typeof match.groups.strike !== 'undefined') {
-            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(match.groups.strikeText, linkRefs)}});
+        // Strikethrough style (double)?
+        } else if (typeof matchGroups.strike2 !== 'undefined') {
+            const strikeText = matchGroups.strike2.slice(2, matchGroups.strike2.length - 2);
+            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(strikeText, linkRefs)}});
+
+        // Strikethrough style (single)?
+        } else if (typeof matchGroups.strike !== 'undefined') {
+            const strikeText = matchGroups.strike.slice(1, matchGroups.strike.length - 1);
+            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(strikeText, linkRefs)}});
 
         // Code?
-        } else if (typeof match.groups.code !== 'undefined') {
-            const codeText = match.groups.codeText.replace(rCodeNewlinesEnd, '').replaceAll(rCodeNewlines, ' ');
-            spans.push({'code': codeText});
+        } else if (typeof matchGroups.code !== 'undefined') {
+            const {code, codeT} = matchGroups;
+            const codeText = code.slice(codeT.length, code.length - codeT.length);
+            const codeScrubbed = codeText.replace(rCodeSpaces, '$1').replace(rCodeNewlinesEnd, '').replaceAll(rCodeNewlines, ' ');
+            spans.push({'code': codeScrubbed});
         }
 
         ixSearch = match.index + match[0].length;
