@@ -8,9 +8,9 @@ import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**
- * Validate a markdown model
+ * Validate a Markdown model
  *
- * @param {Object} markdown - The markdown model
+ * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  * @returns {Object}
  */
 export function validateMarkdownModel(markdown) {
@@ -18,7 +18,7 @@ export function validateMarkdownModel(markdown) {
 }
 
 
-/** The Markdown schema-markdown type model */
+/** The Markdown [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'} */
 export const markdownModelTypes = parseSchemaMarkdown(`\
 # Markdown document
 struct Markdown

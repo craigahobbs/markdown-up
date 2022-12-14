@@ -41,11 +41,11 @@ import {getMarkdownParagraphText} from './parser.js';
 
 
 /**
- * Generate an element model from a markdown model.
+ * Generate an element model from a Markdown model.
  *
- * @param {Object} markdown - The markdown model
+ * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
- * @returns {*} The markdown's element model
+ * @returns {*} The Markdown's [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
 export function markdownElements(markdown, options = null) {
     const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
@@ -88,15 +88,15 @@ function markdownPartElements(part, options, usedHeaderIds) {
 
 
 /**
- * Generate an element model from a markdown model.
+ * Generate an element model from a Markdown model.
  *
  * This is the asynchronous form of the [markdownElements function]{@link module:lib/elements.markdownElements}.
  * Use this form of the function if you have one or more asynchronous code block functions.
  *
  * @async
- * @param {Object} markdown - The markdown model
+ * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
- * @returns {*} The markdown's element model
+ * @returns {*} The Markdown's [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
 // eslint-disable-next-line require-await
 export async function markdownElementsAsync(markdown, options = null) {

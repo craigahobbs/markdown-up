@@ -20,7 +20,7 @@ const rEscapeMarkdownText = /([\\[\]()<>"'*_~`#=+|-])/g;
 /**
  * Get a Markdown model's title. Returns null if no title is found.
  *
- * @param {Object} markdown - The markdown model
+ * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  * @returns {string|null}
  */
 export function getMarkdownTitle(markdown) {
@@ -36,7 +36,8 @@ export function getMarkdownTitle(markdown) {
 /**
  * Get a Markdown paragraph model's text
  *
- * @param {Object} paragraph - The markdown paragraph model
+ * @param {Object} paragraph - The
+ *     [Markdown paragraph model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Paragraph'}
  * @returns {string}
  */
 export function getMarkdownParagraphText(paragraph) {
@@ -75,11 +76,11 @@ const rTableEscape = /\\(\\|)/g;
 
 
 /**
- * Parse markdown text or text lines into a markdown model
+ * Parse markdown text or text lines into a Markdown model
  *
  * @param {string|string[]} markdown - Markdown text or text lines
  * @param {number} [startLineNumber = 1] - The starting line number of the markdown text
- * @returns {Object} The markdown model
+ * @returns {Object} The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  */
 export function parseMarkdown(markdown, startLineNumber = 1) {
     return parseMarkdownInternal(markdown, startLineNumber, null);
@@ -425,7 +426,6 @@ const rLinkHref = '[ \\r\\n]*(?<linkHref>' +
       '\\((?:\\\\.|[^\\\\)])*\\)' +
       '))?[ \\r\\n]*';
 const rSpans = new RegExp(
-    // eslint-disable-next-line prefer-template
     '(?<br>(?: {2,}|\\\\)\\r?\\n)|' +
     `(?<linkImg>\\[\\s*!\\[${rLinkText.replaceAll('<link', '<linkImg')}\\]` +
         `\\(${rLinkHref.replaceAll('<link', '<linkImg')}\\)\\s*\\]` +
@@ -446,16 +446,15 @@ const rSpans = new RegExp(
     '(?<italic>\\*(?!\\**\\s)(?:[^\\s\\\\*]|\\\\.|\\s+(?!\\*))+\\*)|' +
     '(?<boldu>_{2,}(?!_*\\s)(?:[^\\s\\\\_]|\\\\.|\\s+(?!_{2,})|_(?!_))+_{2,}(?!_*[A-Za-z0-9]))|' +
     '(?<italicu>_(?!_*\\s)(?:[^\\s\\\\_]|\\\\.|\\s+(?!_))+_(?!_*[A-Za-z0-9]))|' +
-    '(?<strike2>~~(?!~)(?!\\s)(?:[^\\s\\\\~]|\\\\.|\\s+(?!~~(:[^~]|$))|~~~+|~(?!~))+~~(?!~))|' +
-    '(?<strike>~(?!~)(?!\\s)(?:[^\\s\\\\~]|\\\\.|\\s+(?!~(:[^~]|$))|~~+(?!~))+~(?!~))|' +
-    '(?<code>(?<codeT>`+)(?!`)(?:[^`]|(?!\\k<codeT>[^`])`+)*\\k<codeT>(?!`))',
+    '(?<strike>(?<strikeT>~~?)(?!~)(?!\\s)' +
+        '(?:[^\\s\\\\~]|\\\\.|\\s+(?!\\k<strikeT>(?!~))|(?!\\k<strikeT>(?!~))~+(?!~))+\\k<strikeT>(?!~))|' +
+    '(?<code>(?<codeT>`+)(?!`)(?:[^`]|(?!\\k<codeT>(?!`))`+(?!`))*\\k<codeT>(?!`))',
     'g'
 );
 const rLinkDef = new RegExp(`^ {0,3}\\[${rLinkText}\\]:[ \\r\\n]*${rLinkHref.replace(')])*)', '])+)')}(\\r?\\n|$)`);
 const rLinkRefSpace = /\s+/g;
 const rCodeSpaces = /^ (.+) $/;
 const rCodeNewlines = /\r?\n/g;
-const rCodeNewlinesEnd = /\r?\n$/;
 
 
 // Helper function to translate markdown paragraph text to a markdown paragraph span model array
@@ -539,21 +538,17 @@ function paragraphSpans(text, linkRefs) {
             const italicText = italic.slice(1, italic.length - 1);
             spans.push({'style': {'style': 'italic', 'spans': paragraphSpans(italicText, linkRefs)}});
 
-        // Strikethrough style (double)?
-        } else if (typeof matchGroups.strike2 !== 'undefined') {
-            const strikeText = matchGroups.strike2.slice(2, matchGroups.strike2.length - 2);
-            spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(strikeText, linkRefs)}});
-
-        // Strikethrough style (single)?
+        // Strikethrough style?
         } else if (typeof matchGroups.strike !== 'undefined') {
-            const strikeText = matchGroups.strike.slice(1, matchGroups.strike.length - 1);
+            const {strike, strikeT} = matchGroups;
+            const strikeText = strike.slice(strikeT.length, strike.length - strikeT.length);
             spans.push({'style': {'style': 'strikethrough', 'spans': paragraphSpans(strikeText, linkRefs)}});
 
         // Code?
         } else if (typeof matchGroups.code !== 'undefined') {
             const {code, codeT} = matchGroups;
             const codeText = code.slice(codeT.length, code.length - codeT.length);
-            const codeScrubbed = codeText.replace(rCodeSpaces, '$1').replace(rCodeNewlinesEnd, '').replaceAll(rCodeNewlines, ' ');
+            const codeScrubbed = codeText.replaceAll(rCodeNewlines, ' ').replace(rCodeSpaces, '$1');
             spans.push({'code': codeScrubbed});
         }
 

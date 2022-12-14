@@ -116,7 +116,7 @@ pre {
     background-color: var(--markdown-model-color-background-pre);
     font-family: Courier New, monospace;
     font-size: 0.9rem;
-    margin: 1em;
+    margin-top: 0.5em;
     padding: 0.5em;
     border-width: 1px;
     border-style: solid;
@@ -128,7 +128,7 @@ pre > code {
     background-color: var(--markdown-model-color-background-pre);
     font-size: 0.9rem;
     padding: 0;
-    white-space: pre;
+    overflow-wrap: normal;
 }
 code {
     background-color: var(--markdown-model-color-background-code);
@@ -136,7 +136,7 @@ code {
     font-size: 0.9em;
     padding: 0.2em 0.4em;
     border-radius: 4px;
-    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 a {
     color: var(--markdown-model-color-link);
