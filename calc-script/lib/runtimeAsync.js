@@ -8,7 +8,7 @@ import {CalcScriptRuntimeError, evaluateExpression, executeScriptHelper} from '.
 import {defaultMaxStatements, expressionFunctions, scriptFunctions} from './library.js';
 
 
-/* eslint-disable no-await-in-loop */
+/* eslint-disable no-await-in-loop, require-await */
 
 
 /**
@@ -22,29 +22,23 @@ import {defaultMaxStatements, expressionFunctions, scriptFunctions} from './libr
  * @throws [CalcScriptRuntimeError]{@link module:lib/runtime.CalcScriptRuntimeError}
  */
 export async function executeScriptAsync(script, options = {}) {
+    // Create the global variable object, if necessary
     let {globals = null} = options;
     if (globals === null) {
         globals = {};
         options.globals = globals;
     }
 
-    // Execute the script
-    const timeBegin = performance.now();
+    // Set the script function globals variables
     for (const scriptFuncName of Object.keys(scriptFunctions)) {
         if (!(scriptFuncName in globals)) {
             globals[scriptFuncName] = scriptFunctions[scriptFuncName];
         }
     }
+
+    // Execute the script
     options.statementCount = 0;
-    const result = await executeScriptHelperAsync(script.statements, options, null);
-
-    // Report script duration
-    if ('logFn' in options) {
-        const timeEnd = performance.now();
-        options.logFn(`Script executed in ${(timeEnd - timeBegin).toFixed(1)} milliseconds`);
-    }
-
-    return result;
+    return executeScriptHelperAsync(script.statements, options, null);
 }
 
 
@@ -105,7 +99,6 @@ async function executeScriptHelperAsync(statements, options, locals) {
         // Function?
         } else if (statementKey === 'function') {
             if (statement.function.async) {
-                // eslint-disable-next-line require-await
                 globals[statement.function.name] = async (args, fnOptions) => {
                     const funcLocals = {};
                     if ('args' in statement.function) {
@@ -168,14 +161,16 @@ async function executeScriptHelperAsync(statements, options, locals) {
 }
 
 
-export function isRelativeURL(url) {
+// Test if a URL is relative
+function isRelativeURL(url) {
     return !rNotRelativeURL.test(url);
 }
 
 const rNotRelativeURL = /^(?:[a-z]+:|\/|\?|#)/;
 
 
-export function getBaseURL(url) {
+// Get a URL's base URL
+function getBaseURL(url) {
     return url.slice(0, url.lastIndexOf('/') + 1);
 }
 
@@ -266,7 +261,7 @@ export async function evaluateExpressionAsync(expr, options = null, locals = nul
 
                 // Log and return null
                 if (options !== null && 'logFn' in options) {
-                    options.logFn(`Error: Function "${funcName}" failed with error: ${error.message}`);
+                    options.logFn(`CalcScript: Function "${funcName}" failed with error: ${error.message}`);
                 }
                 return null;
             }

@@ -305,10 +305,30 @@ export class MarkdownUp {
         // Get the Markdown text
         const urlOverride = 'url' in this.params &amp;&amp; this.params.url !== '';
         const url = urlOverride ? this.params.url : this.url;
+        const scriptOptions = this.createScriptOptions(url);
         let markdownText = null;
+        let timeBegin;
         if (this.markdownText !== null &amp;&amp; !urlOverride) {
             ({markdownText} = this);
+
+            // Log Markdown render begin
+            if ('logFn' in scriptOptions) {
+                timeBegin = performance.now();
+                scriptOptions.logFn('MarkdownUp: ===== Rendering Markdown text');
+            }
         } else {
+            // Log Markdown render begin
+            if ('logFn' in scriptOptions) {
+                scriptOptions.logFn(`MarkdownUp: ===== Rendering Markdown document "${url}"`);
+            }
+
+            // Log Markdown fetch begin
+            let fetchBegin;
+            if ('logFn' in scriptOptions) {
+                fetchBegin = performance.now();
+                scriptOptions.logFn(`MarkdownUp: Fetching "${url}" ...`);
+            }
+
             // Fetch the Markdown text resource URL
             const response = await this.window.fetch(url);
             if (!response.ok) {
@@ -322,6 +342,13 @@ export class MarkdownUp {
                 };
             }
             markdownText = await response.text();
+
+            // Log Markdown fetch end with timing
+            if ('logFn' in scriptOptions) {
+                const fetchEnd = performance.now();
+                timeBegin = performance.now();
+                scriptOptions.logFn(`MarkdownUp: Fetch completed in ${(fetchEnd - fetchBegin).toFixed(1)} milliseconds`);
+            }
         }
 
         // Parse the Markdown and get the title
@@ -340,7 +367,6 @@ export class MarkdownUp {
         }
 
         // Render the Markdown
-        const scriptOptions = this.createScriptOptions(url);
         const result = {
             'title': markdownTitle,
             'elements': [
@@ -382,6 +408,12 @@ export class MarkdownUp {
         // Reset the runtime
         scriptOptions.runtime.reset();
 
+        // Log Markdown render end
+        if ('logFn' in scriptOptions) {
+            const timeEnd = performance.now();
+            scriptOptions.logFn(`MarkdownUp: Markdown rendered in ${(timeEnd - timeBegin).toFixed(1)} milliseconds`);
+        }
+
         return result;
     }
 
@@ -414,7 +446,7 @@ export class MarkdownUp {
                     scriptOptions.variables[varName] = evaluateExpression(parseExpression(varExprStr), scriptOptions.variables);
                 } catch ({message}) {
                     if (logFn !== null) {
-                        logFn(`Error evaluating variable "${varName}" expression "${varExprStr}": ${message}`);
+                        logFn(`MarkdownUp: Error evaluating variable "${varName}" expression "${varExprStr}": ${message}`);
                     }
                 }
             }
