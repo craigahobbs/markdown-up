@@ -1457,10 +1457,9 @@ debugLog('Hello')
             ]
         }
     );
-    t.deepEqual(logs.slice(0, logs.length - 1), [
+    t.deepEqual(logs, [
         'Hello'
     ]);
-    t.true(logs[logs.length - 1].startsWith('Script executed in '));
 });
 
 
@@ -1500,8 +1499,7 @@ test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
             ]
         }
     );
-    t.is(logs.length, 6);
-    t.deepEqual(logs.filter((message) => !message.startsWith('Script executed in ')), [
+    t.deepEqual(logs, [
         'Warnings for the script at line number 4:',
         '    Empty script',
         'Warnings for the script at line number 7:',
@@ -1580,14 +1578,13 @@ markdownPrint('varName = ' + varName)
             ]
         }
     );
-    t.deepEqual(logs.slice(0, logs.length - 1), [
+    t.deepEqual(logs, [
         `\
 Error evaluating variable "varName" expression "foo bar": Syntax error:
 foo bar
    ^
 `
     ]);
-    t.true(logs[logs.length - 1].startsWith('Script executed in '));
 });
 
 
