@@ -1426,6 +1426,62 @@ markdownPrint(message)
 
 test('MarkdownUp.main, markdown-script debug', async (t) => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchResolve = (url) => {
+        t.is(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve(`\
+# markdown-script
+
+~~~ markdown-script
+debugLog('Hello')
+~~~
+`);
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const logs = [];
+    window.console = {
+        'log': (message) => {
+            logs.push(message);
+        }
+    };
+    const app = new MarkdownUp(window);
+    app.updateParams('', null, '{"debug": 1}');
+    t.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': 'markdown-script',
+            'elements': [
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
+                    null
+                ],
+                [
+                    menuBurgerElements(),
+                    null
+                ]
+            ]
+        }
+    );
+    const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
+    t.deepEqual(cleanedLogs, [
+        'MarkdownUp: ===== Rendering Markdown document "README.md"',
+        'MarkdownUp: Fetching "README.md" ...',
+        'MarkdownUp: Fetch completed in X milliseconds',
+        'MarkdownUp: Executing script at line number 4 ...',
+        'MarkdownUp: Script static analysis... OK',
+        'Hello',
+        'MarkdownUp: Script executed in X milliseconds',
+        'MarkdownUp: Markdown rendered in X milliseconds'
+    ]);
+});
+
+
+test('MarkdownUp.main, markdown-script debug text', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
     window.console = {
         'log': (message) => {
@@ -1457,8 +1513,14 @@ debugLog('Hello')
             ]
         }
     );
-    t.deepEqual(logs, [
-        'Hello'
+    const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
+    t.deepEqual(cleanedLogs, [
+        'MarkdownUp: ===== Rendering Markdown text',
+        'MarkdownUp: Executing script at line number 4 ...',
+        'MarkdownUp: Script static analysis... OK',
+        'Hello',
+        'MarkdownUp: Script executed in X milliseconds',
+        'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
 });
 
@@ -1478,6 +1540,8 @@ test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
 ~~~
 
 ~~~ markdown-script
+function foo(a, b)
+endfunction
 ~~~
 `});
     app.updateParams('', null, '{"debug": 1}');
@@ -1499,11 +1563,19 @@ test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
             ]
         }
     );
-    t.deepEqual(logs, [
-        'Warnings for the script at line number 4:',
-        '    Empty script',
-        'Warnings for the script at line number 7:',
-        '    Empty script'
+    const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
+    t.deepEqual(cleanedLogs, [
+        'MarkdownUp: ===== Rendering Markdown text',
+        'MarkdownUp: Executing script at line number 4 ...',
+        'MarkdownUp: Script static analysis ... 1 warning:',
+        'MarkdownUp:     Empty script',
+        'MarkdownUp: Script executed in X milliseconds',
+        'MarkdownUp: Executing script at line number 7 ...',
+        'MarkdownUp: Script static analysis ... 2 warnings:',
+        'MarkdownUp:     Unused argument "a" of function "foo" (index 0)',
+        'MarkdownUp:     Unused argument "b" of function "foo" (index 0)',
+        'MarkdownUp: Script executed in X milliseconds',
+        'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
 });
 
@@ -1578,12 +1650,18 @@ markdownPrint('varName = ' + varName)
             ]
         }
     );
-    t.deepEqual(logs, [
+    const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
+    t.deepEqual(cleanedLogs, [
         `\
-Error evaluating variable "varName" expression "foo bar": Syntax error:
+MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error:
 foo bar
    ^
-`
+`,
+        'MarkdownUp: ===== Rendering Markdown text',
+        'MarkdownUp: Executing script at line number 2 ...',
+        'MarkdownUp: Script static analysis... OK',
+        'MarkdownUp: Script executed in X milliseconds',
+        'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
 });
 
