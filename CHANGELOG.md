@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.8 (2022-12-15)
+
+- [0b0eefe](https://github.com/craigahobbs/markdown-up/commit/0b0eefe) - improve debug logging
+
+- [abdf397](https://github.com/craigahobbs/markdown-up/commit/abdf397) - set style variables prior to calling main
+
 ## 1.8.7 (2022-11-23)
 
 - [0355284](https://github.com/craigahobbs/markdown-up/commit/0355284) - markdown-model 1.7
