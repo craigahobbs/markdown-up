@@ -3,8 +3,13 @@
 [![npm](https://img.shields.io/npm/v/markdown-up)](https://www.npmjs.com/package/markdown-up)
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up)](https://github.com/craigahobbs/markdown-up/blob/main/LICENSE)
 
-[MarkdownUp](https://craigahobbs.github.io/markdown-up/)
-is a Markdown viewer.
+[MarkdownUp](https://craigahobbs.github.io/markdown-up/) is a Markdown viewer.
+
+
+## Links
+
+- [MarkdownUp Application](https://craigahobbs.github.io/markdown-up/)
+- [Source code](https://github.com/craigahobbs/markdown-up)
 
 
 ## View Local Markdown Files
@@ -142,8 +147,8 @@ CSV, manipulating data, and rendering tables and charts. For more information, r
 
 ## Development
 
-MarkdownUp is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme)
-and it was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme):
+This package is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme).
+It was started using [javascript-template](https://github.com/craigahobbs/javascript-template#readme) as follows:
 
 ~~~
 template-specialize javascript-template/template/ markdown-up/ -k package markdown-up -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs'
