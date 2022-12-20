@@ -15,7 +15,7 @@
 ## View Local Markdown Files
 
 To view local Markdown files, use the
-[MarkdownUp launcher](https://pypi.org/project/markdown-up/)
+[MarkdownUp launcher](https://github.com/craigahobbs/markdown-up-py#readme)
 from a terminal prompt:
 
 ~~~
