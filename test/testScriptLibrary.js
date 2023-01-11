@@ -505,14 +505,6 @@ test('script library, dataValidate', (t) => {
 //
 
 
-test('script library, documentReset', (t) => {
-    const runtime = testRuntime();
-    t.is(runtime.isDocumentReset, false);
-    t.is(markdownScriptFunctions.documentReset([], runtime.options), undefined);
-    t.is(runtime.isDocumentReset, true);
-});
-
-
 test('script library, documentURL', (t) => {
     const runtime = testRuntime();
     t.is(markdownScriptFunctions.documentURL(['/foo/bar/'], runtime.options), '/foo/bar/');
@@ -553,6 +545,14 @@ test('script library, setDocumentFocus', (t) => {
     t.is(runtime.documentFocus, null);
     markdownScriptFunctions.setDocumentFocus(['test-input'], runtime.options);
     t.is(runtime.documentFocus, 'test-input');
+});
+
+
+test('script library, setDocumentReset', (t) => {
+    const runtime = testRuntime();
+    t.is(runtime.documentReset, null);
+    t.is(markdownScriptFunctions.setDocumentReset(['resetID'], runtime.options), undefined);
+    t.is(runtime.documentReset, 'resetID');
 });
 
 

@@ -329,7 +329,7 @@ test('MarkdownUp, run and render', async (t) => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'menu': false});
     await app.run();
     t.is(window.document.title, 'MarkdownUp');
     t.true(window.document.body.innerHTML.startsWith(
@@ -387,7 +387,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
@@ -401,7 +401,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), null);
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 
@@ -410,7 +410,7 @@ test('MarkdownUp, render menu toggle', async (t) => {
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), null);
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{}');
 });
@@ -427,7 +427,7 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
@@ -441,16 +441,15 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<div class="markdown">Hello!</div>'));
+    t.true(window.document.body.innerHTML.endsWith('<div class="markdown">Hello!</div>'));
     t.is(window.localStorage.getItem('MarkdownUp'), null);
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
 
     // Click the Markdown menu button again
-    [, , , , markdownButton] = window.document.getElementsByTagName('div');
-    window.document.body.innerHTML = '';
+    [, , , markdownButton] = window.document.getElementsByTagName('div');
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), null);
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 });
@@ -467,7 +466,7 @@ test('MarkdownUp, render menu dark mode toggle', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
@@ -481,7 +480,7 @@ test('MarkdownUp, render menu dark mode toggle', async (t) => {
     window.document.body.innerHTML = '';
     darkModeButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), '{"darkMode":1}');
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -490,7 +489,7 @@ test('MarkdownUp, render menu dark mode toggle', async (t) => {
     window.document.body.innerHTML = '';
     darkModeButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.is(window.localStorage.getItem('MarkdownUp'), '{}');
     t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
@@ -507,7 +506,7 @@ test('MarkdownUp, render menu cycle', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
@@ -522,7 +521,7 @@ test('MarkdownUp, render menu cycle', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '14pt'],
@@ -537,7 +536,7 @@ test('MarkdownUp, render menu cycle', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '16pt'],
@@ -560,7 +559,7 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '18pt'],
@@ -575,7 +574,7 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello!</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     t.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '8pt'],
@@ -628,7 +627,7 @@ main()
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 1);
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime timeout ID
     window.location.hash = '#';
@@ -637,14 +636,13 @@ main()
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 2);
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the timeout callback
     windowTimeout.callback();
     t.is(windowTimeout.delay, 2000);
     t.is(app.runtimeTimeoutId, 3);
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 
     // Call the timeout callback again
@@ -652,7 +650,6 @@ main()
     t.is(windowTimeout.delay, null);
     t.is(app.runtimeTimeoutId, null);
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 3</p>'));
 });
 
@@ -691,7 +688,7 @@ main()
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime resize event handler
     window.location.hash = '#';
@@ -700,14 +697,13 @@ main()
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the resize callback
     eventListener.resize();
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello 1</p>'));
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 });
 
@@ -719,7 +715,6 @@ test('MarkdownUp, render focus', async (t) => {
 ~~~ markdown-script
 function main()
     setGlobal('count', count + 1)
-    documentReset()
     elementModelRender(objectNew( \
         'html', 'input', \
         'attr', objectNew( \
@@ -740,7 +735,7 @@ main()
     window.location.hash = '#';
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<input id="test-input" type="text" value="Text 1">'));
+    t.true(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 1">'));
 
     let testInput = window.document.getElementById('test-input');
     t.is(testInput.value, 'Text 1');
@@ -749,12 +744,76 @@ main()
 
     testInput.click();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<input id="test-input" type="text" value="Text 2">'));
+    t.true(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 2">'));
 
     testInput = window.document.getElementById('test-input');
     t.is(testInput.value, 'Text 2');
     t.is(testInput.selectionStart, 6);
     t.is(testInput.selectionEnd, 6);
+});
+
+
+test('MarkdownUp, render document reset ID', async (t) => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.setTimeout and window.clearTimeout
+    const windowTimeout = {'id': 0};
+    window.setTimeout = (callback, delay) => {
+        if (delay === 0) {
+            // Ignore JSDOM call?
+            return 0;
+        }
+        windowTimeout.callback = callback;
+        windowTimeout.delay = delay;
+        windowTimeout.id += 1;
+        return windowTimeout.id;
+    };
+    window.clearTimeout = (timeoutId) => {
+        t.is(timeoutId, windowTimeout.id);
+        windowTimeout.callback = null;
+        windowTimeout.delay = null;
+    };
+
+    const app = new MarkdownUp(window, {
+        'menu': false,
+        'markdownText': `\
+~~~ markdown-script
+function main()
+    setGlobal('count', count + 1)
+    markdownPrint('Hello ' + count)
+    setWindowTimeout(main, 1000)
+    if(count <= 2, setDocumentReset('resetID'))
+endfunction
+
+markdownPrint('# Title')
+elementModelRender(objectNew('html', 'div', 'attr', objectNew('id', 'resetID', 'style', 'display=none')))
+
+count = 0
+setWindowTimeout(main, 1000)
+main()
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    t.is(windowTimeout.delay, 1000);
+    t.is(app.runtimeTimeoutId, 1);
+    t.is(window.document.title, '');
+    t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
+
+    // Call the timeout callback
+    windowTimeout.callback();
+    t.is(windowTimeout.delay, 1000);
+    t.is(app.runtimeTimeoutId, 2);
+    t.is(window.document.title, '');
+    t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
+
+    // Call the timeout callback
+    windowTimeout.callback();
+    t.is(windowTimeout.delay, 1000);
+    t.is(app.runtimeTimeoutId, 3);
+    t.is(window.document.title, '');
+    t.is(window.document.body.innerHTML, '<p>Hello 3</p>');
 });
 
 
@@ -781,7 +840,6 @@ test('MarkdownUp, render location callback', async (t) => {
         'markdownText': `\
 ~~~ markdown-script
 function onClick()
-    documentReset()
     markdownPrint('Hello')
     setWindowLocation('#url=other')
 endfunction
@@ -798,14 +856,14 @@ elementModelRender(objectNew( \
     window.location.hash = '#';
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<span id="test-span">Click Here</span>'));
+    t.true(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
     t.is(window.location.href, `${jsdomURL}#`);
 
     const testSpan = window.document.getElementById('test-span');
     testSpan.click();
 
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
     t.is(window.location.href, `${jsdomURL}#url=other`);
 });
 
@@ -834,7 +892,7 @@ markdownPrint('Hello')
     window.location.hash = '#';
     await app.render();
     t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
 
 
@@ -845,7 +903,6 @@ test('MarkdownUp, render title callback', async (t) => {
 ~~~ markdown-script
 function onClick()
     setDocumentTitle('Hello')
-    documentReset()
     markdownPrint('Hello')
 endfunction
 
@@ -861,13 +918,13 @@ elementModelRender(objectNew( \
     window.location.hash = '#';
     await app.render();
     t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<span id="test-span">Click Here</span>'));
+    t.true(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
 
     const testSpan = window.document.getElementById('test-span');
     testSpan.click();
 
     t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.startsWith('<p>Hello</p>'));
+    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
 
 
@@ -877,20 +934,20 @@ test('MarkdownUp.main, help', async (t) => {
     app.updateParams(null, null, '{"view": "help"}');
     const result = deleteElementCallbacks(await app.main());
     t.deepEqual(
-        result.elements[0][0][0],
+        result.elements[1][0][0],
         {'html': 'h1', 'attr': {'id': 'type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
     );
-    result.elements[0] = '<helpElements>';
+    result.elements[1] = '<helpElements>';
     t.deepEqual(
         result,
         {
             'title': 'MarkdownUp',
             'elements': [
-                '<helpElements>',
                 [
                     menuBurgerElements(),
                     null
-                ]
+                ],
+                '<helpElements>'
             ]
         }
     );
@@ -925,13 +982,13 @@ test('MarkdownUp.main', async (t) => {
         {
             'title': 'Hello',
             'elements': [
-                null,
-                [
-                    {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
-                ],
                 [
                     menuBurgerElements(),
                     null
+                ],
+                null,
+                [
+                    {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
                 ]
             ]
         }
@@ -973,6 +1030,10 @@ test('MarkdownUp.main, url', async (t) => {
         {
             'title': 'Hello',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md', 'style': 'display=none'}},
                 [
                     {'html': 'h1', 'attr': {'id': 'url=sub%2Fother.md&hello'}, 'elem': [{'text': 'Hello'}]},
@@ -1046,10 +1107,6 @@ test('MarkdownUp.main, url', async (t) => {
                             }
                         ]
                     }
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1070,6 +1127,10 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     [
@@ -1077,10 +1138,6 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
                             {'html': 'p', 'elem': [{'text': 'fontSize = 18.67'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1112,6 +1169,10 @@ markdownPrint(fetch('README.md', null, true))
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     [
@@ -1123,10 +1184,6 @@ markdownPrint(fetch('README.md', null, true))
                             }
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1191,13 +1248,13 @@ test('MarkdownUp.main, no title', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
-                [
-                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
-                ],
                 [
                     menuBurgerElements(),
                     null
+                ],
+                null,
+                [
+                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ]
             ]
         }
@@ -1214,13 +1271,13 @@ test('MarkdownUp.main, menu', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
-                [
-                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
-                ],
                 [
                     menuBurgerElements(),
                     menuElements()
+                ],
+                null,
+                [
+                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ]
             ]
         }
@@ -1238,10 +1295,10 @@ test('MarkdownUp.main, no menu', async (t) => {
             'title': null,
             'elements': [
                 null,
+                null,
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
-                ],
-                null
+                ]
             ]
         }
     );
@@ -1257,11 +1314,11 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
                     menuBurgerElements(),
                     menuElements({'viewMarkdown': true})
-                ]
+                ],
+                {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
         }
     );
@@ -1277,11 +1334,11 @@ test('MarkdownUp.main, markdown', async (t) => {
         {
             'title': null,
             'elements': [
-                {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}},
                 [
                     menuBurgerElements(),
                     null
-                ]
+                ],
+                {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
         }
     );
@@ -1297,13 +1354,13 @@ test('MarkdownUp.main, darkMode', async (t) => {
         {
             'title': null,
             'elements': [
-                null,
-                [
-                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
-                ],
                 [
                     menuBurgerElements({'darkMode': 1}),
                     menuElements({'darkMode': 1})
+                ],
+                null,
+                [
+                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ]
             ]
         }
@@ -1326,6 +1383,10 @@ markdownPrint('Hello')
         {
             'title': 'markdown-script',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1334,10 +1395,6 @@ markdownPrint('Hello')
                             {'html': 'p', 'elem': [{'text': 'Hello'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1368,6 +1425,10 @@ markdownPrint('2')
         {
             'title': 'markdown-script',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1382,10 +1443,6 @@ markdownPrint('2')
                             {'html': 'p', 'elem': [{'text': '2'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1406,6 +1463,10 @@ markdownPrint(message)
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     [
@@ -1413,10 +1474,6 @@ markdownPrint(message)
                             {'html': 'p', 'elem': [{'text': 'Globals'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1454,13 +1511,13 @@ debugLog('Hello')
         {
             'title': 'markdown-script',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
-                    null
-                ],
-                [
-                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1501,13 +1558,13 @@ debugLog('Hello')
         {
             'title': 'markdown-script',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
-                    null
-                ],
-                [
-                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1550,14 +1607,14 @@ endfunction
         {
             'title': 'markdown-script',
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
                     null,
-                    null
-                ],
-                [
-                    menuBurgerElements(),
                     null
                 ]
             ]
@@ -1593,6 +1650,10 @@ markdownPrint('varName = ' + varName)
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 {'html': 'div', 'attr': {'id': 'var.varName=5', 'style': 'display=none'}},
                 [
                     [
@@ -1600,10 +1661,6 @@ markdownPrint('varName = ' + varName)
                             {'html': 'p', 'elem': [{'text': 'varName = 5'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1635,6 +1692,10 @@ markdownPrint('varName = ' + varName)
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 {'html': 'div', 'attr': {'id': 'var.varName=foo%20bar', 'style': 'display=none'}},
                 [
                     [
@@ -1642,10 +1703,6 @@ markdownPrint('varName = ' + varName)
                             {'html': 'p', 'elem': [{'text': 'varName = null'}]}
                         ]
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
@@ -1679,16 +1736,16 @@ foobar()
         {
             'title': null,
             'elements': [
+                [
+                    menuBurgerElements(),
+                    null
+                ],
                 null,
                 [
                     [
                         null,
                         {'html': 'pre', 'elem': {'text': 'Undefined function "foobar"'}}
                     ]
-                ],
-                [
-                    menuBurgerElements(),
-                    null
                 ]
             ]
         }
