@@ -272,13 +272,6 @@
             ]
         },
         {
-            "name": "documentReset",
-            "group": "Document",
-            "doc": [
-                "Reset the document. This is useful within callback functions that re-render the document."
-            ]
-        },
-        {
             "name": "documentURL",
             "group": "Document",
             "doc": [
@@ -1077,6 +1070,21 @@
             "group": "Document",
             "doc": [
                 "Set focus to an element"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The element ID"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "setDocumentReset",
+            "group": "Document",
+            "doc": [
+                "Set the document reset element"
             ],
             "args": [
                 {

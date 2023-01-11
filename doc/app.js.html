@@ -296,8 +296,8 @@ export class MarkdownUp {
             return {
                 'title': 'MarkdownUp',
                 'elements': [
-                    schemaMarkdownDoc(markdownUpTypes, 'MarkdownUp', {'params': encodeQueryString(this.params)}),
-                    this.burgerElements()
+                    this.burgerElements(),
+                    schemaMarkdownDoc(markdownUpTypes, 'MarkdownUp', {'params': encodeQueryString(this.params)})
                 ]
             };
         }
@@ -360,8 +360,8 @@ export class MarkdownUp {
             return {
                 'title': markdownTitle,
                 'elements': [
-                    {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': markdownText}},
-                    this.burgerElements()
+                    this.burgerElements(),
+                    {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': markdownText}}
                 ]
             };
         }
@@ -370,6 +370,9 @@ export class MarkdownUp {
         const result = {
             'title': markdownTitle,
             'elements': [
+                // Menu "burger"
+                this.burgerElements(),
+
                 // Add a top hash ID, if necessary
                 Object.keys(this.params).length === 0
                     ? null : {'html': 'div', 'attr': {'id': encodeQueryString(this.params), 'style': 'display=none'}},
@@ -381,10 +384,7 @@ export class MarkdownUp {
                     },
                     'urlFn': (urlRaw) => this.modifyURL(urlRaw, url),
                     'headerIds': true
-                }),
-
-                // Popup menu burger
-                this.burgerElements()
+                })
             ]
         };
 
@@ -472,12 +472,18 @@ export class MarkdownUp {
             }
 
             // Reset the runtime and render
-            const {isDocumentReset, windowLocation} = runtime;
-            const documentElements = [
-                runtime.resetElements(),
-                isDocumentReset ? this.burgerElements() : null
-            ];
-            renderElements(this.window.document.body, documentElements, isDocumentReset);
+            const elements = runtime.resetElements();
+            if (elements !== null) {
+                const {body} = this.window.document;
+                if (runtime.documentReset === null) {
+                    renderElements(body, [this.burgerElements(), elements]);
+                } else {
+                    while (body.lastChild !== null &amp;&amp; body.lastChild.id !== runtime.documentReset) {
+                        body.lastChild.remove();
+                    }
+                    renderElements(body, [elements], false);
+                }
+            }
 
             // Focus?
             if (runtime.documentFocus !== null) {
@@ -486,8 +492,8 @@ export class MarkdownUp {
 
             // Navigate?
             // Note: This is done after render since it may have no effect (in which case we want to render).
-            if (windowLocation !== null) {
-                this.window.location.href = windowLocation;
+            if (runtime.windowLocation !== null) {
+                this.window.location.href = runtime.windowLocation;
             }
 
             // Reset the runtime
