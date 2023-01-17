@@ -622,7 +622,6 @@ main()
 `
     });
     window.location.hash = '#';
-    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     await app.render();
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 1);
@@ -631,7 +630,6 @@ main()
 
     // Render again to test clearing the runtime timeout ID
     window.location.hash = '#';
-    window.sessionStorage.setItem('MarkdownUp', '{}');
     await app.render(true);
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 2);
@@ -639,14 +637,14 @@ main()
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the timeout callback
-    windowTimeout.callback();
+    await windowTimeout.callback();
     t.is(windowTimeout.delay, 2000);
     t.is(app.runtimeTimeoutId, 3);
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 
     // Call the timeout callback again
-    windowTimeout.callback();
+    await windowTimeout.callback();
     t.is(windowTimeout.delay, null);
     t.is(app.runtimeTimeoutId, null);
     t.is(window.document.title, '');
@@ -683,7 +681,6 @@ main()
 `
     });
     window.location.hash = '#';
-    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     await app.render();
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
@@ -692,7 +689,6 @@ main()
 
     // Render again to test clearing the runtime resize event handler
     window.location.hash = '#';
-    window.sessionStorage.setItem('MarkdownUp', '{}');
     await app.render(true);
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
@@ -700,7 +696,7 @@ main()
     t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the resize callback
-    eventListener.resize();
+    await eventListener.resize();
     t.is(typeof eventListener.resize, 'function');
     t.is(typeof app.runtimeWindowResize, 'function');
     t.is(window.document.title, '');
@@ -742,7 +738,7 @@ main()
     t.is(testInput.selectionStart, 6);
     t.is(testInput.selectionEnd, 6);
 
-    testInput.click();
+    await testInput.click();
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 2">'));
 
@@ -802,14 +798,14 @@ main()
     t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
 
     // Call the timeout callback
-    windowTimeout.callback();
+    await windowTimeout.callback();
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 2);
     t.is(window.document.title, '');
     t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
 
     // Call the timeout callback
-    windowTimeout.callback();
+    await windowTimeout.callback();
     t.is(windowTimeout.delay, 1000);
     t.is(app.runtimeTimeoutId, 3);
     t.is(window.document.title, '');
@@ -860,7 +856,7 @@ elementModelRender(objectNew( \
     t.is(window.location.href, `${jsdomURL}#`);
 
     const testSpan = window.document.getElementById('test-span');
-    testSpan.click();
+    await testSpan.click();
 
     t.is(window.document.title, '');
     t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
@@ -921,7 +917,7 @@ elementModelRender(objectNew( \
     t.true(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
 
     const testSpan = window.document.getElementById('test-span');
-    testSpan.click();
+    await testSpan.click();
 
     t.is(window.document.title, 'Hello');
     t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));

@@ -574,7 +574,7 @@ test('script library, setWindowLocation', (t) => {
 });
 
 
-test('script library, setWindowResize', (t) => {
+test('script library, setWindowResize', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
     runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
@@ -587,18 +587,19 @@ test('script library, setWindowResize', (t) => {
     markdownScriptFunctions.setWindowResize([onsize], runtime.options);
 
     t.is(typeof runtime.windowResize, 'function');
+    t.is(runtime.windowResize.constructor.name, 'AsyncFunction');
     t.is(runtime.options.statementCount, undefined);
     t.is(runtimeUpdateCount, 0);
     t.is(onsizeCount, 0);
 
-    runtime.windowResize();
+    await runtime.windowResize();
     t.is(runtime.options.statementCount, 0);
     t.is(runtimeUpdateCount, 1);
     t.is(onsizeCount, 1);
 });
 
 
-test('script library, setWindowTimeout', (t) => {
+test('script library, setWindowTimeout', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
     runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
@@ -611,12 +612,13 @@ test('script library, setWindowTimeout', (t) => {
     markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
 
     t.is(typeof runtime.windowTimeout[0], 'function');
+    t.is(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
     t.is(runtime.windowTimeout[1], 1000);
     t.is(runtime.options.statementCount, undefined);
     t.is(runtimeUpdateCount, 0);
     t.is(ontimeCount, 0);
 
-    runtime.windowTimeout[0]();
+    await runtime.windowTimeout[0]();
     t.is(runtime.options.statementCount, 0);
     t.is(runtimeUpdateCount, 1);
     t.is(ontimeCount, 1);
@@ -880,7 +882,7 @@ test('script library, drawMove', (t) => {
 });
 
 
-test('script library, drawOnClick', (t) => {
+test('script library, drawOnClick', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
     runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
@@ -921,7 +923,8 @@ test('script library, drawOnClick', (t) => {
     t.is(typeof elements[0].elem.elem[0].callback, 'function');
     elements[0].elem.elem[0].callback(element);
     t.is(typeof elementEvents.click, 'function');
-    elementEvents.click(event);
+    t.is(elementEvents.click.constructor.name, 'AsyncFunction');
+    await elementEvents.click(event);
     t.is(clickCount, 1);
     t.is(runtimeUpdateCount, 1);
 
@@ -1358,6 +1361,7 @@ test('script library, elementModelRender callback', (t) => {
 
     elementCallback(mockElement);
     t.is(typeof mockElementEvents.keyup, 'function');
+    t.is(mockElementEvents.keyup.constructor.name, 'AsyncFunction');
 
     // Mock event
     const mockEvent = {'keyCode': 13};
