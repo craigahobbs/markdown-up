@@ -946,7 +946,8 @@ test('script library, drawOnClick', async (t) => {
                             'fill': 'none',
                             'stroke': 'black',
                             'stroke-dasharray': 'none',
-                            'stroke-width': '1.00000000'
+                            'stroke-width': '1.00000000',
+                            'style': 'cursor: pointer; user-select: none;'
                         }
                     }
                 ]
@@ -968,7 +969,7 @@ test('script library, drawOnClick drawing click', (t) => {
             'html': 'p',
             'elem': {
                 'svg': 'svg',
-                'attr': {'width': 50, 'height': 50},
+                'attr': {'width': 50, 'height': 50, 'style': 'cursor: pointer; user-select: none;'},
                 'elem': []
             }
         }
