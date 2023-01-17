@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.9 (2023-01-17)
+
+- [c669ac8](https://github.com/craigahobbs/markdown-up/commit/c669ac8) - add pointer cursor to on-click svg elements
+
+- [c54d0da](https://github.com/craigahobbs/markdown-up/commit/c54d0da) - fix async callback issues
+
+- [1acc8e5](https://github.com/craigahobbs/markdown-up/commit/1acc8e5) - add setDocumentReset function, remove documentReset function
+
 ## 1.8.8 (2022-12-15)
 
 - [0b0eefe](https://github.com/craigahobbs/markdown-up/commit/0b0eefe) - improve debug logging
