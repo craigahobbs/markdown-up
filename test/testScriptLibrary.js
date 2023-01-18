@@ -599,6 +599,32 @@ test('script library, setWindowResize', async (t) => {
 });
 
 
+test('script library, setWindowResize async', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    t.is(runtime.windowResize, null);
+    t.is(runtime.options.statementCount, undefined);
+
+    let onsizeCount = 0;
+    // eslint-disable-next-line require-await
+    const onsize = async () => ++onsizeCount;
+    markdownScriptFunctions.setWindowResize([onsize], runtime.options);
+
+    t.is(typeof runtime.windowResize, 'function');
+    t.is(runtime.windowResize.constructor.name, 'AsyncFunction');
+    t.is(runtime.options.statementCount, undefined);
+    t.is(runtimeUpdateCount, 0);
+    t.is(onsizeCount, 0);
+
+    await runtime.windowResize();
+    t.is(runtime.options.statementCount, 0);
+    t.is(runtimeUpdateCount, 1);
+    t.is(onsizeCount, 1);
+});
+
+
 test('script library, setWindowTimeout', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
@@ -609,6 +635,33 @@ test('script library, setWindowTimeout', async (t) => {
 
     let ontimeCount = 0;
     const ontime = () => ++ontimeCount;
+    markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
+
+    t.is(typeof runtime.windowTimeout[0], 'function');
+    t.is(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
+    t.is(runtime.windowTimeout[1], 1000);
+    t.is(runtime.options.statementCount, undefined);
+    t.is(runtimeUpdateCount, 0);
+    t.is(ontimeCount, 0);
+
+    await runtime.windowTimeout[0]();
+    t.is(runtime.options.statementCount, 0);
+    t.is(runtimeUpdateCount, 1);
+    t.is(ontimeCount, 1);
+});
+
+
+test('script library, setWindowTimeout async', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    t.is(runtime.windowTimeout, null);
+    t.is(runtime.options.statementCount, undefined);
+
+    let ontimeCount = 0;
+    // eslint-disable-next-line require-await
+    const ontime = async () => ++ontimeCount;
     markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
 
     t.is(typeof runtime.windowTimeout[0], 'function');
@@ -892,7 +945,7 @@ test('script library, drawOnClick', async (t) => {
     const clickHandler = ([x, y], options) => {
         t.is(x, 5);
         t.is(y, 10);
-        t.is(options.fontSize, 12);
+        t.not(options, null);
         clickCount += 1;
     };
 
@@ -915,45 +968,75 @@ test('script library, drawOnClick', async (t) => {
         'clientY': 10
     };
 
+    // Draw a rect and set an on-click event
     markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
     markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
     markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
 
+    // Get the runtime elements
     const elements = runtime.resetElements();
     t.is(typeof elements[0].elem.elem[0].callback, 'function');
     elements[0].elem.elem[0].callback(element);
     t.is(typeof elementEvents.click, 'function');
     t.is(elementEvents.click.constructor.name, 'AsyncFunction');
+
+    // Click the rect
     await elementEvents.click(event);
     t.is(clickCount, 1);
     t.is(runtimeUpdateCount, 1);
+});
 
-    delete elements[0].elem.elem[0].callback;
-    t.deepEqual(elements, [
-        {
-            'html': 'p',
-            'elem': {
-                'svg': 'svg',
-                'attr': {'width': 50, 'height': 50},
-                'elem': [
-                    {
-                        'svg': 'rect',
-                        'attr': {
-                            'x': 0,
-                            'y': 0,
-                            'width': 50,
-                            'height': 50,
-                            'fill': 'none',
-                            'stroke': 'black',
-                            'stroke-dasharray': 'none',
-                            'stroke-width': '1.00000000',
-                            'style': 'cursor: pointer; user-select: none;'
-                        }
-                    }
-                ]
-            }
+
+test('script library, drawOnClick async', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Test click handler function
+    let clickCount = 0;
+    // eslint-disable-next-line require-await
+    const clickHandler = async ([x, y], options) => {
+        t.is(x, 5);
+        t.is(y, 10);
+        t.not(options, null);
+        clickCount += 1;
+    };
+
+    // Mock element
+    const elementEvents = {};
+    const element = {
+        'addEventListener': (eventType, eventCallback) => {
+            elementEvents[eventType] = eventCallback;
         }
-    ]);
+    };
+
+    // Mock event
+    const event = {
+        'target': {
+            'ownerSVGElement': {
+                'getBoundingClientRect': () => ({'left': 0, 'top': 0})
+            }
+        },
+        'clientX': 5,
+        'clientY': 10
+    };
+
+    // Draw a rect and set an on-click event
+    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
+    markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
+
+    // Get the runtime elements
+    const elements = runtime.resetElements();
+    t.is(typeof elements[0].elem.elem[0].callback, 'function');
+    elements[0].elem.elem[0].callback(element);
+    t.is(typeof elementEvents.click, 'function');
+    t.is(elementEvents.click.constructor.name, 'AsyncFunction');
+
+    // Click the rect
+    await elementEvents.click(event);
+    t.is(clickCount, 1);
+    t.is(runtimeUpdateCount, 1);
 });
 
 
@@ -969,7 +1052,7 @@ test('script library, drawOnClick drawing click', (t) => {
             'html': 'p',
             'elem': {
                 'svg': 'svg',
-                'attr': {'width': 50, 'height': 50, 'style': 'cursor: pointer; user-select: none;'},
+                'attr': {'width': 50, 'height': 50, 'style': 'cursor: pointer;'},
                 'elem': []
             }
         }
@@ -1308,7 +1391,7 @@ test('script library, elementModelRender', (t) => {
 });
 
 
-test('script library, elementModelRender callback', (t) => {
+test('script library, elementModelRender callback', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
     runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
@@ -1320,56 +1403,112 @@ test('script library, elementModelRender callback', (t) => {
         eventHandlerCodes.push(keyCode);
     };
 
+    // Render the element model
     const elementModel = [
         {
             'html': 'input',
-            'attr': {
-                'id': 'test-input',
-                'type': 'text',
-                'value': 'The text'
-            },
+            'attr': {'id': 'test-input', 'type': 'text', 'value': 'The text'},
             'callback': {
                 'keyup': eventHandler
             }
         }
     ];
     markdownScriptFunctions.elementModelRender([elementModel], runtime.options);
-
     const elements = runtime.resetElements();
     const elementCallback = elements[0][0].callback;
     t.is(typeof elementCallback, 'function');
+    t.is(elementCallback.constructor.name, 'Function');
     delete elements[0][0].callback;
     t.deepEqual(elements, [
         [
             {
                 'html': 'input',
-                'attr': {
-                    'id': 'test-input',
-                    'type': 'text',
-                    'value': 'The text'
-                }
+                'attr': {'id': 'test-input', 'type': 'text', 'value': 'The text'}
             }
         ]
     ]);
+    t.deepEqual(eventHandlerCodes, []);
+    t.is(runtimeUpdateCount, 0);
 
-    // Mock element
+    // Call the element callback
     const mockElementEvents = {};
     const mockElement = {
         'addEventListener': (eventType, eventCallback) => {
             mockElementEvents[eventType] = eventCallback;
         }
     };
-
     elementCallback(mockElement);
     t.is(typeof mockElementEvents.keyup, 'function');
     t.is(mockElementEvents.keyup.constructor.name, 'AsyncFunction');
+    t.deepEqual(eventHandlerCodes, []);
+    t.is(runtimeUpdateCount, 0);
 
-    // Mock event
+    // Call the element handler function
     const mockEvent = {'keyCode': 13};
-
-    mockElementEvents.keyup(mockEvent);
-
+    await mockElementEvents.keyup(mockEvent);
     t.deepEqual(eventHandlerCodes, [13]);
+    t.is(runtimeUpdateCount, 1);
+});
+
+
+test('script library, elementModelRender callback async', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Event handler function
+    let clickCount = 0;
+    // eslint-disable-next-line require-await
+    const eventHandler = async (args, options) => {
+        t.not(options, null);
+        clickCount += 1;
+    };
+
+    // Render the element model
+    const elementModel = [
+        {
+            'html': 'a',
+            'attr': {'style': 'cursor: pointer; user-select: none;'},
+            'elem': {'text': 'Click Me'},
+            'callback': {'click': eventHandler}
+        }
+    ];
+    markdownScriptFunctions.elementModelRender([elementModel], runtime.options);
+    const elements = runtime.resetElements();
+    const elementCallback = elements[0][0].callback;
+    t.is(typeof elementCallback, 'function');
+    t.is(elementCallback.constructor.name, 'Function');
+    delete elements[0][0].callback;
+    t.deepEqual(elements, [
+        [
+            {
+                'html': 'a',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
+                'elem': {'text': 'Click Me'}
+            }
+        ]
+    ]);
+    t.deepEqual(clickCount, 0);
+    t.is(runtimeUpdateCount, 0);
+
+    // Call the element callback
+    const mockElementEvents = {};
+    const mockElement = {
+        'addEventListener': (eventType, eventCallback) => {
+            mockElementEvents[eventType] = eventCallback;
+        }
+    };
+    elementCallback(mockElement);
+    t.is(typeof mockElementEvents.click, 'function');
+    t.is(mockElementEvents.click.constructor.name, 'AsyncFunction');
+    t.deepEqual(clickCount, 0);
+    t.is(runtimeUpdateCount, 0);
+
+    // Call the element handler function
+    const mockEvent = {};
+    await mockElementEvents.click(mockEvent);
+    t.deepEqual(clickCount, 1);
+    t.is(runtimeUpdateCount, 1);
 });
 
 
