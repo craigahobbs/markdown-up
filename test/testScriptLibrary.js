@@ -625,6 +625,38 @@ test('script library, setWindowResize async', async (t) => {
 });
 
 
+test('script library, setWindowResize callback error', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    t.is(runtime.windowResize, null);
+    t.is(runtime.options.statementCount, undefined);
+
+    let onsizeCount = 0;
+    const onsize = () => {
+        ++onsizeCount;
+        throw new Error('BOOM!');
+    };
+    markdownScriptFunctions.setWindowResize([onsize], runtime.options);
+
+    t.is(typeof runtime.windowResize, 'function');
+    t.is(runtime.windowResize.constructor.name, 'AsyncFunction');
+    t.is(runtime.options.statementCount, undefined);
+    t.is(runtimeUpdateCount, 0);
+    t.deepEqual(logs, []);
+    t.is(onsizeCount, 0);
+
+    await runtime.windowResize();
+    t.is(runtime.options.statementCount, 0);
+    t.is(runtimeUpdateCount, 1);
+    t.deepEqual(logs, ['MarkdownUp: Error executing setWindowResize callback: BOOM!']);
+    t.is(onsizeCount, 1);
+});
+
+
 test('script library, setWindowTimeout', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
@@ -674,6 +706,39 @@ test('script library, setWindowTimeout async', async (t) => {
     await runtime.windowTimeout[0]();
     t.is(runtime.options.statementCount, 0);
     t.is(runtimeUpdateCount, 1);
+    t.is(ontimeCount, 1);
+});
+
+
+test('script library, setWindowTimeout callback error', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    t.is(runtime.windowTimeout, null);
+    t.is(runtime.options.statementCount, undefined);
+
+    let ontimeCount = 0;
+    const ontime = () => {
+        ++ontimeCount;
+        throw new Error('BOOM!');
+    };
+    markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
+
+    t.is(typeof runtime.windowTimeout[0], 'function');
+    t.is(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
+    t.is(runtime.windowTimeout[1], 1000);
+    t.is(runtime.options.statementCount, undefined);
+    t.is(runtimeUpdateCount, 0);
+    t.deepEqual(logs, []);
+    t.is(ontimeCount, 0);
+
+    await runtime.windowTimeout[0]();
+    t.is(runtime.options.statementCount, 0);
+    t.is(runtimeUpdateCount, 1);
+    t.deepEqual(logs, ['MarkdownUp: Error executing setWindowTimeout callback: BOOM!']);
     t.is(ontimeCount, 1);
 });
 
@@ -1036,6 +1101,64 @@ test('script library, drawOnClick async', async (t) => {
     // Click the rect
     await elementEvents.click(event);
     t.is(clickCount, 1);
+    t.is(runtimeUpdateCount, 1);
+});
+
+
+test('script library, drawOnClick callback error', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    // Test click handler function
+    let clickCount = 0;
+    const clickHandler = ([x, y], options) => {
+        t.is(x, 5);
+        t.is(y, 10);
+        t.not(options, null);
+        clickCount += 1;
+        throw new Error('BOOM!');
+    };
+
+    // Mock element
+    const elementEvents = {};
+    const element = {
+        'addEventListener': (eventType, eventCallback) => {
+            elementEvents[eventType] = eventCallback;
+        }
+    };
+
+    // Mock event
+    const event = {
+        'target': {
+            'ownerSVGElement': {
+                'getBoundingClientRect': () => ({'left': 0, 'top': 0})
+            }
+        },
+        'clientX': 5,
+        'clientY': 10
+    };
+
+    // Draw a rect and set an on-click event
+    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
+    markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
+
+    // Get the runtime elements
+    const elements = runtime.resetElements();
+    t.is(typeof elements[0].elem.elem[0].callback, 'function');
+    elements[0].elem.elem[0].callback(element);
+    t.is(typeof elementEvents.click, 'function');
+    t.is(elementEvents.click.constructor.name, 'AsyncFunction');
+
+    // Click the rect
+    t.is(clickCount, 0);
+    t.deepEqual(logs, []);
+    await elementEvents.click(event);
+    t.is(clickCount, 1);
+    t.deepEqual(logs, ['MarkdownUp: Error executing drawOnClick callback: BOOM!']);
     t.is(runtimeUpdateCount, 1);
 });
 
@@ -1509,6 +1632,71 @@ test('script library, elementModelRender callback async', async (t) => {
     await mockElementEvents.click(mockEvent);
     t.deepEqual(clickCount, 1);
     t.is(runtimeUpdateCount, 1);
+});
+
+
+test('script library, elementModelRender callback error', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    // Event handler function
+    let clickCount = 0;
+    const eventHandler = (args, options) => {
+        t.not(options, null);
+        clickCount += 1;
+        throw new Error('BOOM!');
+    };
+
+    // Render the element model
+    const elementModel = [
+        {
+            'html': 'a',
+            'attr': {'style': 'cursor: pointer; user-select: none;'},
+            'elem': {'text': 'Click Me'},
+            'callback': {'click': eventHandler}
+        }
+    ];
+    markdownScriptFunctions.elementModelRender([elementModel], runtime.options);
+    const elements = runtime.resetElements();
+    const elementCallback = elements[0][0].callback;
+    t.is(typeof elementCallback, 'function');
+    t.is(elementCallback.constructor.name, 'Function');
+    delete elements[0][0].callback;
+    t.deepEqual(elements, [
+        [
+            {
+                'html': 'a',
+                'attr': {'style': 'cursor: pointer; user-select: none;'},
+                'elem': {'text': 'Click Me'}
+            }
+        ]
+    ]);
+    t.deepEqual(clickCount, 0);
+    t.is(runtimeUpdateCount, 0);
+
+    // Call the element callback
+    const mockElementEvents = {};
+    const mockElement = {
+        'addEventListener': (eventType, eventCallback) => {
+            mockElementEvents[eventType] = eventCallback;
+        }
+    };
+    elementCallback(mockElement);
+    t.is(typeof mockElementEvents.click, 'function');
+    t.is(mockElementEvents.click.constructor.name, 'AsyncFunction');
+    t.deepEqual(clickCount, 0);
+    t.is(runtimeUpdateCount, 0);
+    t.deepEqual(logs, []);
+
+    // Call the element handler function
+    const mockEvent = {};
+    await mockElementEvents.click(mockEvent);
+    t.deepEqual(clickCount, 1);
+    t.is(runtimeUpdateCount, 1);
+    t.deepEqual(logs, ['MarkdownUp: Error executing elementModelRender callback: BOOM!']);
 });
 
 
