@@ -80,6 +80,39 @@ test('script library, dataCalculatedField variables', (t) => {
 });
 
 
+test('script library, dataCalculatedField globals', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'e': 3};
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataCalculatedField([data, 'c', 'b * e'], runtime.options), [
+        {'a': 1, 'b': 3, 'c': 9},
+        {'a': 1, 'b': 4, 'c': 12},
+        {'a': 2, 'b': 5, 'c': 15}
+    ]);
+});
+
+
+test('script library, dataCalculatedField globals variables', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'e': 3};
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    const variables = {'d': 2};
+    t.deepEqual(markdownScriptFunctions.dataCalculatedField([data, 'c', 'b * d * e', variables], runtime.options), [
+        {'a': 1, 'b': 3, 'c': 18},
+        {'a': 1, 'b': 4, 'c': 24},
+        {'a': 2, 'b': 5, 'c': 30}
+    ]);
+});
+
+
 test('script library, dataFilter', (t) => {
     const runtime = testRuntime();
     const data = [
