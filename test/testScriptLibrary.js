@@ -113,6 +113,23 @@ test('script library, dataCalculatedField globals variables', (t) => {
 });
 
 
+test('script library, dataCalculatedField runtime', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {
+        'documentURL': ([url], options) => options.urlFn(url)
+    };
+    runtime.options.urlFn = (url) => (url.startsWith('/') ? url : `/foo/${url}`);
+    const data = [
+        {'a': '/foo'},
+        {'a': 'bar'}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataCalculatedField([data, 'b', 'documentURL(a)'], runtime.options), [
+        {'a': '/foo', 'b': '/foo'},
+        {'a': 'bar', 'b': '/foo/bar'}
+    ]);
+});
+
+
 test('script library, dataFilter', (t) => {
     const runtime = testRuntime();
     const data = [
@@ -138,6 +155,51 @@ test('script library, dataFilter variables', (t) => {
     t.deepEqual(markdownScriptFunctions.dataFilter([data, 'b > d', variables], runtime.options), [
         {'a': 1, 'b': 4},
         {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataFilter globals', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'c': 2};
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataFilter([data, 'a == c'], runtime.options), [
+        {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataFilter globals variables', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'c': 1};
+    const data = [
+        {'a': 1, 'b': 3},
+        {'a': 1, 'b': 4},
+        {'a': 2, 'b': 5}
+    ];
+    const variables = {'d': 1};
+    t.deepEqual(markdownScriptFunctions.dataFilter([data, 'a == (c + d)', variables], runtime.options), [
+        {'a': 2, 'b': 5}
+    ]);
+});
+
+
+test('script library, dataFilter runtime', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {
+        'documentURL': ([url], options) => options.urlFn(url)
+    };
+    runtime.options.urlFn = (url) => (url.startsWith('/') ? url : `/foo/${url}`);
+    const data = [
+        {'a': '/foo'},
+        {'a': 'bar'}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataFilter([data, 'documentURL(a) == "/foo/bar"'], runtime.options), [
+        {'a': 'bar'}
     ]);
 });
 
@@ -187,6 +249,64 @@ test('script library, dataJoin options', (t) => {
             {'a': 2, 'b': 7, 'a2': 4, 'c': 12}
         ]
     );
+});
+
+
+test('script library, dataJoin globals', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'e': 1};
+    const leftData = [
+        {'a': 1, 'c': 5},
+        {'a': 2, 'c': 6}
+    ];
+    const rightData = [
+        {'b': 1, 'd': 10},
+        {'b': 2, 'd': 11}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataJoin([leftData, rightData, 'a + e', 'b'], runtime.options), [
+        {'a': 1, 'b': 2, 'c': 5, 'd': 11},
+        {'a': 2, 'c': 6}
+    ]);
+});
+
+
+test('script library, dataJoin globals variables', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {'e': 1};
+    const leftData = [
+        {'a': 1, 'c': 5},
+        {'a': 2, 'c': 6}
+    ];
+    const rightData = [
+        {'b': 2, 'd': 10},
+        {'b': 3, 'd': 11}
+    ];
+    const variables = {'f': 1};
+    t.deepEqual(markdownScriptFunctions.dataJoin([leftData, rightData, 'a + e + f', 'b', null, variables], runtime.options), [
+        {'a': 1, 'b': 3, 'c': 5, 'd': 11},
+        {'a': 2, 'c': 6}
+    ]);
+});
+
+
+test('script library, dataJoin runtime', (t) => {
+    const runtime = testRuntime();
+    runtime.options.globals = {
+        'documentURL': ([url], options) => options.urlFn(url)
+    };
+    runtime.options.urlFn = (url) => (url.startsWith('/') ? url : `/foo/${url}`);
+    const leftData = [
+        {'a': '/foo', 'c': 5},
+        {'a': 'bar', 'c': 6}
+    ];
+    const rightData = [
+        {'b': '/foo', 'd': 10},
+        {'b': '/foo/bar', 'd': 11}
+    ];
+    t.deepEqual(markdownScriptFunctions.dataJoin([leftData, rightData, 'documentURL(a)', 'b'], runtime.options), [
+        {'a': '/foo', 'b': '/foo', 'c': 5, 'd': 10},
+        {'a': 'bar', 'b': '/foo/bar', 'c': 6, 'd': 11}
+    ]);
 });
 
 
