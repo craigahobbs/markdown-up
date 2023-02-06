@@ -32,7 +32,7 @@
 /** @module lib/app */
 
 import {MarkdownScriptRuntime, markdownScriptCodeBlock} from './script.js';
-import {decodeQueryString, encodeQueryString} from 'schema-markdown/lib/encode.js';
+import {decodeQueryString, encodeQueryString, jsonStringifySortKeys} from 'schema-markdown/lib/encode.js';
 import {getMarkdownTitle, parseMarkdown} from 'markdown-model/lib/parser.js';
 import {evaluateExpression} from 'calc-script/lib/runtime.js';
 import {markdownElementsAsync} from 'markdown-model/lib/elements.js';
@@ -159,7 +159,7 @@ export class MarkdownUp {
             this.updateParams();
 
             // Skip the render if the page params haven't changed
-            if (!forceRender &amp;&amp; paramsPrev !== null &amp;&amp; JSON.stringify(paramsPrev) === JSON.stringify(this.params)) {
+            if (!forceRender &amp;&amp; paramsPrev !== null &amp;&amp; jsonStringifySortKeys(paramsPrev) === jsonStringifySortKeys(this.params)) {
                 return;
             }
         } catch ({message}) {
