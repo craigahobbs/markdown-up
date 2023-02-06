@@ -697,7 +697,11 @@
             "name": "elementModelRender",
             "group": "Element Model",
             "doc": [
-                "Render an [element model](https://github.com/craigahobbs/element-model#readme)"
+                "Render an [element model](https://github.com/craigahobbs/element-model#readme)",
+                "",
+                "**Note:** Element model \"callback\" members are a map of event name (e.g., \"click\") to",
+                "event callback function. Data can be passed to the callback functions by setting a",
+                "\"callbackData\" member."
             ],
             "args": [
                 {
