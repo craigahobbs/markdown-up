@@ -1667,6 +1667,27 @@ test('script library, elementModelRender', (t) => {
 });
 
 
+test('script library, elementModelRender null', (t) => {
+    const runtime = testRuntime();
+    markdownScriptFunctions.elementModelRender([null], runtime.options);
+    t.deepEqual(runtime.resetElements(), [
+        null
+    ]);
+});
+
+
+test('script library, elementModelRender callback null', (t) => {
+    const runtime = testRuntime();
+    const elements = [
+        {'html': 'p', 'elem': {'text': 'Text 1'}, 'callback': null}
+    ];
+    const error = t.throws(
+        () => markdownScriptFunctions.elementModelRender([elements], runtime.options)
+    );
+    t.is(error.message, "Invalid element callback function null (type 'object')");
+});
+
+
 test('script library, elementModelRender callback', async (t) => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;
@@ -1723,6 +1744,62 @@ test('script library, elementModelRender callback', async (t) => {
     const mockEvent = {'keyCode': 13};
     await mockElementEvents.keyup(mockEvent);
     t.deepEqual(eventHandlerCodes, [13]);
+    t.is(runtimeUpdateCount, 1);
+});
+
+
+test('script library, elementModelRender callback data', async (t) => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Event handler function
+    const onClickArgs = [];
+    const onClick = ([data], options) => {
+        t.not(options, null);
+        onClickArgs.push(data);
+    };
+
+    // Render the element model
+    const elementModel = [
+        {
+            'html': 'a',
+            'elem': {'text': 'Click me!'},
+            'callback': {'click': onClick},
+            'callbackData': 'hello!'
+        }
+    ];
+    markdownScriptFunctions.elementModelRender([elementModel], runtime.options);
+    const elements = runtime.resetElements();
+    const elementCallback = elements[0][0].callback;
+    t.is(typeof elementCallback, 'function');
+    t.is(elementCallback.constructor.name, 'Function');
+    delete elements[0][0].callback;
+    t.deepEqual(elements, [
+        [
+            {'html': 'a', 'elem': {'text': 'Click me!'}}
+        ]
+    ]);
+    t.deepEqual(onClickArgs, []);
+    t.is(runtimeUpdateCount, 0);
+
+    // Call the element callback
+    const mockElementEvents = {};
+    const mockElement = {
+        'addEventListener': (eventType, eventCallback) => {
+            mockElementEvents[eventType] = eventCallback;
+        }
+    };
+    elementCallback(mockElement);
+    t.is(typeof mockElementEvents.click, 'function');
+    t.is(mockElementEvents.click.constructor.name, 'AsyncFunction');
+    t.deepEqual(onClickArgs, []);
+    t.is(runtimeUpdateCount, 0);
+
+    // Call the element handler function
+    const mockEvent = {};
+    await mockElementEvents.click(mockEvent);
+    t.deepEqual(onClickArgs, ['hello!']);
     t.is(runtimeUpdateCount, 1);
 });
 
