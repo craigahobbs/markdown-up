@@ -519,6 +519,39 @@
             ]
         },
         {
+            "name": "drawPathRect",
+            "group": "Drawing",
+            "doc": [
+                "Draw a rectangle as a path"
+            ],
+            "args": [
+                {
+                    "name": "x",
+                    "doc": [
+                        "The x-coordinate of the top-left of the rectangle"
+                    ]
+                },
+                {
+                    "name": "y",
+                    "doc": [
+                        "The y-coordinate of the top-left of the rectangle"
+                    ]
+                },
+                {
+                    "name": "width",
+                    "doc": [
+                        "The width of the rectangle"
+                    ]
+                },
+                {
+                    "name": "height",
+                    "doc": [
+                        "The height of the rectangle"
+                    ]
+                }
+            ]
+        },
+        {
             "name": "drawRect",
             "group": "Drawing",
             "doc": [
