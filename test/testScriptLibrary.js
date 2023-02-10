@@ -1336,6 +1336,34 @@ test('script library, drawOnClick drawing click', (t) => {
 });
 
 
+test('script library, drawPathRect', (t) => {
+    const runtime = testRuntime();
+    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawPathRect([0, 0, 50, 50], runtime.options);
+    t.deepEqual(runtime.resetElements(), [
+        {
+            'html': 'p',
+            'elem': {
+                'svg': 'svg',
+                'attr': {'width': 50, 'height': 50},
+                'elem': [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'd': 'M 0.00000000 0.00000000 H 50.00000000 V 50.00000000 H 0.00000000 Z',
+                            'fill': 'none',
+                            'stroke': 'black',
+                            'stroke-dasharray': 'none',
+                            'stroke-width': 1
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+});
+
+
 test('script library, drawRect', (t) => {
     const runtime = testRuntime();
     markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
