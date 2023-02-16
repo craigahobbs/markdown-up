@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.8.10 (2023-02-16)
+
+- [6eede13](https://github.com/craigahobbs/markdown-up/commit/6eede13) - reduce object creation in addCalculatedField, filterData, and joinData
+
+- [8bd9256](https://github.com/craigahobbs/markdown-up/commit/8bd9256) - add drawPathRect function
+
+- [043675e](https://github.com/craigahobbs/markdown-up/commit/043675e) - use jsonStringifySortKeys
+
+- [2c278b0](https://github.com/craigahobbs/markdown-up/commit/2c278b0) - elementModelRender function can pass data to event handler
+
+- [e0ba80b](https://github.com/craigahobbs/markdown-up/commit/e0ba80b) - fix runtime functions with dataCalculatedField, dataFilter, and dataJoin
+
+- [e0d52b8](https://github.com/craigahobbs/markdown-up/commit/e0d52b8) - dataCalculatedField expressions have access to global variables
+
+- [25f42ff](https://github.com/craigahobbs/markdown-up/commit/25f42ff) - fix uncaught callback exception issues
+
+- [e5d9b44](https://github.com/craigahobbs/markdown-up/commit/e5d9b44) - additional async callback tests
+
+- [96af6cb](https://github.com/craigahobbs/markdown-up/commit/96af6cb) - markdown-up 1.8.9
+
 ## 1.8.9 (2023-01-17)
 
 - [c669ac8](https://github.com/craigahobbs/markdown-up/commit/c669ac8) - add pointer cursor to on-click svg elements
