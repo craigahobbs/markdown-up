@@ -90,7 +90,7 @@ export function validateElements(elements) {
         }
 
         // Validate creation callback
-        if ('callback' in elements && typeof elements.callback !== 'function') {
+        if ('callback' in elements && elements.callback !== null && typeof elements.callback !== 'function') {
             throwValueError('Invalid element callback function', elements.callback);
         }
     }
@@ -155,7 +155,7 @@ function renderElementsHelper(parent, elements) {
         parent.appendChild(browserElement);
 
         // Call the element callback, if any
-        if ('callback' in element) {
+        if ('callback' in element && element.callback !== null) {
             element.callback(browserElement);
         }
     }
