@@ -1709,10 +1709,12 @@ test('script library, elementModelRender callback null', (t) => {
     const elements = [
         {'html': 'p', 'elem': {'text': 'Text 1'}, 'callback': null}
     ];
-    const error = t.throws(
-        () => markdownScriptFunctions.elementModelRender([elements], runtime.options)
-    );
-    t.is(error.message, "Invalid element callback function null (type 'object')");
+    markdownScriptFunctions.elementModelRender([elements], runtime.options);
+    t.deepEqual(runtime.resetElements(), [
+        [
+            {'html': 'p', 'elem': {'text': 'Text 1'}, 'callback': null}
+        ]
+    ]);
 });
 
 
