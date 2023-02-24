@@ -146,7 +146,10 @@ export function parseScript(scriptText, startLineNumber = 1) {
         if (matchIfThenBegin !== null) {
             // Add the for-each label definition
             const ifthen = {
-                'label': `__calcScriptIf${labelIndex}`,
+                'jump': {
+                    'label': `__calcScriptIf${labelIndex}`,
+                    'expr': {'unary': {'op': '!', 'expr': parseExpression(matchIfThenBegin.groups.expr)}}
+                },
                 'done': `__calcScriptDone${labelIndex}`,
                 'hasElse': false,
                 line,
@@ -155,13 +158,8 @@ export function parseScript(scriptText, startLineNumber = 1) {
             labelDefs.push({'if': ifthen});
             labelIndex += 1;
 
-            // Add the for-each header statements
-            statements.push(
-                {'jump': {
-                    'label': ifthen.label,
-                    'expr': {'unary': {'op': '!', 'expr': parseExpression(matchIfThenBegin.groups.expr)}}
-                }}
-            );
+            // Add the for-each header statement
+            statements.push({'jump': ifthen.jump});
             continue;
         }
 
@@ -179,19 +177,19 @@ export function parseScript(scriptText, startLineNumber = 1) {
                 throw new CalcScriptParserError('Else-if-then statement following else-then statement', line, 1, startLineNumber + ixLine);
             }
 
-            // Generate the next if-then label
-            const prevLabel = ifthen.label;
-            ifthen.label = `__calcScriptIf${labelIndex}`;
+            // Generate the next if-then jump statement
+            const prevLabel = ifthen.jump.label;
+            ifthen.jump = {
+                'label': `__calcScriptIf${labelIndex}`,
+                'expr': {'unary': {'op': '!', 'expr': parseExpression(matchIfThenElseIf.groups.expr)}}
+            };
             labelIndex += 1;
 
             // Add the if-then else statements
             statements.push(
                 {'jump': {'label': ifthen.done}},
                 {'label': prevLabel},
-                {'jump': {
-                    'label': ifthen.label,
-                    'expr': {'unary': {'op': '!', 'expr': parseExpression(matchIfThenElseIf.groups.expr)}}
-                }}
+                {'jump': ifthen.jump}
             );
             continue;
         }
@@ -214,7 +212,7 @@ export function parseScript(scriptText, startLineNumber = 1) {
             // Add the if-then else statements
             statements.push(
                 {'jump': {'label': ifthen.done}},
-                {'label': ifthen.label}
+                {'label': ifthen.jump.label}
             );
             continue;
         }
@@ -228,9 +226,9 @@ export function parseScript(scriptText, startLineNumber = 1) {
                 throw new CalcScriptParserError('No matching if-then statement', line, 1, startLineNumber + ixLine);
             }
 
-            // Add the else-if-then statement's label, if necessary
+            // Update the previous jump statement's label, if necessary
             if (!ifthen.hasElse) {
-                statements.push({'label': ifthen.label});
+                ifthen.jump.label = ifthen.done;
             }
 
             // Add the if-then footer statement
@@ -246,6 +244,7 @@ export function parseScript(scriptText, startLineNumber = 1) {
                 'loop': `__calcScriptLoop${labelIndex}`,
                 'continue': `__calcScriptLoop${labelIndex}`,
                 'done': `__calcScriptDone${labelIndex}`,
+                'expr': parseExpression(matchWhileBegin.groups.expr),
                 line,
                 'lineNumber': startLineNumber + ixLine
             };
@@ -254,11 +253,8 @@ export function parseScript(scriptText, startLineNumber = 1) {
 
             // Add the while-do header statements
             statements.push(
-                {'label': whiledo.loop},
-                {'jump': {
-                    'label': whiledo.done,
-                    'expr': {'unary': {'op': '!', 'expr': parseExpression(matchWhileBegin.groups.expr)}}
-                }}
+                {'jump': {'label': whiledo.done, 'expr': {'unary': {'op': '!', 'expr': whiledo.expr}}}},
+                {'label': whiledo.loop}
             );
             continue;
         }
@@ -274,7 +270,7 @@ export function parseScript(scriptText, startLineNumber = 1) {
 
             // Add the while-do footer statements
             statements.push(
-                {'jump': {'label': whiledo.loop}},
+                {'jump': {'label': whiledo.loop, 'expr': whiledo.expr}},
                 {'label': whiledo.done}
             );
             continue;
