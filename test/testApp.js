@@ -1620,11 +1620,11 @@ endfunction
     t.deepEqual(cleanedLogs, [
         'MarkdownUp: ===== Rendering Markdown text',
         'MarkdownUp: Executing script at line number 4 ...',
-        'MarkdownUp: Script static analysis ... 1 warning:',
+        'MarkdownUp: Script static analysis... 1 warning:',
         'MarkdownUp:     Empty script',
         'MarkdownUp: Script executed in X milliseconds',
         'MarkdownUp: Executing script at line number 7 ...',
-        'MarkdownUp: Script static analysis ... 2 warnings:',
+        'MarkdownUp: Script static analysis... 2 warnings:',
         'MarkdownUp:     Unused argument "a" of function "foo" (index 0)',
         'MarkdownUp:     Unused argument "b" of function "foo" (index 0)',
         'MarkdownUp: Script executed in X milliseconds',
