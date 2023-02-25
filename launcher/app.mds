@@ -30,7 +30,7 @@ async function markdownUpIndex()
 
     # Render file links
     files = objectGet(index, 'files')
-    if arrayLength(files) then
+    if files != null then
         markdownPrint('', '## Files')
         foreach file in files do
             fileURL = if(vPath != null, vPath + '/', '') + file
@@ -40,7 +40,7 @@ async function markdownUpIndex()
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    if arrayLength(directories) then
+    if directories != null then
         markdownPrint('', '## Directories')
         foreach directory in directories do
             directoryURL = if(vPath != null, vPath + '/', '') + directory
