@@ -23,38 +23,33 @@ async function markdownUpIndex()
         if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
         if(vPath == null, 'Parent', \
             '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + encodeURIComponent(parent) + "'") + ')') + ' |', \
-        '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)' \
+        '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
+        '', \
+        '# ' + title \
     )
-    markdownPrint('# ' + title)
 
     # Render file links
     files = objectGet(index, 'files')
-    jumpif (files == null) filesDone
+    if arrayLength(files) then
         markdownPrint('', '## Files')
-        ixFile = 0
-        fileLoop:
-            jumpif (ixFile >= arrayLength(files)) filesDone
-            file = arrayGet(files, ixFile)
+        foreach file in files do
             fileURL = if(vPath != null, vPath + '/', '') + file
             markdownPrint('', '[' + markdownEscape(file) + '](#url=' + encodeURIComponent(fileURL) + '&var=)')
-            ixFile = ixFile + 1
-        jump fileLoop
-    filesDone:
+        endforeach
+    endif
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    jumpif (directories == null) directoriesDone
+    if arrayLength(directories) then
         markdownPrint('', '## Directories')
-        ixDirectory = 0
-        directoryLoop:
-            jumpif (ixDirectory >= arrayLength(directories)) directoriesDone
-            directory = arrayGet(directories, ixDirectory)
+        foreach directory in directories do
             directoryURL = if(vPath != null, vPath + '/', '') + directory
             markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + encodeURIComponent(directoryURL) + "')")
-            ixDirectory = ixDirectory + 1
-        jump directoryLoop
-    directoriesDone:
+        endforeach
+    endif
 
     # Empty path?
-    if(files == null && directories == null, markdownPrint('', 'No Markdown files or sub-directories found'))
+    if files == null && directories == null then
+        markdownPrint('', 'No Markdown files or sub-directories found')
+    endif
 endfunction
