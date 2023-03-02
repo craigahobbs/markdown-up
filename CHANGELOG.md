@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.11 (2023-03-02)
+
+- [5ab633b](https://github.com/craigahobbs/markdown-up/commit/5ab633b) - calc-script 1.4
+
+- [73635a1](https://github.com/craigahobbs/markdown-up/commit/73635a1) - allow null element callback in elementModelRender function
+
 ## 1.8.10 (2023-02-16)
 
 - [6eede13](https://github.com/craigahobbs/markdown-up/commit/6eede13) - reduce object creation in addCalculatedField, filterData, and joinData
