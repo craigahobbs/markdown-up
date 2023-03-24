@@ -131,7 +131,6 @@ To turn on debug mode, click the debug button in the MarkdownUp menu in the uppe
 
 - [MarkdownUp Application Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
 - [The CalcScript Language](https://craigahobbs.github.io/calc-script/language/)
-- [The CalcScript Library](https://craigahobbs.github.io/calc-script/library/)
 - [The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
 
 
