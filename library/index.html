@@ -15,10 +15,17 @@
             'markdownText': `\
 ~~~ markdown-script
 include 'https://craigahobbs.github.io/calc-script/library/app.mds'
-calcScriptLibraryDoc('library.json', 'The MarkdownUp Library', arrayNew( \\
-    arrayNew('CalcScript', 'https://craigahobbs.github.io/calc-script/library/'), \\
-    arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
-))
+calcScriptLibraryDoc( \\
+    arrayNew( \\
+        'library.json', \\
+        'https://craigahobbs.github.io/calc-script/library/library.json' \\
+    ), \\
+    'The MarkdownUp Library', \\
+    arrayNew( \\
+        arrayNew('CalcScript', 'https://craigahobbs.github.io/calc-script/language/'), \\
+        arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
+    ) \\
+)
 ~~~
 `});
         app.run();
