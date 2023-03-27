@@ -54,3 +54,26 @@ function formsLinkButtonElements(text, onClick)
         'callback', objectNew('click', onClick) \
     )
 endfunction
+
+
+# $function: formLinkElements
+# $group: forms
+# $doc: Create a link [element model](https://github.com/craigahobbs/element-model#readme)
+# $arg text: The link's text
+# $arg url: The link's URL. If null, the link is rendered as text.
+# $return: The link [element model](https://github.com/craigahobbs/element-model#readme)
+function formLinkElements(text, url)
+    if url == null then
+        return objectNew( \
+            'html', 'span', \
+            'attr', objectNew('style', 'user-select: none;'), \
+            'elem', objectNew('text', text) \
+        )
+    endif
+
+    return objectNew( \
+        'html', 'a', \
+        'attr', objectNew('href', documentURL(url)), \
+        'elem', objectNew('text', text) \
+    )
+endfunction

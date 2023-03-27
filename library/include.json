@@ -1,6 +1,30 @@
 {
     "functions": [
         {
+            "name": "formLinkElements",
+            "group": "forms",
+            "doc": [
+                "Create a link [element model](https://github.com/craigahobbs/element-model#readme)"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "The link's text"
+                    ]
+                },
+                {
+                    "name": "url",
+                    "doc": [
+                        "The link's URL. If null, the link is rendered as text."
+                    ]
+                }
+            ],
+            "return": [
+                "The link [element model](https://github.com/craigahobbs/element-model#readme)"
+            ]
+        },
+        {
             "name": "formsLinkButtonElements",
             "group": "forms",
             "doc": [
