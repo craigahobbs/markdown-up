@@ -13,8 +13,8 @@ endif
 # $doc: Create a text input [element model](https://github.com/craigahobbs/element-model#readme)
 # $arg id: The text input element ID
 # $arg text: The initial text of the text input element
-# $arg size: Optional. The size, in characters, of the text input element
-# $arg onEnter: Optional. The text input element on-enter event handler
+# $arg size: Optional (default is null). The size, in characters, of the text input element
+# $arg onEnter: Optional (default is null). The text input element on-enter event handler
 # $return: The text input [element model](https://github.com/craigahobbs/element-model#readme)
 function formsTextElements(id, text, size, onEnter)
     return objectNew( \
