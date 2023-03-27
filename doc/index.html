@@ -87,8 +87,7 @@ single dependency (MarkdownUp). The &quot;markdown-script&quot; fenced code bloc
 <a href="https://craigahobbs.github.io/calc-script/language/">CalcScript programming language</a>.
 In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
 parse CSV, render data tables, draw line charts, and more. For more information, see the
-<a href="https://craigahobbs.github.io/markdown-up/library/">MarkdownUp Library</a> and the
-<a href="https://craigahobbs.github.io/calc-script/library/">CalcScript Library</a>.</p>
+<a href="https://craigahobbs.github.io/markdown-up/library/">MarkdownUp Library</a>.</p>
 <p>For example:</p>
 <pre class="prettyprint source"><code># Dynamic Markdown Example
 
@@ -127,6 +126,21 @@ endwhile
 ~~~
 </code></pre>
 <p>Click here to <a href="https://craigahobbs.github.io/markdown-up/#url=DynamicMarkdownExample.md">see the example in action</a>.</p>
+<h3>The MarkdownUp Include Library</h3>
+<p>MarkdownUp provides some additional functionality that can be included at runtime. Consider the
+following example with the unit test include library:</p>
+<pre class="prettyprint source"><code>include 'https://craigahobbs.github.io/markdown-up/include/unittest.mds'
+
+function testSanity()
+    unittestEquals(1 + 1, 2)
+endfunction
+unittestRunTest('testSanity')
+
+unittestReport()
+</code></pre>
+<p>See the
+<a href="https://craigahobbs.github.io/markdown-up/library/include.html">MarkdownUp Include Library</a>
+documentation for more information on the available include libraries.</p>
 <h3>Debug Mode</h3>
 <p>Debug mode enables logging output using the
 <a href="https://craigahobbs.github.io/calc-script/library/#var.vName='debugLog'">debugLog function</a>.
@@ -141,6 +155,7 @@ reports warnings for any issues found.</p>
 <li><a href="https://craigahobbs.github.io/#url=MarkdownUpApplications.md">MarkdownUp Application Examples</a></li>
 <li><a href="https://craigahobbs.github.io/calc-script/language/">The CalcScript Language</a></li>
 <li><a href="https://craigahobbs.github.io/markdown-up/library/">The MarkdownUp Library</a></li>
+<li><a href="https://craigahobbs.github.io/markdown-up/library/include.html">The MarkdownUp Include Library</a></li>
 </ul>
 <h2>The MarkdownUp Package</h2>
 <p>The <a href="https://www.npmjs.com/package/markdown-up">markdown-up package</a> contains functions for parsing

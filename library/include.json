@@ -1,0 +1,147 @@
+{
+    "functions": [
+        {
+            "name": "formsLinkButtonElements",
+            "group": "forms",
+            "doc": [
+                "Create a link button [element model](https://github.com/craigahobbs/element-model#readme)"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "The link button's text"
+                    ]
+                },
+                {
+                    "name": "onClick",
+                    "doc": [
+                        "The link button's click event handler"
+                    ]
+                }
+            ],
+            "return": [
+                "The link button [element model](https://github.com/craigahobbs/element-model#readme)"
+            ]
+        },
+        {
+            "name": "formsTextElements",
+            "group": "forms",
+            "doc": [
+                "Create a text input [element model](https://github.com/craigahobbs/element-model#readme)"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The text input element ID"
+                    ]
+                },
+                {
+                    "name": "text",
+                    "doc": [
+                        "The initial text of the text input element"
+                    ]
+                },
+                {
+                    "name": "size",
+                    "doc": [
+                        "Optional. The size, in characters, of the text input element"
+                    ]
+                },
+                {
+                    "name": "onEnter",
+                    "doc": [
+                        "Optional. The text input element on-enter event handler"
+                    ]
+                }
+            ],
+            "return": [
+                "The text input [element model](https://github.com/craigahobbs/element-model#readme)"
+            ]
+        },
+        {
+            "name": "unittestDeepEquals",
+            "group": "unittest",
+            "doc": [
+                "Assert an actual value is *deeply* equal to the expected value"
+            ],
+            "args": [
+                {
+                    "name": "actual",
+                    "doc": [
+                        "The actual value"
+                    ]
+                },
+                {
+                    "name": "expected",
+                    "doc": [
+                        "The expected value"
+                    ]
+                },
+                {
+                    "name": "description",
+                    "doc": [
+                        "The description of the assertion"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "unittestEquals",
+            "group": "unittest",
+            "doc": [
+                "Assert an actual value is equal to the expected value"
+            ],
+            "args": [
+                {
+                    "name": "actual",
+                    "doc": [
+                        "The actual value"
+                    ]
+                },
+                {
+                    "name": "expected",
+                    "doc": [
+                        "The expected value"
+                    ]
+                },
+                {
+                    "name": "description",
+                    "doc": [
+                        "The description of the assertion"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "unittestReport",
+            "group": "unittest",
+            "doc": [
+                "Render the unit test report"
+            ]
+        },
+        {
+            "name": "unittestReset",
+            "group": "unittest",
+            "doc": [
+                "Reset the unit test data"
+            ]
+        },
+        {
+            "name": "unittestRunTest",
+            "group": "unittest",
+            "doc": [
+                "Run a unit test"
+            ],
+            "args": [
+                {
+                    "name": "testName",
+                    "doc": [
+                        "The test function name"
+                    ]
+                }
+            ]
+        }
+    ]
+}
