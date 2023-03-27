@@ -68,6 +68,9 @@ app: doc
     # Generate the library documentation
 	$(NODE_DOCKER) npx calcScriptDoc lib/scriptLibrary.js > build/app/library/library.json
 
+    # Generate the include library documentation
+	$(NODE_DOCKER) npx calcScriptDoc static/include/*.mds > build/app/library/include.json
+
     # Generate the library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json
 

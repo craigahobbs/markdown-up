@@ -1,0 +1,56 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# Include sentinel
+if getGlobal('formsLinkButtonElements') then
+    return
+endif
+
+
+# $function: formsTextElements
+# $group: forms
+# $doc: Create a text input [element model](https://github.com/craigahobbs/element-model#readme)
+# $arg id: The text input element ID
+# $arg text: The initial text of the text input element
+# $arg size: Optional. The size, in characters, of the text input element
+# $arg onEnter: Optional. The text input element on-enter event handler
+# $return: The text input [element model](https://github.com/craigahobbs/element-model#readme)
+function formsTextElements(id, text, size, onEnter)
+    return objectNew( \
+        'html', 'input', \
+        'attr', objectNew( \
+            'autocomplete', 'off', \
+            'id', id, \
+            'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+            'type', 'text', \
+            'value', text, \
+            'size', size \
+        ), \
+        'callback', if(onEnter != null, objectNew('keyup', formsTextOnKeyup)), \
+        'callbackData', if(onEnter != null, onEnter) \
+    )
+endfunction
+
+
+function formsTextOnKeyup(keyCode, onEnter)
+    if keyCode == 13 then
+        onEnter()
+    endif
+endfunction
+
+
+# $function: formsLinkButtonElements
+# $group: forms
+# $doc: Create a link button [element model](https://github.com/craigahobbs/element-model#readme)
+# $arg text: The link button's text
+# $arg onClick: The link button's click event handler
+# $return: The link button [element model](https://github.com/craigahobbs/element-model#readme)
+function formsLinkButtonElements(text, onClick)
+    return objectNew( \
+        'html', 'a', \
+        'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
+        'elem', objectNew('text', text), \
+        'callback', objectNew('click', onClick) \
+    )
+endfunction

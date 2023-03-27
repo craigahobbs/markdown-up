@@ -1,0 +1,121 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# Include sentinel
+if getGlobal('unittestTests') then
+    return
+endif
+
+
+# Test statistics
+unittestTests = objectNew()
+unittestWarnings = arrayNew()
+
+
+# $function: unittestRunTest
+# $group: unittest
+# $doc: Run a unit test
+# $arg testName: The test function name
+function unittestRunTest(testName)
+    # Single test argument?
+    if vTest != null && vTest != testName then
+        return
+    endif
+
+    # Test run multiple times?
+    if objectHas(unittestTests, testName) then
+        arrayPush(unittestWarnings, 'Test "' + testName + '" run multiple times')
+        return
+    endif
+    testFailures = arrayNew()
+    objectSet(unittestTests, testName, testFailures)
+    setGlobal('unittestTestName', testName)
+
+    # Get the test func
+    testFn = getGlobal(testName)
+    if testFn == null then
+        arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
+        return
+    endif
+
+    # Run the test
+    testFn()
+
+    # Unset the test name global
+    setGlobal('unittestTestName', null)
+endfunction
+
+
+# $function: unittestReport
+# $group: unittest
+# $doc: Render the unit test report
+function unittestReport()
+    # Report any warnings
+    if arrayLength(unittestWarnings) then
+        markdownPrint('', '## Warnings')
+        foreach warning in unittestWarnings do
+            markdownPrint('', '- ' + markdownEscape(warning))
+        endforeach
+    endif
+
+    # Report each test result
+    markdownPrint('', '## Test Results')
+    testFailCount = 0
+    testNames = arraySort(objectKeys(unittestTests))
+    foreach testName in testNames do
+        testFailures = objectGet(getGlobal('unittestTests'), testName)
+        markdownPrint('', 'Test "' + markdownEscape(testName) + '" - ' + if(arrayLength(testFailures), 'FAIL', 'OK'))
+        foreach error in testFailures do
+            markdownPrint('', '- ' + markdownEscape(error))
+        endforeach
+        if arrayLength(testFailures) then
+            testFailCount = testFailCount + 1
+        endif
+    endforeach
+
+    # Report statistics
+    testCount = arrayLength(testNames)
+    markdownPrint( \
+        '', \
+        '---', \
+        '', \
+        'Ran ' + testCount + ' tests, ' + (testCount - testFailCount) + ' succeeded, ' + testFailCount + ' failed' \
+    )
+endfunction
+
+
+# $function: unittestReset
+# $group: unittest
+# $doc: Reset the unit test data
+function unittestReset()
+    setGlobal('unittestTests', objectNew())
+    setGlobal('unittestWarnings', arrayNew())
+endfunction
+
+
+# $function: unittestEquals
+# $group: unittest
+# $doc: Assert an actual value is equal to the expected value
+# $arg actual: The actual value
+# $arg expected: The expected value
+# $arg description: The description of the assertion
+function unittestEquals(actual, expected, description)
+    if actual != expected then
+        testName = getGlobal('unittestTestName')
+        testFailures = objectGet(getGlobal('unittestTests'), testName)
+        arrayPush(testFailures, if(description != null, description + ' - ', '') + \
+            jsonStringify(actual) + ' != ' + jsonStringify(expected))
+    endif
+endfunction
+
+
+# $function: unittestDeepEquals
+# $group: unittest
+# $doc: Assert an actual value is *deeply* equal to the expected value
+# $arg actual: The actual value
+# $arg expected: The expected value
+# $arg description: The description of the assertion
+function unittestDeepEquals(actual, expected, description)
+    unittestEquals(jsonStringify(actual), jsonStringify(expected), description)
+endfunction

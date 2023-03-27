@@ -65,8 +65,7 @@ single dependency (MarkdownUp). The "markdown-script" fenced code blocks are int
 [CalcScript programming language](https://craigahobbs.github.io/calc-script/language/).
 In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
 parse CSV, render data tables, draw line charts, and more. For more information, see the
-[MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/) and the
-[CalcScript Library](https://craigahobbs.github.io/calc-script/library/).
+[MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/).
 
 For example:
 
@@ -111,6 +110,27 @@ endwhile
 Click here to [see the example in action](https://craigahobbs.github.io/markdown-up/#url=DynamicMarkdownExample.md).
 
 
+### The MarkdownUp Include Library
+
+MarkdownUp provides some additional functionality that can be included at runtime. Consider the
+following example with the unit test include library:
+
+~~~
+include 'https://craigahobbs.github.io/markdown-up/include/unittest.mds'
+
+function testSanity()
+    unittestEquals(1 + 1, 2)
+endfunction
+unittestRunTest('testSanity')
+
+unittestReport()
+~~~
+
+See the
+[MarkdownUp Include Library](https://craigahobbs.github.io/markdown-up/library/include.html)
+documentation for more information on the available include libraries.
+
+
 ### Debug Mode
 
 Debug mode enables logging output using the
@@ -132,6 +152,7 @@ To turn on debug mode, click the debug button in the MarkdownUp menu in the uppe
 - [MarkdownUp Application Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
 - [The CalcScript Language](https://craigahobbs.github.io/calc-script/language/)
 - [The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
+- [The MarkdownUp Include Library](https://craigahobbs.github.io/markdown-up/library/include.html)
 
 
 ## The MarkdownUp Package
