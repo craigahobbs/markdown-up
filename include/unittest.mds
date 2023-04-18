@@ -28,9 +28,6 @@ function unittestRunTest(testName)
         arrayPush(unittestWarnings, 'Test "' + testName + '" run multiple times')
         return
     endif
-    testFailures = arrayNew()
-    objectSet(unittestTests, testName, testFailures)
-    setGlobal('unittestTestName', testName)
 
     # Get the test func
     testFn = getGlobal(testName)
@@ -38,6 +35,11 @@ function unittestRunTest(testName)
         arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
         return
     endif
+
+    # Add the unit test result array
+    testFailures = arrayNew()
+    objectSet(unittestTests, testName, testFailures)
+    setGlobal('unittestTestName', testName)
 
     # Run the test
     testFn()
@@ -51,6 +53,22 @@ endfunction
 # $group: unittest
 # $doc: Render the unit test report
 function unittestReport()
+    # Compute test statistics
+    testNames = arraySort(objectKeys(unittestTests))
+    testCount = arrayLength(testNames)
+    testFailCount = 0
+    foreach testName in testNames do
+        testFailures = objectGet(getGlobal('unittestTests'), testName)
+        if arrayLength(testFailures) then
+            testFailCount = testFailCount + 1
+        endif
+    endforeach
+
+    # Report statistics
+    markdownPrint( \
+        'Ran ' + testCount + ' tests - ' + (testCount - testFailCount) + ' succeeded, ' + testFailCount + ' failed' \
+    )
+
     # Report any warnings
     if arrayLength(unittestWarnings) then
         markdownPrint('', '## Warnings')
@@ -61,28 +79,17 @@ function unittestReport()
 
     # Report each test result
     markdownPrint('', '## Test Results')
-    testFailCount = 0
-    testNames = arraySort(objectKeys(unittestTests))
     foreach testName in testNames do
         testFailures = objectGet(getGlobal('unittestTests'), testName)
-        markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - " + \
-            if(arrayLength(testFailures), 'FAIL', 'OK'))
+        markdownPrint( \
+            '', \
+            '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - ", \
+            if(arrayLength(testFailures), 'FAIL', 'OK') \
+        )
         foreach error in testFailures do
             markdownPrint('', '- ' + markdownEscape(error))
         endforeach
-        if arrayLength(testFailures) then
-            testFailCount = testFailCount + 1
-        endif
     endforeach
-
-    # Report statistics
-    testCount = arrayLength(testNames)
-    markdownPrint( \
-        '', \
-        '---', \
-        '', \
-        'Ran ' + testCount + ' tests, ' + (testCount - testFailCount) + ' succeeded, ' + testFailCount + ' failed' \
-    )
 endfunction
 
 
