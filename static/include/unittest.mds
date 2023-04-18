@@ -65,7 +65,8 @@ function unittestReport()
     testNames = arraySort(objectKeys(unittestTests))
     foreach testName in testNames do
         testFailures = objectGet(getGlobal('unittestTests'), testName)
-        markdownPrint('', 'Test "' + markdownEscape(testName) + '" - ' + if(arrayLength(testFailures), 'FAIL', 'OK'))
+        markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - " + \
+            if(arrayLength(testFailures), 'FAIL', 'OK'))
         foreach error in testFailures do
             markdownPrint('', '- ' + markdownEscape(error))
         endforeach
