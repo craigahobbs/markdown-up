@@ -63,10 +63,11 @@ function unittestReport()
             testFailCount = testFailCount + 1
         endif
     endforeach
+    testPassCount = testCount - testFailCount
 
     # Report statistics
     markdownPrint( \
-        'Ran ' + testCount + ' tests - ' + (testCount - testFailCount) + ' succeeded, ' + testFailCount + ' failed' \
+        'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed' \
     )
 
     # Report any warnings
@@ -77,19 +78,30 @@ function unittestReport()
         endforeach
     endif
 
-    # Report each test result
-    markdownPrint('', '## Test Results')
-    foreach testName in testNames do
-        testFailures = objectGet(getGlobal('unittestTests'), testName)
-        markdownPrint( \
-            '', \
-            '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - ", \
-            if(arrayLength(testFailures), 'FAIL', 'OK') \
-        )
-        foreach error in testFailures do
-            markdownPrint('', '- ' + markdownEscape(error))
+    # Report the failing tests
+    if testFailCount then
+        markdownPrint('', '## Failing Tests')
+        foreach testName in testNames do
+            testFailures = objectGet(getGlobal('unittestTests'), testName)
+            if arrayLength(testFailures) then
+                markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - FAIL")
+                foreach error in testFailures do
+                    markdownPrint('', '- ' + markdownEscape(error))
+                endforeach
+            endif
         endforeach
-    endforeach
+    endif
+
+    # Report the failing tests
+    if testPassCount then
+        markdownPrint('', '## Passing Tests')
+        foreach testName in testNames do
+            testFailures = objectGet(getGlobal('unittestTests'), testName)
+            if !arrayLength(testFailures) then
+                markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + encodeURIComponent(testName) + "') - OK")
+            endif
+        endforeach
+    endif
 endfunction
 
 
@@ -110,10 +122,7 @@ endfunction
 # $arg description: The description of the assertion
 function unittestEquals(actual, expected, description)
     if actual != expected then
-        testName = getGlobal('unittestTestName')
-        testFailures = objectGet(getGlobal('unittestTests'), testName)
-        arrayPush(testFailures, if(description != null, description + ' - ', '') + \
-            jsonStringify(actual) + ' != ' + jsonStringify(expected))
+        unittestRecordError(jsonStringify(actual), jsonStringify(expected), description)
     endif
 endfunction
 
@@ -125,5 +134,17 @@ endfunction
 # $arg expected: The expected value
 # $arg description: The description of the assertion
 function unittestDeepEquals(actual, expected, description)
-    unittestEquals(jsonStringify(actual), jsonStringify(expected), description)
+    actualJSON = jsonStringify(actual)
+    expectedJSON = jsonStringify(expected)
+    if actualJSON != expectedJSON then
+        unittestRecordError(actualJSON, expectedJSON, description)
+    endif
+endfunction
+
+
+# Helper function to record a unit test error
+function unittestRecordError(actualStr, expectedStr, description)
+    testName = getGlobal('unittestTestName')
+    testFailures = objectGet(getGlobal('unittestTests'), testName)
+    arrayPush(testFailures, if(description != null, description + ' - ', '') + actualStr + ' != ' + expectedStr)
 endfunction
