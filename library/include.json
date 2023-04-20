@@ -166,6 +166,21 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "unittestRunTestAsync",
+            "group": "unittest",
+            "doc": [
+                "Run an asyncronous unit test"
+            ],
+            "args": [
+                {
+                    "name": "testName",
+                    "doc": [
+                        "The test function name"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -18,22 +18,45 @@ unittestWarnings = arrayNew()
 # $doc: Run a unit test
 # $arg testName: The test function name
 function unittestRunTest(testName)
+    testFn = unittestRunTestHelper(testName)
+    if testFn then
+        testFn()
+        setGlobal('unittestTestName', null)
+    endif
+endfunction
+
+
+# $function: unittestRunTestAsync
+# $group: unittest
+# $doc: Run an asyncronous unit test
+# $arg testName: The test function name
+async function unittestRunTestAsync(testName)
+    testFn = unittestRunTestHelper(testName)
+    if testFn then
+        testFn()
+        setGlobal('unittestTestName', null)
+    endif
+endfunction
+
+
+# unittestRunTest helper function
+function unittestRunTestHelper(testName)
     # Single test argument?
     if vTest != null && vTest != testName then
-        return
+        return null
     endif
 
     # Test run multiple times?
     if objectHas(unittestTests, testName) then
         arrayPush(unittestWarnings, 'Test "' + testName + '" run multiple times')
-        return
+        return null
     endif
 
     # Get the test func
     testFn = getGlobal(testName)
     if testFn == null then
         arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
-        return
+        return null
     endif
 
     # Add the unit test result array
@@ -41,11 +64,7 @@ function unittestRunTest(testName)
     objectSet(unittestTests, testName, testFailures)
     setGlobal('unittestTestName', testName)
 
-    # Run the test
-    testFn()
-
-    # Unset the test name global
-    setGlobal('unittestTestName', null)
+    return testFn
 endfunction
 
 
