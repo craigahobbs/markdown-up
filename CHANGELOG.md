@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.0 (2023-05-03)
+
+- [1c366cd](https://github.com/craigahobbs/markdown-up/commit/1c366cd) - markdown-model 1.8
+
 ## 1.8.11 (2023-03-02)
 
 - [5ab633b](https://github.com/craigahobbs/markdown-up/commit/5ab633b) - calc-script 1.4
