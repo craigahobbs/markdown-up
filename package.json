@@ -24,9 +24,9 @@
     "dependencies": {
         "calc-script": "~1.4",
         "element-model": "~1.1",
-        "markdown-model": "~1.7",
+        "markdown-model": "~1.8",
         "schema-markdown": "~1.2",
-        "schema-markdown-doc": "~1.5"
+        "schema-markdown-doc": "~1.6"
     },
     "devDependencies": {
         "ava": "~5.2",
