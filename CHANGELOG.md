@@ -26,10 +26,6 @@
 
 - [25f42ff](https://github.com/craigahobbs/markdown-up/commit/25f42ff) - fix uncaught callback exception issues
 
-- [e5d9b44](https://github.com/craigahobbs/markdown-up/commit/e5d9b44) - additional async callback tests
-
-- [96af6cb](https://github.com/craigahobbs/markdown-up/commit/96af6cb) - markdown-up 1.8.9
-
 ## 1.8.9 (2023-01-17)
 
 - [c669ac8](https://github.com/craigahobbs/markdown-up/commit/c669ac8) - add pointer cursor to on-click svg elements
