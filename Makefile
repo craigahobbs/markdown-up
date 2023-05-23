@@ -20,6 +20,7 @@ GHPAGES_SRC := build/app/
 
 
 # Include javascript-build
+AVA_TEST := 1
 include Makefile.base
 
 
