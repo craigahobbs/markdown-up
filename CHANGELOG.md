@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.1 (2023-05-23)
+
+- [57a507e](https://github.com/craigahobbs/markdown-up/commit/57a507e) - run tests with node --test
+
 ## 1.9.0 (2023-05-03)
 
 - [1c366cd](https://github.com/craigahobbs/markdown-up/commit/1c366cd) - markdown-model 1.8
