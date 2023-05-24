@@ -1,34 +1,37 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-/* eslint-disable id-length */
-
 import {dataTableElements, validateDataTable} from '../lib/dataTable.js';
-import {ValidationError} from 'schema-markdown/lib/schema.js';
-import test from 'ava';
+import {strict as assert} from 'node:assert';
+import test from 'node:test';
 
 
-test('validateDataTable', (t) => {
+test('validateDataTable', () => {
     const dataTable = {'fields': ['A', 'B']};
-    t.deepEqual(validateDataTable(dataTable), dataTable);
+    assert.deepEqual(validateDataTable(dataTable), dataTable);
 });
 
 
-test('validateDataTable, error', (t) => {
+test('validateDataTable, error', () => {
     const dataTable = {'fields': 1};
-    const error = t.throws(() => {
-        validateDataTable(dataTable);
-    }, {'instanceOf': ValidationError});
-    t.is(error.message, "Invalid value 1 (type 'number') for member 'fields', expected type 'array'");
+    assert.throws(
+        () => {
+            validateDataTable(dataTable);
+        },
+        {
+            'name': 'ValidationError',
+            'message': "Invalid value 1 (type 'number') for member 'fields', expected type 'array'"
+        }
+    );
 });
 
 
-test('dataTableElements', (t) => {
+test('dataTableElements', () => {
     const data = [
         {'A': 1, 'B': 'abc', 'C': new Date(Date.UTC(2022, 7, 30))},
         {'A': 2, 'B': 'def', 'C': new Date(Date.UTC(2022, 7, 31))}
     ];
-    t.deepEqual(dataTableElements(data), {
+    assert.deepEqual(dataTableElements(data), {
         'html': 'table',
         'elem': [
             {
@@ -71,14 +74,14 @@ test('dataTableElements', (t) => {
 });
 
 
-test('dataTableElements, model fields', (t) => {
+test('dataTableElements, model fields', () => {
     const data = [
         {'A': 1, 'B': 'abc', 'C': 5},
         {'A': 2, 'B': 'def', 'C': 6}
     ];
     const dataTable = validateDataTable({'fields': ['B', 'A']});
     validateDataTable(dataTable);
-    t.deepEqual(dataTableElements(data, dataTable), {
+    assert.deepEqual(dataTableElements(data, dataTable), {
         'html': 'table',
         'elem': [
             {
@@ -118,7 +121,7 @@ test('dataTableElements, model fields', (t) => {
 });
 
 
-test('dataTableElements, model category fields', (t) => {
+test('dataTableElements, model category fields', () => {
     const data = [
         {'A': 1, 'B': 'abc', 'C': 5},
         {'A': 1, 'B': 'def', 'C': 6},
@@ -127,7 +130,7 @@ test('dataTableElements, model category fields', (t) => {
     ];
     const dataTable = validateDataTable({'categories': ['A']});
     validateDataTable(dataTable);
-    t.deepEqual(dataTableElements(data, dataTable), {
+    assert.deepEqual(dataTableElements(data, dataTable), {
         'html': 'table',
         'elem': [
             {
@@ -197,7 +200,7 @@ test('dataTableElements, model category fields', (t) => {
 });
 
 
-test('dataTableElements, markdown fields', (t) => {
+test('dataTableElements, markdown fields', () => {
     const data = [
         {'A': '**1**', 'B': '**bold**', 'C': 5},
         {'A': '*2*', 'B': '*italic*', 'C': 6},
@@ -206,7 +209,7 @@ test('dataTableElements, markdown fields', (t) => {
     const options = {'urlFn': (url) => `/${url}`};
     const dataTable = validateDataTable({'categories': ['A'], 'markdown': ['A', 'B']});
     validateDataTable(dataTable);
-    t.deepEqual(dataTableElements(data, dataTable, options), {
+    assert.deepEqual(dataTableElements(data, dataTable, options), {
         'html': 'table',
         'elem': [
             {

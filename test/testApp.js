@@ -1,11 +1,10 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-/* eslint-disable id-length */
-
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
-import test from 'ava';
+import {strict as assert} from 'node:assert';
+import test from 'node:test';
 
 
 // The JSDOM URL
@@ -292,19 +291,19 @@ function sleep(ms) {
 }
 
 
-test('MarkdownUp, constructor', (t) => {
+test('MarkdownUp, constructor', () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
-    t.is(app.window, window);
-    t.is(app.params, null);
-    t.is(app.fontSize, 12);
-    t.is(app.lineHeight, 1.2);
-    t.is(app.menu, true);
-    t.is(app.url, 'README.md');
+    assert.equal(app.window, window);
+    assert.equal(app.params, null);
+    assert.equal(app.fontSize, 12);
+    assert.equal(app.lineHeight, 1.2);
+    assert.equal(app.menu, true);
+    assert.equal(app.url, 'README.md');
 });
 
 
-test('MarkdownUp, constructor options', (t) => {
+test('MarkdownUp, constructor options', () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'fontSize': 14,
@@ -312,16 +311,16 @@ test('MarkdownUp, constructor options', (t) => {
         'menu': false,
         'url': 'CHANGELOG.md'
     });
-    t.is(app.window, window);
-    t.is(app.params, null);
-    t.is(app.fontSize, 14);
-    t.is(app.lineHeight, 1.6);
-    t.is(app.menu, false);
-    t.is(app.url, 'CHANGELOG.md');
+    assert.equal(app.window, window);
+    assert.equal(app.params, null);
+    assert.equal(app.fontSize, 14);
+    assert.equal(app.lineHeight, 1.6);
+    assert.equal(app.menu, false);
+    assert.equal(app.url, 'CHANGELOG.md');
 });
 
 
-test('MarkdownUp, run and render', async (t) => {
+test('MarkdownUp, run and render', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -331,11 +330,11 @@ test('MarkdownUp, run and render', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     const app = new MarkdownUp(window, {'menu': false});
     await app.run();
-    t.is(window.document.title, 'MarkdownUp');
-    t.true(window.document.body.innerHTML.startsWith(
+    assert.equal(window.document.title, 'MarkdownUp');
+    assert(window.document.body.innerHTML.startsWith(
         '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
@@ -346,11 +345,11 @@ test('MarkdownUp, run and render', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render(true);
-    t.is(window.document.title, 'MarkdownUp');
-    t.true(window.document.body.innerHTML.startsWith(
+    assert.equal(window.document.title, 'MarkdownUp');
+    assert(window.document.body.innerHTML.startsWith(
         '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '1'],
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
@@ -358,7 +357,7 @@ test('MarkdownUp, run and render', async (t) => {
 });
 
 
-test('MarkdownUp, render bad params', async (t) => {
+test('MarkdownUp, render bad params', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -367,9 +366,9 @@ test('MarkdownUp, render bad params', async (t) => {
     window.location.hash = '#unknown=bad';
     const app = new MarkdownUp(window);
     await app.render();
-    t.is(window.document.title, 'MarkdownUp');
-    t.is(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, 'MarkdownUp');
+    assert.equal(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
@@ -377,7 +376,7 @@ test('MarkdownUp, render bad params', async (t) => {
 });
 
 
-test('MarkdownUp, render menu toggle', async (t) => {
+test('MarkdownUp, render menu toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -386,37 +385,37 @@ test('MarkdownUp, render menu toggle', async (t) => {
     window.location.hash = '#';
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
 
     // Click the menu button and wait for the render
     let [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 
     // Click the menu button again
     [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{}');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
 });
 
 
-test('MarkdownUp, render menu view toggle', async (t) => {
+test('MarkdownUp, render menu view toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -426,36 +425,36 @@ test('MarkdownUp, render menu view toggle', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
     let [, , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<div class="markdown">Hello!</div>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
+    assert(window.document.body.innerHTML.endsWith('<div class="markdown">Hello!</div>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
 
     // Click the Markdown menu button again
     [, , , markdownButton] = window.document.getElementsByTagName('div');
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 });
 
 
-test('MarkdownUp, render menu dark mode toggle', async (t) => {
+test('MarkdownUp, render menu dark mode toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -465,37 +464,37 @@ test('MarkdownUp, render menu dark mode toggle', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button and wait for the render
     let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     darkModeButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), '{"darkMode":1}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":1}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button again
     [, , , , darkModeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     darkModeButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.is(window.localStorage.getItem('MarkdownUp'), '{}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
-test('MarkdownUp, render menu cycle', async (t) => {
+test('MarkdownUp, render menu cycle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -505,15 +504,15 @@ test('MarkdownUp, render menu cycle', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), null);
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
     let [, , , , , markdownButton] = window.document.getElementsByTagName('div');
@@ -521,14 +520,14 @@ test('MarkdownUp, render menu cycle', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button again to cycle-over
     [, , , , , markdownButton] = window.document.getElementsByTagName('div');
@@ -536,18 +535,18 @@ test('MarkdownUp, render menu cycle', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '16pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":16}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":16}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
-test('MarkdownUp, render menu cycle overflow', async (t) => {
+test('MarkdownUp, render menu cycle overflow', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -558,15 +557,15 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '18pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
     const [, , , , , markdownButton] = window.document.getElementsByTagName('div');
@@ -574,18 +573,18 @@ test('MarkdownUp, render menu cycle overflow', async (t) => {
     documentElementStyleSetPropertyCalls.length = 0;
     markdownButton.click();
     await sleep(0);
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    t.deepEqual(documentElementStyleSetPropertyCalls, [
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '8pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    t.is(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
-    t.is(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
-test('MarkdownUp, render timeout', async (t) => {
+test('MarkdownUp, render timeout', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     // Patch window.setTimeout and window.clearTimeout
@@ -601,7 +600,7 @@ test('MarkdownUp, render timeout', async (t) => {
         return windowTimeout.id;
     };
     window.clearTimeout = (timeoutId) => {
-        t.is(timeoutId, windowTimeout.id);
+        assert.equal(timeoutId, windowTimeout.id);
         windowTimeout.callback = null;
         windowTimeout.delay = null;
     };
@@ -623,36 +622,36 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    t.is(windowTimeout.delay, 1000);
-    t.is(app.runtimeTimeoutId, 1);
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
+    assert.equal(windowTimeout.delay, 1000);
+    assert.equal(app.runtimeTimeoutId, 1);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime timeout ID
     window.location.hash = '#';
     await app.render(true);
-    t.is(windowTimeout.delay, 1000);
-    t.is(app.runtimeTimeoutId, 2);
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
+    assert.equal(windowTimeout.delay, 1000);
+    assert.equal(app.runtimeTimeoutId, 2);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the timeout callback
     await windowTimeout.callback();
-    t.is(windowTimeout.delay, 2000);
-    t.is(app.runtimeTimeoutId, 3);
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
+    assert.equal(windowTimeout.delay, 2000);
+    assert.equal(app.runtimeTimeoutId, 3);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 
     // Call the timeout callback again
     await windowTimeout.callback();
-    t.is(windowTimeout.delay, null);
-    t.is(app.runtimeTimeoutId, null);
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 3</p>'));
+    assert.equal(windowTimeout.delay, null);
+    assert.equal(app.runtimeTimeoutId, null);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 3</p>'));
 });
 
 
-test('MarkdownUp, render resize', async (t) => {
+test('MarkdownUp, render resize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     // Patch window.addEventListener and window.removeEventListener
@@ -661,8 +660,8 @@ test('MarkdownUp, render resize', async (t) => {
         eventListener[type] = callback;
     };
     window.removeEventListener = (type, callback) => {
-        t.is(type, 'resize');
-        t.is(callback, eventListener[type]);
+        assert.equal(type, 'resize');
+        assert.equal(callback, eventListener[type]);
         eventListener[type] = null;
     };
 
@@ -682,29 +681,29 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    t.is(typeof eventListener.resize, 'function');
-    t.is(typeof app.runtimeWindowResize, 'function');
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
+    assert.equal(typeof eventListener.resize, 'function');
+    assert.equal(typeof app.runtimeWindowResize, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Render again to test clearing the runtime resize event handler
     window.location.hash = '#';
     await app.render(true);
-    t.is(typeof eventListener.resize, 'function');
-    t.is(typeof app.runtimeWindowResize, 'function');
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
+    assert.equal(typeof eventListener.resize, 'function');
+    assert.equal(typeof app.runtimeWindowResize, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the resize callback
     await eventListener.resize();
-    t.is(typeof eventListener.resize, 'function');
-    t.is(typeof app.runtimeWindowResize, 'function');
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
+    assert.equal(typeof eventListener.resize, 'function');
+    assert.equal(typeof app.runtimeWindowResize, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 });
 
 
-test('MarkdownUp, render focus', async (t) => {
+test('MarkdownUp, render focus', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
@@ -730,26 +729,26 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 1">'));
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 1">'));
 
     let testInput = window.document.getElementById('test-input');
-    t.is(testInput.value, 'Text 1');
-    t.is(testInput.selectionStart, 6);
-    t.is(testInput.selectionEnd, 6);
+    assert.equal(testInput.value, 'Text 1');
+    assert.equal(testInput.selectionStart, 6);
+    assert.equal(testInput.selectionEnd, 6);
 
     await testInput.click();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 2">'));
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 2">'));
 
     testInput = window.document.getElementById('test-input');
-    t.is(testInput.value, 'Text 2');
-    t.is(testInput.selectionStart, 6);
-    t.is(testInput.selectionEnd, 6);
+    assert.equal(testInput.value, 'Text 2');
+    assert.equal(testInput.selectionStart, 6);
+    assert.equal(testInput.selectionEnd, 6);
 });
 
 
-test('MarkdownUp, render document reset ID', async (t) => {
+test('MarkdownUp, render document reset ID', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     // Patch window.setTimeout and window.clearTimeout
@@ -765,7 +764,7 @@ test('MarkdownUp, render document reset ID', async (t) => {
         return windowTimeout.id;
     };
     window.clearTimeout = (timeoutId) => {
-        t.is(timeoutId, windowTimeout.id);
+        assert.equal(timeoutId, windowTimeout.id);
         windowTimeout.callback = null;
         windowTimeout.delay = null;
     };
@@ -792,28 +791,28 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    t.is(windowTimeout.delay, 1000);
-    t.is(app.runtimeTimeoutId, 1);
-    t.is(window.document.title, '');
-    t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
+    assert.equal(windowTimeout.delay, 1000);
+    assert.equal(app.runtimeTimeoutId, 1);
+    assert.equal(window.document.title, '');
+    assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
 
     // Call the timeout callback
     await windowTimeout.callback();
-    t.is(windowTimeout.delay, 1000);
-    t.is(app.runtimeTimeoutId, 2);
-    t.is(window.document.title, '');
-    t.is(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
+    assert.equal(windowTimeout.delay, 1000);
+    assert.equal(app.runtimeTimeoutId, 2);
+    assert.equal(window.document.title, '');
+    assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
 
     // Call the timeout callback
     await windowTimeout.callback();
-    t.is(windowTimeout.delay, 1000);
-    t.is(app.runtimeTimeoutId, 3);
-    t.is(window.document.title, '');
-    t.is(window.document.body.innerHTML, '<p>Hello 3</p>');
+    assert.equal(windowTimeout.delay, 1000);
+    assert.equal(app.runtimeTimeoutId, 3);
+    assert.equal(window.document.title, '');
+    assert.equal(window.document.body.innerHTML, '<p>Hello 3</p>');
 });
 
 
-test('MarkdownUp, render location', async (t) => {
+test('MarkdownUp, render location', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
@@ -824,13 +823,13 @@ setWindowLocation('#url=other')
     });
     window.location.hash = '#';
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
-    t.is(window.location.href, `${jsdomURL}#url=other`);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    assert.equal(window.location.href, `${jsdomURL}#url=other`);
 });
 
 
-test('MarkdownUp, render location callback', async (t) => {
+test('MarkdownUp, render location callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
@@ -851,31 +850,31 @@ elementModelRender(objectNew( \
     });
     window.location.hash = '#';
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
-    t.is(window.location.href, `${jsdomURL}#`);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
+    assert.equal(window.location.href, `${jsdomURL}#`);
 
     const testSpan = window.document.getElementById('test-span');
     await testSpan.click();
 
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
-    t.is(window.location.href, `${jsdomURL}#url=other`);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
+    assert.equal(window.location.href, `${jsdomURL}#url=other`);
 });
 
 
-test('MarkdownUp, render location hash', async (t) => {
+test('MarkdownUp, render location hash', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': ''});
     window.location.hash = '#myid';
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
-    t.is(window.location.href, `${jsdomURL}#myid`);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    assert.equal(window.location.href, `${jsdomURL}#myid`);
 });
 
 
-test('MarkdownUp, render title', async (t) => {
+test('MarkdownUp, render title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
@@ -887,12 +886,12 @@ markdownPrint('Hello')
     });
     window.location.hash = '#';
     await app.render();
-    t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
+    assert.equal(window.document.title, 'Hello');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
 
 
-test('MarkdownUp, render title callback', async (t) => {
+test('MarkdownUp, render title callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
@@ -913,28 +912,28 @@ elementModelRender(objectNew( \
     });
     window.location.hash = '#';
     await app.render();
-    t.is(window.document.title, '');
-    t.true(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
 
     const testSpan = window.document.getElementById('test-span');
     await testSpan.click();
 
-    t.is(window.document.title, 'Hello');
-    t.true(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
+    assert.equal(window.document.title, 'Hello');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
 
 
-test('MarkdownUp.main, help', async (t) => {
+test('MarkdownUp.main, help', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
     app.updateParams(null, null, '{"view": "help"}');
     const result = deleteElementCallbacks(await app.main());
-    t.deepEqual(
+    assert.deepEqual(
         result.elements[1][0][0],
         {'html': 'h1', 'attr': {'id': 'type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
     );
     result.elements[1] = '<helpElements>';
-    t.deepEqual(
+    assert.deepEqual(
         result,
         {
             'title': 'MarkdownUp',
@@ -950,20 +949,20 @@ test('MarkdownUp.main, help', async (t) => {
 });
 
 
-test('MarkdownUp.updateParams, invalid session/local storage', (t) => {
+test('MarkdownUp.updateParams, invalid session/local storage', () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
     app.updateParams('', 'BAD', 'BAD');
-    t.deepEqual(app.params, {});
-    t.deepEqual(app.paramsLocal, {});
-    t.deepEqual(app.paramsSession, {});
+    assert.deepEqual(app.params, {});
+    assert.deepEqual(app.paramsLocal, {});
+    assert.deepEqual(app.paramsSession, {});
 });
 
 
-test('MarkdownUp.main', async (t) => {
+test('MarkdownUp.main', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'README.md');
+        assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
         })};
@@ -973,7 +972,7 @@ test('MarkdownUp.main', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'Hello',
@@ -992,10 +991,10 @@ test('MarkdownUp.main', async (t) => {
 });
 
 
-test('MarkdownUp.main, url', async (t) => {
+test('MarkdownUp.main, url', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'sub/other.md');
+        assert.equal(url, 'sub/other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
 # Hello
@@ -1021,7 +1020,7 @@ test('MarkdownUp.main, url', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('url=sub%2Fother.md');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'Hello',
@@ -1110,7 +1109,7 @@ test('MarkdownUp.main, url', async (t) => {
 });
 
 
-test('MarkdownUp.main, fontSize', async (t) => {
+test('MarkdownUp.main, fontSize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 ~~~ markdown-script
@@ -1118,7 +1117,7 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
 ~~~
 `});
     app.updateParams(null, '{"fontSize": 14}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1141,10 +1140,10 @@ markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
 });
 
 
-test('MarkdownUp.main, fetch script', async (t) => {
+test('MarkdownUp.main, fetch script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'README.md');
+        assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
         })};
@@ -1160,7 +1159,7 @@ markdownPrint(fetch('README.md', null, true))
 `
     });
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1187,10 +1186,10 @@ markdownPrint(fetch('README.md', null, true))
 });
 
 
-test('MarkdownUp.main, fetch error', async (t) => {
+test('MarkdownUp.main, fetch error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'README.md');
+        assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': 'Not Found'};
     };
     window.fetch = (url) => new Promise((resolve) => {
@@ -1198,7 +1197,7 @@ test('MarkdownUp.main, fetch error', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'MarkdownUp',
@@ -1211,10 +1210,10 @@ test('MarkdownUp.main, fetch error', async (t) => {
 });
 
 
-test('MarkdownUp.main, fetch error no status text', async (t) => {
+test('MarkdownUp.main, fetch error no status text', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'README.md');
+        assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': ''};
     };
     window.fetch = (url) => new Promise((resolve) => {
@@ -1222,7 +1221,7 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
     });
     const app = new MarkdownUp(window);
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'MarkdownUp',
@@ -1235,11 +1234,11 @@ test('MarkdownUp.main, fetch error no status text', async (t) => {
 });
 
 
-test('MarkdownUp.main, no title', async (t) => {
+test('MarkdownUp.main, no title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1258,11 +1257,11 @@ test('MarkdownUp.main, no title', async (t) => {
 });
 
 
-test('MarkdownUp.main, menu', async (t) => {
+test('MarkdownUp.main, menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', null, '{"menu": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1281,11 +1280,11 @@ test('MarkdownUp.main, menu', async (t) => {
 });
 
 
-test('MarkdownUp.main, no menu', async (t) => {
+test('MarkdownUp.main, no menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello', 'menu': false});
     app.updateParams('', null, '{"menu": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1301,11 +1300,11 @@ test('MarkdownUp.main, no menu', async (t) => {
 });
 
 
-test('MarkdownUp.main, menu cycle and toggle', async (t) => {
+test('MarkdownUp.main, menu cycle and toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', '{"fontSize": 18}', '{"menu": 1, "view": "markdown"}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1321,11 +1320,11 @@ test('MarkdownUp.main, menu cycle and toggle', async (t) => {
 });
 
 
-test('MarkdownUp.main, markdown', async (t) => {
+test('MarkdownUp.main, markdown', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', null, '{"view": "markdown"}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1341,11 +1340,11 @@ test('MarkdownUp.main, markdown', async (t) => {
 });
 
 
-test('MarkdownUp.main, darkMode', async (t) => {
+test('MarkdownUp.main, darkMode', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', '{"darkMode": 1}', '{"menu": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1364,7 +1363,7 @@ test('MarkdownUp.main, darkMode', async (t) => {
 });
 
 
-test('MarkdownUp.main, markdown-script', async (t) => {
+test('MarkdownUp.main, markdown-script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 # markdown-script
@@ -1374,7 +1373,7 @@ markdownPrint('Hello')
 ~~~
 `});
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
@@ -1398,7 +1397,7 @@ markdownPrint('Hello')
 });
 
 
-test('MarkdownUp.main, markdown-script invalid markdown line', async (t) => {
+test('MarkdownUp.main, markdown-script invalid markdown line', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 # markdown-script
@@ -1416,7 +1415,7 @@ markdownPrint('2')
 ~~~
 `});
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
@@ -1446,7 +1445,7 @@ markdownPrint('2')
 });
 
 
-test('MarkdownUp.main, markdown-script globals', async (t) => {
+test('MarkdownUp.main, markdown-script globals', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'globals': {'message': 'Globals'}, 'markdownText': `\
 ~~~ markdown-script
@@ -1454,7 +1453,7 @@ markdownPrint(message)
 ~~~
 `});
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1477,10 +1476,10 @@ markdownPrint(message)
 });
 
 
-test('MarkdownUp.main, markdown-script debug', async (t) => {
+test('MarkdownUp.main, markdown-script debug', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {
-        t.is(url, 'README.md');
+        assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
 # markdown-script
@@ -1502,7 +1501,7 @@ debugLog('Hello')
     };
     const app = new MarkdownUp(window);
     app.updateParams('', null, '{"debug": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
@@ -1520,7 +1519,7 @@ debugLog('Hello')
         }
     );
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
-    t.deepEqual(cleanedLogs, [
+    assert.deepEqual(cleanedLogs, [
         'MarkdownUp: ===== Rendering Markdown document "README.md"',
         'MarkdownUp: Fetching "README.md" ...',
         'MarkdownUp: Fetch completed in X milliseconds',
@@ -1533,7 +1532,7 @@ debugLog('Hello')
 });
 
 
-test('MarkdownUp.main, markdown-script debug text', async (t) => {
+test('MarkdownUp.main, markdown-script debug text', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
     window.console = {
@@ -1549,7 +1548,7 @@ debugLog('Hello')
 ~~~
 `});
     app.updateParams('', null, '{"debug": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
@@ -1567,7 +1566,7 @@ debugLog('Hello')
         }
     );
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
-    t.deepEqual(cleanedLogs, [
+    assert.deepEqual(cleanedLogs, [
         'MarkdownUp: ===== Rendering Markdown text',
         'MarkdownUp: Executing script at line number 4 ...',
         'MarkdownUp: Script static analysis... OK',
@@ -1578,7 +1577,7 @@ debugLog('Hello')
 });
 
 
-test('MarkdownUp.main, markdown-script debug warnings', async (t) => {
+test('MarkdownUp.main, markdown-script debug warnings', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
     window.console = {
@@ -1598,7 +1597,7 @@ endfunction
 ~~~
 `});
     app.updateParams('', null, '{"debug": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': 'markdown-script',
@@ -1617,7 +1616,7 @@ endfunction
         }
     );
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
-    t.deepEqual(cleanedLogs, [
+    assert.deepEqual(cleanedLogs, [
         'MarkdownUp: ===== Rendering Markdown text',
         'MarkdownUp: Executing script at line number 4 ...',
         'MarkdownUp: Script static analysis... 1 warning:',
@@ -1633,7 +1632,7 @@ endfunction
 });
 
 
-test('MarkdownUp.main, markdown-script variables', async (t) => {
+test('MarkdownUp.main, markdown-script variables', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 ~~~ markdown-script
@@ -1641,7 +1640,7 @@ markdownPrint('varName = ' + varName)
 ~~~
 `});
     app.updateParams('var.varName=5');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1664,7 +1663,7 @@ markdownPrint('varName = ' + varName)
 });
 
 
-test('MarkdownUp.main, markdown-script variables error', async (t) => {
+test('MarkdownUp.main, markdown-script variables error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const logs = [];
     window.console = {
@@ -1683,7 +1682,7 @@ markdownPrint('varName = ' + varName)
         }
     );
     app.updateParams('var.varName=foo%20bar', null, '{"debug": 1}');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,
@@ -1704,7 +1703,7 @@ markdownPrint('varName = ' + varName)
         }
     );
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
-    t.deepEqual(cleanedLogs, [
+    assert.deepEqual(cleanedLogs, [
         `\
 MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error:
 foo bar
@@ -1719,7 +1718,7 @@ foo bar
 });
 
 
-test('MarkdownUp.main, markdown-script runtime error', async (t) => {
+test('MarkdownUp.main, markdown-script runtime error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 ~~~ markdown-script
@@ -1727,7 +1726,7 @@ foobar()
 ~~~
 `});
     app.updateParams('');
-    t.deepEqual(
+    assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
             'title': null,

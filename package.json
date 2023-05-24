@@ -19,7 +19,7 @@
         "lib/**/*"
     ],
     "scripts": {
-        "test": "ava -v test/"
+        "test": "node --test test/"
     },
     "dependencies": {
         "calc-script": "~1.4",
@@ -29,7 +29,6 @@
         "schema-markdown-doc": "~1.6"
     },
     "devDependencies": {
-        "ava": "~5.2",
         "c8": "~7.13",
         "eslint": "~8.40",
         "jsdoc": "~4.0",

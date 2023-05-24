@@ -1,29 +1,32 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-/* eslint-disable id-length */
-
 import {lineChartElements, validateLineChart} from '../lib/lineChart.js';
-import {ValidationError} from 'schema-markdown/lib/schema.js';
-import test from 'ava';
+import {strict as assert} from 'node:assert';
+import test from 'node:test';
 
 
-test('validateDataTable', (t) => {
+test('validateDataTable', () => {
     const lineChart = {'x': 'A', 'y': ['B']};
-    t.deepEqual(validateLineChart(lineChart), lineChart);
+    assert.deepEqual(validateLineChart(lineChart), lineChart);
 });
 
 
-test('validateLineChart, error', (t) => {
+test('validateLineChart, error', () => {
     const lineChart = {'x': 1, 'y': ['B']};
-    const error = t.throws(() => {
-        validateLineChart(lineChart);
-    }, {'instanceOf': ValidationError});
-    t.is(error.message, "Invalid value 1 (type 'number') for member 'x', expected type 'string'");
+    assert.throws(
+        () => {
+            validateLineChart(lineChart);
+        },
+        {
+            'name': 'ValidationError',
+            'message': "Invalid value 1 (type 'number') for member 'x', expected type 'string'"
+        }
+    );
 });
 
 
-test('lineChartElements', (t) => {
+test('lineChartElements', () => {
     const data = [
         {'A': 0, 'B': 5, 'C': 3},
         {'A': 1, 'C': 7},
@@ -33,7 +36,7 @@ test('lineChartElements', (t) => {
     ];
     const lineChart = {'x': 'A', 'y': ['B', 'C']};
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -346,7 +349,7 @@ test('lineChartElements', (t) => {
 });
 
 
-test('lineChartElements, color field', (t) => {
+test('lineChartElements, color field', () => {
     const data = [
         {'A': 1, 'B': 1, 'C': 'abc'},
         {'B': 3, 'C': 'abc'},
@@ -357,7 +360,7 @@ test('lineChartElements, color field', (t) => {
     ];
     const lineChart = {'x': 'A', 'y': ['B'], 'color': 'C'};
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -723,7 +726,7 @@ test('lineChartElements, color field', (t) => {
 });
 
 
-test('lineChartElements, color field multiple fields', (t) => {
+test('lineChartElements, color field multiple fields', () => {
     const data = [
         {'A': 1, 'B': 5, 'C': 2, 'D': 'abc'},
         {'A': 5, 'B': 1, 'C': 4, 'D': 'abc'},
@@ -732,7 +735,7 @@ test('lineChartElements, color field multiple fields', (t) => {
     ];
     const lineChart = {'x': 'A', 'y': ['B', 'C'], 'color': 'D'};
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -1119,7 +1122,7 @@ test('lineChartElements, color field multiple fields', (t) => {
 });
 
 
-test('lineChartElements, lines', (t) => {
+test('lineChartElements, lines', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -1133,7 +1136,7 @@ test('lineChartElements, lines', (t) => {
         'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -1360,7 +1363,7 @@ test('lineChartElements, lines', (t) => {
 });
 
 
-test('lineChartElements, lines no label', (t) => {
+test('lineChartElements, lines no label', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -1374,7 +1377,7 @@ test('lineChartElements, lines no label', (t) => {
         'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -1483,7 +1486,7 @@ test('lineChartElements, lines no label', (t) => {
 });
 
 
-test('lineChartElements, lines extend axis', (t) => {
+test('lineChartElements, lines extend axis', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -1497,7 +1500,7 @@ test('lineChartElements, lines extend axis', (t) => {
         'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -1724,7 +1727,7 @@ test('lineChartElements, lines extend axis', (t) => {
 });
 
 
-test('lineChartElements, title', (t) => {
+test('lineChartElements, title', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -1737,7 +1740,7 @@ test('lineChartElements, title', (t) => {
         'yTicks': {'count': 0}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -1833,32 +1836,42 @@ test('lineChartElements, title', (t) => {
 });
 
 
-test('lineChartElements, no data', (t) => {
+test('lineChartElements, no data', () => {
     const data = [];
     const lineChart = {'x': 'A', 'y': ['B']};
     validateLineChart(lineChart);
-    const error = t.throws(() => {
-        lineChartElements(data, lineChart);
-    }, {'instanceOf': Error});
-    t.is(error.message, 'No data');
+    assert.throws(
+        () => {
+            lineChartElements(data, lineChart);
+        },
+        {
+            'name': 'Error',
+            'message': 'No data'
+        }
+    );
 });
 
 
-test('lineChartElements, missing field', (t) => {
+test('lineChartElements, missing field', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
     ];
     const lineChart = {'x': 'A', 'y': ['C']};
     validateLineChart(lineChart);
-    const error = t.throws(() => {
-        lineChartElements(data, lineChart);
-    }, {'instanceOf': Error});
-    t.is(error.message, 'No data');
+    assert.throws(
+        () => {
+            lineChartElements(data, lineChart);
+        },
+        {
+            'name': 'Error',
+            'message': 'No data'
+        }
+    );
 });
 
 
-test('lineChartElements, axis ticks', (t) => {
+test('lineChartElements, axis ticks', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -1870,7 +1883,7 @@ test('lineChartElements, axis ticks', (t) => {
         'yTicks': {'count': 6, 'skip': 2, 'start': -1, 'end': 9}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
@@ -2170,7 +2183,7 @@ test('lineChartElements, axis ticks', (t) => {
 });
 
 
-test('lineChartElements, axis ticks one', (t) => {
+test('lineChartElements, axis ticks one', () => {
     const data = [
         {'A': 1, 'B': 5},
         {'A': 5, 'B': 1}
@@ -2182,7 +2195,7 @@ test('lineChartElements, axis ticks one', (t) => {
         'yTicks': {'count': 1}
     };
     validateLineChart(lineChart);
-    t.deepEqual(lineChartElements(data, lineChart), {
+    assert.deepEqual(lineChartElements(data, lineChart), {
         'svg': 'svg',
         'attr': {
             'width': 640,
