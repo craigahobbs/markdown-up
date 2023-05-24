@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-model",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "Markdown object model, parser, and renderer",
     "keywords": [
         "markdown",
@@ -21,17 +21,16 @@
         "static/markdown-model.css"
     ],
     "scripts": {
-        "test": "ava -v test/"
+        "test": "node --test test/"
     },
     "dependencies": {
         "schema-markdown": "~1.2"
     },
     "devDependencies": {
-        "ava": "~5.2",
         "c8": "~7.13",
         "element-model": "~1.1",
-        "eslint": "~8.39",
+        "eslint": "~8.40",
         "jsdoc": "~4.0",
-        "jsdom": "~21.1"
+        "jsdom": "~22.0"
     }
 }

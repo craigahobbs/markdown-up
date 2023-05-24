@@ -54,7 +54,8 @@ const rLineSplit = /\r?\n/;
  * Parse Schema Markdown from a string or an iterator of strings
  *
  * @param {string|string[]} text - The Schema Markdown text
- * @param {Object} [options.types=''] - The [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
+ * @param {Object} [options = {}] - The options object
+ * @param {Object} [options.types={}] - The [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
  * @param {string} [options.filename=''] - The name of file being parsed (for error messages)
  * @param {boolean} [options.validate=true] - If true, validate after parsing
  * @returns {Object} The [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'}
@@ -375,7 +376,8 @@ export function parseSchemaMarkdown(text, {types = {}, filename = '', validate =
 
             // Duplicate URL?
             if (urls.some((url) => url.method === actionUrl.method && url.path === actionUrl.path)) {
-                addError(`Duplicate URL: ${method} ${'path' in actionUrl ? actionUrl.path : ''}`, filename, linenum);
+                const paddedPath = 'path' in actionUrl ? ` ${actionUrl.path}` : '';
+                addError(`Duplicate URL: ${method}${paddedPath}`, filename, linenum);
             }
 
             // Add the URL
@@ -580,6 +582,7 @@ export class SchemaMarkdownParserError extends Error {
      */
     constructor(errors) {
         super(errors.join('\n'));
+        this.name = this.constructor.name;
         this.errors = errors;
     }
 }
