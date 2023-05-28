@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "calc-script",
-    "version": "1.4.4",
+    "version": "1.4.5",
     "description": "CalcScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -31,7 +31,6 @@
     "devDependencies": {
         "c8": "~7.13",
         "eslint": "~8.40",
-        "jsdoc": "~4.0",
-        "jsdom": "~22.0"
+        "jsdoc": "~4.0"
     }
 }
