@@ -20,6 +20,7 @@ GHPAGES_SRC := build/app/
 
 
 # Include javascript-build
+USE_JSDOM := 1
 include Makefile.base
 
 
