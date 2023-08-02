@@ -609,7 +609,7 @@ test('MarkdownUp, render timeout', async () => {
         'markdownText': `\
 ~~~ markdown-script
 function main()
-    setGlobal('count', count + 1)
+    runtimeSetGlobal('count', count + 1)
     markdownPrint('Hello ' + count)
     if(count == 2, setWindowTimeout(main, 2000))
 endfunction
@@ -669,7 +669,7 @@ test('MarkdownUp, render resize', async () => {
         'markdownText': `\
 ~~~ markdown-script
 function main()
-    setGlobal('count', count + 1)
+    runtimeSetGlobal('count', count + 1)
     markdownPrint('Hello ' + count)
 endfunction
 
@@ -709,7 +709,7 @@ test('MarkdownUp, render focus', async () => {
         'markdownText': `\
 ~~~ markdown-script
 function main()
-    setGlobal('count', count + 1)
+    runtimeSetGlobal('count', count + 1)
     elementModelRender(objectNew( \
         'html', 'input', \
         'attr', objectNew( \
@@ -774,7 +774,7 @@ test('MarkdownUp, render document reset ID', async () => {
         'markdownText': `\
 ~~~ markdown-script
 function main()
-    setGlobal('count', count + 1)
+    runtimeSetGlobal('count', count + 1)
     markdownPrint('Hello ' + count)
     setWindowTimeout(main, 1000)
     if(count <= 2, setDocumentReset('resetID'))
@@ -1154,7 +1154,7 @@ test('MarkdownUp.main, fetch script', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-markdownPrint(fetch('README.md', null, true))
+markdownPrint(httpFetch('README.md', null, true))
 ~~~
 `
     });
@@ -1485,7 +1485,7 @@ test('MarkdownUp.main, markdown-script debug', async () => {
 # markdown-script
 
 ~~~ markdown-script
-debugLog('Hello')
+consoleLogDebug('Hello')
 ~~~
 `);
         })};
@@ -1544,7 +1544,7 @@ test('MarkdownUp.main, markdown-script debug text', async () => {
 # markdown-script
 
 ~~~ markdown-script
-debugLog('Hello')
+consoleLogDebug('Hello')
 ~~~
 `});
     app.updateParams('', null, '{"debug": 1}');

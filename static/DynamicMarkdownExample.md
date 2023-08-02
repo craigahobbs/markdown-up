@@ -18,7 +18,7 @@ markdownPrint( \
 
 # Render many hellos
 ixHello = 0
-while ixHello < helloCount do
+while ixHello < helloCount:
     # Render the hello title
     helloTitle = 'Hello #' + (ixHello + 1)
     markdownPrint('', '## ' + helloTitle)

@@ -90,7 +90,7 @@ markdownPrint( \
 
 # Render many hellos
 ixHello = 0
-while ixHello < helloCount do
+while ixHello < helloCount:
     # Render the hello title
     helloTitle = 'Hello #' + (ixHello + 1)
     markdownPrint('', '## ' + helloTitle)
@@ -116,7 +116,7 @@ MarkdownUp provides some additional functionality that can be included at runtim
 following example with the unit test include library:
 
 ~~~
-include 'https://craigahobbs.github.io/markdown-up/include/unittest.mds'
+include <unittest.mds>
 
 function testSanity()
     unittestEquals(1 + 1, 2)
@@ -133,16 +133,16 @@ documentation for more information on the available include libraries.
 
 ### Debug Mode
 
-Debug mode enables logging output using the
-[debugLog function](https://craigahobbs.github.io/calc-script/library/#var.vName='debugLog').
+Debug mode logs the script runtime duration and runs the CalcScript linter, which performs static
+code analysis on your code and reports warnings for any issues found.
+
+Debug mode also enables debug logging using the
+[consoleLogDebug function](https://craigahobbs.github.io/calc-script/library/#var.vName='consoleLogDebug').
 For example:
 
 ~~~ calcscript
-debugLog('Hello debug')
+consoleLogDebug('Hello debug')
 ~~~
-
-Debug mode also enables the CalcScript linter, which performs static code analysis on your code and
-reports warnings for any issues found.
 
 To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.
 

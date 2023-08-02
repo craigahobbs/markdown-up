@@ -3,7 +3,7 @@
 
 
 # Include sentinel
-if getGlobal('formsLinkButtonElements') then
+if runtimeGetGlobal('formsLinkButtonElements'):
     return
 endif
 
@@ -34,7 +34,7 @@ endfunction
 
 
 function formsTextOnKeyup(keyCode, onEnter)
-    if keyCode == 13 then
+    if keyCode == 13:
         onEnter()
     endif
 endfunction
@@ -63,7 +63,7 @@ endfunction
 # $arg url: The link's URL. If null, the link is rendered as text.
 # $return: The link [element model](https://github.com/craigahobbs/element-model#readme)
 function formsLinkElements(text, url)
-    if url == null then
+    if url == null:
         return objectNew( \
             'html', 'span', \
             'attr', objectNew('style', 'user-select: none;'), \
