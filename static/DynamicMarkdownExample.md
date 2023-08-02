@@ -24,7 +24,7 @@ while ixHello < helloCount:
     markdownPrint('', '## ' + helloTitle)
 
     # Render the hello drawing
-    setDrawingSize(width, height)
+    drawNew(width, height)
     drawStyle('red', borderSize, 'blue')
     drawRect(0.5 * borderSize, 0.5 * borderSize, width - borderSize, height - borderSize)
     drawTextStyle(0.67 * height, 'white', true)

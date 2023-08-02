@@ -656,241 +656,50 @@ test('script library, dataValidate', () => {
 //
 
 
-test('script library, documentURL', () => {
+test('script library, documentFontSize', () => {
     const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.documentURL(['/foo/bar/'], runtime.options), '/foo/bar/');
-    assert.equal(markdownScriptFunctions.documentURL(['bar/'], runtime.options), '/foo/bar/');
+    assert.equal(markdownScriptFunctions.documentFontSize([], runtime.options), 16);
 });
 
 
-test('script library, getDocumentFontSize', () => {
+test('script library, documentInputValue', () => {
     const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getDocumentFontSize([], runtime.options), 16);
-});
-
-
-test('script library, getDocumentInputValue', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getDocumentInputValue(['test-input'], runtime.options), null);
+    assert.equal(markdownScriptFunctions.documentInputValue(['test-input'], runtime.options), null);
     runtime.options.window.document.body.innerHTML = '<div id="test-input"/>';
-    assert.equal(markdownScriptFunctions.getDocumentInputValue(['test-input'], runtime.options), null);
+    assert.equal(markdownScriptFunctions.documentInputValue(['test-input'], runtime.options), null);
     runtime.options.window.document.body.innerHTML = '<input id="test-input" type="text" value="The text"/>';
-    assert.equal(markdownScriptFunctions.getDocumentInputValue(['test-input'], runtime.options), 'The text');
+    assert.equal(markdownScriptFunctions.documentInputValue(['test-input'], runtime.options), 'The text');
 });
 
 
-test('script library, getWindowHeight', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getWindowHeight([], runtime.options), 768);
-});
-
-
-test('script library, getWindowWidth', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getWindowWidth([], runtime.options), 1024);
-});
-
-
-test('script library, setDocumentFocus', () => {
+test('script library, documentSetFocus', () => {
     const runtime = testRuntime();
     assert.equal(runtime.documentFocus, null);
-    markdownScriptFunctions.setDocumentFocus(['test-input'], runtime.options);
+    markdownScriptFunctions.documentSetFocus(['test-input'], runtime.options);
     assert.equal(runtime.documentFocus, 'test-input');
 });
 
 
-test('script library, setDocumentReset', () => {
+test('script library, documentSetReset', () => {
     const runtime = testRuntime();
     assert.equal(runtime.documentReset, null);
-    assert.equal(markdownScriptFunctions.setDocumentReset(['resetID'], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.documentSetReset(['resetID'], runtime.options), undefined);
     assert.equal(runtime.documentReset, 'resetID');
 });
 
 
-test('script library, setDocumentTitle', () => {
+test('script library, documentSetTitle', () => {
     const runtime = testRuntime();
     assert.equal(runtime.documentTitle, null);
-    markdownScriptFunctions.setDocumentTitle(['The Title'], runtime.options);
+    markdownScriptFunctions.documentSetTitle(['The Title'], runtime.options);
     assert.equal(runtime.documentTitle, 'The Title');
 });
 
 
-test('script library, setWindowLocation', () => {
+test('script library, documentURL', () => {
     const runtime = testRuntime();
-    assert.equal(runtime.windowLocation, null);
-    markdownScriptFunctions.setWindowLocation(['/other'], runtime.options);
-    assert.equal(runtime.windowLocation, '/other');
-    markdownScriptFunctions.setWindowLocation(['other'], runtime.options);
-    assert.equal(runtime.windowLocation, '/foo/other');
-});
-
-
-test('script library, setWindowResize', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-
-    assert.equal(runtime.windowResize, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let onsizeCount = 0;
-    const onsize = () => ++onsizeCount;
-    markdownScriptFunctions.setWindowResize([onsize], runtime.options);
-
-    assert.equal(typeof runtime.windowResize, 'function');
-    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.equal(onsizeCount, 0);
-
-    await runtime.windowResize();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.equal(onsizeCount, 1);
-});
-
-
-test('script library, setWindowResize async', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-
-    assert.equal(runtime.windowResize, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let onsizeCount = 0;
-    // eslint-disable-next-line require-await
-    const onsize = async () => ++onsizeCount;
-    markdownScriptFunctions.setWindowResize([onsize], runtime.options);
-
-    assert.equal(typeof runtime.windowResize, 'function');
-    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.equal(onsizeCount, 0);
-
-    await runtime.windowResize();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.equal(onsizeCount, 1);
-});
-
-
-test('script library, setWindowResize callback error', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-    const logs = [];
-    runtime.options.logFn = (message) => logs.push(message);
-
-    assert.equal(runtime.windowResize, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let onsizeCount = 0;
-    const onsize = () => {
-        ++onsizeCount;
-        throw new Error('BOOM!');
-    };
-    markdownScriptFunctions.setWindowResize([onsize], runtime.options);
-
-    assert.equal(typeof runtime.windowResize, 'function');
-    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.deepEqual(logs, []);
-    assert.equal(onsizeCount, 0);
-
-    await runtime.windowResize();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.deepEqual(logs, ['MarkdownUp: Error executing setWindowResize callback: BOOM!']);
-    assert.equal(onsizeCount, 1);
-});
-
-
-test('script library, setWindowTimeout', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-
-    assert.equal(runtime.windowTimeout, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let ontimeCount = 0;
-    const ontime = () => ++ontimeCount;
-    markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
-
-    assert.equal(typeof runtime.windowTimeout[0], 'function');
-    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
-    assert.equal(runtime.windowTimeout[1], 1000);
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.equal(ontimeCount, 0);
-
-    await runtime.windowTimeout[0]();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.equal(ontimeCount, 1);
-});
-
-
-test('script library, setWindowTimeout async', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-
-    assert.equal(runtime.windowTimeout, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let ontimeCount = 0;
-    // eslint-disable-next-line require-await
-    const ontime = async () => ++ontimeCount;
-    markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
-
-    assert.equal(typeof runtime.windowTimeout[0], 'function');
-    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
-    assert.equal(runtime.windowTimeout[1], 1000);
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.equal(ontimeCount, 0);
-
-    await runtime.windowTimeout[0]();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.equal(ontimeCount, 1);
-});
-
-
-test('script library, setWindowTimeout callback error', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-    const logs = [];
-    runtime.options.logFn = (message) => logs.push(message);
-
-    assert.equal(runtime.windowTimeout, null);
-    assert.equal(runtime.options.statementCount, undefined);
-
-    let ontimeCount = 0;
-    const ontime = () => {
-        ++ontimeCount;
-        throw new Error('BOOM!');
-    };
-    markdownScriptFunctions.setWindowTimeout([ontime, 1000], runtime.options);
-
-    assert.equal(typeof runtime.windowTimeout[0], 'function');
-    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
-    assert.equal(runtime.windowTimeout[1], 1000);
-    assert.equal(runtime.options.statementCount, undefined);
-    assert.equal(runtimeUpdateCount, 0);
-    assert.deepEqual(logs, []);
-    assert.equal(ontimeCount, 0);
-
-    await runtime.windowTimeout[0]();
-    assert.equal(runtime.options.statementCount, 0);
-    assert.equal(runtimeUpdateCount, 1);
-    assert.deepEqual(logs, ['MarkdownUp: Error executing setWindowTimeout callback: BOOM!']);
-    assert.equal(ontimeCount, 1);
+    assert.equal(markdownScriptFunctions.documentURL(['/foo/bar/'], runtime.options), '/foo/bar/');
+    assert.equal(markdownScriptFunctions.documentURL(['bar/'], runtime.options), '/foo/bar/');
 });
 
 
@@ -901,7 +710,7 @@ test('script library, setWindowTimeout callback error', async () => {
 
 test('script library, drawArc', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([100, 50], runtime.options);
+    markdownScriptFunctions.drawNew([100, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 25], runtime.options);
     markdownScriptFunctions.drawArc([25, 25, 0, 0, 0, 50, 25], runtime.options);
     markdownScriptFunctions.drawArc([25, 25, 0, 1, 1, 100, 25], runtime.options);
@@ -932,7 +741,7 @@ test('script library, drawArc', () => {
 
 test('script library, drawCircle', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawCircle([25, 25, 25], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
         {
@@ -962,7 +771,7 @@ test('script library, drawCircle', () => {
 
 test('script library, drawClose', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 50], runtime.options);
@@ -993,7 +802,7 @@ test('script library, drawClose', () => {
 
 test('script library, drawEllipse', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 40], runtime.options);
+    markdownScriptFunctions.drawNew([50, 40], runtime.options);
     markdownScriptFunctions.drawEllipse([25, 20, 25, 20], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
         {
@@ -1024,7 +833,7 @@ test('script library, drawEllipse', () => {
 
 test('script library, drawHLine', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 25], runtime.options);
     markdownScriptFunctions.drawHLine([50], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
@@ -1051,9 +860,15 @@ test('script library, drawHLine', () => {
 });
 
 
+test('script library, drawHeight', () => {
+    const runtime = testRuntime();
+    assert.equal(markdownScriptFunctions.drawHeight([], runtime.options), 200);
+});
+
+
 test('script library, drawImage', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawImage([15, 15, 25, 25, '/foo/bar.jpg'], runtime.options);
     markdownScriptFunctions.drawImage([35, 35, 25, 25, 'bar.jpg'], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
@@ -1092,7 +907,7 @@ test('script library, drawImage', () => {
 
 test('script library, drawLine', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 50], runtime.options);
@@ -1122,7 +937,7 @@ test('script library, drawLine', () => {
 
 test('script library, drawMove', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 0], runtime.options);
     markdownScriptFunctions.drawMove([0, 50], runtime.options);
@@ -1185,7 +1000,7 @@ test('script library, drawOnClick', async () => {
     };
 
     // Draw a rect and set an on-click event
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
     markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
 
@@ -1238,7 +1053,7 @@ test('script library, drawOnClick async', async () => {
     };
 
     // Draw a rect and set an on-click event
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
     markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
 
@@ -1293,7 +1108,7 @@ test('script library, drawOnClick callback error', async () => {
     };
 
     // Draw a rect and set an on-click event
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawRect([0, 0, 50, 50], runtime.options);
     markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
 
@@ -1316,7 +1131,7 @@ test('script library, drawOnClick callback error', async () => {
 
 test('script library, drawOnClick drawing click', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawOnClick([null], runtime.options);
     const elements = runtime.resetElements();
     assert.equal(typeof elements[0].elem.callback, 'function');
@@ -1336,7 +1151,7 @@ test('script library, drawOnClick drawing click', () => {
 
 test('script library, drawPathRect', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawPathRect([0, 0, 50, 50], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
         {
@@ -1364,7 +1179,7 @@ test('script library, drawPathRect', () => {
 
 test('script library, drawRect', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawRect([0, 0, 50, 50, 5, 5], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
         {
@@ -1395,10 +1210,31 @@ test('script library, drawRect', () => {
 });
 
 
+test('script library, drawNew', () => {
+    const runtime = testRuntime();
+    assert.equal(markdownScriptFunctions.drawWidth([], runtime.options), 300);
+    assert.equal(markdownScriptFunctions.drawHeight([], runtime.options), 200);
+    assert.equal(runtime.resetElements(), null);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
+    assert.equal(markdownScriptFunctions.drawWidth([], runtime.options), 50);
+    assert.equal(markdownScriptFunctions.drawHeight([], runtime.options), 50);
+    assert.deepEqual(runtime.resetElements(), [
+        {
+            'html': 'p',
+            'elem': {
+                'svg': 'svg',
+                'attr': {'width': 50, 'height': 50},
+                'elem': []
+            }
+        }
+    ]);
+});
+
+
 test('script library, drawStyle', () => {
     const runtime = testRuntime();
 
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([0, 0], runtime.options);
     markdownScriptFunctions.drawLine([50, 0], runtime.options);
     markdownScriptFunctions.drawStyle(['red'], runtime.options);
@@ -1520,7 +1356,7 @@ test('script library, drawStyle no drawing', () => {
 
 test('script library, drawText', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawText(['Hello', 25, 15], runtime.options);
     markdownScriptFunctions.drawTextStyle([null, 'black', true, true], runtime.options);
     markdownScriptFunctions.drawText(['World!', 25, 35], runtime.options);
@@ -1568,6 +1404,13 @@ test('script library, drawText', () => {
 });
 
 
+test('script library, drawTextHeight', () => {
+    const runtime = testRuntime();
+    assert.equal(Math.round(markdownScriptFunctions.drawTextHeight(['Hello', 50], runtime.options) * 1000) / 1000, 16.667);
+    assert.equal(markdownScriptFunctions.drawTextHeight(['', 0], runtime.options), 16);
+});
+
+
 test('script library, drawTextStyle', () => {
     const runtime = testRuntime();
 
@@ -1597,9 +1440,15 @@ test('script library, drawTextStyle', () => {
 });
 
 
+test('script library, drawTextWidth', () => {
+    const runtime = testRuntime();
+    assert.equal(markdownScriptFunctions.drawTextWidth(['Hello', 16], runtime.options), 48);
+});
+
+
 test('script library, drawVLine', () => {
     const runtime = testRuntime();
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
+    markdownScriptFunctions.drawNew([50, 50], runtime.options);
     markdownScriptFunctions.drawMove([25, 0], runtime.options);
     markdownScriptFunctions.drawVLine([50], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
@@ -1626,49 +1475,9 @@ test('script library, drawVLine', () => {
 });
 
 
-test('script library, getDrawingHeight', () => {
+test('script library, drawWidth', () => {
     const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getDrawingHeight([], runtime.options), 200);
-});
-
-
-test('script library, getDrawingWidth', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getDrawingWidth([], runtime.options), 300);
-});
-
-
-test('script library, getTextHeight', () => {
-    const runtime = testRuntime();
-    assert.equal(Math.round(markdownScriptFunctions.getTextHeight(['Hello', 50], runtime.options) * 1000) / 1000, 16.667);
-    assert.equal(markdownScriptFunctions.getTextHeight(['', 0], runtime.options), 16);
-});
-
-
-test('script library, getTextWidth', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getTextWidth(['Hello', 16], runtime.options), 48);
-});
-
-
-test('script library, setDrawingSize', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.getDrawingWidth([], runtime.options), 300);
-    assert.equal(markdownScriptFunctions.getDrawingHeight([], runtime.options), 200);
-    assert.equal(runtime.resetElements(), null);
-    markdownScriptFunctions.setDrawingSize([50, 50], runtime.options);
-    assert.equal(markdownScriptFunctions.getDrawingWidth([], runtime.options), 50);
-    assert.equal(markdownScriptFunctions.getDrawingHeight([], runtime.options), 50);
-    assert.deepEqual(runtime.resetElements(), [
-        {
-            'html': 'p',
-            'elem': {
-                'svg': 'svg',
-                'attr': {'width': 50, 'height': 50},
-                'elem': []
-            }
-        }
-    ]);
+    assert.equal(markdownScriptFunctions.drawWidth([], runtime.options), 300);
 });
 
 
@@ -2221,4 +2030,200 @@ test('script library, sessionStorageRemove', () => {
     assert.equal(runtime.options.window.sessionStorage.getItem('foo'), 'bar');
     markdownScriptFunctions.sessionStorageRemove(['foo'], runtime.options);
     assert.equal(runtime.options.window.sessionStorage.getItem('foo'), null);
+});
+
+
+//
+// Window functions
+//
+
+
+test('script library, windowHeight', () => {
+    const runtime = testRuntime();
+    assert.equal(markdownScriptFunctions.windowHeight([], runtime.options), 768);
+});
+
+
+test('script library, windowSetLocation', () => {
+    const runtime = testRuntime();
+    assert.equal(runtime.windowLocation, null);
+    markdownScriptFunctions.windowSetLocation(['/other'], runtime.options);
+    assert.equal(runtime.windowLocation, '/other');
+    markdownScriptFunctions.windowSetLocation(['other'], runtime.options);
+    assert.equal(runtime.windowLocation, '/foo/other');
+});
+
+
+test('script library, windowSetResize', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    assert.equal(runtime.windowResize, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let onsizeCount = 0;
+    const onsize = () => ++onsizeCount;
+    markdownScriptFunctions.windowSetResize([onsize], runtime.options);
+
+    assert.equal(typeof runtime.windowResize, 'function');
+    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.equal(onsizeCount, 0);
+
+    await runtime.windowResize();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.equal(onsizeCount, 1);
+});
+
+
+test('script library, windowSetResize async', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    assert.equal(runtime.windowResize, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let onsizeCount = 0;
+    // eslint-disable-next-line require-await
+    const onsize = async () => ++onsizeCount;
+    markdownScriptFunctions.windowSetResize([onsize], runtime.options);
+
+    assert.equal(typeof runtime.windowResize, 'function');
+    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.equal(onsizeCount, 0);
+
+    await runtime.windowResize();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.equal(onsizeCount, 1);
+});
+
+
+test('script library, windowSetResize callback error', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    assert.equal(runtime.windowResize, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let onsizeCount = 0;
+    const onsize = () => {
+        ++onsizeCount;
+        throw new Error('BOOM!');
+    };
+    markdownScriptFunctions.windowSetResize([onsize], runtime.options);
+
+    assert.equal(typeof runtime.windowResize, 'function');
+    assert.equal(runtime.windowResize.constructor.name, 'AsyncFunction');
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.deepEqual(logs, []);
+    assert.equal(onsizeCount, 0);
+
+    await runtime.windowResize();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.deepEqual(logs, ['MarkdownUp: Error executing windowSetResize callback: BOOM!']);
+    assert.equal(onsizeCount, 1);
+});
+
+
+test('script library, windowSetTimeout', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    assert.equal(runtime.windowTimeout, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let ontimeCount = 0;
+    const ontime = () => ++ontimeCount;
+    markdownScriptFunctions.windowSetTimeout([ontime, 1000], runtime.options);
+
+    assert.equal(typeof runtime.windowTimeout[0], 'function');
+    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
+    assert.equal(runtime.windowTimeout[1], 1000);
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.equal(ontimeCount, 0);
+
+    await runtime.windowTimeout[0]();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.equal(ontimeCount, 1);
+});
+
+
+test('script library, windowSetTimeout async', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    assert.equal(runtime.windowTimeout, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let ontimeCount = 0;
+    // eslint-disable-next-line require-await
+    const ontime = async () => ++ontimeCount;
+    markdownScriptFunctions.windowSetTimeout([ontime, 1000], runtime.options);
+
+    assert.equal(typeof runtime.windowTimeout[0], 'function');
+    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
+    assert.equal(runtime.windowTimeout[1], 1000);
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.equal(ontimeCount, 0);
+
+    await runtime.windowTimeout[0]();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.equal(ontimeCount, 1);
+});
+
+
+test('script library, windowSetTimeout callback error', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    assert.equal(runtime.windowTimeout, null);
+    assert.equal(runtime.options.statementCount, undefined);
+
+    let ontimeCount = 0;
+    const ontime = () => {
+        ++ontimeCount;
+        throw new Error('BOOM!');
+    };
+    markdownScriptFunctions.windowSetTimeout([ontime, 1000], runtime.options);
+
+    assert.equal(typeof runtime.windowTimeout[0], 'function');
+    assert.equal(runtime.windowTimeout[0].constructor.name, 'AsyncFunction');
+    assert.equal(runtime.windowTimeout[1], 1000);
+    assert.equal(runtime.options.statementCount, undefined);
+    assert.equal(runtimeUpdateCount, 0);
+    assert.deepEqual(logs, []);
+    assert.equal(ontimeCount, 0);
+
+    await runtime.windowTimeout[0]();
+    assert.equal(runtime.options.statementCount, 0);
+    assert.equal(runtimeUpdateCount, 1);
+    assert.deepEqual(logs, ['MarkdownUp: Error executing windowSetTimeout callback: BOOM!']);
+    assert.equal(ontimeCount, 1);
+});
+
+
+test('script library, windowWidth', () => {
+    const runtime = testRuntime();
+    assert.equal(markdownScriptFunctions.windowWidth([], runtime.options), 1024);
 });

@@ -15,7 +15,7 @@ async function markdownUpIndex()
     # Set the document title
     path = objectGet(index, 'path')
     title = 'MarkdownUp - ' + path
-    setDocumentTitle(title)
+    documentSetTitle(title)
 
     # Menu and title
     parent = objectGet(index, 'parent')

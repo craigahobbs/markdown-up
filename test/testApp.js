@@ -611,11 +611,11 @@ test('MarkdownUp, render timeout', async () => {
 function main()
     runtimeSetGlobal('count', count + 1)
     markdownPrint('Hello ' + count)
-    if(count == 2, setWindowTimeout(main, 2000))
+    if(count == 2, windowSetTimeout(main, 2000))
 endfunction
 
 count = 0
-setWindowTimeout(main, 1000)
+windowSetTimeout(main, 1000)
 main()
 ~~~
 `
@@ -674,7 +674,7 @@ function main()
 endfunction
 
 count = 0
-setWindowResize(main)
+windowSetResize(main)
 main()
 ~~~
 `
@@ -719,7 +719,7 @@ function main()
         ), \
         'callback', objectNew('click', main) \
     ))
-    setDocumentFocus('test-input')
+    documentSetFocus('test-input')
 endfunction
 
 count = 0
@@ -776,15 +776,15 @@ test('MarkdownUp, render document reset ID', async () => {
 function main()
     runtimeSetGlobal('count', count + 1)
     markdownPrint('Hello ' + count)
-    setWindowTimeout(main, 1000)
-    if(count <= 2, setDocumentReset('resetID'))
+    windowSetTimeout(main, 1000)
+    if(count <= 2, documentSetReset('resetID'))
 endfunction
 
 markdownPrint('# Title')
 elementModelRender(objectNew('html', 'div', 'attr', objectNew('id', 'resetID', 'style', 'display=none')))
 
 count = 0
-setWindowTimeout(main, 1000)
+windowSetTimeout(main, 1000)
 main()
 ~~~
 `
@@ -817,7 +817,7 @@ test('MarkdownUp, render location', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-setWindowLocation('#url=other')
+windowSetLocation('#url=other')
 ~~~
 `
     });
@@ -836,7 +836,7 @@ test('MarkdownUp, render location callback', async () => {
 ~~~ markdown-script
 function onClick()
     markdownPrint('Hello')
-    setWindowLocation('#url=other')
+    windowSetLocation('#url=other')
 endfunction
 
 elementModelRender(objectNew( \
@@ -879,7 +879,7 @@ test('MarkdownUp, render title', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-setDocumentTitle('Hello')
+documentSetTitle('Hello')
 markdownPrint('Hello')
 ~~~
 `
@@ -897,7 +897,7 @@ test('MarkdownUp, render title callback', async () => {
         'markdownText': `\
 ~~~ markdown-script
 function onClick()
-    setDocumentTitle('Hello')
+    documentSetTitle('Hello')
     markdownPrint('Hello')
 endfunction
 
@@ -1113,7 +1113,7 @@ test('MarkdownUp.main, fontSize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\
 ~~~ markdown-script
-markdownPrint('fontSize = ' + numberToFixed(getDocumentFontSize()))
+markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
 ~~~
 `});
     app.updateParams(null, '{"fontSize": 14}');
