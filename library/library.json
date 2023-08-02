@@ -272,6 +272,79 @@
             ]
         },
         {
+            "name": "documentFontSize",
+            "group": "Document",
+            "doc": [
+                "Get the document font size"
+            ],
+            "return": [
+                "The document font size, in pixels"
+            ]
+        },
+        {
+            "name": "documentInputValue",
+            "group": "Document",
+            "doc": [
+                "Get an input element's value"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The input element ID"
+                    ]
+                }
+            ],
+            "return": [
+                "The input element value or null if the element does not exist"
+            ]
+        },
+        {
+            "name": "documentSetFocus",
+            "group": "Document",
+            "doc": [
+                "Set focus to an element"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The element ID"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "documentSetReset",
+            "group": "Document",
+            "doc": [
+                "Set the document reset element"
+            ],
+            "args": [
+                {
+                    "name": "id",
+                    "doc": [
+                        "The element ID"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "documentSetTitle",
+            "group": "Document",
+            "doc": [
+                "Set the document title"
+            ],
+            "args": [
+                {
+                    "name": "title",
+                    "doc": [
+                        "The document title string"
+                    ]
+                }
+            ]
+        },
+        {
             "name": "documentURL",
             "group": "Document",
             "doc": [
@@ -423,6 +496,16 @@
             ]
         },
         {
+            "name": "drawHeight",
+            "group": "Drawing",
+            "doc": [
+                "Get the current drawing's height"
+            ],
+            "return": [
+                "The current drawing's height"
+            ]
+        },
+        {
             "name": "drawImage",
             "group": "Drawing",
             "doc": [
@@ -499,6 +582,27 @@
                     "name": "y",
                     "doc": [
                         "The y-coordinate of the new drawing point"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "drawNew",
+            "group": "Drawing",
+            "doc": [
+                "Create a new drawing"
+            ],
+            "args": [
+                {
+                    "name": "width",
+                    "doc": [
+                        "The width of the drawing"
+                    ]
+                },
+                {
+                    "name": "height",
+                    "doc": [
+                        "The height of the drawing"
                     ]
                 }
             ]
@@ -673,6 +777,30 @@
             ]
         },
         {
+            "name": "drawTextHeight",
+            "group": "Drawing",
+            "doc": [
+                "Compute the text's height to fit the width"
+            ],
+            "args": [
+                {
+                    "name": "text",
+                    "doc": [
+                        "The text"
+                    ]
+                },
+                {
+                    "name": "width",
+                    "doc": [
+                        "The width of the text. If 0, the default font size (in pixels) is returned."
+                    ]
+                }
+            ],
+            "return": [
+                "The text's height"
+            ]
+        },
+        {
             "name": "drawTextStyle",
             "group": "Drawing",
             "doc": [
@@ -712,113 +840,7 @@
             ]
         },
         {
-            "name": "drawVLine",
-            "group": "Drawing",
-            "doc": [
-                "Draw a vertical line from the current point to the end point"
-            ],
-            "args": [
-                {
-                    "name": "y",
-                    "doc": [
-                        "The y-coordinate of the end point"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "elementModelRender",
-            "group": "Element Model",
-            "doc": [
-                "Render an [element model](https://github.com/craigahobbs/element-model#readme)",
-                "",
-                "**Note:** Element model \"callback\" members are a map of event name (e.g., \"click\") to",
-                "event callback function. Data can be passed to the callback functions by setting a",
-                "\"callbackData\" member."
-            ],
-            "args": [
-                {
-                    "name": "element",
-                    "doc": [
-                        "The [element model](https://github.com/craigahobbs/element-model#readme)"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "getDocumentFontSize",
-            "group": "Document",
-            "doc": [
-                "Get the document font size"
-            ],
-            "return": [
-                "The document font size, in pixels"
-            ]
-        },
-        {
-            "name": "getDocumentInputValue",
-            "group": "Document",
-            "doc": [
-                "Get an input element's value"
-            ],
-            "args": [
-                {
-                    "name": "id",
-                    "doc": [
-                        "The input element ID"
-                    ]
-                }
-            ],
-            "return": [
-                "The input element value or null if the element does not exist"
-            ]
-        },
-        {
-            "name": "getDrawingHeight",
-            "group": "Drawing",
-            "doc": [
-                "Get the current drawing's height"
-            ],
-            "return": [
-                "The current drawing's height"
-            ]
-        },
-        {
-            "name": "getDrawingWidth",
-            "group": "Drawing",
-            "doc": [
-                "Get the current drawing's width"
-            ],
-            "return": [
-                "The current drawing's width"
-            ]
-        },
-        {
-            "name": "getTextHeight",
-            "group": "Drawing",
-            "doc": [
-                "Compute the text's height to fit the width"
-            ],
-            "args": [
-                {
-                    "name": "text",
-                    "doc": [
-                        "The text"
-                    ]
-                },
-                {
-                    "name": "width",
-                    "doc": [
-                        "The width of the text. If 0, the default font size (in pixels) is returned."
-                    ]
-                }
-            ],
-            "return": [
-                "The text's height"
-            ]
-        },
-        {
-            "name": "getTextWidth",
+            "name": "drawTextWidth",
             "group": "Drawing",
             "doc": [
                 "Compute the text's width"
@@ -842,23 +864,47 @@
             ]
         },
         {
-            "name": "getWindowHeight",
-            "group": "Document",
+            "name": "drawVLine",
+            "group": "Drawing",
             "doc": [
-                "Get the browser window's height"
+                "Draw a vertical line from the current point to the end point"
             ],
-            "return": [
-                "The browser window's height"
+            "args": [
+                {
+                    "name": "y",
+                    "doc": [
+                        "The y-coordinate of the end point"
+                    ]
+                }
             ]
         },
         {
-            "name": "getWindowWidth",
-            "group": "Document",
+            "name": "drawWidth",
+            "group": "Drawing",
             "doc": [
-                "Get the browser window's width"
+                "Get the current drawing's width"
             ],
             "return": [
-                "The browser window's width"
+                "The current drawing's width"
+            ]
+        },
+        {
+            "name": "elementModelRender",
+            "group": "Element Model",
+            "doc": [
+                "Render an [element model](https://github.com/craigahobbs/element-model#readme)",
+                "",
+                "**Note:** Element model \"callback\" members are a map of event name (e.g., \"click\") to",
+                "event callback function. Data can be passed to the callback functions by setting a",
+                "\"callbackData\" member."
+            ],
+            "args": [
+                {
+                    "name": "element",
+                    "doc": [
+                        "The [element model](https://github.com/craigahobbs/element-model#readme)"
+                    ]
+                }
             ]
         },
         {
@@ -1103,74 +1149,18 @@
             ]
         },
         {
-            "name": "setDocumentFocus",
-            "group": "Document",
+            "name": "windowHeight",
+            "group": "Window",
             "doc": [
-                "Set focus to an element"
+                "Get the browser window's height"
             ],
-            "args": [
-                {
-                    "name": "id",
-                    "doc": [
-                        "The element ID"
-                    ]
-                }
+            "return": [
+                "The browser window's height"
             ]
         },
         {
-            "name": "setDocumentReset",
-            "group": "Document",
-            "doc": [
-                "Set the document reset element"
-            ],
-            "args": [
-                {
-                    "name": "id",
-                    "doc": [
-                        "The element ID"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "setDocumentTitle",
-            "group": "Document",
-            "doc": [
-                "Set the document title"
-            ],
-            "args": [
-                {
-                    "name": "title",
-                    "doc": [
-                        "The document title string"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "setDrawingSize",
-            "group": "Drawing",
-            "doc": [
-                "Set the current drawing's size"
-            ],
-            "args": [
-                {
-                    "name": "width",
-                    "doc": [
-                        "The width of the drawing"
-                    ]
-                },
-                {
-                    "name": "height",
-                    "doc": [
-                        "The height of the drawing"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "setWindowLocation",
-            "group": "Document",
+            "name": "windowSetLocation",
+            "group": "Window",
             "doc": [
                 "Navigate the browser window to a location URL"
             ],
@@ -1184,8 +1174,8 @@
             ]
         },
         {
-            "name": "setWindowResize",
-            "group": "Document",
+            "name": "windowSetResize",
+            "group": "Window",
             "doc": [
                 "Set the browser window resize event handler"
             ],
@@ -1199,8 +1189,8 @@
             ]
         },
         {
-            "name": "setWindowTimeout",
-            "group": "Document",
+            "name": "windowSetTimeout",
+            "group": "Window",
             "doc": [
                 "Set the browser window timeout event handler"
             ],
@@ -1217,6 +1207,16 @@
                         "The delay, in milliseconds, to ellapse before calling the timeout"
                     ]
                 }
+            ]
+        },
+        {
+            "name": "windowWidth",
+            "group": "Window",
+            "doc": [
+                "Get the browser window's width"
+            ],
+            "return": [
+                "The browser window's width"
             ]
         }
     ]

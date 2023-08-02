@@ -109,6 +109,7 @@ enum MarkdownUpView
  * @property {number} [lineHeight = 1.2] - The line height, in em
  * @property {?string} [markdownText = null] - The default Markdown text
  * @property {boolean} [menu = true] - If true, show the menu
+ * @property {string} [systemPrefix] - The markdown-script system include prefix
  * @property {string} [url = 'README.md'] - The default resource URL
  */
 
@@ -134,6 +135,7 @@ export class MarkdownUp {
         this.lineHeight = (options !== null ? options.lineHeight : null) ?? 1.2;
         this.markdownText = (options !== null ? options.markdownText : null) ?? null;
         this.menu = (options !== null ? options.menu : null) ?? true;
+        this.systemPrefix = (options !== null ? options.systemPrefix : null) ?? 'https://craigahobbs.github.io/markdown-up/include/';
         this.url = (options !== null ? options.url : null) ?? 'README.md';
         this.runtimeWindowResize = null;
         this.runtimeTimeoutId = null;
@@ -419,23 +421,20 @@ export class MarkdownUp {
 
 
     createScriptOptions(resourceURL) {
+        const logFn = (text) => {
+            this.window.console.log(text);
+        };
         const scriptOptions = {
+            'debug': 'debug' in this.paramsSession,
             // eslint-disable-next-line require-await
             'fetchFn': async (fetchURL, options) => this.window.fetch(fetchURL, options),
             'fontSize': this.paramsLocal.fontSize ?? this.fontSize,
+            logFn,
             'params': this.params,
+            'systemPrefix': this.systemPrefix,
             'urlFn': (url) => this.modifyURL(url, resourceURL),
             'window': this.window
         };
-
-        // Add log function, if debugging
-        let logFn = null;
-        if ('debug' in this.paramsSession) {
-            logFn = (text) => {
-                this.window.console.log(text);
-            };
-            scriptOptions.logFn = logFn;
-        }
 
         // Add hash parameter variables, if any
         if ('var' in this.params) {

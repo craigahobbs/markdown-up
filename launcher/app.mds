@@ -9,20 +9,20 @@
 
 async function markdownUpIndex()
     # Fetch the index files/directories/parent API
-    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + encodeURIComponent(vPath), '')
-    index = fetch(index_url)
+    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + urlEncodeComponent(vPath), '')
+    index = httpFetch(index_url)
 
     # Set the document title
     path = objectGet(index, 'path')
     title = 'MarkdownUp - ' + path
-    setDocumentTitle(title)
+    documentSetTitle(title)
 
     # Menu and title
     parent = objectGet(index, 'parent')
     markdownPrint( \
         if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
         if(vPath == null, 'Parent', \
-            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + encodeURIComponent(parent) + "'") + ')') + ' |', \
+            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + urlEncodeComponent(parent) + "'") + ')') + ' |', \
         '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
         '', \
         '# ' + title \
@@ -30,26 +30,26 @@ async function markdownUpIndex()
 
     # Render file links
     files = objectGet(index, 'files')
-    if files != null then
+    if files != null:
         markdownPrint('', '## Files')
-        foreach file in files do
+        for file in files:
             fileURL = if(vPath != null, vPath + '/', '') + file
-            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + encodeURIComponent(fileURL) + '&var=)')
-        endforeach
+            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=)')
+        endfor
     endif
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    if directories != null then
+    if directories != null:
         markdownPrint('', '## Directories')
-        foreach directory in directories do
+        for directory in directories:
             directoryURL = if(vPath != null, vPath + '/', '') + directory
-            markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + encodeURIComponent(directoryURL) + "')")
-        endforeach
+            markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + urlEncodeComponent(directoryURL) + "')")
+        endfor
     endif
 
     # Empty path?
-    if files == null && directories == null then
+    if files == null && directories == null:
         markdownPrint('', 'No Markdown files or sub-directories found')
     endif
 endfunction

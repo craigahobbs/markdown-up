@@ -126,7 +126,15 @@ async function executeScriptHelperAsync(statements, options, locals) {
         // Include?
         } else if (statementKey === 'include') {
             // Fetch the include script text
-            const includeURLs = ('urlFn' in options ? statement.include.urls.map((url) => options.urlFn(url)) : statement.include.urls);
+            const includeURLs = [
+                ...statement.include.includes.map((url) => ('urlFn' in options ? options.urlFn(url) : url)),
+                ...statement.include.systemIncludes.map((url) => {
+                    if ('systemPrefix' in options && isRelativeURL(url)) {
+                        return `${options.systemPrefix}${url}`;
+                    }
+                    return 'urlFn' in options ? options.urlFn(url) : url;
+                })
+            ];
             const responses = await Promise.all(includeURLs.map(async (url) => {
                 try {
                     return 'fetchFn' in options ? await options.fetchFn(url) : null;
@@ -162,7 +170,7 @@ async function executeScriptHelperAsync(statements, options, locals) {
                 }
 
                 // Run the calc-script linter?
-                if ('logFn' in options) {
+                if ('logFn' in options && options.debug) {
                     const warnings = lintScript(scriptModel);
                     const warningPrefix = `CalcScript: Include "${includeURL}" static analysis...`;
                     if (warnings.length) {
@@ -284,7 +292,7 @@ export async function evaluateExpressionAsync(expr, options = null, locals = nul
                 }
 
                 // Log and return null
-                if (options !== null && 'logFn' in options) {
+                if (options !== null && 'logFn' in options && options.debug) {
                     options.logFn(`CalcScript: Function "${funcName}" failed with error: ${error.message}`);
                 }
                 return null;

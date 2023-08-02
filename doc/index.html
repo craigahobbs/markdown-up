@@ -109,13 +109,13 @@ markdownPrint( \
 
 # Render many hellos
 ixHello = 0
-while ixHello &lt; helloCount do
+while ixHello &lt; helloCount:
     # Render the hello title
     helloTitle = 'Hello #' + (ixHello + 1)
     markdownPrint('', '## ' + helloTitle)
 
     # Render the hello drawing
-    setDrawingSize(width, height)
+    drawNew(width, height)
     drawStyle('red', borderSize, 'blue')
     drawRect(0.5 * borderSize, 0.5 * borderSize, width - borderSize, height - borderSize)
     drawTextStyle(0.67 * height, 'white', true)
@@ -129,7 +129,7 @@ endwhile
 <h3>The MarkdownUp Include Library</h3>
 <p>MarkdownUp provides some additional functionality that can be included at runtime. Consider the
 following example with the unit test include library:</p>
-<pre class="prettyprint source"><code>include 'https://craigahobbs.github.io/markdown-up/include/unittest.mds'
+<pre class="prettyprint source"><code>include &lt;unittest.mds>
 
 function testSanity()
     unittestEquals(1 + 1, 2)
@@ -142,13 +142,13 @@ unittestReport()
 <a href="https://craigahobbs.github.io/markdown-up/library/include.html">MarkdownUp Include Library</a>
 documentation for more information on the available include libraries.</p>
 <h3>Debug Mode</h3>
-<p>Debug mode enables logging output using the
-<a href="https://craigahobbs.github.io/calc-script/library/#var.vName='debugLog'">debugLog function</a>.
+<p>Debug mode logs the script runtime duration and runs the CalcScript linter, which performs static
+code analysis on your code and reports warnings for any issues found.</p>
+<p>Debug mode also enables debug logging using the
+<a href="https://craigahobbs.github.io/calc-script/library/#var.vName='consoleLogDebug'">consoleLogDebug function</a>.
 For example:</p>
-<pre class="prettyprint source lang-calcscript"><code>debugLog('Hello debug')
+<pre class="prettyprint source lang-calcscript"><code>consoleLogDebug('Hello debug')
 </code></pre>
-<p>Debug mode also enables the CalcScript linter, which performs static code analysis on your code and
-reports warnings for any issues found.</p>
 <p>To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.</p>
 <h3>Links</h3>
 <ul>
