@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0 (2023-08-02)
+
+- [362b527](https://github.com/craigahobbs/markdown-up/commit/362b527) - cleanup script library function prefixes
+
+- [b1ab490](https://github.com/craigahobbs/markdown-up/commit/b1ab490) - calc-script 2.0
+
 ## 1.9.1 (2023-05-23)
 
 - [57a507e](https://github.com/craigahobbs/markdown-up/commit/57a507e) - run tests with node --test
