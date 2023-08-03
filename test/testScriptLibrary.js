@@ -13,6 +13,7 @@ import test from 'node:test';
 const testRuntime = () => {
     const {window} = new JSDOM('', {'url': 'https://github.com/craigahobbs/markdown-up'});
     const options = {
+        'debug': true,
         'fontSize': 12,
         'urlFn': (url) => (url.startsWith('/') ? url : `/foo/${url}`),
         window
