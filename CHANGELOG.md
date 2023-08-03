@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2023-08-03)
+
+- [5ee0286](https://github.com/craigahobbs/markdown-up/commit/5ee0286) - fix debug logging
+
 ## 2.0.0 (2023-08-02)
 
 - [362b527](https://github.com/craigahobbs/markdown-up/commit/362b527) - cleanup script library function prefixes
