@@ -1,9 +1,5 @@
 # Changelog
 
-## 2023-08-03
-
-- [c18145b](https://github.com/craigahobbs/markdown-up/commit/c18145b) - markdown-up 2.0.1
-
 ## 2.0.1 (2023-08-03)
 
 - [5ee0286](https://github.com/craigahobbs/markdown-up/commit/5ee0286) - fix debug logging
