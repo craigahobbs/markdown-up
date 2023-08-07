@@ -112,14 +112,14 @@
                 {
                     "name": "joinExpr",
                     "doc": [
-                        "The [join expression](https://craigahobbs.github.io/calc-script/language/#expressions)"
+                        "The [join expression](https://craigahobbs.github.io/bare-script/language/#expressions)"
                     ]
                 },
                 {
                     "name": "rightExpr",
                     "doc": [
                         "Optional (default is null).",
-                        "    The right [join expression](https://craigahobbs.github.io/calc-script/language/#expressions)"
+                        "    The right [join expression](https://craigahobbs.github.io/bare-script/language/#expressions)"
                     ]
                 },
                 {
