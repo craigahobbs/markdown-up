@@ -48,7 +48,7 @@ app: doc
 		README.md \
 		static/* \
 		lib \
-		node_modules/calc-script \
+		node_modules/bare-script \
 		node_modules/element-model \
 		node_modules/markdown-model \
 		node_modules/schema-markdown \
@@ -67,10 +67,10 @@ app: doc
 	done
 
     # Generate the library documentation
-	$(NODE_DOCKER) npx calcScriptDoc lib/scriptLibrary.js > build/app/library/library.json
+	$(NODE_DOCKER) npx bareScriptDoc lib/scriptLibrary.js > build/app/library/library.json
 
     # Generate the include library documentation
-	$(NODE_DOCKER) npx calcScriptDoc static/include/*.mds > build/app/library/include.json
+	$(NODE_DOCKER) npx bareScriptDoc static/include/*.mds > build/app/library/include.json
 
     # Generate the library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json

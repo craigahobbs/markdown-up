@@ -14,15 +14,15 @@
         const app = new MarkdownUp(window, {
             'markdownText': `\
 ~~~ markdown-script
-include 'https://craigahobbs.github.io/calc-script/library/app.mds'
-calcScriptLibraryDoc( \\
+include 'https://craigahobbs.github.io/bare-script/library/app.mds'
+bareScriptLibraryDoc( \\
     arrayNew( \\
         'library.json', \\
-        'https://craigahobbs.github.io/calc-script/library/library.json' \\
+        'https://craigahobbs.github.io/bare-script/library/library.json' \\
     ), \\
     'The MarkdownUp Library', \\
     arrayNew( \\
-        arrayNew('CalcScript', 'https://craigahobbs.github.io/calc-script/language/'), \\
+        arrayNew('BareScript', 'https://craigahobbs.github.io/bare-script/language/'), \\
         arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
     ) \\
 )

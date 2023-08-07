@@ -62,7 +62,7 @@ To view a different Markdown resource, set the application's
 Using MarkdownUp's "markdown-script" fenced code blocks, you can dynamically generate Markdown,
 allowing you to build lightweight, client-rendered web applications with no HTML, no CSS, and a
 single dependency (MarkdownUp). The "markdown-script" fenced code blocks are interpreted as the
-[CalcScript programming language](https://craigahobbs.github.io/calc-script/language/).
+[BareScript programming language](https://craigahobbs.github.io/bare-script/language/).
 In addition to generating Markdown, you can fetch text and JSON resources, create SVG drawings,
 parse CSV, render data tables, draw line charts, and more. For more information, see the
 [MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/).
@@ -133,14 +133,14 @@ documentation for more information on the available include libraries.
 
 ### Debug Mode
 
-Debug mode logs the script runtime duration and runs the CalcScript linter, which performs static
+Debug mode logs the script runtime duration and runs the BareScript linter, which performs static
 code analysis on your code and reports warnings for any issues found.
 
 Debug mode also enables debug logging using the
-[consoleLogDebug function](https://craigahobbs.github.io/calc-script/library/#var.vName='consoleLogDebug').
+[consoleLogDebug function](https://craigahobbs.github.io/bare-script/library/#var.vName='consoleLogDebug').
 For example:
 
-~~~ calcscript
+~~~ barescript
 consoleLogDebug('Hello debug')
 ~~~
 
@@ -150,7 +150,7 @@ To turn on debug mode, click the debug button in the MarkdownUp menu in the uppe
 ### Links
 
 - [MarkdownUp Application Examples](https://craigahobbs.github.io/#url=MarkdownUpApplications.md)
-- [The CalcScript Language](https://craigahobbs.github.io/calc-script/language/)
+- [The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
 - [The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
 - [The MarkdownUp Include Library](https://craigahobbs.github.io/markdown-up/library/include.html)
 
