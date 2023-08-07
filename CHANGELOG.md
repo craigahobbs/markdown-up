@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2 (2023-08-07)
+
+- [32a2a4d](https://github.com/craigahobbs/markdown-up/commit/32a2a4d) - rename calc-script to bare-script
+
 ## 2.0.1 (2023-08-03)
 
 - [5ee0286](https://github.com/craigahobbs/markdown-up/commit/5ee0286) - fix debug logging
