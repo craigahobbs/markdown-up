@@ -932,7 +932,6 @@ export const expressionFunctionMap = {
     'date': 'datetimeNew',
     'day': 'datetimeDay',
     'endsWith': 'stringEndsWith',
-    'if': 'if',
     'indexOf': 'stringIndexOf',
     'fixed': 'numberToFixed',
     'floor': 'mathFloor',
@@ -974,5 +973,5 @@ export const expressionFunctionMap = {
 
 // The built-in expression functions
 export const expressionFunctions = Object.fromEntries(Object.entries(expressionFunctionMap).map(
-    ([exprFnName, scriptFnName]) => [exprFnName, scriptFunctions[scriptFnName] ?? null]
+    ([exprFnName, scriptFnName]) => [exprFnName, scriptFunctions[scriptFnName]]
 ).filter(([, exprFn]) => exprFn !== null));
