@@ -61,6 +61,9 @@ struct DataTable
     # The datetime format
     optional DataTableDatetimeFormat datetime
 
+    # If true, trim formatted values (default is true)
+    optional bool trim
+
 
 # A data table field formatting model
 struct DataTableFieldFormat
@@ -146,6 +149,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
     const markdownOptions = (options !== null &amp;&amp; 'urlFn' in options ? {'urlFn': options.urlFn} : null);
     const formatPrecision = (dataTable !== null ? (dataTable.precision ?? null) : null);
     const formatDatetime = (dataTable !== null ? (dataTable.datetime ?? null) : null);
+    const formatTrim = (dataTable !== null ? (dataTable.trim ?? null) : null);
     return {
         'html': 'table',
         'elem': [
@@ -190,7 +194,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
                             const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
                             const fieldElements = fieldFormat !== null &amp;&amp; fieldFormat.markdown
                                 ? markdownElements(parseMarkdown(`${value}`), markdownOptions)
-                                : {'text': formatValue(value, formatPrecision, formatDatetime, false)};
+                                : {'text': formatValue(value, formatPrecision, formatDatetime, formatTrim)};
                             return {
                                 'html': 'td',
                                 'attr': fieldFormat !== null &amp;&amp; 'align' in fieldFormat
@@ -203,7 +207,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
                             const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
                             const fieldElements = fieldFormat !== null &amp;&amp; fieldFormat.markdown
                                 ? markdownElements(parseMarkdown(`${value}`), markdownOptions)
-                                : {'text': formatValue(value, formatPrecision, formatDatetime, false)};
+                                : {'text': formatValue(value, formatPrecision, formatDatetime, formatTrim)};
                             return {
                                 'html': 'td',
                                 'attr': fieldFormat !== null &amp;&amp; 'align' in fieldFormat

@@ -545,7 +545,7 @@ export function topData(data, count, categoryFields = null) {
 
 
 // Helper function to format labels
-export function formatValue(value, precision = null, datetime = null, trim = true) {
+export function formatValue(value, precision = null, datetime = null, trim = null) {
     if (value instanceof Date) {
         if (datetime === 'year') {
             // Round to nearest year
@@ -574,12 +574,13 @@ export function formatValue(value, precision = null, datetime = null, trim = tru
         return value.toISOString().replace(rDateCleanup, '');
     } else if (typeof value === 'number') {
         const numberFormat = value.toFixed(precision ?? defaultPrecision);
-        return trim ? numberFormat.replace(rNumberCleanup, '') : numberFormat;
+        return (trim ?? defaultTrim) ? numberFormat.replace(rNumberCleanup, '') : numberFormat;
     }
     return `${value}`;
 }
 
 const defaultPrecision = 2;
+const defaultTrim = true;
 const rNumberCleanup = /\.0*$/;
 const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
 

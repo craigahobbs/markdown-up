@@ -204,6 +204,16 @@
                         "The datetime format"
                     ],
                     "optional": true
+                },
+                {
+                    "name": "trim",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, trim formatted values (default is true)"
+                    ],
+                    "optional": true
                 }
             ]
         }
