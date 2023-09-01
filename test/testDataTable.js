@@ -39,9 +39,9 @@ test('dataTableElements', () => {
                 'elem': [
                     [],
                     [
-                        {'html': 'th', 'elem': {'text': 'A'}},
-                        {'html': 'th', 'elem': {'text': 'B'}},
-                        {'html': 'th', 'elem': {'text': 'C'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'C'}}
                     ]
                 ]
             },
@@ -51,9 +51,9 @@ test('dataTableElements', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'elem': {'text': '1'}},
-                            {'html': 'td', 'elem': {'text': 'abc'}},
-                            {'html': 'td', 'elem': {'text': '2022-08-30'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2022-08-30'}}
                         ]
                     ]
                 },
@@ -62,9 +62,9 @@ test('dataTableElements', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'elem': {'text': '2'}},
-                            {'html': 'td', 'elem': {'text': 'def'}},
-                            {'html': 'td', 'elem': {'text': '2022-08-31'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2022-08-31'}}
                         ]
                     ]
                 }
@@ -89,8 +89,8 @@ test('dataTableElements, model fields', () => {
                 'elem': [
                     [],
                     [
-                        {'html': 'th', 'elem': {'text': 'B'}},
-                        {'html': 'th', 'elem': {'text': 'A'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}}
                     ]
                 ]
             },
@@ -100,8 +100,8 @@ test('dataTableElements, model fields', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'elem': {'text': 'abc'}},
-                            {'html': 'td', 'elem': {'text': '1'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
                         ]
                     ]
                 },
@@ -110,8 +110,8 @@ test('dataTableElements, model fields', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'elem': {'text': 'def'}},
-                            {'html': 'td', 'elem': {'text': '2'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
                         ]
                     ]
                 }
@@ -137,11 +137,11 @@ test('dataTableElements, model category fields', () => {
                 'html': 'tr',
                 'elem': [
                     [
-                        {'html': 'th', 'elem': {'text': 'A'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}}
                     ],
                     [
-                        {'html': 'th', 'elem': {'text': 'B'}},
-                        {'html': 'th', 'elem': {'text': 'C'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'C'}}
                     ]
                 ]
             },
@@ -150,11 +150,11 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': {'text': '1'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
                         ],
                         [
-                            {'html': 'td', 'elem': {'text': 'abc'}},
-                            {'html': 'td', 'elem': {'text': '5'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '5.00'}}
                         ]
                     ]
                 },
@@ -162,11 +162,11 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': null}
+                            {'html': 'td', 'attr': null, 'elem': null}
                         ],
                         [
-                            {'html': 'td', 'elem': {'text': 'def'}},
-                            {'html': 'td', 'elem': {'text': '6'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '6.00'}}
                         ]
                     ]
                 },
@@ -174,11 +174,11 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': {'text': 'null'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'null'}}
                         ],
                         [
-                            {'html': 'td', 'elem': {'text': 'null'}},
-                            {'html': 'td', 'elem': {'text': '7'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'null'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '7.00'}}
                         ]
                     ]
                 },
@@ -186,11 +186,11 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': {'text': '2'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
                         ],
                         [
-                            {'html': 'td', 'elem': {'text': 'ghi'}},
-                            {'html': 'td', 'elem': {'text': 'null'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'ghi'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'null'}}
                         ]
                     ]
                 }
@@ -200,14 +200,14 @@ test('dataTableElements, model category fields', () => {
 });
 
 
-test('dataTableElements, markdown fields', () => {
+test('dataTableElements, format markdown fields', () => {
     const data = [
         {'A': '**1**', 'B': '**bold**', 'C': 5},
         {'A': '*2*', 'B': '*italic*', 'C': 6},
         {'A': '3', 'B': '[Link](test.html)', 'C': 7}
     ];
     const options = {'urlFn': (url) => `/${url}`};
-    const dataTable = validateDataTable({'categories': ['A'], 'markdown': ['A', 'B']});
+    const dataTable = validateDataTable({'categories': ['A'], 'formats': {'A': {'markdown': true}, 'B': {'markdown': true}}});
     validateDataTable(dataTable);
     assert.deepEqual(dataTableElements(data, dataTable, options), {
         'html': 'table',
@@ -216,11 +216,11 @@ test('dataTableElements, markdown fields', () => {
                 'html': 'tr',
                 'elem': [
                     [
-                        {'html': 'th', 'elem': {'text': 'A'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}}
                     ],
                     [
-                        {'html': 'th', 'elem': {'text': 'B'}},
-                        {'html': 'th', 'elem': {'text': 'C'}}
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'C'}}
                     ]
                 ]
             },
@@ -229,7 +229,7 @@ test('dataTableElements, markdown fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -239,7 +239,7 @@ test('dataTableElements, markdown fields', () => {
                             ]}
                         ],
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -247,7 +247,7 @@ test('dataTableElements, markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'elem': {'text': '5'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '5.00'}}
                         ]
                     ]
                 },
@@ -255,7 +255,7 @@ test('dataTableElements, markdown fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -265,7 +265,7 @@ test('dataTableElements, markdown fields', () => {
                             ]}
                         ],
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -273,7 +273,7 @@ test('dataTableElements, markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'elem': {'text': '6'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '6.00'}}
                         ]
                     ]
                 },
@@ -281,7 +281,7 @@ test('dataTableElements, markdown fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -291,7 +291,7 @@ test('dataTableElements, markdown fields', () => {
                             ]}
                         ],
                         [
-                            {'html': 'td', 'elem': [
+                            {'html': 'td', 'attr': null, 'elem': [
                                 {
                                     'html': 'p',
                                     'elem': [
@@ -299,7 +299,87 @@ test('dataTableElements, markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'elem': {'text': '7'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '7.00'}}
+                        ]
+                    ]
+                }
+            ]
+        ]
+    });
+});
+
+
+test('dataTableElements, format markdown fields missing', () => {
+    const data = [
+        {'A': '**1**', 'B': '**2**', 'C': 'abc'}
+    ];
+    const dataTable = validateDataTable({'categories': ['A'], 'formats': {'C': {}}});
+    validateDataTable(dataTable);
+    assert.deepEqual(dataTableElements(data, dataTable), {
+        'html': 'table',
+        'elem': [
+            {
+                'html': 'tr',
+                'elem': [
+                    [
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}}
+                    ],
+                    [
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'C'}}
+                    ]
+                ]
+            },
+            [
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [
+                            {'html': 'td', 'attr': null, 'elem': {'text': '**1**'}}
+                        ],
+                        [
+                            {'html': 'td', 'attr': null, 'elem': {'text': '**2**'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}}
+                        ]
+                    ]
+                }
+            ]
+        ]
+    });
+});
+
+
+test('dataTableElements, format alignment', () => {
+    const data = [
+        {'A': 'a', 'B': 'b', 'C': 'c'}
+    ];
+    const dataTable = validateDataTable({'categories': ['A'], 'formats': {'A': {'align': 'center'}, 'B': {'align': 'right'}}});
+    validateDataTable(dataTable);
+    assert.deepEqual(dataTableElements(data, dataTable), {
+        'html': 'table',
+        'elem': [
+            {
+                'html': 'tr',
+                'elem': [
+                    [
+                        {'html': 'th', 'attr': {'style': 'text-align: center'}, 'elem': {'text': 'A'}}
+                    ],
+                    [
+                        {'html': 'th', 'attr': {'style': 'text-align: right'}, 'elem': {'text': 'B'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'C'}}
+                    ]
+                ]
+            },
+            [
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [
+                            {'html': 'td', 'attr': {'style': 'text-align: center'}, 'elem': {'text': 'a'}}
+                        ],
+                        [
+                            {'html': 'td', 'attr': {'style': 'text-align: right'}, 'elem': {'text': 'b'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'c'}}
                         ]
                     ]
                 }

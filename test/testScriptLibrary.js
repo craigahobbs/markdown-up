@@ -564,16 +564,34 @@ test('script library, dataTable', () => {
             'elem': [
                 {
                     'html': 'tr',
-                    'elem': [[], [{'html': 'th', 'elem': {'text': 'a'}}, {'html': 'th', 'elem': {'text': 'b'}}]]
+                    'elem': [
+                        [],
+                        [
+                            {'html': 'th', 'attr': null, 'elem': {'text': 'a'}},
+                            {'html': 'th', 'attr': null, 'elem': {'text': 'b'}}
+                        ]
+                    ]
                 },
                 [
                     {
                         'html': 'tr',
-                        'elem': [[], [{'html': 'td', 'elem': {'text': '1'}}, {'html': 'td', 'elem': {'text': '3'}}]]
+                        'elem': [
+                            [],
+                            [
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}},
+                                {'html': 'td', 'attr': null, 'elem': {'text': '3.00'}}
+                            ]
+                        ]
                     },
                     {
                         'html': 'tr',
-                        'elem': [[], [{'html': 'td', 'elem': {'text': '2'}}, {'html': 'td', 'elem': {'text': '1'}}]]
+                        'elem': [
+                            [],
+                            [
+                                {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}},
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                            ]
+                        ]
                     }
                 ]
             ]
@@ -596,16 +614,31 @@ test('script library, dataTable model', () => {
             'elem': [
                 {
                     'html': 'tr',
-                    'elem': [[], [{'html': 'th', 'elem': {'text': 'a'}}]]
+                    'elem': [
+                        [],
+                        [
+                            {'html': 'th', 'attr': null, 'elem': {'text': 'a'}}
+                        ]
+                    ]
                 },
                 [
                     {
                         'html': 'tr',
-                        'elem': [[], [{'html': 'td', 'elem': {'text': '1'}}]]
+                        'elem': [
+                            [],
+                            [
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                            ]
+                        ]
                     },
                     {
                         'html': 'tr',
-                        'elem': [[], [{'html': 'td', 'elem': {'text': '2'}}]]
+                        'elem': [
+                            [],
+                            [
+                                {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
+                            ]
+                        ]
                     }
                 ]
             ]
