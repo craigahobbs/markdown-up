@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "bare-script",
-    "version": "2.0.3",
+    "version": "2.1.0",
     "description": "BareScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -17,7 +17,8 @@
         "url": "https://github.com/craigahobbs"
     },
     "bin": {
-        "bareScriptDoc": "./bin/bareScriptDoc.js"
+        "bare": "./bin/bare.js",
+        "baredoc": "./bin/bareDoc.js"
     },
     "files": [
         "lib/**/*"
@@ -30,7 +31,7 @@
     },
     "devDependencies": {
         "c8": "~8.0",
-        "eslint": "~8.44",
+        "eslint": "~8.48",
         "jsdoc": "~4.0"
     }
 }

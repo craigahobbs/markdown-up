@@ -3,7 +3,7 @@
 
 
 # Include sentinel
-if runtimeGetGlobal('unittestTests'):
+if systemGlobalGet('unittestTests'):
     return
 endif
 
@@ -21,7 +21,7 @@ function unittestRunTest(testName)
     testFn = unittestRunTestHelper(testName)
     if testFn:
         testFn()
-        runtimeSetGlobal('unittestTestName', null)
+        systemGlobalSet('unittestTestName', null)
     endif
 endfunction
 
@@ -34,7 +34,7 @@ async function unittestRunTestAsync(testName)
     testFn = unittestRunTestHelper(testName)
     if testFn:
         testFn()
-        runtimeSetGlobal('unittestTestName', null)
+        systemGlobalSet('unittestTestName', null)
     endif
 endfunction
 
@@ -53,7 +53,7 @@ function unittestRunTestHelper(testName)
     endif
 
     # Get the test func
-    testFn = runtimeGetGlobal(testName)
+    testFn = systemGlobalGet(testName)
     if testFn == null:
         arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
         return null
@@ -62,7 +62,7 @@ function unittestRunTestHelper(testName)
     # Add the unit test result array
     testFailures = arrayNew()
     objectSet(unittestTests, testName, testFailures)
-    runtimeSetGlobal('unittestTestName', testName)
+    systemGlobalSet('unittestTestName', testName)
 
     return testFn
 endfunction
@@ -77,7 +77,7 @@ function unittestReport()
     testCount = arrayLength(testNames)
     testFailCount = 0
     for testName in testNames:
-        testFailures = objectGet(runtimeGetGlobal('unittestTests'), testName)
+        testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
         if arrayLength(testFailures):
             testFailCount = testFailCount + 1
         endif
@@ -101,7 +101,7 @@ function unittestReport()
     if testFailCount:
         markdownPrint('', '## Failing Tests')
         for testName in testNames:
-            testFailures = objectGet(runtimeGetGlobal('unittestTests'), testName)
+            testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if arrayLength(testFailures):
                 markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + urlEncodeComponent(testName) + "') - FAIL")
                 for error in testFailures:
@@ -115,7 +115,7 @@ function unittestReport()
     if testPassCount:
         markdownPrint('', '## Passing Tests')
         for testName in testNames:
-            testFailures = objectGet(runtimeGetGlobal('unittestTests'), testName)
+            testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if !arrayLength(testFailures):
                 markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + urlEncodeComponent(testName) + "') - OK")
             endif
@@ -128,8 +128,8 @@ endfunction
 # $group: unittest
 # $doc: Reset the unit test data
 function unittestReset()
-    runtimeSetGlobal('unittestTests', objectNew())
-    runtimeSetGlobal('unittestWarnings', arrayNew())
+    systemGlobalSet('unittestTests', objectNew())
+    systemGlobalSet('unittestWarnings', arrayNew())
 endfunction
 
 
@@ -163,7 +163,7 @@ endfunction
 
 # Helper function to record a unit test error
 function unittestRecordError(actualStr, expectedStr, description)
-    testName = runtimeGetGlobal('unittestTestName')
-    testFailures = objectGet(runtimeGetGlobal('unittestTests'), testName)
+    testName = systemGlobalGet('unittestTestName')
+    testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
     arrayPush(testFailures, if(description != null, description + ' - ', '') + actualStr + ' != ' + expectedStr)
 endfunction

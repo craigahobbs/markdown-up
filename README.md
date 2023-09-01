@@ -137,11 +137,11 @@ Debug mode logs the script runtime duration and runs the BareScript linter, whic
 code analysis on your code and reports warnings for any issues found.
 
 Debug mode also enables debug logging using the
-[consoleLogDebug function](https://craigahobbs.github.io/bare-script/library/#var.vName='consoleLogDebug').
+[systemLogDebug function](https://craigahobbs.github.io/bare-script/library/#var.vName='systemLogDebug').
 For example:
 
 ~~~ barescript
-consoleLogDebug('Hello debug')
+systemLogDebug('Hello debug')
 ~~~
 
 To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.
