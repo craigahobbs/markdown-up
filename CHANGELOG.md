@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1 (2023-09-01)
+
+- [06a808b](https://github.com/craigahobbs/markdown-up/commit/06a808b) - markdown-script dataTable trim option
+
 ## 2.2.0 (2023-09-01)
 
 - [6516470](https://github.com/craigahobbs/markdown-up/commit/6516470) - markdown-script dataTable improvements
