@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0 (2023-09-01)
+
+- [6516470](https://github.com/craigahobbs/markdown-up/commit/6516470) - markdown-script dataTable improvements
+
 ## 2.1.0 (2023-09-01)
 
 - [eaecba5](https://github.com/craigahobbs/markdown-up/commit/eaecba5) - bare-script 2.1
