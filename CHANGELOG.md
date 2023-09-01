@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 (2023-09-01)
+
+- [eaecba5](https://github.com/craigahobbs/markdown-up/commit/eaecba5) - bare-script 2.1
+
 ## 2.0.2 (2023-08-07)
 
 - [32a2a4d](https://github.com/craigahobbs/markdown-up/commit/32a2a4d) - rename calc-script to bare-script
