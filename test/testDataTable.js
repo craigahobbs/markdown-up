@@ -51,7 +51,7 @@ test('dataTableElements', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1'}},
                             {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
                             {'html': 'td', 'attr': null, 'elem': {'text': '2022-08-30'}}
                         ]
@@ -62,7 +62,7 @@ test('dataTableElements', () => {
                     'elem': [
                         [],
                         [
-                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2'}},
                             {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
                             {'html': 'td', 'attr': null, 'elem': {'text': '2022-08-31'}}
                         ]
@@ -101,7 +101,7 @@ test('dataTableElements, model fields', () => {
                         [],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1'}}
                         ]
                     ]
                 },
@@ -111,7 +111,7 @@ test('dataTableElements, model fields', () => {
                         [],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2'}}
                         ]
                     ]
                 }
@@ -150,11 +150,11 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1'}}
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'abc'}},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '5.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '5'}}
                         ]
                     ]
                 },
@@ -166,7 +166,7 @@ test('dataTableElements, model category fields', () => {
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'def'}},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '6.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '6'}}
                         ]
                     ]
                 },
@@ -178,7 +178,7 @@ test('dataTableElements, model category fields', () => {
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'null'}},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '7.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '7'}}
                         ]
                     ]
                 },
@@ -186,11 +186,58 @@ test('dataTableElements, model category fields', () => {
                     'html': 'tr',
                     'elem': [
                         [
-                            {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2'}}
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': {'text': 'ghi'}},
                             {'html': 'td', 'attr': null, 'elem': {'text': 'null'}}
+                        ]
+                    ]
+                }
+            ]
+        ]
+    });
+});
+
+
+test('dataTableElements, model precision and trim', () => {
+    const data = [
+        {'A': 1.25, 'B': new Date(Date.UTC(2023, 7, 1))},
+        {'A': 2.04, 'B': new Date(Date.UTC(2023, 8, 1))}
+    ];
+    const dataTable = validateDataTable({'precision': 1, 'datetime': 'month', 'trim': false});
+    validateDataTable(dataTable);
+    assert.deepEqual(dataTableElements(data, dataTable), {
+        'html': 'table',
+        'elem': [
+            {
+                'html': 'tr',
+                'elem': [
+                    [],
+                    [
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'A'}},
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'B'}}
+                    ]
+                ]
+            },
+            [
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [],
+                        [
+                            {'html': 'td', 'attr': null, 'elem': {'text': '1.3'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2023-08'}}
+                        ]
+                    ]
+                },
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [],
+                        [
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2.0'}},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '2023-09'}}
                         ]
                     ]
                 }
@@ -247,7 +294,7 @@ test('dataTableElements, format markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '5.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '5'}}
                         ]
                     ]
                 },
@@ -273,7 +320,7 @@ test('dataTableElements, format markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '6.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '6'}}
                         ]
                     ]
                 },
@@ -299,7 +346,7 @@ test('dataTableElements, format markdown fields', () => {
                                     ]
                                 }
                             ]},
-                            {'html': 'td', 'attr': null, 'elem': {'text': '7.00'}}
+                            {'html': 'td', 'attr': null, 'elem': {'text': '7'}}
                         ]
                     ]
                 }

@@ -578,8 +578,8 @@ test('script library, dataTable', () => {
                         'elem': [
                             [],
                             [
-                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}},
-                                {'html': 'td', 'attr': null, 'elem': {'text': '3.00'}}
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1'}},
+                                {'html': 'td', 'attr': null, 'elem': {'text': '3'}}
                             ]
                         ]
                     },
@@ -588,8 +588,8 @@ test('script library, dataTable', () => {
                         'elem': [
                             [],
                             [
-                                {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}},
-                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                                {'html': 'td', 'attr': null, 'elem': {'text': '2'}},
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1'}}
                             ]
                         ]
                     }
@@ -627,7 +627,7 @@ test('script library, dataTable model', () => {
                         'elem': [
                             [],
                             [
-                                {'html': 'td', 'attr': null, 'elem': {'text': '1.00'}}
+                                {'html': 'td', 'attr': null, 'elem': {'text': '1'}}
                             ]
                         ]
                     },
@@ -636,7 +636,7 @@ test('script library, dataTable model', () => {
                         'elem': [
                             [],
                             [
-                                {'html': 'td', 'attr': null, 'elem': {'text': '2.00'}}
+                                {'html': 'td', 'attr': null, 'elem': {'text': '2'}}
                             ]
                         ]
                     }
