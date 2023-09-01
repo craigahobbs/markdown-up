@@ -67,10 +67,10 @@ app: doc
 	done
 
     # Generate the library documentation
-	$(NODE_DOCKER) npx bareScriptDoc lib/scriptLibrary.js > build/app/library/library.json
+	$(NODE_DOCKER) npx baredoc lib/scriptLibrary.js > build/app/library/library.json
 
     # Generate the include library documentation
-	$(NODE_DOCKER) npx bareScriptDoc static/include/*.mds > build/app/library/include.json
+	$(NODE_DOCKER) npx baredoc static/include/*.mds > build/app/library/include.json
 
     # Generate the library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json

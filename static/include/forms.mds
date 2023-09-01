@@ -3,7 +3,7 @@
 
 
 # Include sentinel
-if runtimeGetGlobal('formsLinkButtonElements'):
+if systemGlobalGet('formsLinkButtonElements'):
     return
 endif
 

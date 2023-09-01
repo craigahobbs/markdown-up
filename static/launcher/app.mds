@@ -10,7 +10,7 @@
 async function markdownUpIndex()
     # Fetch the index files/directories/parent API
     index_url = 'markdown_up_index' + if(vPath != null, '?path=' + urlEncodeComponent(vPath), '')
-    index = httpFetch(index_url)
+    index = systemFetch(index_url)
 
     # Set the document title
     path = objectGet(index, 'path')
