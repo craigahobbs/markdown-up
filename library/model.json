@@ -166,11 +166,11 @@
                     "optional": true
                 },
                 {
-                    "name": "markdown",
+                    "name": "formats",
                     "type": {
-                        "array": {
+                        "dict": {
                             "type": {
-                                "builtin": "string"
+                                "user": "DataTableFieldFormat"
                             }
                         }
                     },
@@ -178,7 +178,7 @@
                         "lenGT": 0
                     },
                     "doc": [
-                        "The \"categories\" and \"fields\" to be rendered as Markdown text"
+                        "The field formatting for \"categories\" and \"fields\""
                     ],
                     "optional": true
                 },
@@ -204,6 +204,57 @@
                         "The datetime format"
                     ],
                     "optional": true
+                }
+            ]
+        }
+    },
+    "DataTableFieldFormat": {
+        "struct": {
+            "name": "DataTableFieldFormat",
+            "doc": [
+                "A data table field formatting model"
+            ],
+            "docGroup": "Data Table",
+            "members": [
+                {
+                    "name": "markdown",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, format the field as Markdown"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "align",
+                    "type": {
+                        "user": "DataTableFieldAlignment"
+                    },
+                    "doc": [
+                        "The field alignment"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "DataTableFieldAlignment": {
+        "enum": {
+            "name": "DataTableFieldAlignment",
+            "doc": [
+                "A field alignment"
+            ],
+            "docGroup": "Data Table",
+            "values": [
+                {
+                    "name": "left"
+                },
+                {
+                    "name": "right"
+                },
+                {
+                    "name": "center"
                 }
             ]
         }
