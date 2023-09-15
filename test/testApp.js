@@ -608,7 +608,7 @@ test('MarkdownUp, render timeout', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-function main()
+function main():
     systemGlobalSet('count', count + 1)
     markdownPrint('Hello ' + count)
     if(count == 2, windowSetTimeout(main, 2000))
@@ -668,7 +668,7 @@ test('MarkdownUp, render resize', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-function main()
+function main():
     systemGlobalSet('count', count + 1)
     markdownPrint('Hello ' + count)
 endfunction
@@ -708,7 +708,7 @@ test('MarkdownUp, render focus', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-function main()
+function main():
     systemGlobalSet('count', count + 1)
     elementModelRender(objectNew( \
         'html', 'input', \
@@ -773,7 +773,7 @@ test('MarkdownUp, render document reset ID', async () => {
         'menu': false,
         'markdownText': `\
 ~~~ markdown-script
-function main()
+function main():
     systemGlobalSet('count', count + 1)
     markdownPrint('Hello ' + count)
     windowSetTimeout(main, 1000)
@@ -834,7 +834,7 @@ test('MarkdownUp, render location callback', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-function onClick()
+function onClick():
     markdownPrint('Hello')
     windowSetLocation('#url=other')
 endfunction
@@ -896,7 +896,7 @@ test('MarkdownUp, render title callback', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-function onClick()
+function onClick():
     documentSetTitle('Hello')
     markdownPrint('Hello')
 endfunction
@@ -1592,7 +1592,7 @@ test('MarkdownUp.main, markdown-script debug warnings', async () => {
 ~~~
 
 ~~~ markdown-script
-function foo(a, b)
+function foo(a, b):
 endfunction
 ~~~
 `});
