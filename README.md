@@ -118,7 +118,7 @@ following example with the unit test include library:
 ~~~
 include <unittest.mds>
 
-function testSanity()
+function testSanity():
     unittestEquals(1 + 1, 2)
 endfunction
 unittestRunTest('testSanity')

@@ -16,7 +16,7 @@ endif
 # $arg size: Optional (default is null). The size, in characters, of the text input element
 # $arg onEnter: Optional (default is null). The text input element on-enter event handler
 # $return: The text input [element model](https://github.com/craigahobbs/element-model#readme)
-function formsTextElements(id, text, size, onEnter)
+function formsTextElements(id, text, size, onEnter):
     return objectNew( \
         'html', 'input', \
         'attr', objectNew( \
@@ -33,7 +33,7 @@ function formsTextElements(id, text, size, onEnter)
 endfunction
 
 
-function formsTextOnKeyup(keyCode, onEnter)
+function formsTextOnKeyup(keyCode, onEnter):
     if keyCode == 13:
         onEnter()
     endif
@@ -46,7 +46,7 @@ endfunction
 # $arg text: The link button's text
 # $arg onClick: The link button's click event handler
 # $return: The link button [element model](https://github.com/craigahobbs/element-model#readme)
-function formsLinkButtonElements(text, onClick)
+function formsLinkButtonElements(text, onClick):
     return objectNew( \
         'html', 'a', \
         'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
@@ -62,7 +62,7 @@ endfunction
 # $arg text: The link's text
 # $arg url: The link's URL. If null, the link is rendered as text.
 # $return: The link [element model](https://github.com/craigahobbs/element-model#readme)
-function formsLinkElements(text, url)
+function formsLinkElements(text, url):
     if url == null:
         return objectNew( \
             'html', 'span', \

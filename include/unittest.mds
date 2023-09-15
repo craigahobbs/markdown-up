@@ -17,7 +17,7 @@ unittestWarnings = arrayNew()
 # $group: unittest
 # $doc: Run a unit test
 # $arg testName: The test function name
-function unittestRunTest(testName)
+function unittestRunTest(testName):
     testFn = unittestRunTestHelper(testName)
     if testFn:
         testFn()
@@ -30,7 +30,7 @@ endfunction
 # $group: unittest
 # $doc: Run an asyncronous unit test
 # $arg testName: The test function name
-async function unittestRunTestAsync(testName)
+async function unittestRunTestAsync(testName):
     testFn = unittestRunTestHelper(testName)
     if testFn:
         testFn()
@@ -40,7 +40,7 @@ endfunction
 
 
 # unittestRunTest helper function
-function unittestRunTestHelper(testName)
+function unittestRunTestHelper(testName):
     # Single test argument?
     if vTest != null && vTest != testName:
         return null
@@ -71,7 +71,7 @@ endfunction
 # $function: unittestReport
 # $group: unittest
 # $doc: Render the unit test report
-function unittestReport()
+function unittestReport():
     # Compute test statistics
     testNames = arraySort(objectKeys(unittestTests))
     testCount = arrayLength(testNames)
@@ -127,7 +127,7 @@ endfunction
 # $function: unittestReset
 # $group: unittest
 # $doc: Reset the unit test data
-function unittestReset()
+function unittestReset():
     systemGlobalSet('unittestTests', objectNew())
     systemGlobalSet('unittestWarnings', arrayNew())
 endfunction
@@ -139,7 +139,7 @@ endfunction
 # $arg actual: The actual value
 # $arg expected: The expected value
 # $arg description: The description of the assertion
-function unittestEquals(actual, expected, description)
+function unittestEquals(actual, expected, description):
     if actual != expected:
         unittestRecordError(jsonStringify(actual), jsonStringify(expected), description)
     endif
@@ -152,7 +152,7 @@ endfunction
 # $arg actual: The actual value
 # $arg expected: The expected value
 # $arg description: The description of the assertion
-function unittestDeepEquals(actual, expected, description)
+function unittestDeepEquals(actual, expected, description):
     actualJSON = jsonStringify(actual)
     expectedJSON = jsonStringify(expected)
     if actualJSON != expectedJSON:
@@ -162,7 +162,7 @@ endfunction
 
 
 # Helper function to record a unit test error
-function unittestRecordError(actualStr, expectedStr, description)
+function unittestRecordError(actualStr, expectedStr, description):
     testName = systemGlobalGet('unittestTestName')
     testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
     arrayPush(testFailures, if(description != null, description + ' - ', '') + actualStr + ' != ' + expectedStr)

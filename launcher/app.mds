@@ -7,7 +7,7 @@
 #
 
 
-async function markdownUpIndex()
+async function markdownUpIndex():
     # Fetch the index files/directories/parent API
     index_url = 'markdown_up_index' + if(vPath != null, '?path=' + urlEncodeComponent(vPath), '')
     index = systemFetch(index_url)
