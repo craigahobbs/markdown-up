@@ -1,41 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>JSDoc: Source: data.js</title>
-
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
-</head>
-
-<body>
-
-<div id="main">
-
-    <h1 class="page-title">Source: data.js</h1>
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>// Licensed under the MIT License
-// https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+// Licensed under the MIT License
+// https://github.com/craigahobbs/bare-script/blob/main/LICENSE
 
 /** @module lib/data */
 
-import {evaluateExpression} from 'bare-script/lib/runtime.js';
-import {jsonStringifySortKeys} from 'schema-markdown/lib/encode.js';
-import {parseExpression} from 'bare-script/lib/parser.js';
-import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
-import {validateType} from 'schema-markdown/lib/schema.js';
+import {evaluateExpression} from './runtime.js';
+import {jsonStringifySortKeys} from '../../schema-markdown/lib/encode.js';
+import {parseExpression} from './parser.js';
+import {parseSchemaMarkdown} from '../../schema-markdown/lib/parser.js';
+import {validateType} from '../../schema-markdown/lib/schema.js';
 
 
 /**
@@ -80,10 +52,10 @@ export function parseCSV(text) {
     const result = [];
     if (rows.length >= 2) {
         const [fields] = rows;
-        for (let ixLine = 1; ixLine &lt; rows.length; ixLine += 1) {
+        for (let ixLine = 1; ixLine < rows.length; ixLine += 1) {
             const row = rows[ixLine];
             result.push(Object.fromEntries(fields.map(
-                (field, ixField) => [field, ixField &lt; row.length ? row[ixField] : 'null']
+                (field, ixField) => [field, ixField < row.length ? row[ixField] : 'null']
             )));
         }
     }
@@ -116,10 +88,10 @@ export function validateData(data, csv = false) {
                     types[field] = 'number';
                 } else if (value instanceof Date) {
                     types[field] = 'datetime';
-                } else if (typeof value === 'string' &amp;&amp; (!csv || value !== 'null')) {
+                } else if (typeof value === 'string' && (!csv || value !== 'null')) {
                     if (parseDatetime(value) !== null) {
                         types[field] = 'datetime';
-                    } else if (csv &amp;&amp; parseNumber(value) !== null) {
+                    } else if (csv && parseNumber(value) !== null) {
                         types[field] = 'number';
                     } else {
                         types[field] = 'string';
@@ -138,18 +110,18 @@ export function validateData(data, csv = false) {
             const fieldType = types[field];
 
             // Null string?
-            if (csv &amp;&amp; value === 'null') {
+            if (csv && value === 'null') {
                 row[field] = null;
 
             // Number field
             } else if (fieldType === 'number') {
-                if (csv &amp;&amp; typeof value === 'string') {
+                if (csv && typeof value === 'string') {
                     const numberValue = parseNumber(value);
                     if (numberValue === null) {
                         throwFieldError(field, fieldType, value);
                     }
                     row[field] = numberValue;
-                } else if (value !== null &amp;&amp; typeof value !== 'number') {
+                } else if (value !== null && typeof value !== 'number') {
                     throwFieldError(field, fieldType, value);
                 }
 
@@ -161,13 +133,13 @@ export function validateData(data, csv = false) {
                         throwFieldError(field, fieldType, value);
                     }
                     row[field] = datetimeValue;
-                } else if (value !== null &amp;&amp; !(value instanceof Date)) {
+                } else if (value !== null && !(value instanceof Date)) {
                     throwFieldError(field, fieldType, value);
                 }
 
             // String field
             } else {
-                if (value !== null &amp;&amp; typeof value !== 'string') {
+                if (value !== null && typeof value !== 'string') {
                     throwFieldError(field, fieldType, value);
                 }
             }
@@ -187,7 +159,7 @@ function parseNumber(text) {
 }
 
 
-function parseDatetime(text) {
+export function parseDatetime(text) {
     if (rDate.test(text)) {
         const localDate = new Date(text);
         return new Date(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate());
@@ -210,7 +182,7 @@ const rDatetime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2
  * @param {?string} [rightExpr = null] - The right join [expression]{@link https://craigahobbs.github.io/bare-script/language/#expressions}
  * @param {boolean} [isLeftJoin = false] - If true, perform a left join (always include left row)
  * @param {?Object} [variables = null] - Additional variables for expression evaluation
- * @param {?Object} [options = null] - The [markdown-script options]{@link module:lib/script~MarkdownScriptOptions}
+ * @param {?Object} [options = null] - The [script execution options]{@link module:lib/runtime~ExecuteScriptOptions}
  * @returns {Object[]} The joined data array
  */
 export function joinData(leftData, rightData, joinExpr, rightExpr = null, isLeftJoin = false, variables = null, options = null) {
@@ -295,7 +267,7 @@ export function joinData(leftData, rightData, joinExpr, rightExpr = null, isLeft
  * @param {string} fieldName - The calculated field name
  * @param {string} expr - The calculated field expression
  * @param {?Object} [variables = null] -  Additional variables for expression evaluation
- * @param {?Object} [options = null] - The [markdown-script options]{@link module:lib/script~MarkdownScriptOptions}
+ * @param {?Object} [options = null] - The [script execution options]{@link module:lib/runtime~ExecuteScriptOptions}
  * @returns {Object[]} The updated data array
  */
 export function addCalculatedField(data, fieldName, expr, variables = null, options = null) {
@@ -327,7 +299,7 @@ export function addCalculatedField(data, fieldName, expr, variables = null, opti
  * @param {Object[]} data - The data array
  * @param {string} expr - The boolean filter [expression]{@link https://craigahobbs.github.io/bare-script/language/#expressions}
  * @param {?Object} [variables = null] -  Additional variables for expression evaluation
- * @param {?Object} [options = null] - The [markdown-script options]{@link module:lib/script~MarkdownScriptOptions}
+ * @param {?Object} [options = null] - The [script execution options]{@link module:lib/runtime~ExecuteScriptOptions}
  * @returns {Object[]} The filtered data array
  */
 export function filterData(data, expr, variables = null, options = null) {
@@ -410,9 +382,9 @@ enum AggregationFunction
  * Validate an aggregation model
  *
  * @param {Object} aggregation - The
- *     [aggregation model]{@link https://craigahobbs.github.io/markdown-up/library/model.html#var.vName='Aggregation'}
+ *     [aggregation model]{@link https://craigahobbs.github.io/bare-script/library/model.html#var.vName='Aggregation'}
  * @returns {Object} The validated
- *     [aggregation model]{@link https://craigahobbs.github.io/markdown-up/library/model.html#var.vName='Aggregation'}
+ *     [aggregation model]{@link https://craigahobbs.github.io/bare-script/library/model.html#var.vName='Aggregation'}
  * @throws [ValidationError]{@link https://craigahobbs.github.io/schema-markdown-js/module-lib_schema.ValidationError.html}
  */
 export function validateAggregation(aggregation) {
@@ -425,7 +397,7 @@ export function validateAggregation(aggregation) {
  *
  * @param {Object[]} data - The data array
  * @param {Object} aggregation - The
- *     [aggregation model]{@link https://craigahobbs.github.io/markdown-up/library/model.html#var.vName='Aggregation'}
+ *     [aggregation model]{@link https://craigahobbs.github.io/bare-script/library/model.html#var.vName='Aggregation'}
  * @returns {Object[]} The aggregated data array
  */
 export function aggregateData(data, aggregation) {
@@ -446,7 +418,7 @@ export function aggregateData(data, aggregation) {
             aggregateRow = {};
             categoryRows[rowKey] = aggregateRow;
             if (categories !== null) {
-                for (let ixCategoryField = 0; ixCategoryField &lt; categories.length; ixCategoryField++) {
+                for (let ixCategoryField = 0; ixCategoryField < categories.length; ixCategoryField++) {
                     aggregateRow[categories[ixCategoryField]] = categoryValues[ixCategoryField];
                 }
             }
@@ -475,7 +447,7 @@ export function aggregateData(data, aggregation) {
             } else if (func === 'max') {
                 aggregateRow[field] = measureValues.reduce((max, val) => (val > max ? val : max));
             } else if (func === 'min') {
-                aggregateRow[field] = measureValues.reduce((min, val) => (val &lt; min ? val : min));
+                aggregateRow[field] = measureValues.reduce((min, val) => (val < min ? val : min));
             } else if (func === 'sum') {
                 aggregateRow[field] = measureValues.reduce((sum, val) => sum + val, 0);
             } else {
@@ -536,7 +508,7 @@ export function topData(data, count, categoryFields = null) {
     for (const categoryKey of categoryOrder) {
         const categoryKeyRows = categoryRows[categoryKey];
         const categoryKeyLength = categoryKeyRows.length;
-        for (let ixRow = 0; ixRow &lt; topCount &amp;&amp; ixRow &lt; categoryKeyLength; ixRow++) {
+        for (let ixRow = 0; ixRow < topCount && ixRow < categoryKeyLength; ixRow++) {
             dataTop.push(categoryKeyRows[ixRow]);
         }
     }
@@ -544,48 +516,13 @@ export function topData(data, count, categoryFields = null) {
 }
 
 
-// Helper function to format labels
-export function formatValue(value, precision = null, datetime = null, trim = null) {
-    if (value instanceof Date) {
-        if (datetime === 'year') {
-            // Round to nearest year
-            let valueRounded = value;
-            if (value.getUTCMonth() > 5) {
-                valueRounded = new Date(value);
-                valueRounded.setUTCFullYear(value.getUTCFullYear() + 1);
-            }
-
-            const isoFormat = valueRounded.toISOString();
-            return isoFormat.slice(0, isoFormat.indexOf('T') - 6);
-        } else if (datetime === 'month') {
-            // Round to the nearest month
-            let valueRounded = value;
-            if (value.getUTCDate() > 15) {
-                valueRounded = new Date(value);
-                valueRounded.setMonth(value.getUTCMonth() + 1);
-            }
-
-            const isoFormat = valueRounded.toISOString();
-            return isoFormat.slice(0, isoFormat.indexOf('T') - 3);
-        } else if (datetime === 'day') {
-            const isoFormat = value.toISOString();
-            return isoFormat.slice(0, isoFormat.indexOf('T'));
-        }
-        return value.toISOString().replace(rDateCleanup, '');
-    } else if (typeof value === 'number') {
-        const numberFormat = value.toFixed(precision ?? defaultPrecision);
-        return (trim ?? defaultTrim) ? numberFormat.replace(rNumberCleanup, '') : numberFormat;
-    }
-    return `${value}`;
-}
-
-const defaultPrecision = 2;
-const defaultTrim = true;
-const rNumberCleanup = /\.0*$/;
-const rDateCleanup = /(?:(?:(?:-01)?T00:00)?:00)?\.\d\d\dZ$/;
-
-
-// Helper function to compare values
+/**
+ * Compare two data values
+ *
+ * @param {*} value1 - The first value
+ * @param {*} value2 - The second value
+ * @returns {number} -1 if the first value is less, 1 if the first value is greater, and 0 if they are equal
+ */
 export function compareValues(value1, value2) {
     if (value1 === null) {
         return value2 === null ? 0 : -1;
@@ -594,56 +531,7 @@ export function compareValues(value1, value2) {
     } else if (value1 instanceof Date) {
         const time1 = value1.getTime();
         const time2 = value2.getTime();
-        return time1 &lt; time2 ? -1 : (time1 === time2 ? 0 : 1);
+        return time1 < time2 ? -1 : (time1 === time2 ? 0 : 1);
     }
-    return value1 &lt; value2 ? -1 : (value1 === value2 ? 0 : 1);
+    return value1 < value2 ? -1 : (value1 === value2 ? 0 : 1);
 }
-
-
-// Helper function to compute a value's parameter
-export function valueParameter(value, minValue, maxValue) {
-    if (minValue === maxValue) {
-        return 0;
-    }
-
-    if (minValue instanceof Date) {
-        const minDateValue = minValue.valueOf();
-        return (value.valueOf() - minDateValue) / (maxValue.valueOf() - minDateValue);
-    }
-
-    return (value - minValue) / (maxValue - minValue);
-}
-
-
-// Helper function to compute a value from a parameter
-export function parameterValue(param, minValue, maxValue) {
-    if (minValue instanceof Date) {
-        const minDateValue = minValue.valueOf();
-        return new Date(minDateValue + param * (maxValue.valueOf() - minDateValue));
-    }
-
-    return minValue + param * (maxValue - minValue);
-}
-</code></pre>
-        </article>
-    </section>
-
-
-
-
-</div>
-
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_data.html">lib/data</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
-</nav>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a>
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
-</body>
-</html>

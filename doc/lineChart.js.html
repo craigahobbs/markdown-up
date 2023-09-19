@@ -31,7 +31,8 @@
 
 /** @module lib/lineChart */
 
-import {compareValues, formatValue, parameterValue, valueParameter} from './data.js';
+import {formatValue, parameterValue, valueParameter} from './dataUtil.js';
+import {compareValues} from 'bare-script/lib/data.js';
 import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import {validateType} from 'schema-markdown/lib/schema.js';
 
@@ -734,7 +735,7 @@ export function lineChartElements(data, lineChart, options = null) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_data.html">lib/data</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
 </nav>
 
 <br class="clear">
