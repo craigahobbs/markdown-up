@@ -157,8 +157,9 @@ To turn on debug mode, click the debug button in the MarkdownUp menu in the uppe
 
 ## The MarkdownUp Package
 
-The [markdown-up package](https://www.npmjs.com/package/markdown-up) contains functions for parsing
-CSV, manipulating data, and rendering tables and charts. For more information, refer to the
+The [markdown-up package](https://www.npmjs.com/package/markdown-up)
+exposes various functionality of the MarkdownUp application, such as rendering data tables and
+charts. For more information, refer to the
 [MarkdownUp package documentation](https://craigahobbs.github.io/markdown-up/doc/).
 
 
