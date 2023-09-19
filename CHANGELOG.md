@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0 (2023-09-19)
+
+- [9bebc79](https://github.com/craigahobbs/markdown-up/commit/9bebc79) - move data functions to bare-script
+
 ## 2.2.1 (2023-09-01)
 
 - [06a808b](https://github.com/craigahobbs/markdown-up/commit/06a808b) - markdown-script dataTable trim option
