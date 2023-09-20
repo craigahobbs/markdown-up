@@ -1,0 +1,50 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include '../forms.mds'
+
+
+function testFormsTextElements():
+    unittestDeepEquals( \
+        formsTextElements('testId', 'Hello', 30), \
+        objectNew( \
+            'attr', objectNew( \
+                'autocomplete', 'off', \
+                'id', 'testId', \
+                'size', 30, \
+                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type', 'text', \
+                'value', 'Hello' \
+            ), \
+            'callback', null, \
+            'callbackData', null, \
+            'html', 'input' \
+        ) \
+    )
+endfunction
+unittestRunTest('testFormsTextElements')
+
+
+function testFormsTextElementsOnEnterCallback():
+endfunction
+
+
+function testFormsTextElementsOnEnter():
+    elements = formsTextElements('testId', 'Hello', 30, testFormsTextElementsOnEnterCallback)
+    unittestDeepEquals( \
+        elements, \
+        objectNew( \
+            'attr', objectNew( \
+                'autocomplete', 'off', \
+                'id', 'testId', \
+                'size', 30, \
+                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type', 'text', \
+                'value', 'Hello' \
+            ), \
+            'callback', objectNew(), \
+            'html', 'input' \
+        ) \
+    )
+endfunction
+unittestRunTest('testFormsTextElementsOnEnter')
