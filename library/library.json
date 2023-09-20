@@ -568,7 +568,7 @@
                 }
             ],
             "return": [
-                "The text's height"
+                "The text's height, in pixels"
             ]
         },
         {
@@ -631,7 +631,7 @@
                 }
             ],
             "return": [
-                "The text's width"
+                "The text's width, in pixels"
             ]
         },
         {

@@ -1,0 +1,237 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# Include sentinel
+if systemGlobalGet('markdownUpState'):
+    return
+endif
+
+
+# Constants
+markdownUpFontWidthRatio = 0.6
+markdownUpPixelsPerPoint = 4 / 3
+
+
+# The mock MarkdownUp state
+markdownUpState = objectNew( \
+    'drawingHeight', 480, \
+    'drawingWidth', 640, \
+    'fontSizePx', 12 * markdownUpPixelsPerPoint \
+)
+
+
+#
+# Data functions
+#
+
+function dataLineChart(data, lineChart):
+    width = objectGet(lineChart, 'width', 640)
+    height = objectGet(lineChart, 'height', 320)
+    title = objectGet(lineChart, 'title')
+    systemLog('')
+    systemLog('<LineChart ' + width + 'x' + height + ', ' + arrayLength(data) + ' rows' + if(title, ' - ' + title, '') + '>')
+endfunction
+
+function dataTable(data):
+    systemLog('')
+    systemLog('<DataTable ' + arrayLength(data) + ' rows>')
+endfunction
+
+
+#
+# Document functions
+#
+
+function documentFontSize():
+    return objectGet(markdownUpState, 'fontSizePx')
+endfunction
+
+function documentInputValue():
+endfunction
+
+function documentSetFocus():
+endfunction
+
+function documentSetReset():
+endfunction
+
+function documentSetTitle():
+endfunction
+
+function documentURL(url):
+    return url
+endfunction
+
+
+#
+# Drawing functions
+#
+
+function drawArc():
+endfunction
+
+function drawCircle():
+endfunction
+
+function drawClose():
+endfunction
+
+function drawEllipse():
+endfunction
+
+function drawHLine():
+endfunction
+
+function drawHeight():
+    return objectGet(markdownUpState, 'drawingHeight')
+endfunction
+
+function drawImage():
+endfunction
+
+function drawLine():
+endfunction
+
+function drawMove():
+endfunction
+
+function drawNew(width, height):
+    objectSet(markdownUpState, 'drawingWidth', width)
+    objectSet(markdownUpState, 'drawingHeight', height)
+    systemLog('')
+    systemLog('<Drawing ' + width + 'x' + height + '>')
+endfunction
+
+function drawOnClick():
+endfunction
+
+function drawPathRect():
+endfunction
+
+function drawRect():
+endfunction
+
+function drawStyle():
+endfunction
+
+function drawText():
+endfunction
+
+function drawTextHeight(text, width):
+    if width > 0:
+        return width / (markdownUpFontWidthRatio * stringLength(text))
+    endif
+    return objectGet(markdownUpState, 'fontSizePx')
+endfunction
+
+function drawTextStyle():
+endfunction
+
+function drawTextWidth(text, fontSizePx):
+    return markdownUpFontWidthRatio * fontSizePx * stringLength(text)
+endfunction
+
+function drawVLine():
+endfunction
+
+function drawWidth():
+    return objectGet(markdownUpState, 'drawingWidth')
+endfunction
+
+
+#
+# Element Model functions
+#
+
+function elementModelRender():
+endfunction
+
+
+#
+# Local storage functions
+#
+
+function localStorageClear():
+endfunction
+
+function localStorageGet():
+endfunction
+
+function localStorageRemove():
+endfunction
+
+function localStorageSet():
+endfunction
+
+
+#
+# Markdown functions
+#
+
+function markdownEscape(text):
+    return text
+endfunction
+
+function markdownHeaderId(text):
+    return text
+endfunction
+
+function markdownParse():
+endfunction
+
+function markdownPrint(lines...):
+    for line in lines:
+        systemLog(line)
+    endfor
+endfunction
+
+function markdownTitle():
+endfunction
+
+
+#
+# Schema functions
+#
+
+function schemaElements():
+endfunction
+
+
+#
+# Session storage functions
+#
+
+function sessionStorageClear():
+endfunction
+
+function sessionStorageGet():
+endfunction
+
+function sessionStorageRemove():
+endfunction
+
+function sessionStorageSet():
+endfunction
+
+
+#
+# Window functions
+#
+
+function windowHeight():
+    return 768
+endfunction
+
+function windowSetLocation():
+endfunction
+
+function windowSetResize():
+endfunction
+
+function windowSetTimeout():
+endfunction
+
+function windowWidth():
+    return 1024
+endfunction

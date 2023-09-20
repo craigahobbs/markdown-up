@@ -14,7 +14,7 @@ unittestWarnings = arrayNew()
 
 
 # $function: unittestRunTest
-# $group: unittest
+# $group: unittest.mds
 # $doc: Run a unit test
 # $arg testName: The test function name
 function unittestRunTest(testName):
@@ -27,7 +27,7 @@ endfunction
 
 
 # $function: unittestRunTestAsync
-# $group: unittest
+# $group: unittest.mds
 # $doc: Run an asyncronous unit test
 # $arg testName: The test function name
 async function unittestRunTestAsync(testName):
@@ -69,7 +69,7 @@ endfunction
 
 
 # $function: unittestReport
-# $group: unittest
+# $group: unittest.mds
 # $doc: Render the unit test report
 function unittestReport():
     # Compute test statistics
@@ -125,7 +125,7 @@ endfunction
 
 
 # $function: unittestReset
-# $group: unittest
+# $group: unittest.mds
 # $doc: Reset the unit test data
 function unittestReset():
     systemGlobalSet('unittestTests', objectNew())
@@ -134,7 +134,7 @@ endfunction
 
 
 # $function: unittestEquals
-# $group: unittest
+# $group: unittest.mds
 # $doc: Assert an actual value is equal to the expected value
 # $arg actual: The actual value
 # $arg expected: The expected value
@@ -147,7 +147,7 @@ endfunction
 
 
 # $function: unittestDeepEquals
-# $group: unittest
+# $group: unittest.mds
 # $doc: Assert an actual value is *deeply* equal to the expected value
 # $arg actual: The actual value
 # $arg expected: The expected value

@@ -2,7 +2,7 @@
     "functions": [
         {
             "name": "formsLinkButtonElements",
-            "group": "forms",
+            "group": "forms.mds",
             "doc": [
                 "Create a link button [element model](https://github.com/craigahobbs/element-model#readme)"
             ],
@@ -26,7 +26,7 @@
         },
         {
             "name": "formsLinkElements",
-            "group": "forms",
+            "group": "forms.mds",
             "doc": [
                 "Create a link [element model](https://github.com/craigahobbs/element-model#readme)"
             ],
@@ -50,7 +50,7 @@
         },
         {
             "name": "formsTextElements",
-            "group": "forms",
+            "group": "forms.mds",
             "doc": [
                 "Create a text input [element model](https://github.com/craigahobbs/element-model#readme)"
             ],
@@ -86,7 +86,7 @@
         },
         {
             "name": "unittestDeepEquals",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Assert an actual value is *deeply* equal to the expected value"
             ],
@@ -113,7 +113,7 @@
         },
         {
             "name": "unittestEquals",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Assert an actual value is equal to the expected value"
             ],
@@ -140,21 +140,21 @@
         },
         {
             "name": "unittestReport",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Render the unit test report"
             ]
         },
         {
             "name": "unittestReset",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Reset the unit test data"
             ]
         },
         {
             "name": "unittestRunTest",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Run a unit test"
             ],
@@ -169,7 +169,7 @@
         },
         {
             "name": "unittestRunTestAsync",
-            "group": "unittest",
+            "group": "unittest.mds",
             "doc": [
                 "Run an asyncronous unit test"
             ],
