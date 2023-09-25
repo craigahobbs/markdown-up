@@ -25,6 +25,7 @@ markdownUpState = objectNew( \
 # Data functions
 #
 
+
 function dataLineChart(data, lineChart):
     width = objectGet(lineChart, 'width', 640)
     height = objectGet(lineChart, 'height', 320)
@@ -33,9 +34,128 @@ function dataLineChart(data, lineChart):
     systemLog('<LineChart ' + width + 'x' + height + ', ' + arrayLength(data) + ' rows' + if(title, ' - ' + title, '') + '>')
 endfunction
 
-function dataTable(data):
-    systemLog('')
-    systemLog('<DataTable ' + arrayLength(data) + ' rows>')
+
+function dataTable(data, model):
+    # Validate the data
+    data = dataValidate(data)
+    if data == null:
+        return
+    endif
+
+    # Determine the table fields
+    modelFields = objectGet(model, 'fields')
+    modelCategories = objectGet(model, 'categories')
+    fields = arrayNew()
+    if modelFields != null || modelCategories != null:
+        if modelCategories != null:
+            arrayExtend(fields, modelCategories)
+        endif
+        if modelFields != null:
+            arrayExtend(fields, modelFields)
+        endif
+    else:
+        if arrayLength(data) > 0:
+            arrayExtend(fields, objectKeys(arrayGet(data, 0)))
+        endif
+    endif
+    if !arrayLength(fields):
+        return
+    endif
+
+    # Get precision and formatting
+    precisionNumber = if(objectHas(model, 'precision'), objectGet(model, 'precision'), 2)
+    precisionTrim = if(objectHas(model, 'trim'), objectGet(model, 'trim'), true)
+    formats = objectGet(model, 'formats')
+
+    # Compute the field header widths
+    widths = objectNew()
+    for field in fields:
+        fieldWidth = stringLength(field)
+        if !objectHas(widths, field) || fieldWidth > objectGet(widths, field):
+            objectSet(widths, field, fieldWidth)
+        endif
+    endfor
+
+    # Compute the formatted field value strings and widths
+    dataFormat = arrayNew()
+    for row in data:
+        rowFormat = objectNew()
+        arrayPush(dataFormat, rowFormat)
+        for field in fields:
+            # Format the value
+            value = objectGet(row, field)
+            if stringLength(value) != null:
+                valueFormat = value
+            else:
+                valueFormat = numberToFixed(value, precisionNumber, precisionTrim)
+                if valueFormat == null:
+                    if datetimeYear(value) != null:
+                        valueFormat = datetimeISOFormat(value)
+                    else:
+                        valueFormat = stringNew(value)
+                    endif
+                endif
+            endif
+            objectSet(rowFormat, field, valueFormat)
+
+            # Update the field width
+            valueWidth = stringLength(valueFormat)
+            if !objectHas(widths, field) || valueWidth > objectGet(widths, field):
+                objectSet(widths, field, valueWidth)
+            endif
+        endfor
+    endfor
+
+    # Compute the field header separator
+    headerSeparator = ''
+    for field in fields:
+        width = objectGet(widths, field)
+        align = objectGet(objectGet(formats, field), 'align')
+        headerSeparator = headerSeparator + '+=' + markdownUpValueField('', width, align, '=') + '='
+    endfor
+    headerSeparator = headerSeparator + '+'
+
+    # Compute the table header fields
+    headerFields = ''
+    for field in fields:
+        width = objectGet(widths, field)
+        align = objectGet(objectGet(formats, field), 'align')
+        headerFields = headerFields + '| ' + markdownUpValueField(field, width, align, ' ') + ' '
+    endfor
+    headerFields = headerFields + '|'
+
+    # Output the table header
+    systemLog(headerSeparator)
+    systemLog(headerFields)
+    systemLog(headerSeparator)
+
+    # Output each row
+    for row in dataFormat:
+        line = ''
+        for field in fields:
+            width = objectGet(widths, field)
+            align = objectGet(objectGet(formats, field), 'align')
+            line = line + '| ' + markdownUpValueField(objectGet(row, field), width, align, ' ') + ' '
+        endfor
+        line = line + '|'
+        systemLog(line)
+    endfor
+
+    # Output the table footer
+    systemLog(headerSeparator)
+endfunction
+
+
+function markdownUpValueField(value, width, align, fill):
+    spaces = width - stringLength(value)
+    if align == 'right':
+        return stringRepeat(fill, spaces) + value
+    elif align == 'center':
+        spacesLeft = mathFloor(spaces / 2)
+        spacesRight = spaces - spacesLeft
+        return stringRepeat(fill, spacesLeft) + value + stringRepeat(fill, spacesRight)
+    endif
+    return value + stringRepeat(fill, spaces)
 endfunction
 
 
@@ -43,21 +163,27 @@ endfunction
 # Document functions
 #
 
+
 function documentFontSize():
     return objectGet(markdownUpState, 'fontSizePx')
 endfunction
 
+
 function documentInputValue():
 endfunction
+
 
 function documentSetFocus():
 endfunction
 
+
 function documentSetReset():
 endfunction
 
+
 function documentSetTitle():
 endfunction
+
 
 function documentURL(url):
     return url
@@ -68,33 +194,43 @@ endfunction
 # Drawing functions
 #
 
+
 function drawArc():
 endfunction
+
 
 function drawCircle():
 endfunction
 
+
 function drawClose():
 endfunction
+
 
 function drawEllipse():
 endfunction
 
+
 function drawHLine():
 endfunction
+
 
 function drawHeight():
     return objectGet(markdownUpState, 'drawingHeight')
 endfunction
 
+
 function drawImage():
 endfunction
+
 
 function drawLine():
 endfunction
 
+
 function drawMove():
 endfunction
+
 
 function drawNew(width, height):
     objectSet(markdownUpState, 'drawingWidth', width)
@@ -103,20 +239,26 @@ function drawNew(width, height):
     systemLog('<Drawing ' + width + 'x' + height + '>')
 endfunction
 
+
 function drawOnClick():
 endfunction
+
 
 function drawPathRect():
 endfunction
 
+
 function drawRect():
 endfunction
+
 
 function drawStyle():
 endfunction
 
+
 function drawText():
 endfunction
+
 
 function drawTextHeight(text, width):
     if width > 0:
@@ -125,15 +267,19 @@ function drawTextHeight(text, width):
     return objectGet(markdownUpState, 'fontSizePx')
 endfunction
 
+
 function drawTextStyle():
 endfunction
+
 
 function drawTextWidth(text, fontSizePx):
     return markdownUpFontWidthRatio * fontSizePx * stringLength(text)
 endfunction
 
+
 function drawVLine():
 endfunction
+
 
 function drawWidth():
     return objectGet(markdownUpState, 'drawingWidth')
@@ -144,6 +290,7 @@ endfunction
 # Element Model functions
 #
 
+
 function elementModelRender():
 endfunction
 
@@ -152,14 +299,18 @@ endfunction
 # Local storage functions
 #
 
+
 function localStorageClear():
 endfunction
+
 
 function localStorageGet():
 endfunction
 
+
 function localStorageRemove():
 endfunction
+
 
 function localStorageSet():
 endfunction
@@ -169,22 +320,27 @@ endfunction
 # Markdown functions
 #
 
+
 function markdownEscape(text):
     return text
 endfunction
+
 
 function markdownHeaderId(text):
     return text
 endfunction
 
+
 function markdownParse():
 endfunction
+
 
 function markdownPrint(lines...):
     for line in lines:
         systemLog(line)
     endfor
 endfunction
+
 
 function markdownTitle():
 endfunction
@@ -194,6 +350,7 @@ endfunction
 # Schema functions
 #
 
+
 function schemaElements():
 endfunction
 
@@ -202,14 +359,18 @@ endfunction
 # Session storage functions
 #
 
+
 function sessionStorageClear():
 endfunction
+
 
 function sessionStorageGet():
 endfunction
 
+
 function sessionStorageRemove():
 endfunction
+
 
 function sessionStorageSet():
 endfunction
@@ -219,18 +380,23 @@ endfunction
 # Window functions
 #
 
+
 function windowHeight():
     return 768
 endfunction
 
+
 function windowSetLocation():
 endfunction
+
 
 function windowSetResize():
 endfunction
 
+
 function windowSetTimeout():
 endfunction
+
 
 function windowWidth():
     return 1024

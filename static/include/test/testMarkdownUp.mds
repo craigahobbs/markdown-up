@@ -59,14 +59,123 @@ unittestRunTest('testMarkdownUp_dataLineChart_noDefaults')
 
 function testMarkdownUp_dataTable():
     testMarkdownUp_systemLogMockBegin()
-    data = arrayNew(objectNew('A', 1, 'B', 2))
-    unittestEquals(dataTable(data, objectNew()), null)
+    data = arrayNew(objectNew('A', 1.495, 'B', 2))
+    unittestEquals(dataTable(data), null)
     unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '', \
-        '<DataTable 1 rows>' \
+        '+======+===+', \
+        '| A    | B |', \
+        '+======+===+', \
+        '| 1.50 | 2 |', \
+        '+======+===+' \
     ))
-    endfunction
+endfunction
 unittestRunTest('testMarkdownUp_dataTable')
+
+
+function testMarkdownUp_dataTable_fields():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew(objectNew('A', 1, 'B', 2, 'C', 3))
+    model = objectNew( \
+        'fields', 'C', \
+        'categories', 'A' \
+    )
+    unittestEquals(dataTable(data, model), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
+        '+===+===+', \
+        '| A | C |', \
+        '+===+===+', \
+        '| 1 | 3 |', \
+        '+===+===+' \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_fields')
+
+
+function testMarkdownUp_dataTable_precision():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew(objectNew('A', 1.495, 'B', 2))
+    model = objectNew( \
+        'precision', 1, \
+        'trim', false \
+    )
+    unittestEquals(dataTable(data, model), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
+        '+=====+=====+', \
+        '| A   | B   |', \
+        '+=====+=====+', \
+        '| 1.5 | 2.0 |', \
+        '+=====+=====+' \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_precision')
+
+
+function testMarkdownUp_dataTable_datetime():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
+    model = objectNew( \
+        'precision', 1, \
+        'trim', false \
+    )
+    unittestEquals(dataTable(data, model), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
+        '+==========================+', \
+        '| A                        |', \
+        '+==========================+', \
+        '| 2023-09-25T00:00:00.000Z |', \
+        '+==========================+' \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_datetime')
+
+
+function testMarkdownUp_dataTable_formats():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew( \
+        objectNew('A', 'asdf', 'B', 'asdf', 'CCCCCCCCCC', 'asdf'), \
+        objectNew('A', 'asdfasdf', 'B', 'asdfasdf', 'CCCCCCCCCC', 'asdfasdf'), \
+        objectNew('A', 'asdfa', 'B', 'asdfas', 'CCCCCCCCCC', 'asdfas') \
+    )
+    model = objectNew( \
+        'formats', objectNew( \
+            'A', objectNew('align', 'center'), \
+            'B', objectNew('align', 'right'), \
+            'CCCCCCCCCC', objectNew('align', 'right') \
+        ) \
+    )
+    unittestEquals(dataTable(data, model), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
+        "+==========+==========+============+", \
+        "|    A     |        B | CCCCCCCCCC |", \
+        "+==========+==========+============+", \
+        "|   asdf   |     asdf |       asdf |", \
+        "| asdfasdf | asdfasdf |   asdfasdf |", \
+        "|  asdfa   |   asdfas |     asdfas |", \
+        "+==========+==========+============+" \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_formats')
+
+
+function testMarkdownUp_dataTable_invalidData():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew( \
+        objectNew('A', 1), \
+        objectNew('A', 'asdfasdf') \
+    )
+    unittestEquals(dataTable(data), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_invalidData')
+
+
+function testMarkdownUp_dataTable_noFields():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew()
+    unittestEquals(dataTable(data), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_noFields')
 
 
 function testMarkdownUp_documentFontSize():
