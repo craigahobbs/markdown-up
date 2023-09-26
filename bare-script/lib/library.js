@@ -160,7 +160,7 @@ export const scriptFunctions = {
     // $group: Data
     // $doc: Aggregate a data array
     // $arg data: The data array
-    // $arg aggregation: The [aggregation model](model.html#var.vName='Aggregation')
+    // $arg aggregation: The [aggregation model](https://craigahobbs.github.io/bare-script/library/model.html#var.vName='Aggregation')
     // $return: The aggregated data array
     'dataAggregate': ([data, aggregation]) => aggregateData(data, validateAggregation(aggregation)),
 
@@ -599,7 +599,7 @@ export const scriptFunctions = {
     // $arg defaultValue: The default value (optional)
     // $return: The value or null if the key does not exist
     'objectGet': ([object, key, defaultValue = null]) => (
-        object !== null && typeof object === 'object' ? (Object.hasOwn(object, key) ? object[key] : defaultValue) : null
+        object !== null && typeof object === 'object' ? (Object.hasOwn(object, key) ? object[key] : defaultValue) : defaultValue
     ),
 
     // $function: objectHas
