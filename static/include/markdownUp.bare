@@ -63,6 +63,7 @@ function dataTable(data, model):
     endif
 
     # Get precision and formatting
+    precisionDatetime = if(objectHas(model, 'datetime'), objectGet(model, 'datetime'), null)
     precisionNumber = if(objectHas(model, 'precision'), objectGet(model, 'precision'), 2)
     precisionTrim = if(objectHas(model, 'trim'), objectGet(model, 'trim'), true)
     formats = objectGet(model, 'formats')
@@ -90,7 +91,7 @@ function dataTable(data, model):
                 valueFormat = numberToFixed(value, precisionNumber, precisionTrim)
                 if valueFormat == null:
                     if datetimeYear(value) != null:
-                        valueFormat = datetimeISOFormat(value)
+                        valueFormat = datetimeISOFormat(value, precisionDatetime != null)
                     else:
                         valueFormat = stringNew(value)
                     endif

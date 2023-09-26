@@ -113,11 +113,7 @@ unittestRunTest('testMarkdownUp_dataTable_precision')
 function testMarkdownUp_dataTable_datetime():
     testMarkdownUp_systemLogMockBegin()
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
-    model = objectNew( \
-        'precision', 1, \
-        'trim', false \
-    )
-    unittestEquals(dataTable(data, model), null)
+    unittestEquals(dataTable(data), null)
     unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
         '+==========================+', \
         '| A                        |', \
@@ -127,6 +123,22 @@ function testMarkdownUp_dataTable_datetime():
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_datetime')
+
+
+function testMarkdownUp_dataTable_datetime_precision():
+    testMarkdownUp_systemLogMockBegin()
+    data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
+    model = objectNew('datetime', 'day')
+    unittestEquals(dataTable(data, model), null)
+    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
+        '+============+', \
+        '| A          |', \
+        '+============+', \
+        '| 2023-09-25 |', \
+        '+============+' \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_dataTable_datetime_precision')
 
 
 function testMarkdownUp_dataTable_formats():
