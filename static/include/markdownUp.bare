@@ -63,9 +63,9 @@ function dataTable(data, model):
     endif
 
     # Get precision and formatting
-    precisionDatetime = if(objectHas(model, 'datetime'), objectGet(model, 'datetime'), null)
-    precisionNumber = if(objectHas(model, 'precision'), objectGet(model, 'precision'), 2)
-    precisionTrim = if(objectHas(model, 'trim'), objectGet(model, 'trim'), true)
+    precisionDatetime = objectGet(model, 'datetime')
+    precisionNumber = objectGet(model, 'precision', 2)
+    precisionTrim = objectGet(model, 'trim', true)
     formats = objectGet(model, 'formats')
 
     # Compute the field header widths
