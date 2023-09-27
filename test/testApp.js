@@ -1411,6 +1411,10 @@ markdownPrint(null)
 ~~~
 
 ~~~ markdown-script
+markdownPrint(objectNew())
+~~~
+
+~~~ markdown-script
 markdownPrint('2')
 ~~~
 `});
