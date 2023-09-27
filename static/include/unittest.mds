@@ -85,9 +85,11 @@ function unittestReport():
     testPassCount = testCount - testFailCount
 
     # Report statistics
-    markdownPrint( \
-        'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed' \
-    )
+    markdownPrint('', 'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed')
+    if vTest != null:
+        testURL = if(vTestArgs != null, '#' + vTestArgs, '#var=')
+        markdownPrint('([all tests](' + testURL + '))')
+    endif
 
     # Report any warnings
     if arrayLength(unittestWarnings):
@@ -103,7 +105,7 @@ function unittestReport():
         for testName in testNames:
             testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if arrayLength(testFailures):
-                testURL = '#' + if(vTestArgs, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
+                testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
                 markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - FAIL")
                 for errorLines in testFailures:
                     for errorLine, ixErrorLine in errorLines:
@@ -124,7 +126,7 @@ function unittestReport():
         for testName in testNames:
             testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if !arrayLength(testFailures):
-                testURL = '#' + if(vTestArgs, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
+                testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
                 markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - OK")
             endif
         endfor
