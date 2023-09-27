@@ -105,7 +105,6 @@ export async function markdownElementsAsync(markdown, options = null) {
 }
 
 
-// eslint-disable-next-line require-await
 async function markdownPartsElementsAsync(parts, options, usedHeaderIds) {
     const elements = [];
     for (const part of parts) {

@@ -78,7 +78,7 @@ const rTableEscape = /\\(\\|)/g;
 /**
  * Parse markdown text or text lines into a Markdown model
  *
- * @param {string|string[]} markdown - Markdown text or text lines
+ * @param {string|string[]} markdown - Markdown text or text lines. Null text lines are ignored.
  * @param {number} [startLineNumber = 1] - The starting line number of the markdown text
  * @returns {Object} The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  */
@@ -174,6 +174,9 @@ export function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
     let emptyLinePrev = true;
     const markdownStrings = (typeof markdown === 'string' ? [markdown] : markdown);
     for (const markdownString of markdownStrings) {
+        if (markdownString === null) {
+            continue;
+        }
         for (const lineRaw of markdownString.split(rLineSplit)) {
             const line = lineRaw.replaceAll('\t', '    ');
             const matchLine = line.match(rIndent);
