@@ -103,7 +103,8 @@ function unittestReport():
         for testName in testNames:
             testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if arrayLength(testFailures):
-                markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + urlEncodeComponent(testName) + "') - FAIL")
+                testURL = '#' + if(vTestArgs, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
+                markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - FAIL")
                 for errorLines in testFailures:
                     for errorLine, ixErrorLine in errorLines:
                         if ixErrorLine == 0:
@@ -123,7 +124,8 @@ function unittestReport():
         for testName in testNames:
             testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
             if !arrayLength(testFailures):
-                markdownPrint('', '[' + markdownEscape(testName) + "](#var.vTest='" + urlEncodeComponent(testName) + "') - OK")
+                testURL = '#' + if(vTestArgs, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
+                markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - OK")
             endif
         endfor
     endif
