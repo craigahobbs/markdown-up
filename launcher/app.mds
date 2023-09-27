@@ -29,22 +29,19 @@ async function markdownUpIndex():
     )
 
     # Render file links
-    files = objectGet(index, 'files')
-    if files != null:
-        markdownPrint('', '## Markdown Files')
+    files = arrayNew()
+    markdownFiles = objectGet(index, 'files')
+    arrayExtend(files, markdownFiles)
+    arrayExtend(files, objectGet(index, 'htmlFiles'))
+    arraySort(files)
+    if arrayLength(files):
+        markdownPrint('', '## Files')
         for file in files:
             fileURL = if(vPath != null, vPath + '/', '') + file
-            markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=)')
-        endfor
-    endif
-
-    # Render HTML links
-    htmlFiles = objectGet(index, 'htmlFiles')
-    if htmlFiles != null:
-        markdownPrint('', '## HTML Files')
-        for htmlFile in htmlFiles:
-            htmlFileURL = if(vPath != null, vPath + '/', '') + htmlFile
-            markdownPrint('', '[' + markdownEscape(htmlFile) + '](' + htmlFileURL + ')')
+            if arrayIndexOf(markdownFiles, file) != -1:
+                fileURL = '#url=' + urlEncodeComponent(fileURL) + '&var='
+            endif
+            markdownPrint('', '[' + markdownEscape(file) + '](' + fileURL + ')')
         endfor
     endif
 
