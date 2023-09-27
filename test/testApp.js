@@ -1432,7 +1432,7 @@ markdownPrint('2')
                             {'html': 'p', 'elem': [{'text': '1'}]}
                         ]
                     ],
-                    [],
+                    [[]],
                     [
                         [
                             {'html': 'p', 'elem': [{'text': '2'}]}
