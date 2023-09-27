@@ -6,11 +6,11 @@ include <unittest.mds>
 
 # Run markdownUp.bare unit tests?
 if vBare:
-    markdownPrint('', 'Running "markdownUp.bare" tests. To run default tests, [click here](#var=).', '')
+    markdownPrint('Running "markdownUp.bare" tests. To run default tests, [click here](#var=).')
     vTestArgs = 'var.vBare=1'
     include 'testMarkdownUp.mds'
 else:
-    markdownPrint('', 'Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).', '')
+    markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
     include 'testForms.mds'
 endif
 
