@@ -25,12 +25,15 @@ endfunction
 unittestRunTest('testFormsTextElements')
 
 
-function testFormsTextElementsOnEnterCallback():
+function testFormsTextElements_onEnterCallback():
+    clickCount = systemGlobalGet('testFormsTextElements_onEnterCount')
+    systemGlobalSet('testFormsTextElements_onEnterCount', clickCount + 1)
 endfunction
 
 
-function testFormsTextElementsOnEnter():
-    elements = formsTextElements('testId', 'Hello', 30, testFormsTextElementsOnEnterCallback)
+function testFormsTextElements_onEnter():
+    systemGlobalSet('testFormsTextElements_onEnterCount', 0)
+    elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallback)
     unittestDeepEquals( \
         elements, \
         objectNew( \
@@ -46,5 +49,66 @@ function testFormsTextElementsOnEnter():
             'html', 'input' \
         ) \
     )
+    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
+    onEnter = objectGet(elements, 'callbackData')
+    onKeyup(10, onEnter)
+    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    onKeyup(13, onEnter)
+    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
-unittestRunTest('testFormsTextElementsOnEnter')
+unittestRunTest('testFormsTextElements_onEnter')
+
+
+function testFormsLinkButtonElementsCallback():
+    clickCount = systemGlobalGet('testFormsLinkButtonElementsCount')
+    systemGlobalSet('testFormsLinkButtonElementsCount', clickCount + 1)
+endfunction
+
+
+function testFormsLinkButtonElements():
+    systemGlobalSet('testFormsLinkButtonElementsCount', 0)
+    elements = formsLinkButtonElements('Hello', testFormsLinkButtonElementsCallback)
+    unittestDeepEquals( \
+        elements, \
+        objectNew( \
+            'html', 'a', \
+            'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
+            'elem', objectNew('text', 'Hello'), \
+            'callback', objectNew() \
+        ) \
+    )
+    unittestEquals(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)
+    onClick = objectGet(objectGet(elements, 'callback'), 'click')
+    onClick()
+    unittestEquals(systemGlobalGet('testFormsLinkButtonElementsCount'), 1)
+endfunction
+unittestRunTest('testFormsLinkButtonElements')
+
+
+function testFormsLinkElements():
+    elements = formsLinkElements('Hello', '#var=')
+    unittestDeepEquals( \
+        elements, \
+        objectNew( \
+            'html', 'a', \
+            'attr', objectNew('href', '#var='), \
+            'elem', objectNew('text', 'Hello') \
+        ) \
+    )
+endfunction
+unittestRunTest('testFormsLinkElements')
+
+
+function testFormsLinkElements_urlNull():
+    elements = formsLinkElements('Hello', null)
+    unittestDeepEquals( \
+        elements, \
+        objectNew( \
+            'html', 'span', \
+            'attr', objectNew('style', 'user-select: none;'), \
+            'elem', objectNew('text', 'Hello') \
+        ) \
+    )
+endfunction
+unittestRunTest('testFormsLinkElements_urlNull')
