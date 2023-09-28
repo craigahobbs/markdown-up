@@ -47,7 +47,7 @@ async function markdownUpIndex():
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    if directories != null:
+    if arrayLength(directories):
         markdownPrint('', '## Directories')
         for directory in directories:
             directoryURL = if(vPath != null, vPath + '/', '') + directory
@@ -56,7 +56,7 @@ async function markdownUpIndex():
     endif
 
     # Empty path?
-    if files == null && directories == null:
+    if !arrayLength(files) && !arrayLength(directories):
         markdownPrint('', 'No Markdown files or sub-directories found')
     endif
 endfunction
