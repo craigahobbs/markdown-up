@@ -100,7 +100,7 @@ endfunction
 unittestRunTest('testFormsLinkElements')
 
 
-function testFormsLinkElements_urlNull():
+function testFormsLinkElements_nullUrl():
     elements = formsLinkElements('Hello', null)
     unittestDeepEquals( \
         elements, \
@@ -111,4 +111,4 @@ function testFormsLinkElements_urlNull():
         ) \
     )
 endfunction
-unittestRunTest('testFormsLinkElements_urlNull')
+unittestRunTest('testFormsLinkElements_nullUrl')

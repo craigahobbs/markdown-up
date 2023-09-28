@@ -1,0 +1,90 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include '../unittest.mds'
+
+
+# Helper to begin mocking the unittest global state
+function testUnittestMockBegin():
+    result = arrayNew(systemGlobalGet('unittestTests'), systemGlobalGet('unittestWarnings'), systemGlobalGet('unittestTestName'))
+    systemGlobalSet('unittestTests', objectNew())
+    systemGlobalSet('unittestWarnings', arrayNew())
+    systemGlobalSet('unittestTestName', null)
+    return result
+endfunction
+
+
+# Helper to end mocking the unittest global state
+function testUnittestMockEnd(beginResult):
+    result = arrayNew(systemGlobalGet('unittestTests'), systemGlobalGet('unittestWarnings'))
+    systemGlobalSet('unittestTests', arrayGet(beginResult, 0))
+    systemGlobalSet('unittestWarnings', arrayGet(beginResult, 1))
+    systemGlobalSet('unittestTestName', arrayGet(beginResult, 2))
+    return result
+endfunction
+
+
+# Helper unittest function
+function testUnittestRunTest_test():
+    unittestEquals(1 + 1, 2)
+    unittestDeepEquals(arrayPush(arrayNew(1), 2), arrayNew(1, 2))
+endfunction
+
+
+# Helper unittest function
+function testUnittestRunTest_testFail():
+    unittestEquals(1 + 1, 3)
+    unittestDeepEquals(arrayPush(arrayNew(1), 2), arrayNew(1, 2, 3))
+endfunction
+
+
+function testUnittestRunTest():
+    mockBegin = testUnittestMockBegin()
+    unittestRunTest('testUnittestRunTest_test')
+    unittestDeepEquals(testUnittestMockEnd(mockBegin), arrayNew( \
+        objectNew('testUnittestRunTest_test', arrayNew()), \
+        arrayNew() \
+    ))
+endfunction
+unittestRunTest('testUnittestRunTest')
+
+
+function testUnittestRunTest_failure():
+    mockBegin = testUnittestMockBegin()
+    unittestRunTest('testUnittestRunTest_test')
+    unittestRunTest('testUnittestRunTest_testFail')
+    unittestDeepEquals(testUnittestMockEnd(mockBegin), arrayNew( \
+        objectNew( \
+            'testUnittestRunTest_test', arrayNew(), \
+            'testUnittestRunTest_testFail', arrayNew( \
+                arrayNew('~~~', '2', '~~~', '', '!=', '', '~~~', '3', '~~~'), \
+                arrayNew('~~~', '[1,2]', '~~~', '', '!=', '', '~~~', '[1,2,3]', '~~~') \
+            ) \
+        ), \
+        arrayNew() \
+    ))
+endfunction
+unittestRunTest('testUnittestRunTest_failure')
+
+
+function testUnittestRunTest_multiple():
+    mockBegin = testUnittestMockBegin()
+    unittestRunTest('testUnittestRunTest_test')
+    unittestRunTest('testUnittestRunTest_test')
+    unittestDeepEquals(testUnittestMockEnd(mockBegin), arrayNew( \
+        objectNew('testUnittestRunTest_test', arrayNew()), \
+        arrayNew('Test "testUnittestRunTest_test" run multiple times') \
+    ))
+endfunction
+unittestRunTest('testUnittestRunTest_multiple')
+
+
+function testUnittestRunTest_unknown():
+    mockBegin = testUnittestMockBegin()
+    unittestRunTest('testUnittestRunTest_unknownTest')
+    unittestDeepEquals(testUnittestMockEnd(mockBegin), arrayNew( \
+        objectNew(), \
+        arrayNew('Test "testUnittestRunTest_unknownTest" not found') \
+    ))
+endfunction
+unittestRunTest('testUnittestRunTest_unknown')
