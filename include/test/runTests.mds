@@ -12,6 +12,7 @@ if vBare:
 else:
     markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
     include 'testForms.mds'
+    include 'testUnittest.mds'
 endif
 
 # Test report
