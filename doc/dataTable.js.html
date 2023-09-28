@@ -69,11 +69,14 @@ struct DataTable
 # A data table field formatting model
 struct DataTableFieldFormat
 
-    # If true, format the field as Markdown
-    optional bool markdown
-
     # The field alignment
     optional DataTableFieldAlignment align
+
+    # If true, don't wrap text
+    optional bool nowrap
+
+    # If true, format the field as Markdown
+    optional bool markdown
 
 
 # A field alignment
@@ -162,7 +165,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
                         const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
                         return {
                             'html': 'th',
-                            'attr': (fieldFormat !== null &amp;&amp; 'align' in fieldFormat ? {'style': `text-align: ${fieldFormat.align}`} : null),
+                            'attr': createFieldAttr(fieldFormat),
                             'elem': {'text': field}
                         };
                     }),
@@ -170,7 +173,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
                         const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
                         return {
                             'html': 'th',
-                            'attr': (fieldFormat !== null &amp;&amp; 'align' in fieldFormat ? {'style': `text-align: ${fieldFormat.align}`} : null),
+                            'attr': createFieldAttr(fieldFormat),
                             'elem': {'text': field}
                         };
                     })
@@ -198,9 +201,8 @@ export function dataTableElements(data, dataTable = null, options = null) {
                                 : {'text': formatValue(value, formatPrecision, formatDatetime, formatTrim)};
                             return {
                                 'html': 'td',
-                                'attr': fieldFormat !== null &amp;&amp; 'align' in fieldFormat
-                                    ? {'style': `text-align: ${fieldFormat.align}`} : null,
-                                'elem': skip ? null : fieldElements
+                                'attr': createFieldAttr(fieldFormat),
+                                'elem': (skip ? null : fieldElements)
                             };
                         }),
                         tableFields.map((field) => {
@@ -211,8 +213,7 @@ export function dataTableElements(data, dataTable = null, options = null) {
                                 : {'text': formatValue(value, formatPrecision, formatDatetime, formatTrim)};
                             return {
                                 'html': 'td',
-                                'attr': fieldFormat !== null &amp;&amp; 'align' in fieldFormat
-                                    ? {'style': `text-align: ${fieldFormat.align}`} : null,
+                                'attr': createFieldAttr(fieldFormat),
                                 'elem': fieldElements
                             };
                         })
@@ -221,6 +222,18 @@ export function dataTableElements(data, dataTable = null, options = null) {
             })
         ]
     };
+}
+
+
+function createFieldAttr(fieldFormat) {
+    const fieldStyles = [];
+    if (fieldFormat !== null &amp;&amp; 'align' in fieldFormat) {
+        fieldStyles.push(`text-align: ${fieldFormat.align}`);
+    }
+    if (fieldFormat !== null &amp;&amp; fieldFormat.nowrap) {
+        fieldStyles.push('white-space: nowrap');
+    }
+    return (fieldStyles.length ? {'style': fieldStyles.join('; ')} : null);
 }
 </code></pre>
         </article>

@@ -103,22 +103,32 @@
             "docGroup": "Data Table",
             "members": [
                 {
-                    "name": "markdown",
-                    "type": {
-                        "builtin": "bool"
-                    },
-                    "doc": [
-                        "If true, format the field as Markdown"
-                    ],
-                    "optional": true
-                },
-                {
                     "name": "align",
                     "type": {
                         "user": "DataTableFieldAlignment"
                     },
                     "doc": [
                         "The field alignment"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "nowrap",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, don't wrap text"
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "markdown",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, format the field as Markdown"
                     ],
                     "optional": true
                 }
