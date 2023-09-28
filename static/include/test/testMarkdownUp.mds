@@ -76,8 +76,8 @@ function testMarkdownUp_dataTable_fields():
     testMarkdownUp_systemLogMockBegin()
     data = arrayNew(objectNew('A', 1, 'B', 2, 'C', 3))
     model = objectNew( \
-        'fields', 'C', \
-        'categories', 'A' \
+        'fields', arrayNew('C'), \
+        'categories', arrayNew('A') \
     )
     unittestEquals(dataTable(data, model), null)
     unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
@@ -410,9 +410,11 @@ unittestRunTest('testMarkdownUp_markdownParse')
 
 function testMarkdownUp_markdownPrint():
     testMarkdownUp_systemLogMockBegin()
-    unittestEquals(testMarkdownUp_markdownPrintStub('Hello', 'Goodbye'), null)
+    unittestEquals(testMarkdownUp_markdownPrintStub('Hello', arrayNew('1', '2'), 'Goodbye'), null)
     unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
         'Hello', \
+        '1', \
+        '2', \
         'Goodbye' \
     ))
 endfunction

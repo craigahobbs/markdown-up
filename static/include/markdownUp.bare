@@ -43,20 +43,14 @@ function dataTable(data, model):
     endif
 
     # Determine the table fields
+    fields = arrayNew()
     modelFields = objectGet(model, 'fields')
     modelCategories = objectGet(model, 'categories')
-    fields = arrayNew()
     if modelFields != null || modelCategories != null:
-        if modelCategories != null:
-            arrayExtend(fields, modelCategories)
-        endif
-        if modelFields != null:
-            arrayExtend(fields, modelFields)
-        endif
+        arrayExtend(fields, modelCategories)
+        arrayExtend(fields, modelFields)
     else:
-        if arrayLength(data) > 0:
-            arrayExtend(fields, objectKeys(arrayGet(data, 0)))
-        endif
+        arrayExtend(fields, objectKeys(arrayGet(data, 0)))
     endif
     if !arrayLength(fields):
         return
@@ -337,8 +331,17 @@ endfunction
 
 
 function markdownPrint(lines...):
+    markdownUp_markdownPrintHelper(lines)
+endfunction
+
+
+function markdownUp_markdownPrintHelper(lines):
     for line in lines:
-        systemLog(line)
+        if arrayLength(line) != null:
+            markdownUp_markdownPrintHelper(line)
+        else:
+            systemLog(line)
+        endif
     endfor
 endfunction
 
