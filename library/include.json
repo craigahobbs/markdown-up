@@ -143,6 +143,9 @@
             "group": "unittest.mds",
             "doc": [
                 "Render the unit test report"
+            ],
+            "return": [
+                "The number of unit test failures"
             ]
         },
         {

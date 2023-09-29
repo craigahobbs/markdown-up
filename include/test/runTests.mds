@@ -16,4 +16,4 @@ else:
 endif
 
 # Test report
-unittestReport()
+return unittestReport()
