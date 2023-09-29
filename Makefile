@@ -38,11 +38,10 @@ run: app
 
 
 .PHONY: test-include
+commit: test-include
 test-include: build/npm.build
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds -v vBare 1
-
-test: test-include
 
 
 .PHONY: app
