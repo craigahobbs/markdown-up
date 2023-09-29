@@ -32,11 +32,6 @@ help:
 	@echo '            [app|run|test-include]'
 
 
-.PHONY: run
-run: app
-	python3 -m http.server --directory build/app
-
-
 .PHONY: test-include
 commit: test-include
 test-include: build/npm.build
@@ -44,7 +39,11 @@ test-include: build/npm.build
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds -v vBare 1
 
 
-.PHONY: app
+.PHONY: app run
+run: app
+	python3 -m http.server --directory build/app
+
+
 commit: app
 app: doc
 	rm -rf build/app/
