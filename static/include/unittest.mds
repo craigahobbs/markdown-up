@@ -71,6 +71,7 @@ endfunction
 # $function: unittestReport
 # $group: unittest.mds
 # $doc: Render the unit test report
+# $return: The number of unit test failures
 function unittestReport():
     # Compute test statistics
     testNames = arraySort(objectKeys(unittestTests))
@@ -131,6 +132,8 @@ function unittestReport():
             endif
         endfor
     endif
+
+    return testFailCount
 endfunction
 
 

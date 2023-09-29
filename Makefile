@@ -29,12 +29,20 @@ clean:
 
 
 help:
-	@echo '            [app|run|'
+	@echo '            [app|run|test-include]'
 
 
 .PHONY: run
 run: app
 	python3 -m http.server --directory build/app
+
+
+.PHONY: test-include
+test-include: build/npm.build
+	$(NODE_DOCKER) npx bare -c 'include <markdownUp.bare>' static/include/test/runTests.mds
+	$(NODE_DOCKER) npx bare -c 'include <markdownUp.bare>' static/include/test/runTests.mds -v vBare 1
+
+test: test-include
 
 
 .PHONY: app
