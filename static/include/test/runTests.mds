@@ -4,6 +4,11 @@
 include '../unittest.mds'
 
 
+# Set the title
+title = 'MarkdownUp Include Library Tests'
+documentSetTitle(title)
+markdownPrint('# ' + markdownEscape(title), '')
+
 # Run markdownUp.bare unit tests?
 if vBare:
     markdownPrint('Running "markdownUp.bare" tests. To run default tests, [click here](#var=).')
