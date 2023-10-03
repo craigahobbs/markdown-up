@@ -39,9 +39,10 @@ async function markdownUpIndex():
         for file in files:
             fileURL = if(vPath != null, vPath + '/', '') + file
             if arrayIndexOf(markdownFiles, file) != -1:
-                fileURL = '#url=' + urlEncodeComponent(fileURL) + '&var='
+                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=)')
+            else:
+                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
             endif
-            markdownPrint('', '[' + markdownEscape(file) + '](' + fileURL + ')')
         endfor
     endif
 

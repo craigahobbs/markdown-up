@@ -24,14 +24,14 @@ function testUnittestMockEnd(beginResult):
 endfunction
 
 
-# Helper unittest function
+# Helper unittest function (passes)
 function testUnittestRunTest_test():
     unittestEquals(1 + 1, 2)
     unittestDeepEquals(arrayPush(arrayNew(1), 2), arrayNew(1, 2))
 endfunction
 
 
-# Helper unittest function
+# Helper unittest function (fails)
 function testUnittestRunTest_testFail():
     unittestEquals(1 + 1, 3)
     unittestDeepEquals(arrayPush(arrayNew(1), 2), arrayNew(1, 2, 3))
