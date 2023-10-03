@@ -207,13 +207,6 @@
             ]
         },
         {
-            "name": "unittestReset",
-            "group": "unittest.mds",
-            "doc": [
-                "Reset the unit test data"
-            ]
-        },
-        {
             "name": "unittestRunTest",
             "group": "unittest.mds",
             "doc": [
