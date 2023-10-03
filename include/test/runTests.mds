@@ -2,12 +2,8 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 include '../unittest.mds'
+include '../unittestMock.mds'
 
-
-# Set the title
-title = 'MarkdownUp Include Library Tests'
-documentSetTitle(title)
-markdownPrint('# ' + markdownEscape(title), '')
 
 # Run markdownUp.bare unit tests?
 if vBare:
@@ -18,6 +14,7 @@ else:
     markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
     include 'testForms.mds'
     include 'testUnittest.mds'
+    include 'testUnittestMock.mds'
 endif
 
 # Test report
