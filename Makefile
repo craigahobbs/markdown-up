@@ -40,6 +40,13 @@ test-include: build/npm.build
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds -v vBare 1
 
 
+.PHONY: test-launcher
+commit: test-launcher
+test-launcher: build/npm.build
+	$(NODE_DOCKER) npx bare -s static/launcher/*.mds static/launcher/test/*.mds
+	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/launcher/test/runTests.mds
+
+
 .PHONY: app run
 run: app
 	python3 -m http.server --directory build/app
@@ -74,10 +81,10 @@ app: doc
 	done
 
     # Generate the library documentation
-	$(NODE_DOCKER) npx baredoc lib/scriptLibrary.js > build/app/library/library.json
+	if ! $(NODE_DOCKER) npx baredoc lib/scriptLibrary.js > build/app/library/library.json; then cat build/app/library/library.json; exit 1; fi
 
     # Generate the include library documentation
-	$(NODE_DOCKER) npx baredoc static/include/*.mds > build/app/library/include.json
+	if ! $(NODE_DOCKER) npx baredoc static/include/*.mds > build/app/library/include.json; then cat build/app/library/include.json; exit 1; fi
 
     # Generate the library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json

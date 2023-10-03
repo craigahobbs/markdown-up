@@ -1,0 +1,149 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# $function: unittestMockBegin
+# $group: unittestMock.mds
+# $doc: Start a generic function mock
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+# $arg funcName: The name of the function to mock
+function unittestMockBegin(funcName):
+    ixMock = arrayLength(unittestMockFunctions)
+    funcOrig = systemGlobalGet(funcName)
+    systemGlobalSet(funcName, systemGlobalGet('unittestMockFunction' + ixMock))
+    arrayPush(unittestMockFunctions, objectNew('name', funcName, 'orig', funcOrig, 'args', arrayNew()))
+endfunction
+
+
+# $function: unittestMockEnd
+# $group: unittestMock.mds
+# $doc: Stop all generic function mocks
+# $return: The object of function name to function arguments
+function unittestMockEnd():
+    # Restore the original function and collect the mock args
+    mockArgs = objectNew()
+    for mock, ixMock in unittestMockFunctions:
+        systemGlobalSet(objectGet(mock, 'name'), objectGet(mock, 'orig'))
+        objectSet(mockArgs, objectGet(mock, 'name'), objectGet(mock, 'args'))
+    endfor
+
+    # Reset the mock functions
+    systemGlobalSet('unittestMockFunctions', arrayNew())
+
+    return mockArgs
+endfunction
+
+
+# The mocked functions array
+unittestMockFunctions = arrayNew()
+
+function unittestMockFind(funcName):
+    for mock in unittestMockFunctions:
+        if objectGet(mock, 'name') == funcName:
+            return mock
+        endif
+    endfor
+    return null
+endfunction
+
+function unittestMockFunction0(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 0), 'args'), args)
+endfunction
+
+function unittestMockFunction1(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 1), 'args'), args)
+endfunction
+
+function unittestMockFunction2(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 2), 'args'), args)
+endfunction
+
+function unittestMockFunction3(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 3), 'args'), args)
+endfunction
+
+function unittestMockFunction4(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 4), 'args'), args)
+endfunction
+
+function unittestMockFunction5(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 5), 'args'), args)
+endfunction
+
+function unittestMockFunction6(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 6), 'args'), args)
+endfunction
+
+function unittestMockFunction7(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 7), 'args'), args)
+endfunction
+
+function unittestMockFunction8(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 8), 'args'), args)
+endfunction
+
+function unittestMockFunction9(args...):
+    arrayPush(objectGet(arrayGet(unittestMockFunctions, 9), 'args'), args)
+endfunction
+
+
+# $function: unittestMockBegin_markdownPrint
+# $group: unittestMock.mds
+# $doc: Begin mocking the MarkdownUp library's [markdownPrint](./#var.vGroup='Markdown'&markdownprint) function.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+function unittestMockBegin_markdownPrint():
+    funcOrig = systemGlobalGet('markdownPrint')
+    systemGlobalSet('markdownPrint', unittestMock_markdownPrint)
+    arrayPush(unittestMockFunctions, objectNew('name', 'markdownPrint', 'orig', funcOrig, 'args', arrayNew()))
+endfunction
+
+function unittestMock_markdownPrint(lines...):
+    unittestMock_markdownPrintHelper(lines)
+endfunction
+
+function unittestMock_markdownPrintHelper(lines):
+    for line in lines:
+        if arrayLength(line) != null:
+            unittestMock_markdownPrintHelper(line)
+        else:
+            arrayPush(objectGet(unittestMockFind('markdownPrint'), 'args'), line)
+        endif
+    endfor
+endfunction
+
+
+# $function: unittestMockBegin_systemFetch
+# $group: unittestMock.mds
+# $doc: Begin mocking the MarkdownUp library's [systemFetch](./#var.vGroup='System'&systemfetch) function.
+# $doc: To stop mocking, call the [unittestMockEnd_systemFetch](#var.vGroup='unittestMock.mds'&unittestmockend-systemfetch) function.
+# $arg responses: The map of URL to response
+function unittestMockBegin_systemFetch(responses):
+    funcOrig = systemGlobalGet('systemFetch')
+    systemGlobalSet('systemFetch', unittestMock_systemFetch)
+    arrayPush(unittestMockFunctions, objectNew('name', 'systemFetch', 'orig', funcOrig, 'args', arrayNew()))
+    systemGlobalSet('unittestMock_systemFetchResponses', responses)
+endfunction
+
+function unittestMock_systemFetch(url, options, isText):
+    arrayPush(objectGet(unittestMockFind('systemFetch'), 'args'), arrayNew(url, options, isText))
+    response = objectGet(unittestMock_systemFetchResponses, url)
+    if response != null && ((isText && stringLength(response) != null) || (!isText && stringLength(response) == null)):
+        return response
+    endif
+    return null
+endfunction
+
+
+# $function: unittestMockBegin_systemLog
+# $group: unittestMock.mds
+# $doc: Begin mocking the MarkdownUp library's [systemLog](./#var.vGroup='System'&systemlog) function.
+# $doc: To stop mocking, call the [unittestMockEnd_systemLog](#var.vGroup='unittestMock.mds'&unittestmockend-systemlog) function.
+function unittestMockBegin_systemLog():
+    funcOrig = systemGlobalGet('systemLog')
+    systemGlobalSet('systemLog', unittestMock_systemLog)
+    arrayPush(unittestMockFunctions, objectNew('name', 'systemLog', 'orig', funcOrig, 'args', arrayNew()))
+endfunction
+
+function unittestMock_systemLog(message):
+    arrayPush(objectGet(unittestMockFind('systemLog'), 'args'), message)
+endfunction

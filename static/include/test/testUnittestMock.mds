@@ -1,0 +1,72 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+include '../unittestMock.mds'
+
+
+function testUnittestMockGeneric():
+    unittestMockBegin('documentSetTitle')
+    documentSetTitle('Title')
+    documentSetTitle('Title2')
+    unittestDeepEquals( \
+        unittestMockEnd(), \
+        objectNew('documentSetTitle', arrayNew( \
+            arrayNew('Title'), \
+            arrayNew('Title2') \
+        )) \
+    )
+endfunction
+unittestRunTest('testUnittestMockGeneric')
+
+
+function testUnittestMock_markdownPrint():
+    unittestMockBegin_markdownPrint()
+    markdownPrint('# Title')
+    markdownPrint('', arrayNew('- 1', '- 2'))
+    unittestDeepEquals( \
+        unittestMockEnd(), \
+        objectNew('markdownPrint', arrayNew( \
+            '# Title', \
+            '', \
+            '- 1', \
+            '- 2' \
+        )) \
+    )
+endfunction
+unittestRunTest('testUnittestMock_markdownPrint')
+
+
+function testUnittestMock_systemFetch():
+    unittestMockBegin_systemFetch(objectNew( \
+        'index.html', '<html>', \
+        'data.json', arrayNew() \
+    ))
+    unittestEquals(systemFetch('index.html', null, true), '<html>')
+    unittestDeepEquals(systemFetch('data.json'), arrayNew())
+    unittestEquals(systemFetch('missing.json', objectNew()), null)
+    unittestDeepEquals( \
+        unittestMockEnd(), \
+        objectNew('systemFetch', arrayNew( \
+            arrayNew('index.html', null, true), \
+            arrayNew('data.json', null, null), \
+            arrayNew('missing.json', objectNew(), null) \
+        )) \
+    )
+endfunction
+unittestRunTest('testUnittestMock_systemFetch')
+
+
+function testUnittestMock_systemLog():
+    unittestMockBegin_systemLog()
+    systemLog('1')
+    systemLog('2')
+    unittestDeepEquals( \
+        unittestMockEnd(), \
+        objectNew('systemLog', arrayNew( \
+            '1', \
+            '2' \
+        )) \
+    )
+endfunction
+unittestRunTest('testUnittestMock_systemLog')

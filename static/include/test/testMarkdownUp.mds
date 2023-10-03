@@ -14,135 +14,130 @@ testMarkdownUp_markdownPrintStub = systemGlobalGet('markdownPrint')
 markdownPrint = testMarkdownUp_markdownPrintOriginal
 
 
-# systemLog mock
-testMarkdownUp_systemLogOriginal = systemLog
-testMarkdownUp_systemLogMockLines = arrayNew()
-
-function testMarkdownUp_systemLogMock(message):
-    arrayPush(testMarkdownUp_systemLogMockLines, message)
-endfunction
-
-function testMarkdownUp_systemLogMockBegin():
-    systemGlobalSet('systemLog', testMarkdownUp_systemLogMock)
-    systemGlobalSet('testMarkdownUp_systemLogMockLines', arrayNew())
-endfunction
-
-function testMarkdownUp_systemLogMockEnd():
-    systemGlobalSet('systemLog', testMarkdownUp_systemLogOriginal)
-    return testMarkdownUp_systemLogMockLines
-endfunction
-
-
 function testMarkdownUp_dataLineChart():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1, 'B', 2))
     unittestEquals(dataLineChart(data, objectNew()), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '', \
-        '<LineChart 640x320, 1 rows>' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '', \
+            '<LineChart 640x320, 1 rows>' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataLineChart')
 
 
 function testMarkdownUp_dataLineChart_noDefaults():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1, 'B', 2))
     unittestEquals(dataLineChart(data, objectNew('width', 800, 'height', 400, 'title', 'Hello')), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '', \
-        '<LineChart 800x400, 1 rows - Hello>' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '', \
+            '<LineChart 800x400, 1 rows - Hello>' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataLineChart_noDefaults')
 
 
 function testMarkdownUp_dataTable():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1.495, 'B', 2))
     unittestEquals(dataTable(data), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '+======+===+', \
-        '| A    | B |', \
-        '+======+===+', \
-        '| 1.50 | 2 |', \
-        '+======+===+' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '+======+===+', \
+            '| A    | B |', \
+            '+======+===+', \
+            '| 1.50 | 2 |', \
+            '+======+===+' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable')
 
 
 function testMarkdownUp_dataTable_fields():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1, 'B', 2, 'C', 3))
     model = objectNew( \
         'fields', arrayNew('C'), \
         'categories', arrayNew('A') \
     )
     unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '+===+===+', \
-        '| A | C |', \
-        '+===+===+', \
-        '| 1 | 3 |', \
-        '+===+===+' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '+===+===+', \
+            '| A | C |', \
+            '+===+===+', \
+            '| 1 | 3 |', \
+            '+===+===+' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_fields')
 
 
 function testMarkdownUp_dataTable_precision():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1.495, 'B', 2))
     model = objectNew( \
         'precision', 1, \
         'trim', false \
     )
     unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '+=====+=====+', \
-        '| A   | B   |', \
-        '+=====+=====+', \
-        '| 1.5 | 2.0 |', \
-        '+=====+=====+' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '+=====+=====+', \
+            '| A   | B   |', \
+            '+=====+=====+', \
+            '| 1.5 | 2.0 |', \
+            '+=====+=====+' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_precision')
 
 
 function testMarkdownUp_dataTable_datetime():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
     unittestEquals(dataTable(data), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '+==========================+', \
-        '| A                        |', \
-        '+==========================+', \
-        '| 2023-09-25T00:00:00.000Z |', \
-        '+==========================+' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '+==========================+', \
+            '| A                        |', \
+            '+==========================+', \
+            '| 2023-09-25T00:00:00.000Z |', \
+            '+==========================+' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_datetime')
 
 
 function testMarkdownUp_dataTable_datetime_precision():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
     model = objectNew('datetime', 'day')
     unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '+============+', \
-        '| A          |', \
-        '+============+', \
-        '| 2023-09-25 |', \
-        '+============+' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '+============+', \
+            '| A          |', \
+            '+============+', \
+            '| 2023-09-25 |', \
+            '+============+' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_datetime_precision')
 
 
 function testMarkdownUp_dataTable_formats():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew( \
         objectNew('A', 'asdf', 'B', 'asdf', 'CCCCCCCCCC', 'asdf'), \
         objectNew('A', 'asdfasdf', 'B', 'asdfasdf', 'CCCCCCCCCC', 'asdfasdf'), \
@@ -156,36 +151,42 @@ function testMarkdownUp_dataTable_formats():
         ) \
     )
     unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        "+==========+==========+============+", \
-        "|    A     |        B | CCCCCCCCCC |", \
-        "+==========+==========+============+", \
-        "|   asdf   |     asdf |       asdf |", \
-        "| asdfasdf | asdfasdf |   asdfasdf |", \
-        "|  asdfa   |   asdfas |     asdfas |", \
-        "+==========+==========+============+" \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            "+==========+==========+============+", \
+            "|    A     |        B | CCCCCCCCCC |", \
+            "+==========+==========+============+", \
+            "|   asdf   |     asdf |       asdf |", \
+            "| asdfasdf | asdfasdf |   asdfasdf |", \
+            "|  asdfa   |   asdfas |     asdfas |", \
+            "+==========+==========+============+" \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_formats')
 
 
 function testMarkdownUp_dataTable_invalidData():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew( \
         objectNew('A', 1), \
         objectNew('A', 'asdfasdf') \
     )
     unittestEquals(dataTable(data), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew())
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew() \
+    ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_invalidData')
 
 
 function testMarkdownUp_dataTable_noFields():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     data = arrayNew()
     unittestEquals(dataTable(data), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew())
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew() \
+    ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_noFields')
 
@@ -282,11 +283,13 @@ unittestRunTest('testMarkdownUp_drawMove')
 
 
 function testMarkdownUp_drawNew():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     unittestEquals(drawNew(800, 600), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        '', \
-        '<Drawing 800x600>' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            '', \
+            '<Drawing 800x600>' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_drawNew')
@@ -409,13 +412,15 @@ unittestRunTest('testMarkdownUp_markdownParse')
 
 
 function testMarkdownUp_markdownPrint():
-    testMarkdownUp_systemLogMockBegin()
+    unittestMockBegin_systemLog()
     unittestEquals(testMarkdownUp_markdownPrintStub('Hello', arrayNew('1', '2'), 'Goodbye'), null)
-    unittestDeepEquals(testMarkdownUp_systemLogMockEnd(), arrayNew( \
-        'Hello', \
-        '1', \
-        '2', \
-        'Goodbye' \
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'systemLog', arrayNew( \
+            'Hello', \
+            '1', \
+            '2', \
+            'Goodbye' \
+        ) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_markdownPrint')

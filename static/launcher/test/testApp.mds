@@ -1,0 +1,54 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include '../app.mds'
+
+
+async function testMarkdownUpIndex():
+    # Setup mocks
+    unittestMockBegin_markdownPrint()
+    unittestMockBegin_systemFetch(objectNew( \
+        'markdown_up_index', objectNew( \
+            'path', '.', \
+            'files', arrayNew('a.md', 'c.md'), \
+            'htmlFiles', arrayNew('b.html'), \
+            'directories', arrayNew('sub1', 'sub2') \
+        ) \
+    ))
+    unittestMockBegin('documentSetTitle')
+
+    # Render the index
+    markdownUpIndex()
+
+    # Reset mocks
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        "documentSetTitle", arrayNew( \
+            arrayNew("MarkdownUp - .") \
+        ), \
+        "markdownPrint", arrayNew( \
+            "Root |", \
+            "Parent |", \
+            "[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)", \
+            "", \
+            "# MarkdownUp - .", \
+            "", \
+            "## Files", \
+            "", \
+            "[a.md](#url=a.md&var=)", \
+            "", \
+            "[b.html](b.html)", \
+            "", \
+            "[c.md](#url=c.md&var=)", \
+            "", \
+            "## Directories", \
+            "", \
+            "[sub1](#var.vPath='sub1')", \
+            "", \
+            "[sub2](#var.vPath='sub2')" \
+        ), \
+        "systemFetch", arrayNew( \
+            arrayNew("markdown_up_index",null,null) \
+        ) \
+    ))
+endfunction
+unittestRunTestAsync('testMarkdownUpIndex')
