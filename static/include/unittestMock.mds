@@ -17,7 +17,7 @@ endfunction
 
 # $function: unittestMockEnd
 # $group: unittestMock.mds
-# $doc: Stop all generic function mocks
+# $doc: Stop all function mocks
 # $return: The object of function name to function arguments
 function unittestMockEnd():
     # Restore the original function and collect the mock args
@@ -115,7 +115,7 @@ endfunction
 # $function: unittestMockBegin_systemFetch
 # $group: unittestMock.mds
 # $doc: Begin mocking the MarkdownUp library's [systemFetch](./#var.vGroup='System'&systemfetch) function.
-# $doc: To stop mocking, call the [unittestMockEnd_systemFetch](#var.vGroup='unittestMock.mds'&unittestmockend-systemfetch) function.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
 # $arg responses: The map of URL to response
 function unittestMockBegin_systemFetch(responses):
     funcOrig = systemGlobalGet('systemFetch')
@@ -137,7 +137,7 @@ endfunction
 # $function: unittestMockBegin_systemLog
 # $group: unittestMock.mds
 # $doc: Begin mocking the MarkdownUp library's [systemLog](./#var.vGroup='System'&systemlog) function.
-# $doc: To stop mocking, call the [unittestMockEnd_systemLog](#var.vGroup='unittestMock.mds'&unittestmockend-systemlog) function.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
 function unittestMockBegin_systemLog():
     funcOrig = systemGlobalGet('systemLog')
     systemGlobalSet('systemLog', unittestMock_systemLog)
