@@ -167,7 +167,7 @@
             "group": "unittestMock.mds",
             "doc": [
                 "Begin mocking the MarkdownUp library's [systemFetch](./#var.vGroup='System'&systemfetch) function.",
-                "To stop mocking, call the [unittestMockEnd_systemFetch](#var.vGroup='unittestMock.mds'&unittestmockend-systemfetch) function."
+                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
             ],
             "args": [
                 {
@@ -183,14 +183,14 @@
             "group": "unittestMock.mds",
             "doc": [
                 "Begin mocking the MarkdownUp library's [systemLog](./#var.vGroup='System'&systemlog) function.",
-                "To stop mocking, call the [unittestMockEnd_systemLog](#var.vGroup='unittestMock.mds'&unittestmockend-systemlog) function."
+                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
             ]
         },
         {
             "name": "unittestMockEnd",
             "group": "unittestMock.mds",
             "doc": [
-                "Stop all generic function mocks"
+                "Stop all function mocks"
             ],
             "return": [
                 "The object of function name to function arguments"
