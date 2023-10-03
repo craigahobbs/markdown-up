@@ -93,7 +93,8 @@ function unittestReport():
     endif
 
     # Report any warnings
-    if arrayLength(unittestWarnings):
+    testWarningCount = arrayLength(unittestWarnings)
+    if testWarningCount:
         markdownPrint('', '## Warnings')
         for warning in unittestWarnings:
             markdownPrint('', '- ' + markdownEscape(warning))
@@ -121,7 +122,7 @@ function unittestReport():
         endfor
     endif
 
-    # Report the failing tests
+    # Report the passing tests
     if testPassCount:
         markdownPrint('', '## Passing Tests')
         for testName in testNames:
@@ -133,16 +134,7 @@ function unittestReport():
         endfor
     endif
 
-    return testFailCount
-endfunction
-
-
-# $function: unittestReset
-# $group: unittest.mds
-# $doc: Reset the unit test data
-function unittestReset():
-    systemGlobalSet('unittestTests', objectNew())
-    systemGlobalSet('unittestWarnings', arrayNew())
+    return testWarningCount + testFailCount
 endfunction
 
 
