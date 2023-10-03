@@ -6,6 +6,7 @@ include '../app.mds'
 
 async function testMarkdownUpIndex():
     # Setup mocks
+    unittestMockBegin('documentSetTitle')
     unittestMockBegin_markdownPrint()
     unittestMockBegin_systemFetch(objectNew( \
         'markdown_up_index', objectNew( \
@@ -15,40 +16,127 @@ async function testMarkdownUpIndex():
             'directories', arrayNew('sub1', 'sub2') \
         ) \
     ))
-    unittestMockBegin('documentSetTitle')
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
     unittestDeepEquals(unittestMockEnd(), objectNew( \
-        "documentSetTitle", arrayNew( \
-            arrayNew("MarkdownUp - .") \
+        'documentSetTitle', arrayNew( \
+            arrayNew('MarkdownUp - .') \
         ), \
-        "markdownPrint", arrayNew( \
-            "Root |", \
-            "Parent |", \
-            "[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)", \
-            "", \
-            "# MarkdownUp - .", \
-            "", \
-            "## Files", \
-            "", \
-            "[a.md](#url=a.md&var=)", \
-            "", \
-            "[b.html](b.html)", \
-            "", \
-            "[c.md](#url=c.md&var=)", \
-            "", \
-            "## Directories", \
-            "", \
+        'markdownPrint', arrayNew( \
+            'Root |', \
+            'Parent |', \
+            '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
+            '', \
+            '# MarkdownUp - .', \
+            '', \
+            '## Files', \
+            '', \
+            '[a.md](#url=a.md&var=)', \
+            '', \
+            '[b.html](b.html)', \
+            '', \
+            '[c.md](#url=c.md&var=)', \
+            '', \
+            '## Directories', \
+            '', \
             "[sub1](#var.vPath='sub1')", \
-            "", \
+            '', \
             "[sub2](#var.vPath='sub2')" \
         ), \
-        "systemFetch", arrayNew( \
-            arrayNew("markdown_up_index",null,null) \
+        'systemFetch', arrayNew( \
+            arrayNew('markdown_up_index',null,null) \
         ) \
     ))
 endfunction
 unittestRunTestAsync('testMarkdownUpIndex')
+
+
+async function testMarkdownUpIndex_path():
+    # Setup mocks
+    unittestMockBegin('documentSetTitle')
+    unittestMockBegin_markdownPrint()
+    unittestMockBegin_systemFetch(objectNew( \
+        'markdown_up_index?path=subdir', objectNew( \
+            'path', 'subdir', \
+            'parent', '.', \
+            'files', arrayNew('a.md', 'c.md'), \
+            'htmlFiles', arrayNew('b.html'), \
+            'directories', arrayNew('sub1', 'sub2') \
+        ) \
+    ))
+
+    # Render the index
+    systemGlobalSet('vPath', 'subdir')
+    markdownUpIndex()
+    systemGlobalSet('vPath', null)
+
+    # Reset mocks
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'documentSetTitle', arrayNew( \
+            arrayNew('MarkdownUp - subdir') \
+        ), \
+        'markdownPrint', arrayNew( \
+            '[Root](#var=) |', \
+            "[Parent](#var.vPath='.') |", \
+            '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
+            '', \
+            '# MarkdownUp - subdir', \
+            '', \
+            '## Files', \
+            '', \
+            '[a.md](#url=subdir%2Fa.md&var=)', \
+            '', \
+            '[b.html](subdir/b.html)', \
+            '', \
+            '[c.md](#url=subdir%2Fc.md&var=)', \
+            '', \
+            '## Directories', \
+            '', \
+            "[sub1](#var.vPath='subdir%2Fsub1')", \
+            '', \
+            "[sub2](#var.vPath='subdir%2Fsub2')" \
+        ), \
+        'systemFetch', arrayNew( \
+            arrayNew('markdown_up_index?path=subdir', null, null) \
+        ) \
+    ))
+endfunction
+unittestRunTestAsync('testMarkdownUpIndex_path')
+
+
+async function testMarkdownUpIndex_empty():
+    # Setup mocks
+    unittestMockBegin('documentSetTitle')
+    unittestMockBegin_markdownPrint()
+    unittestMockBegin_systemFetch(objectNew( \
+        'markdown_up_index', objectNew( \
+            'path', '.' \
+        ) \
+    ))
+
+    # Render the index
+    markdownUpIndex()
+
+    # Reset mocks
+    unittestDeepEquals(unittestMockEnd(), objectNew( \
+        'documentSetTitle', arrayNew( \
+            arrayNew('MarkdownUp - .') \
+        ), \
+        'markdownPrint', arrayNew( \
+            'Root |', \
+            'Parent |', \
+            '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
+            '', \
+            '# MarkdownUp - .', \
+            '', \
+            'No Markdown files or sub-directories found' \
+        ), \
+        'systemFetch', arrayNew( \
+            arrayNew('markdown_up_index',null,null) \
+        ) \
+    ))
+endfunction
+unittestRunTestAsync('testMarkdownUpIndex_empty')
