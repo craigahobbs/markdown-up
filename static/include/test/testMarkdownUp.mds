@@ -338,7 +338,10 @@ unittestRunTest('testMarkdownUp_drawTextHeight_width')
 
 
 function testMarkdownUp_drawTextStyle():
+    unittestEquals(drawTextStyle(20), null)
+    unittestEquals(drawTextHeight('Hello'), 20)
     unittestEquals(drawTextStyle(), null)
+    unittestEquals(drawTextHeight('Hello'), 16)
 endfunction
 unittestRunTest('testMarkdownUp_drawTextStyle')
 
@@ -369,28 +372,21 @@ endfunction
 unittestRunTest('testMarkdownUp_elementModelRender')
 
 
-function testMarkdownUp_localStorageClear():
+function testMarkdownUp_localStorage():
+    unittestEquals(localStorageGet('key1'), null)
+    unittestEquals(localStorageGet('key2'), null)
+    unittestEquals(localStorageSet('key1', 'value1'), null)
+    unittestEquals(localStorageSet('key2', 'value2'), null)
+    unittestEquals(localStorageGet('key1'), 'value1')
+    unittestEquals(localStorageGet('key2'), 'value2')
+    unittestEquals(localStorageRemove('key2'), null)
+    unittestEquals(localStorageGet('key1'), 'value1')
+    unittestEquals(localStorageGet('key2'), null)
     unittestEquals(localStorageClear(), null)
+    unittestEquals(localStorageGet('key1'), null)
+    unittestEquals(localStorageGet('key2'), null)
 endfunction
-unittestRunTest('testMarkdownUp_localStorageClear')
-
-
-function testMarkdownUp_localStorageGet():
-    unittestEquals(localStorageGet(), null)
-endfunction
-unittestRunTest('testMarkdownUp_localStorageGet')
-
-
-function testMarkdownUp_localStorageRemove():
-    unittestEquals(localStorageRemove(), null)
-endfunction
-unittestRunTest('testMarkdownUp_localStorageRemove')
-
-
-function testMarkdownUp_localStorageSet():
-    unittestEquals(localStorageSet(), null)
-endfunction
-unittestRunTest('testMarkdownUp_localStorageSet')
+unittestRunTest('testMarkdownUp_localStorage')
 
 
 function testMarkdownUp_markdownEscape():
@@ -441,28 +437,21 @@ endfunction
 unittestRunTest('testMarkdownUp_schemaElements')
 
 
-function testMarkdownUp_sessionStorageClear():
+function testMarkdownUp_sessionStorage():
+    unittestEquals(sessionStorageGet('key1'), null)
+    unittestEquals(sessionStorageGet('key2'), null)
+    unittestEquals(sessionStorageSet('key1', 'value1'), null)
+    unittestEquals(sessionStorageSet('key2', 'value2'), null)
+    unittestEquals(sessionStorageGet('key1'), 'value1')
+    unittestEquals(sessionStorageGet('key2'), 'value2')
+    unittestEquals(sessionStorageRemove('key2'), null)
+    unittestEquals(sessionStorageGet('key1'), 'value1')
+    unittestEquals(sessionStorageGet('key2'), null)
     unittestEquals(sessionStorageClear(), null)
+    unittestEquals(sessionStorageGet('key1'), null)
+    unittestEquals(sessionStorageGet('key2'), null)
 endfunction
-unittestRunTest('testMarkdownUp_sessionStorageClear')
-
-
-function testMarkdownUp_sessionStorageGet():
-    unittestEquals(sessionStorageGet(), null)
-endfunction
-unittestRunTest('testMarkdownUp_sessionStorageGet')
-
-
-function testMarkdownUp_sessionStorageRemove():
-    unittestEquals(sessionStorageRemove(), null)
-endfunction
-unittestRunTest('testMarkdownUp_sessionStorageRemove')
-
-
-function testMarkdownUp_sessionStorageSet():
-    unittestEquals(sessionStorageSet(), null)
-endfunction
-unittestRunTest('testMarkdownUp_sessionStorageSet')
+unittestRunTest('testMarkdownUp_sessionStorage')
 
 
 function testMarkdownUp_windowHeight():
