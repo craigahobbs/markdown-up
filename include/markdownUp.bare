@@ -9,15 +9,20 @@ endif
 
 
 # Constants
-markdownUpFontWidthRatio = 0.6
 markdownUpPixelsPerPoint = 4 / 3
+markdownUpDefaultFontSizePx = 12 * markdownUpPixelsPerPoint
+markdownUpFontWidthRatio = 0.6
+markdownUpWindowHeight = 768
+markdownUpWindowWidth = 1024
 
 
 # The mock MarkdownUp state
 markdownUpState = objectNew( \
+    'drawingFontSizePx', markdownUpDefaultFontSizePx, \
     'drawingHeight', 480, \
     'drawingWidth', 640, \
-    'fontSizePx', 12 * markdownUpPixelsPerPoint \
+    'localStorage', objectNew(), \
+    'sessionStorage', objectNew() \
 )
 
 
@@ -160,7 +165,7 @@ endfunction
 
 
 function documentFontSize():
-    return objectGet(markdownUpState, 'fontSizePx')
+    return markdownUpDefaultFontSizePx
 endfunction
 
 
@@ -259,11 +264,12 @@ function drawTextHeight(text, width):
     if width > 0:
         return width / (markdownUpFontWidthRatio * stringLength(text))
     endif
-    return objectGet(markdownUpState, 'fontSizePx')
+    return objectGet(markdownUpState, 'drawingFontSizePx')
 endfunction
 
 
-function drawTextStyle():
+function drawTextStyle(fontSizePx):
+    objectSet(markdownUpState, 'drawingFontSizePx', if(fontSizePx != null, fontSizePx, markdownUpDefaultFontSizePx))
 endfunction
 
 
@@ -296,18 +302,22 @@ endfunction
 
 
 function localStorageClear():
+    objectSet(markdownUpState, 'localStorage', objectNew())
 endfunction
 
 
-function localStorageGet():
+function localStorageGet(key):
+    return objectGet(objectGet(markdownUpState, 'localStorage'), key)
 endfunction
 
 
-function localStorageRemove():
+function localStorageRemove(key):
+    objectDelete(objectGet(markdownUpState, 'localStorage'), key)
 endfunction
 
 
-function localStorageSet():
+function localStorageSet(key, value):
+    objectSet(objectGet(markdownUpState, 'localStorage'), key, value)
 endfunction
 
 
@@ -321,7 +331,6 @@ function markdownEscape(text):
 endfunction
 
 markdownUp_markdownEscapeRegex = regexNew('([\\\\[\\]()<>"\'*_~`#=+|-])', 'g')
-
 
 
 function markdownHeaderId(text):
@@ -345,7 +354,6 @@ endfunction
 function markdownPrint(lines...):
     markdownUp_markdownPrintHelper(lines)
 endfunction
-
 
 function markdownUp_markdownPrintHelper(lines):
     for line in lines:
@@ -377,18 +385,22 @@ endfunction
 
 
 function sessionStorageClear():
+    objectSet(markdownUpState, 'sessionStorage', objectNew())
 endfunction
 
 
-function sessionStorageGet():
+function sessionStorageGet(key):
+    return objectGet(objectGet(markdownUpState, 'sessionStorage'), key)
 endfunction
 
 
-function sessionStorageRemove():
+function sessionStorageRemove(key):
+    objectDelete(objectGet(markdownUpState, 'sessionStorage'), key)
 endfunction
 
 
-function sessionStorageSet():
+function sessionStorageSet(key, value):
+    objectSet(objectGet(markdownUpState, 'sessionStorage'), key, value)
 endfunction
 
 
@@ -398,7 +410,7 @@ endfunction
 
 
 function windowHeight():
-    return 768
+    return markdownUpWindowHeight
 endfunction
 
 
@@ -415,5 +427,5 @@ endfunction
 
 
 function windowWidth():
-    return 1024
+    return markdownUpWindowWidth
 endfunction

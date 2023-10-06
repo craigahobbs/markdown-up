@@ -5,7 +5,7 @@
 # $function: unittestMockBegin
 # $group: unittestMock.mds
 # $doc: Start a generic function mock
-# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function
 # $arg funcName: The name of the function to mock
 function unittestMockBegin(funcName):
     ixMock = arrayLength(unittestMockFunctions)
