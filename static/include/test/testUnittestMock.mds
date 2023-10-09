@@ -9,7 +9,7 @@ function testUnittestMockGeneric():
     unittestMockBegin('documentSetTitle')
     documentSetTitle('Title')
     documentSetTitle('Title2')
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         unittestMockEnd(), \
         objectNew('documentSetTitle', arrayNew( \
             arrayNew('Title'), \
@@ -24,7 +24,7 @@ function testUnittestMock_markdownPrint():
     unittestMockBegin_markdownPrint()
     markdownPrint('# Title')
     markdownPrint('', arrayNew('- 1', '- 2'))
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         unittestMockEnd(), \
         objectNew('markdownPrint', arrayNew( \
             '# Title', \
@@ -42,10 +42,10 @@ function testUnittestMock_systemFetch():
         'index.html', '<html>', \
         'data.json', arrayNew() \
     ))
-    unittestEquals(systemFetch('index.html', null, true), '<html>')
-    unittestDeepEquals(systemFetch('data.json'), arrayNew())
-    unittestEquals(systemFetch('missing.json', objectNew()), null)
-    unittestDeepEquals( \
+    unittestEqual(systemFetch('index.html', null, true), '<html>')
+    unittestDeepEqual(systemFetch('data.json'), arrayNew())
+    unittestEqual(systemFetch('missing.json', objectNew()), null)
+    unittestDeepEqual( \
         unittestMockEnd(), \
         objectNew('systemFetch', arrayNew( \
             arrayNew('index.html', null, true), \
@@ -61,7 +61,7 @@ function testUnittestMock_systemLog():
     unittestMockBegin_systemLog()
     systemLog('1')
     systemLog('2')
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         unittestMockEnd(), \
         objectNew('systemLog', arrayNew( \
             '1', \

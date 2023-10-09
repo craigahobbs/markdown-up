@@ -138,26 +138,26 @@ function unittestReport():
 endfunction
 
 
-# $function: unittestEquals
+# $function: unittestEqual
 # $group: unittest.mds
 # $doc: Assert an actual value is equal to the expected value
 # $arg actual: The actual value
 # $arg expected: The expected value
 # $arg description: The description of the assertion
-function unittestEquals(actual, expected, description):
+function unittestEqual(actual, expected, description):
     if actual != expected:
         unittestRecordError(jsonStringify(actual), jsonStringify(expected), description)
     endif
 endfunction
 
 
-# $function: unittestDeepEquals
+# $function: unittestDeepEqual
 # $group: unittest.mds
 # $doc: Assert an actual value is *deeply* equal to the expected value
 # $arg actual: The actual value
 # $arg expected: The expected value
 # $arg description: The description of the assertion
-function unittestDeepEquals(actual, expected, description):
+function unittestDeepEqual(actual, expected, description):
     actualJSON = jsonStringify(actual)
     expectedJSON = jsonStringify(expected)
     if actualJSON != expectedJSON:

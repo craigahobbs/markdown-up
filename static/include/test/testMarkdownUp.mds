@@ -17,8 +17,8 @@ markdownPrint = testMarkdownUp_markdownPrintOriginal
 function testMarkdownUp_dataLineChart():
     unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1, 'B', 2))
-    unittestEquals(dataLineChart(data, objectNew()), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataLineChart(data, objectNew()), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '', \
             '<LineChart 640x320, 1 rows>' \
@@ -31,8 +31,8 @@ unittestRunTest('testMarkdownUp_dataLineChart')
 function testMarkdownUp_dataLineChart_noDefaults():
     unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1, 'B', 2))
-    unittestEquals(dataLineChart(data, objectNew('width', 800, 'height', 400, 'title', 'Hello')), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataLineChart(data, objectNew('width', 800, 'height', 400, 'title', 'Hello')), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '', \
             '<LineChart 800x400, 1 rows - Hello>' \
@@ -45,8 +45,8 @@ unittestRunTest('testMarkdownUp_dataLineChart_noDefaults')
 function testMarkdownUp_dataTable():
     unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', 1.495, 'B', 2))
-    unittestEquals(dataTable(data), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '+======+===+', \
             '| A    | B |', \
@@ -66,8 +66,8 @@ function testMarkdownUp_dataTable_fields():
         'fields', arrayNew('C'), \
         'categories', arrayNew('A') \
     )
-    unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data, model), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '+===+===+', \
             '| A | C |', \
@@ -87,8 +87,8 @@ function testMarkdownUp_dataTable_precision():
         'precision', 1, \
         'trim', false \
     )
-    unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data, model), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '+=====+=====+', \
             '| A   | B   |', \
@@ -104,8 +104,8 @@ unittestRunTest('testMarkdownUp_dataTable_precision')
 function testMarkdownUp_dataTable_datetime():
     unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
-    unittestEquals(dataTable(data), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '+==========================+', \
             '| A                        |', \
@@ -122,8 +122,8 @@ function testMarkdownUp_dataTable_datetime_precision():
     unittestMockBegin_systemLog()
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
     model = objectNew('datetime', 'day')
-    unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data, model), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '+============+', \
             '| A          |', \
@@ -150,8 +150,8 @@ function testMarkdownUp_dataTable_formats():
             'CCCCCCCCCC', objectNew('align', 'right') \
         ) \
     )
-    unittestEquals(dataTable(data, model), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data, model), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             "+==========+==========+============+", \
             "|    A     |        B | CCCCCCCCCC |", \
@@ -172,8 +172,8 @@ function testMarkdownUp_dataTable_invalidData():
         objectNew('A', 1), \
         objectNew('A', 'asdfasdf') \
     )
-    unittestEquals(dataTable(data), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew() \
     ))
 endfunction
@@ -183,8 +183,8 @@ unittestRunTest('testMarkdownUp_dataTable_invalidData')
 function testMarkdownUp_dataTable_noFields():
     unittestMockBegin_systemLog()
     data = arrayNew()
-    unittestEquals(dataTable(data), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(dataTable(data), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew() \
     ))
 endfunction
@@ -192,100 +192,100 @@ unittestRunTest('testMarkdownUp_dataTable_noFields')
 
 
 function testMarkdownUp_documentFontSize():
-    unittestEquals(documentFontSize(), 16)
+    unittestEqual(documentFontSize(), 16)
 endfunction
 unittestRunTest('testMarkdownUp_documentFontSize')
 
 
 function testMarkdownUp_documentInputValue():
-    unittestEquals(documentInputValue(), null)
+    unittestEqual(documentInputValue(), null)
 endfunction
 unittestRunTest('testMarkdownUp_documentInputValue')
 
 
 function testMarkdownUp_documentSetFocus():
-    unittestEquals(documentSetFocus(), null)
+    unittestEqual(documentSetFocus(), null)
 endfunction
 unittestRunTest('testMarkdownUp_documentSetFocus')
 
 
 function testMarkdownUp_documentSetReset():
-    unittestEquals(documentSetReset(), null)
+    unittestEqual(documentSetReset(), null)
 endfunction
 unittestRunTest('testMarkdownUp_documentSetReset')
 
 
 function testMarkdownUp_documentSetTitle():
-    unittestEquals(documentSetTitle(), null)
+    unittestEqual(documentSetTitle(), null)
 endfunction
 unittestRunTest('testMarkdownUp_documentSetTitle')
 
 
 function testMarkdownUp_documentURL():
-    unittestEquals(documentURL('test.json'), 'test.json')
+    unittestEqual(documentURL('test.json'), 'test.json')
 endfunction
 unittestRunTest('testMarkdownUp_documentURL')
 
 
 function testMarkdownUp_drawArc():
-    unittestEquals(drawArc(), null)
+    unittestEqual(drawArc(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawArc')
 
 
 function testMarkdownUp_drawCircle():
-    unittestEquals(drawCircle(), null)
+    unittestEqual(drawCircle(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawCircle')
 
 
 function testMarkdownUp_drawClose():
-    unittestEquals(drawClose(), null)
+    unittestEqual(drawClose(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawClose')
 
 
 function testMarkdownUp_drawEllipse():
-    unittestEquals(drawEllipse(), null)
+    unittestEqual(drawEllipse(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawEllipse')
 
 
 function testMarkdownUp_drawHLine():
-    unittestEquals(drawHLine(), null)
+    unittestEqual(drawHLine(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawHLine')
 
 
 function testMarkdownUp_drawHeight():
     objectSet(markdownUpState, 'drawingHeight', 480)
-    unittestEquals(drawHeight(), 480)
+    unittestEqual(drawHeight(), 480)
 endfunction
 unittestRunTest('testMarkdownUp_drawHeight')
 
 
 function testMarkdownUp_drawImage():
-    unittestEquals(drawImage(), null)
+    unittestEqual(drawImage(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawImage')
 
 
 function testMarkdownUp_drawLine():
-    unittestEquals(drawLine(), null)
+    unittestEqual(drawLine(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawLine')
 
 
 function testMarkdownUp_drawMove():
-    unittestEquals(drawMove(), null)
+    unittestEqual(drawMove(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawMove')
 
 
 function testMarkdownUp_drawNew():
     unittestMockBegin_systemLog()
-    unittestEquals(drawNew(800, 600), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(drawNew(800, 600), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             '', \
             '<Drawing 800x600>' \
@@ -296,101 +296,101 @@ unittestRunTest('testMarkdownUp_drawNew')
 
 
 function testMarkdownUp_drawOnClick():
-    unittestEquals(drawOnClick(), null)
+    unittestEqual(drawOnClick(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawOnClick')
 
 
 function testMarkdownUp_drawPathRect():
-    unittestEquals(drawPathRect(), null)
+    unittestEqual(drawPathRect(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawPathRect')
 
 
 function testMarkdownUp_drawRect():
-    unittestEquals(drawRect(), null)
+    unittestEqual(drawRect(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawRect')
 
 
 function testMarkdownUp_drawStyle():
-    unittestEquals(drawStyle(), null)
+    unittestEqual(drawStyle(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawStyle')
 
 
 function testMarkdownUp_drawText():
-    unittestEquals(drawText(), null)
+    unittestEqual(drawText(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawText')
 
 
 function testMarkdownUp_drawTextHeight():
-    unittestEquals(drawTextHeight(), 16)
+    unittestEqual(drawTextHeight(), 16)
 endfunction
 unittestRunTest('testMarkdownUp_drawTextHeight')
 
 
 function testMarkdownUp_drawTextHeight_width():
-    unittestEquals(drawTextHeight('Hello', 30), 10)
+    unittestEqual(drawTextHeight('Hello', 30), 10)
 endfunction
 unittestRunTest('testMarkdownUp_drawTextHeight_width')
 
 
 function testMarkdownUp_drawTextStyle():
-    unittestEquals(drawTextStyle(20), null)
-    unittestEquals(drawTextHeight('Hello'), 20)
-    unittestEquals(drawTextStyle(), null)
-    unittestEquals(drawTextHeight('Hello'), 16)
+    unittestEqual(drawTextStyle(20), null)
+    unittestEqual(drawTextHeight('Hello'), 20)
+    unittestEqual(drawTextStyle(), null)
+    unittestEqual(drawTextHeight('Hello'), 16)
 endfunction
 unittestRunTest('testMarkdownUp_drawTextStyle')
 
 
 function testMarkdownUp_drawTextWidth():
-    unittestEquals(drawTextWidth('Hello', 16), 48)
+    unittestEqual(drawTextWidth('Hello', 16), 48)
 endfunction
 unittestRunTest('testMarkdownUp_drawTextWidth')
 
 
 
 function testMarkdownUp_drawVLine():
-    unittestEquals(drawVLine(), null)
+    unittestEqual(drawVLine(), null)
 endfunction
 unittestRunTest('testMarkdownUp_drawVLine')
 
 
 function testMarkdownUp_drawWidth():
     objectSet(markdownUpState, 'drawingWidth', 640)
-    unittestEquals(drawWidth(), 640)
+    unittestEqual(drawWidth(), 640)
 endfunction
 unittestRunTest('testMarkdownUp_drawWidth')
 
 
 function testMarkdownUp_elementModelRender():
-    unittestEquals(elementModelRender(), null)
+    unittestEqual(elementModelRender(), null)
 endfunction
 unittestRunTest('testMarkdownUp_elementModelRender')
 
 
 function testMarkdownUp_localStorage():
-    unittestEquals(localStorageGet('key1'), null)
-    unittestEquals(localStorageGet('key2'), null)
-    unittestEquals(localStorageSet('key1', 'value1'), null)
-    unittestEquals(localStorageSet('key2', 'value2'), null)
-    unittestEquals(localStorageGet('key1'), 'value1')
-    unittestEquals(localStorageGet('key2'), 'value2')
-    unittestEquals(localStorageRemove('key2'), null)
-    unittestEquals(localStorageGet('key1'), 'value1')
-    unittestEquals(localStorageGet('key2'), null)
-    unittestEquals(localStorageClear(), null)
-    unittestEquals(localStorageGet('key1'), null)
-    unittestEquals(localStorageGet('key2'), null)
+    unittestEqual(localStorageGet('key1'), null)
+    unittestEqual(localStorageGet('key2'), null)
+    unittestEqual(localStorageSet('key1', 'value1'), null)
+    unittestEqual(localStorageSet('key2', 'value2'), null)
+    unittestEqual(localStorageGet('key1'), 'value1')
+    unittestEqual(localStorageGet('key2'), 'value2')
+    unittestEqual(localStorageRemove('key2'), null)
+    unittestEqual(localStorageGet('key1'), 'value1')
+    unittestEqual(localStorageGet('key2'), null)
+    unittestEqual(localStorageClear(), null)
+    unittestEqual(localStorageGet('key1'), null)
+    unittestEqual(localStorageGet('key2'), null)
 endfunction
 unittestRunTest('testMarkdownUp_localStorage')
 
 
 function testMarkdownUp_markdownEscape():
-    unittestEquals( \
+    unittestEqual( \
         markdownEscape('Escape me: \\ [ ] ( ) < > " \' * _ ~ ` # | -'), \
         'Escape me: \\\\ \\[ \\] \\( \\) \\< \\> \\" \\\' \\* \\_ \\~ \\` \\# \\| \\-' \
     )
@@ -399,21 +399,21 @@ unittestRunTest('testMarkdownUp_markdownEscape')
 
 
 function testMarkdownUp_markdownHeaderId():
-    unittestEquals(markdownHeaderId('**This is a  "Test"**'), 'this-is-a-test')
+    unittestEqual(markdownHeaderId('**This is a  "Test"**'), 'this-is-a-test')
 endfunction
 unittestRunTest('testMarkdownUp_markdownHeaderId')
 
 
 function testMarkdownUp_markdownParse():
-    unittestEquals(markdownParse(), null)
+    unittestEqual(markdownParse(), null)
 endfunction
 unittestRunTest('testMarkdownUp_markdownParse')
 
 
 function testMarkdownUp_markdownPrint():
     unittestMockBegin_systemLog()
-    unittestEquals(testMarkdownUp_markdownPrintStub('Hello', arrayNew('1', '2'), 'Goodbye'), null)
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestEqual(testMarkdownUp_markdownPrintStub('Hello', arrayNew('1', '2'), 'Goodbye'), null)
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'systemLog', arrayNew( \
             'Hello', \
             '1', \
@@ -426,59 +426,59 @@ unittestRunTest('testMarkdownUp_markdownPrint')
 
 
 function testMarkdownUp_markdownTitle():
-    unittestEquals(markdownTitle(), null)
+    unittestEqual(markdownTitle(), null)
 endfunction
 unittestRunTest('testMarkdownUp_markdownTitle')
 
 
 function testMarkdownUp_schemaElements():
-    unittestEquals(schemaElements(), null)
+    unittestEqual(schemaElements(), null)
 endfunction
 unittestRunTest('testMarkdownUp_schemaElements')
 
 
 function testMarkdownUp_sessionStorage():
-    unittestEquals(sessionStorageGet('key1'), null)
-    unittestEquals(sessionStorageGet('key2'), null)
-    unittestEquals(sessionStorageSet('key1', 'value1'), null)
-    unittestEquals(sessionStorageSet('key2', 'value2'), null)
-    unittestEquals(sessionStorageGet('key1'), 'value1')
-    unittestEquals(sessionStorageGet('key2'), 'value2')
-    unittestEquals(sessionStorageRemove('key2'), null)
-    unittestEquals(sessionStorageGet('key1'), 'value1')
-    unittestEquals(sessionStorageGet('key2'), null)
-    unittestEquals(sessionStorageClear(), null)
-    unittestEquals(sessionStorageGet('key1'), null)
-    unittestEquals(sessionStorageGet('key2'), null)
+    unittestEqual(sessionStorageGet('key1'), null)
+    unittestEqual(sessionStorageGet('key2'), null)
+    unittestEqual(sessionStorageSet('key1', 'value1'), null)
+    unittestEqual(sessionStorageSet('key2', 'value2'), null)
+    unittestEqual(sessionStorageGet('key1'), 'value1')
+    unittestEqual(sessionStorageGet('key2'), 'value2')
+    unittestEqual(sessionStorageRemove('key2'), null)
+    unittestEqual(sessionStorageGet('key1'), 'value1')
+    unittestEqual(sessionStorageGet('key2'), null)
+    unittestEqual(sessionStorageClear(), null)
+    unittestEqual(sessionStorageGet('key1'), null)
+    unittestEqual(sessionStorageGet('key2'), null)
 endfunction
 unittestRunTest('testMarkdownUp_sessionStorage')
 
 
 function testMarkdownUp_windowHeight():
-    unittestEquals(windowHeight(), 768)
+    unittestEqual(windowHeight(), 768)
 endfunction
 unittestRunTest('testMarkdownUp_windowHeight')
 
 
 function testMarkdownUp_windowSetLocation():
-    unittestEquals(windowSetLocation(), null)
+    unittestEqual(windowSetLocation(), null)
 endfunction
 unittestRunTest('testMarkdownUp_windowSetLocation')
 
 
 function testMarkdownUp_windowSetResize():
-    unittestEquals(windowSetResize(), null)
+    unittestEqual(windowSetResize(), null)
 endfunction
 unittestRunTest('testMarkdownUp_windowSetResize')
 
 
 function testMarkdownUp_windowSetTimeout():
-    unittestEquals(windowSetTimeout(), null)
+    unittestEqual(windowSetTimeout(), null)
 endfunction
 unittestRunTest('testMarkdownUp_windowSetTimeout')
 
 
 function testMarkdownUp_windowWidth():
-    unittestEquals(windowWidth(), 1024)
+    unittestEqual(windowWidth(), 1024)
 endfunction
 unittestRunTest('testMarkdownUp_windowWidth')

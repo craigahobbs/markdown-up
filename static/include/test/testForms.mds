@@ -5,7 +5,7 @@ include '../forms.mds'
 
 
 function testFormsTextElements():
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         formsTextElements('testId', 'Hello', 30), \
         objectNew( \
             'attr', objectNew( \
@@ -34,7 +34,7 @@ endfunction
 function testFormsTextElements_onEnter():
     systemGlobalSet('testFormsTextElements_onEnterCount', 0)
     elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallback)
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         elements, \
         objectNew( \
             'attr', objectNew( \
@@ -49,13 +49,13 @@ function testFormsTextElements_onEnter():
             'html', 'input' \
         ) \
     )
-    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
     onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
     onEnter = objectGet(elements, 'callbackData')
     onKeyup(10, onEnter)
-    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
     onKeyup(13, onEnter)
-    unittestEquals(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
 unittestRunTest('testFormsTextElements_onEnter')
 
@@ -69,7 +69,7 @@ endfunction
 function testFormsLinkButtonElements():
     systemGlobalSet('testFormsLinkButtonElementsCount', 0)
     elements = formsLinkButtonElements('Hello', testFormsLinkButtonElementsCallback)
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         elements, \
         objectNew( \
             'html', 'a', \
@@ -78,17 +78,17 @@ function testFormsLinkButtonElements():
             'callback', objectNew() \
         ) \
     )
-    unittestEquals(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)
+    unittestEqual(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)
     onClick = objectGet(objectGet(elements, 'callback'), 'click')
     onClick()
-    unittestEquals(systemGlobalGet('testFormsLinkButtonElementsCount'), 1)
+    unittestEqual(systemGlobalGet('testFormsLinkButtonElementsCount'), 1)
 endfunction
 unittestRunTest('testFormsLinkButtonElements')
 
 
 function testFormsLinkElements():
     elements = formsLinkElements('Hello', '#var=')
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         elements, \
         objectNew( \
             'html', 'a', \
@@ -102,7 +102,7 @@ unittestRunTest('testFormsLinkElements')
 
 function testFormsLinkElements_nullUrl():
     elements = formsLinkElements('Hello', null)
-    unittestDeepEquals( \
+    unittestDeepEqual( \
         elements, \
         objectNew( \
             'html', 'span', \
