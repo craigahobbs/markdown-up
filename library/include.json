@@ -85,7 +85,7 @@
             ]
         },
         {
-            "name": "unittestDeepEquals",
+            "name": "unittestDeepEqual",
             "group": "unittest.mds",
             "doc": [
                 "Assert an actual value is *deeply* equal to the expected value"
@@ -112,7 +112,7 @@
             ]
         },
         {
-            "name": "unittestEquals",
+            "name": "unittestEqual",
             "group": "unittest.mds",
             "doc": [
                 "Assert an actual value is equal to the expected value"

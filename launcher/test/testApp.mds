@@ -21,7 +21,7 @@ async function testMarkdownUpIndex():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \
@@ -71,7 +71,7 @@ async function testMarkdownUpIndex_escapes():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \
@@ -120,7 +120,7 @@ async function testMarkdownUpIndex_path():
     systemGlobalSet('vPath', null)
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - subdir') \
         ), \
@@ -167,7 +167,7 @@ async function testMarkdownUpIndex_empty():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \
@@ -203,7 +203,7 @@ async function testMarkdownUpIndex_onlyMarkdown():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \
@@ -243,7 +243,7 @@ async function testMarkdownUpIndex_onlyHTML():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \
@@ -281,7 +281,7 @@ async function testMarkdownUpIndex_onlyDirectories():
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEquals(unittestMockEnd(), objectNew( \
+    unittestDeepEqual(unittestMockEnd(), objectNew( \
         'documentSetTitle', arrayNew( \
             arrayNew('MarkdownUp - .') \
         ), \

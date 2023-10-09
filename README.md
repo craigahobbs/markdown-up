@@ -119,7 +119,7 @@ following example with the unit test include library:
 include <unittest.mds>
 
 function testSanity():
-    unittestEquals(1 + 1, 2)
+    unittestEqual(1 + 1, 2)
 endfunction
 unittestRunTest('testSanity')
 
