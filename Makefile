@@ -29,7 +29,7 @@ clean:
 
 
 help:
-	@echo '            [app|run|test-include]'
+	@echo '            [app|run|test-include|test-launcher]'
 
 
 .PHONY: test-include

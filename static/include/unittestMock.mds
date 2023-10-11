@@ -35,10 +35,10 @@ unittestMockState = objectCopy(unittestMockStateDefault)
 # $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
 # $arg data: Optional (default is null). The map of function name to mock function data.
 # $arg data: The following functions make use of mock data:
-# $arg data: - **documentInputValue** - map of id to array of return values
+# $arg data: - **documentInputValue** - map of id to return value
 # $arg data: - **markdownParse** - array of return values
 # $arg data: - **markdownTitle** - array of return values
-# $arg data: - **systemFetch** - map of URL to array of return values
+# $arg data: - **systemFetch** - map of URL to return value
 function unittestMockAll(data):
     # Data
     unittestMockOneGeneric('dataLineChart')
@@ -240,7 +240,7 @@ endfunction
 
 
 #
-# Local storage functions
+# Local Storage functions
 #
 
 
@@ -345,7 +345,7 @@ endfunction
 
 
 #
-# Session storage functions
+# Session Storage functions
 #
 
 
@@ -396,6 +396,15 @@ function unittestMock_systemFetch(data, args...):
 
     # Record the mocked function call
     arrayPush(unittestMockCalls, arrayNew('systemFetch', args))
+
+    # Array of URLs?
+    if arrayLength(url) != null:
+        result = arrayNew()
+        for urlItem in url:
+            arrayPush(result, objectGet(data, urlItem))
+        endfor
+        return result
+    endif
 
     # Return the mocked systemFetch response
     return objectGet(data, url)
