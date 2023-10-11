@@ -139,51 +139,24 @@
             ]
         },
         {
-            "name": "unittestMockBegin",
+            "name": "unittestMockAll",
             "group": "unittestMock.mds",
             "doc": [
-                "Start a generic function mock",
-                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function"
-            ],
-            "args": [
-                {
-                    "name": "funcName",
-                    "doc": [
-                        "The name of the function to mock"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "unittestMockBegin_markdownPrint",
-            "group": "unittestMock.mds",
-            "doc": [
-                "Begin mocking the MarkdownUp library's [markdownPrint](./#var.vGroup='Markdown'&markdownprint) function.",
-                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
-            ]
-        },
-        {
-            "name": "unittestMockBegin_systemFetch",
-            "group": "unittestMock.mds",
-            "doc": [
-                "Begin mocking the MarkdownUp library's [systemFetch](./#var.vGroup='System'&systemfetch) function.",
+                "Start mocking all BareScript and MarkdownUp library functions with externalities.",
                 "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
             ],
             "args": [
                 {
-                    "name": "responses",
+                    "name": "data",
                     "doc": [
-                        "The map of URL to response"
+                        "Optional (default is null). The map of function name to mock function data.",
+                        "The following functions make use of mock data:",
+                        "- **documentInputValue** - map of id to array of return values",
+                        "- **markdownParse** - array of return values",
+                        "- **markdownTitle** - array of return values",
+                        "- **systemFetch** - map of URL to array of return values"
                     ]
                 }
-            ]
-        },
-        {
-            "name": "unittestMockBegin_systemLog",
-            "group": "unittestMock.mds",
-            "doc": [
-                "Begin mocking the MarkdownUp library's [systemLog](./#var.vGroup='System'&systemlog) function.",
-                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
             ]
         },
         {
@@ -193,7 +166,45 @@
                 "Stop all function mocks"
             ],
             "return": [
-                "The object of function name to function arguments"
+                "The array of mock function call tuples of the form (function name, function argument array)"
+            ]
+        },
+        {
+            "name": "unittestMockOne",
+            "group": "unittestMock.mds",
+            "doc": [
+                "Start a function mock.",
+                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
+            ],
+            "args": [
+                {
+                    "name": "funcName",
+                    "doc": [
+                        "The name of the function to mock"
+                    ]
+                },
+                {
+                    "name": "mockFunc",
+                    "doc": [
+                        "The mock function"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "unittestMockOneGeneric",
+            "group": "unittestMock.mds",
+            "doc": [
+                "Start a generic function mock.",
+                "To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function."
+            ],
+            "args": [
+                {
+                    "name": "funcName",
+                    "doc": [
+                        "The name of the function to mock"
+                    ]
+                }
             ]
         },
         {

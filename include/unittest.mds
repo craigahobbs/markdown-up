@@ -78,7 +78,7 @@ function unittestReport():
     testCount = arrayLength(testNames)
     testFailCount = 0
     for testName in testNames:
-        testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
+        testFailures = objectGet(unittestTests, testName)
         if arrayLength(testFailures):
             testFailCount = testFailCount + 1
         endif
@@ -105,19 +105,21 @@ function unittestReport():
     if testFailCount:
         markdownPrint('', '## Failing Tests')
         for testName in testNames:
-            testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
+            testFailures = objectGet(unittestTests, testName)
             if arrayLength(testFailures):
                 testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
-                markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - FAIL")
+                failureLines = arrayNew('', '[' + markdownEscape(testName) + '](' + testURL + ") - FAIL")
                 for errorLines in testFailures:
                     for errorLine, ixErrorLine in errorLines:
                         if ixErrorLine == 0:
-                            markdownPrint('', '- ' + errorLine)
+                            arrayPush(failureLines, '')
+                            arrayPush(failureLines, '- ' + errorLine)
                         else:
-                            markdownPrint('  ' + errorLine)
+                            arrayPush(failureLines, '  ' + errorLine)
                         endif
                     endfor
                 endfor
+                markdownPrint(failureLines)
             endif
         endfor
     endif
@@ -126,7 +128,7 @@ function unittestReport():
     if testPassCount:
         markdownPrint('', '## Passing Tests')
         for testName in testNames:
-            testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
+            testFailures = objectGet(unittestTests, testName)
             if !arrayLength(testFailures):
                 testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
                 markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - OK")
@@ -168,20 +170,21 @@ endfunction
 
 # Helper function to record a unit test error
 function unittestRecordError(actualStr, expectedStr, description):
-    testName = systemGlobalGet('unittestTestName')
-    testFailures = objectGet(systemGlobalGet('unittestTests'), testName)
-    errorLines = arrayNew()
+    testFailures = objectGet(unittestTests, unittestTestName)
+    errorLines = arrayNew( \
+        '~~~', \
+        actualStr, \
+        '~~~', \
+        '', \
+        '!=', \
+        '', \
+        '~~~', \
+        expectedStr, \
+        '~~~' \
+    )
     if description != null:
-        arrayPush(errorLines, markdownEscape(description))
+        arrayPush(testFailures, arrayExtend(arrayNew(markdownEscape(description), errorLines)))
+    else:
+        arrayPush(testFailures, errorLines)
     endif
-    arrayPush(errorLines, '~~~')
-    arrayPush(errorLines, actualStr)
-    arrayPush(errorLines, '~~~')
-    arrayPush(errorLines, '')
-    arrayPush(errorLines, '!=')
-    arrayPush(errorLines, '')
-    arrayPush(errorLines, '~~~')
-    arrayPush(errorLines, expectedStr)
-    arrayPush(errorLines, '~~~')
-    arrayPush(testFailures, errorLines)
 endfunction

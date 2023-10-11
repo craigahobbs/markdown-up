@@ -6,20 +6,22 @@ include '../unittest.mds'
 
 # Helper to begin mocking the unittest global state
 function testUnittestMockBegin():
-    result = arrayNew(systemGlobalGet('unittestTests'), systemGlobalGet('unittestWarnings'), systemGlobalGet('unittestTestName'))
+    result = arrayNew(unittestTests, unittestWarnings, unittestTestName, vTest)
     systemGlobalSet('unittestTests', objectNew())
     systemGlobalSet('unittestWarnings', arrayNew())
     systemGlobalSet('unittestTestName', null)
+    systemGlobalSet('vTest', null)
     return result
 endfunction
 
 
 # Helper to end mocking the unittest global state
 function testUnittestMockEnd(beginResult):
-    result = arrayNew(systemGlobalGet('unittestTests'), systemGlobalGet('unittestWarnings'))
+    result = arrayNew(unittestTests, unittestWarnings)
     systemGlobalSet('unittestTests', arrayGet(beginResult, 0))
     systemGlobalSet('unittestWarnings', arrayGet(beginResult, 1))
     systemGlobalSet('unittestTestName', arrayGet(beginResult, 2))
+    systemGlobalSet('vTest', arrayGet(beginResult, 3))
     return result
 endfunction
 
@@ -46,7 +48,7 @@ endfunction
 
 function testUnittestRunTest():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -58,15 +60,19 @@ function testUnittestRunTest():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 1 tests - 1 passed, 0 failed', \
+            'Ran 1 tests - 1 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTest('testUnittestRunTest')
@@ -74,7 +80,7 @@ unittestRunTest('testUnittestRunTest')
 
 function testUnittestRunTest_failure():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -87,48 +93,57 @@ function testUnittestRunTest_failure():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 2 tests - 1 passed, 1 failed', \
+            'Ran 2 tests - 1 passed, 1 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Failing Tests', \
+            '## Failing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
+            arrayNew( \
+                '', \
+                "[testUnittest\\_testFail](#var.vTest='testUnittest_testFail') - FAIL", \
+                '', \
+                '- ~~~', \
+                '  2', \
+                '  ~~~', \
+                '  ', \
+                '  !=', \
+                '  ', \
+                '  ~~~', \
+                '  3', \
+                '  ~~~', \
+                '', \
+                '- ~~~', \
+                '  [1,2]', \
+                '  ~~~', \
+                '  ', \
+                '  !=', \
+                '  ', \
+                '  ~~~', \
+                '  [1,2,3]', \
+                '  ~~~' \
+            ) \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            "[testUnittest\\_testFail](#var.vTest='testUnittest_testFail') - FAIL", \
-            '', \
-            '- ~~~', \
-            '  2', \
-            '  ~~~', \
-            '  ', \
-            '  !=', \
-            '  ', \
-            '  ~~~', \
-            '  3', \
-            '  ~~~', \
-            '', \
-            '- ~~~', \
-            '  [1,2]', \
-            '  ~~~', \
-            '  ', \
-            '  !=', \
-            '  ', \
-            '  ~~~', \
-            '  [1,2,3]', \
-            '  ~~~', \
-            '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
-        ) \
+        )) \
     ))
-
 endfunction
 unittestRunTest('testUnittestRunTest_failure')
 
 
 function testUnittestRunTest_multiple():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -141,19 +156,27 @@ function testUnittestRunTest_multiple():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 1 tests - 1 passed, 0 failed', \
+            'Ran 1 tests - 1 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Warnings', \
+            '## Warnings' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '- Test \\"testUnittest\\_testPass\\" run multiple times', \
+            '- Test \\"testUnittest\\_testPass\\" run multiple times' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTest('testUnittestRunTest_multiple')
@@ -161,7 +184,7 @@ unittestRunTest('testUnittestRunTest_multiple')
 
 function testUnittestRunTest_unknown():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -173,15 +196,19 @@ function testUnittestRunTest_unknown():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 0 tests - 0 passed, 0 failed', \
+            'Ran 0 tests - 0 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Warnings', \
+            '## Warnings' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             '- Test \\"testUnittest\\_testUnknown\\" not found' \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTest('testUnittestRunTest_unknown')
@@ -189,7 +216,7 @@ unittestRunTest('testUnittestRunTest_unknown')
 
 async function testUnittestRunTestAsync():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -201,15 +228,19 @@ async function testUnittestRunTestAsync():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 1 tests - 1 passed, 0 failed', \
+            'Ran 1 tests - 1 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTestAsync('testUnittestRunTestAsync')
@@ -217,7 +248,7 @@ unittestRunTestAsync('testUnittestRunTestAsync')
 
 async function testUnittestRunTestAsync_failure():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -230,39 +261,49 @@ async function testUnittestRunTestAsync_failure():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 2 tests - 1 passed, 1 failed', \
+            'Ran 2 tests - 1 passed, 1 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Failing Tests', \
+            '## Failing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
+            arrayNew( \
+                '', \
+                "[testUnittest\\_testFailAsync](#var.vTest='testUnittest_testFailAsync') - FAIL", \
+                '', \
+                '- ~~~', \
+                '  2', \
+                '  ~~~', \
+                '  ', \
+                '  !=', \
+                '  ', \
+                '  ~~~', \
+                '  3', \
+                '  ~~~', \
+                '', \
+                '- ~~~', \
+                '  [1,2]', \
+                '  ~~~', \
+                '  ', \
+                '  !=', \
+                '  ', \
+                '  ~~~', \
+                '  [1,2,3]', \
+                '  ~~~' \
+            ) \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            "[testUnittest\\_testFailAsync](#var.vTest='testUnittest_testFailAsync') - FAIL", \
-            '', \
-            '- ~~~', \
-            '  2', \
-            '  ~~~', \
-            '  ', \
-            '  !=', \
-            '  ', \
-            '  ~~~', \
-            '  3', \
-            '  ~~~', \
-            '', \
-            '- ~~~', \
-            '  [1,2]', \
-            '  ~~~', \
-            '  ', \
-            '  !=', \
-            '  ', \
-            '  ~~~', \
-            '  [1,2,3]', \
-            '  ~~~', \
-            '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        ) \
+        )) \
     ))
 
 endfunction
@@ -271,7 +312,7 @@ unittestRunTestAsync('testUnittestRunTestAsync_failure')
 
 async function testUnittestRunTestAsync_multiple():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -284,19 +325,27 @@ async function testUnittestRunTestAsync_multiple():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 1 tests - 1 passed, 0 failed', \
+            'Ran 1 tests - 1 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Warnings', \
+            '## Warnings' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '- Test \\"testUnittest\\_testPassAsync\\" run multiple times', \
+            '- Test \\"testUnittest\\_testPassAsync\\" run multiple times' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests', \
+            '## Passing Tests' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTestAsync('testUnittestRunTestAsync_multiple')
@@ -304,7 +353,7 @@ unittestRunTestAsync('testUnittestRunTestAsync_multiple')
 
 async function testUnittestRunTestAsync_unknown():
     # Setup mocks
-    unittestMockBegin_markdownPrint()
+    unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
@@ -316,15 +365,19 @@ async function testUnittestRunTestAsync_unknown():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), objectNew( \
-        'markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            'Ran 0 tests - 0 passed, 0 failed', \
+            'Ran 0 tests - 0 passed, 0 failed' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Warnings', \
+            '## Warnings' \
+        )), \
+        arrayNew('markdownPrint', arrayNew( \
             '', \
             '- Test \\"testUnittest\\_testUnknownAsync\\" not found' \
-        ) \
+        )) \
     ))
 endfunction
 unittestRunTestAsync('testUnittestRunTestAsync_unknown')

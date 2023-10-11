@@ -5,68 +5,162 @@
 include '../unittestMock.mds'
 
 
-function testUnittestMockGeneric():
-    unittestMockBegin('documentSetTitle')
-    documentSetTitle('Title')
-    documentSetTitle('Title2')
-    unittestDeepEqual( \
-        unittestMockEnd(), \
-        objectNew('documentSetTitle', arrayNew( \
-            arrayNew('Title'), \
-            arrayNew('Title2') \
-        )) \
-    )
-endfunction
-unittestRunTest('testUnittestMockGeneric')
-
-
-function testUnittestMock_markdownPrint():
-    unittestMockBegin_markdownPrint()
-    markdownPrint('# Title')
-    markdownPrint('', arrayNew('- 1', '- 2'))
-    unittestDeepEqual( \
-        unittestMockEnd(), \
-        objectNew('markdownPrint', arrayNew( \
-            '# Title', \
-            '', \
-            '- 1', \
-            '- 2' \
-        )) \
-    )
-endfunction
-unittestRunTest('testUnittestMock_markdownPrint')
-
-
-function testUnittestMock_systemFetch():
-    unittestMockBegin_systemFetch(objectNew( \
-        'index.html', '<html>', \
-        'data.json', arrayNew() \
+function testUnittestMockAll():
+    # Setup mocks
+    unittestMockAll(objectNew( \
+        'documentInputValue', objectNew('id1', 'value1'), \
+        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
+        'markdownTitle', arrayNew('Title'), \
+        'systemFetch', objectNew('test.json', objectNew('key', 'value')) \
     ))
-    unittestEqual(systemFetch('index.html', null, true), '<html>')
-    unittestDeepEqual(systemFetch('data.json'), arrayNew())
-    unittestEqual(systemFetch('missing.json', objectNew()), null)
-    unittestDeepEqual( \
-        unittestMockEnd(), \
-        objectNew('systemFetch', arrayNew( \
-            arrayNew('index.html', null, true), \
-            arrayNew('data.json', null, null), \
-            arrayNew('missing.json', objectNew(), null) \
-        )) \
-    )
-endfunction
-unittestRunTest('testUnittestMock_systemFetch')
 
+    # Data
+    dataLineChart(arrayNew(objectNew('A', 1)), objectNew('title', 'Title'))
+    dataTable(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))
 
-function testUnittestMock_systemLog():
-    unittestMockBegin_systemLog()
-    systemLog('1')
-    systemLog('2')
-    unittestDeepEqual( \
-        unittestMockEnd(), \
-        objectNew('systemLog', arrayNew( \
-            '1', \
-            '2' \
-        )) \
+    # Document
+    unittestEqual(documentFontSize(), 16)
+    unittestEqual(documentInputValue('id1'), 'value1')
+    documentSetFocus('id1')
+    documentSetReset('id1')
+    documentSetTitle('Hello')
+    unittestEqual(documentURL('test.json'), 'test.json')
+
+    # Drawing (before)
+    unittestEqual(drawHeight(), 480)
+    unittestEqual(drawWidth(), 640)
+    unittestEqual(drawTextHeight(''), 16)
+    unittestEqual(drawTextHeight('Hello', 72), 24)
+    unittestEqual(drawTextWidth('Hello', 20), 60)
+    drawNew(800, 600)
+    drawStyle('red')
+    drawTextStyle(20)
+
+    # Drawing (path)
+    drawMove(10, 10)
+    drawArc(10, 10, 0, 0, 0, 20, 20)
+    drawHLine(25)
+    drawLine(30, 30)
+    drawPathRect(35, 35)
+    drawVLine(40)
+    drawClose()
+
+    # Drawing (non-path)
+    drawCircle(20, 20, 10)
+    drawEllipse(20, 20, 10, 15)
+    drawImage(10, 10, 20, 20, 'test.jpg')
+    drawOnClick(null)
+    drawRect(10, 10, 20, 20)
+    drawText('Hello', 10, 10)
+
+    # Drawing (after)
+    unittestEqual(drawHeight(), 600)
+    unittestEqual(drawWidth(), 800)
+    unittestEqual(drawTextHeight(''), 20)
+    unittestEqual(drawTextHeight('Hello', 72), 24)
+    unittestEqual(drawTextWidth('Hello', 20), 60)
+
+    # Element Model
+    elementModelRender(objectNew('html', 'h1', 'elem', objectNew('text', 'Hello')))
+
+    # Local Storage
+    unittestEqual(localStorageGet('key1'), null)
+    unittestEqual(localStorageGet('key2'), null)
+    localStorageSet('key1', 'value1')
+    localStorageSet('key2', 'value2')
+    unittestEqual(localStorageGet('key1'), 'value1')
+    unittestEqual(localStorageGet('key2'), 'value2')
+    localStorageRemove('key2')
+    unittestEqual(localStorageGet('key1'), 'value1')
+    unittestEqual(localStorageGet('key2'), null)
+    localStorageClear()
+    unittestEqual(localStorageGet('key1'), null)
+    unittestEqual(localStorageGet('key2'), null)
+
+    # Markdown
+    unittestEqual( \
+        markdownEscape('Escape me: \\ [ ] ( ) < > " \' * _ ~ ` # | -'), \
+        'Escape me: \\\\ \\[ \\] \\( \\) \\< \\> \\" \\\' \\* \\_ \\~ \\` \\# \\| \\-' \
     )
+    unittestEqual(markdownHeaderId('**This is a  "Test"**'), 'this-is-a-test')
+    unittestDeepEqual(markdownParse('# Title'), objectNew('parts', arrayNew()))
+    markdownPrint('# Title')
+    unittestDeepEqual(markdownTitle(objectNew('parts', arrayNew())), 'Title')
+
+    # Schema
+    unittestDeepEqual( \
+        schemaElements(objectNew('TestStruct', objectNew('struct', objectNew('name', 'TestStruct'))), 'TestStruct'), \
+        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'struct TestStruct')))) \
+    )
+
+    # Session Storage
+    unittestEqual(sessionStorageGet('key1'), null)
+    unittestEqual(sessionStorageGet('key2'), null)
+    sessionStorageSet('key1', 'value1')
+    sessionStorageSet('key2', 'value2')
+    unittestEqual(sessionStorageGet('key1'), 'value1')
+    unittestEqual(sessionStorageGet('key2'), 'value2')
+    sessionStorageRemove('key2')
+    unittestEqual(sessionStorageGet('key1'), 'value1')
+    unittestEqual(sessionStorageGet('key2'), null)
+    sessionStorageClear()
+    unittestEqual(sessionStorageGet('key1'), null)
+    unittestEqual(sessionStorageGet('key2'), null)
+
+    # System
+    unittestDeepEqual(systemFetch('test.json'), objectNew('key', 'value'))
+    systemLog('Hello')
+    systemLogDebug('Hello Debug')
+
+    # Window
+    unittestEqual(windowHeight(), 768)
+    windowSetLocation('test.html')
+    windowSetResize(null)
+    windowSetTimeout(null, 1000)
+    unittestEqual(windowWidth(), 1024)
+
+    # Reset mocks
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('dataLineChart', arrayNew(arrayNew(objectNew('A', 1)), objectNew('title', 'Title'))), \
+        arrayNew('dataTable', arrayNew(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))), \
+        arrayNew('documentInputValue', arrayNew('id1')), \
+        arrayNew('documentSetFocus', arrayNew('id1')), \
+        arrayNew('documentSetReset', arrayNew('id1')), \
+        arrayNew('documentSetTitle', arrayNew('Hello')), \
+        arrayNew('drawNew', arrayNew(800, 600)), \
+        arrayNew('drawStyle', arrayNew('red')), \
+        arrayNew('drawTextStyle', arrayNew(20)), \
+        arrayNew('drawMove', arrayNew(10, 10)), \
+        arrayNew('drawArc', arrayNew(10, 10, 0, 0, 0, 20, 20)), \
+        arrayNew('drawHLine', arrayNew(25)), \
+        arrayNew('drawLine', arrayNew(30, 30)), \
+        arrayNew('drawPathRect', arrayNew(35, 35)), \
+        arrayNew('drawVLine', arrayNew(40)), \
+        arrayNew('drawClose', arrayNew()), \
+        arrayNew('drawCircle', arrayNew(20, 20, 10)), \
+        arrayNew('drawEllipse', arrayNew(20, 20, 10, 15)), \
+        arrayNew('drawImage', arrayNew(10, 10, 20, 20, 'test.jpg')), \
+        arrayNew('drawOnClick', arrayNew(null)), \
+        arrayNew('drawRect', arrayNew(10, 10, 20, 20)), \
+        arrayNew('drawText', arrayNew('Hello', 10, 10)), \
+        arrayNew('elementModelRender', arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'Hello')))), \
+        arrayNew('localStorageSet', arrayNew('key1', 'value1')), \
+        arrayNew('localStorageSet', arrayNew('key2', 'value2')), \
+        arrayNew('localStorageRemove', arrayNew('key2')), \
+        arrayNew('localStorageClear', arrayNew()), \
+        arrayNew('markdownParse', arrayNew('# Title')), \
+        arrayNew('markdownPrint', arrayNew('# Title')), \
+        arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
+        arrayNew('sessionStorageSet', arrayNew('key1', 'value1')), \
+        arrayNew('sessionStorageSet', arrayNew('key2', 'value2')), \
+        arrayNew('sessionStorageRemove', arrayNew('key2')), \
+        arrayNew('sessionStorageClear', arrayNew()), \
+        arrayNew('systemFetch', arrayNew('test.json')), \
+        arrayNew('systemLog', arrayNew('Hello')), \
+        arrayNew('systemLogDebug', arrayNew('Hello Debug')), \
+        arrayNew('windowSetLocation', arrayNew('test.html')), \
+        arrayNew('windowSetResize', arrayNew(null)), \
+        arrayNew('windowSetTimeout', arrayNew(null, 1000)) \
+    ))
 endfunction
-unittestRunTest('testUnittestMock_systemLog')
+unittestRunTest('testUnittestMockAll')
