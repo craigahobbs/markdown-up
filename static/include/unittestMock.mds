@@ -2,148 +2,416 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
-# $function: unittestMockBegin
+# Include sentinel
+if systemGlobalGet('unittestMockState'):
+    return
+endif
+
+
+# Constants
+unittestMockPixelsPerPoint = 4 / 3
+unittestMockDefaultFontSizePx = 12 * unittestMockPixelsPerPoint
+unittestMockFontWidthRatio = 0.6
+unittestMockWindowHeight = 768
+unittestMockWindowWidth = 1024
+
+
+# The mocked MarkdownUp state
+unittestMockCalls = arrayNew()
+unittestMockFunctions = objectNew()
+unittestMockStateDefault = objectNew( \
+    'drawingFontSizePx', unittestMockDefaultFontSizePx, \
+    'drawingHeight', 480, \
+    'drawingWidth', 640, \
+    'localStorage', objectNew(), \
+    'sessionStorage', objectNew() \
+)
+unittestMockState = objectCopy(unittestMockStateDefault)
+
+
+# $function: unittestMockAll
 # $group: unittestMock.mds
-# $doc: Start a generic function mock
-# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function
+# $doc: Start mocking all BareScript and MarkdownUp library functions with externalities.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+# $arg data: Optional (default is null). The map of function name to mock function data.
+# $arg data: The following functions make use of mock data:
+# $arg data: - **documentInputValue** - map of id to array of return values
+# $arg data: - **markdownParse** - array of return values
+# $arg data: - **markdownTitle** - array of return values
+# $arg data: - **systemFetch** - map of URL to array of return values
+function unittestMockAll(data):
+    # Data
+    unittestMockOneGeneric('dataLineChart')
+    unittestMockOneGeneric('dataTable')
+
+    # Document
+    unittestMockOne('documentFontSize', unittestMock_documentFontSize)
+    unittestMockOne('documentInputValue', systemPartial(unittestMock_documentInputValue, objectGet(data, 'documentInputValue')))
+    unittestMockOneGeneric('documentSetFocus')
+    unittestMockOneGeneric('documentSetReset')
+    unittestMockOneGeneric('documentSetTitle')
+    unittestMockOne('documentURL', unittestMock_documentURL)
+
+    # Drawing
+    unittestMockOneGeneric('drawArc')
+    unittestMockOneGeneric('drawCircle')
+    unittestMockOneGeneric('drawClose')
+    unittestMockOneGeneric('drawEllipse')
+    unittestMockOneGeneric('drawHLine')
+    unittestMockOne('drawHeight', unittestMock_drawHeight)
+    unittestMockOneGeneric('drawImage')
+    unittestMockOneGeneric('drawLine')
+    unittestMockOneGeneric('drawMove')
+    unittestMockOne('drawNew', unittestMock_drawNew)
+    unittestMockOneGeneric('drawOnClick')
+    unittestMockOneGeneric('drawPathRect')
+    unittestMockOneGeneric('drawRect')
+    unittestMockOneGeneric('drawStyle')
+    unittestMockOneGeneric('drawText')
+    unittestMockOne('drawTextHeight', unittestMock_drawTextHeight)
+    unittestMockOne('drawTextStyle', unittestMock_drawTextStyle)
+    unittestMockOne('drawTextWidth', unittestMock_drawTextWidth)
+    unittestMockOneGeneric('drawVLine')
+    unittestMockOne('drawWidth', unittestMock_drawWidth)
+
+    # Element Model
+    unittestMockOneGeneric('elementModelRender')
+
+    # Local Storage
+    unittestMockOne('localStorageClear', unittestMock_localStorageClear)
+    unittestMockOne('localStorageGet', unittestMock_localStorageGet)
+    unittestMockOne('localStorageRemove', unittestMock_localStorageRemove)
+    unittestMockOne('localStorageSet', unittestMock_localStorageSet)
+
+    # Markdown
+    unittestMockOne('markdownEscape', unittestMock_markdownEscape)
+    unittestMockOne('markdownHeaderId', unittestMock_markdownHeaderId)
+    unittestMockOne('markdownParse', systemPartial(unittestMock_markdownParse, objectGet(data, 'markdownParse')))
+    unittestMockOneGeneric('markdownPrint')
+    unittestMockOne('markdownTitle', systemPartial(unittestMock_markdownTitle, objectGet(data, 'markdownTitle')))
+
+    # Schema
+    unittestMockOne('schemaElements', unittestMock_schemaElements)
+
+    # Session Storage
+    unittestMockOne('sessionStorageClear', unittestMock_sessionStorageClear)
+    unittestMockOne('sessionStorageGet', unittestMock_sessionStorageGet)
+    unittestMockOne('sessionStorageRemove', unittestMock_sessionStorageRemove)
+    unittestMockOne('sessionStorageSet', unittestMock_sessionStorageSet)
+
+    # System
+    unittestMockOne('systemFetch', systemPartial(unittestMock_systemFetch, objectGet(data, 'systemFetch')))
+    unittestMockOneGeneric('systemLog')
+    unittestMockOneGeneric('systemLogDebug')
+
+    # Window
+    unittestMockOne('windowHeight', unittestMock_windowHeight)
+    unittestMockOneGeneric('windowSetLocation')
+    unittestMockOneGeneric('windowSetResize')
+    unittestMockOneGeneric('windowSetTimeout')
+    unittestMockOne('windowWidth', unittestMock_windowWidth)
+endfunction
+
+
+# $function: unittestMockOne
+# $group: unittestMock.mds
+# $doc: Start a function mock.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
 # $arg funcName: The name of the function to mock
-function unittestMockBegin(funcName):
-    ixMock = arrayLength(unittestMockFunctions)
-    funcOrig = systemGlobalGet(funcName)
-    systemGlobalSet(funcName, systemGlobalGet('unittestMockFunction' + ixMock))
-    arrayPush(unittestMockFunctions, objectNew('name', funcName, 'orig', funcOrig, 'args', arrayNew()))
+# $arg mockFunc: The mock function
+function unittestMockOne(funcName, mockFunc):
+    # Replace the function withi the mocked function
+    objectSet(unittestMockFunctions, funcName, systemGlobalGet(funcName))
+    systemGlobalSet(funcName, mockFunc)
+endfunction
+
+
+# $function: unittestMockOneGeneric
+# $group: unittestMock.mds
+# $doc: Start a generic function mock.
+# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+# $arg funcName: The name of the function to mock
+function unittestMockOneGeneric(funcName):
+    return unittestMockOne(funcName, systemPartial(unittestMockGeneric, funcName))
+endfunction
+
+function unittestMockGeneric(funcName, args...):
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew(funcName, args))
 endfunction
 
 
 # $function: unittestMockEnd
 # $group: unittestMock.mds
 # $doc: Stop all function mocks
-# $return: The object of function name to function arguments
+# $return: The array of mock function call tuples of the form (function name, function argument array)
 function unittestMockEnd():
-    # Restore the original function and collect the mock args
-    mockArgs = objectNew()
-    for mock, ixMock in unittestMockFunctions:
-        systemGlobalSet(objectGet(mock, 'name'), objectGet(mock, 'orig'))
-        objectSet(mockArgs, objectGet(mock, 'name'), objectGet(mock, 'args'))
+    # Restore the original functions
+    for funcName in objectKeys(unittestMockFunctions):
+        systemGlobalSet(funcName, objectGet(unittestMockFunctions, funcName))
     endfor
 
-    # Reset the mock functions
-    systemGlobalSet('unittestMockFunctions', arrayNew())
+    # Reset the mock state
+    mockCalls = unittestMockCalls
+    systemGlobalSet('unittestMockCalls', arrayNew())
+    systemGlobalSet('unittestMockFunctions', objectNew())
+    systemGlobalSet('unittestMockState', objectCopy(unittestMockStateDefault))
 
-    return mockArgs
+    return mockCalls
 endfunction
 
 
-# The mocked functions array
-unittestMockFunctions = arrayNew()
+#
+# Document functions
+#
 
-function unittestMockFind(funcName):
-    for mock in unittestMockFunctions:
-        if objectGet(mock, 'name') == funcName:
-            return mock
-        endif
-    endfor
-    return null
-endfunction
 
-function unittestMockFunction0(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 0), 'args'), args)
-endfunction
-
-function unittestMockFunction1(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 1), 'args'), args)
-endfunction
-
-function unittestMockFunction2(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 2), 'args'), args)
-endfunction
-
-function unittestMockFunction3(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 3), 'args'), args)
-endfunction
-
-function unittestMockFunction4(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 4), 'args'), args)
-endfunction
-
-function unittestMockFunction5(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 5), 'args'), args)
-endfunction
-
-function unittestMockFunction6(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 6), 'args'), args)
-endfunction
-
-function unittestMockFunction7(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 7), 'args'), args)
-endfunction
-
-function unittestMockFunction8(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 8), 'args'), args)
-endfunction
-
-function unittestMockFunction9(args...):
-    arrayPush(objectGet(arrayGet(unittestMockFunctions, 9), 'args'), args)
+function unittestMock_documentFontSize():
+    return unittestMockDefaultFontSizePx
 endfunction
 
 
-# $function: unittestMockBegin_markdownPrint
-# $group: unittestMock.mds
-# $doc: Begin mocking the MarkdownUp library's [markdownPrint](./#var.vGroup='Markdown'&markdownprint) function.
-# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
-function unittestMockBegin_markdownPrint():
-    funcOrig = systemGlobalGet('markdownPrint')
-    systemGlobalSet('markdownPrint', unittestMock_markdownPrint)
-    arrayPush(unittestMockFunctions, objectNew('name', 'markdownPrint', 'orig', funcOrig, 'args', arrayNew()))
-endfunction
+function unittestMock_documentInputValue(data, args...):
+    id = arrayGet(args, 0)
 
-function unittestMock_markdownPrint(lines...):
-    unittestMock_markdownPrintHelper(lines)
-endfunction
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('documentInputValue', args))
 
-function unittestMock_markdownPrintHelper(lines):
-    for line in lines:
-        if arrayLength(line) != null:
-            unittestMock_markdownPrintHelper(line)
-        else:
-            arrayPush(objectGet(unittestMockFind('markdownPrint'), 'args'), line)
-        endif
-    endfor
+    # Return the mocked documentInputValue response
+    return objectGet(data, id)
 endfunction
 
 
-# $function: unittestMockBegin_systemFetch
-# $group: unittestMock.mds
-# $doc: Begin mocking the MarkdownUp library's [systemFetch](./#var.vGroup='System'&systemfetch) function.
-# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
-# $arg responses: The map of URL to response
-function unittestMockBegin_systemFetch(responses):
-    funcOrig = systemGlobalGet('systemFetch')
-    systemGlobalSet('systemFetch', unittestMock_systemFetch)
-    arrayPush(unittestMockFunctions, objectNew('name', 'systemFetch', 'orig', funcOrig, 'args', arrayNew()))
-    systemGlobalSet('unittestMock_systemFetchResponses', responses)
+function unittestMock_documentURL(url):
+    return url
 endfunction
 
-function unittestMock_systemFetch(url, options, isText):
-    arrayPush(objectGet(unittestMockFind('systemFetch'), 'args'), arrayNew(url, options, isText))
-    response = objectGet(unittestMock_systemFetchResponses, url)
-    if response != null && ((isText && stringLength(response) != null) || (!isText && stringLength(response) == null)):
-        return response
+
+#
+# Drawing functions
+#
+
+
+function unittestMock_drawHeight():
+    return objectGet(unittestMockState, 'drawingHeight')
+endfunction
+
+
+function unittestMock_drawNew(args...):
+    width = arrayGet(args, 0)
+    height = arrayGet(args, 1)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('drawNew', args))
+
+    # Update the mock state
+    objectSet(unittestMockState, 'drawingWidth', width)
+    objectSet(unittestMockState, 'drawingHeight', height)
+endfunction
+
+
+function unittestMock_drawTextHeight(text, width):
+    if width > 0:
+        return width / (unittestMockFontWidthRatio * stringLength(text))
     endif
-    return null
+    return objectGet(unittestMockState, 'drawingFontSizePx')
 endfunction
 
 
-# $function: unittestMockBegin_systemLog
-# $group: unittestMock.mds
-# $doc: Begin mocking the MarkdownUp library's [systemLog](./#var.vGroup='System'&systemlog) function.
-# $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
-function unittestMockBegin_systemLog():
-    funcOrig = systemGlobalGet('systemLog')
-    systemGlobalSet('systemLog', unittestMock_systemLog)
-    arrayPush(unittestMockFunctions, objectNew('name', 'systemLog', 'orig', funcOrig, 'args', arrayNew()))
+function unittestMock_drawTextStyle(args...):
+    fontSizePx = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('drawTextStyle', args))
+
+    # Update the mock state
+    objectSet(unittestMockState, 'drawingFontSizePx', if(fontSizePx != null, fontSizePx, unittestMockDefaultFontSizePx))
 endfunction
 
-function unittestMock_systemLog(message):
-    arrayPush(objectGet(unittestMockFind('systemLog'), 'args'), message)
+
+function unittestMock_drawTextWidth(text, fontSizePx):
+    return unittestMockFontWidthRatio * fontSizePx * stringLength(text)
+endfunction
+
+
+function unittestMock_drawWidth():
+    return objectGet(unittestMockState, 'drawingWidth')
+endfunction
+
+
+#
+# Local storage functions
+#
+
+
+function unittestMock_localStorageClear(args...):
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('localStorageClear', args))
+
+    # Update the mock state
+    objectSet(unittestMockState, 'localStorage', objectNew())
+endfunction
+
+
+function unittestMock_localStorageGet(key):
+    return objectGet(objectGet(unittestMockState, 'localStorage'), key)
+endfunction
+
+
+function unittestMock_localStorageRemove(args...):
+    key = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('localStorageRemove', args))
+
+    # Update the mock state
+    objectDelete(objectGet(unittestMockState, 'localStorage'), key)
+endfunction
+
+
+function unittestMock_localStorageSet(args...):
+    key = arrayGet(args, 0)
+    value = arrayGet(args, 1)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('localStorageSet', args))
+
+    # Update the mock state
+    objectSet(objectGet(unittestMockState, 'localStorage'), key, value)
+endfunction
+
+
+#
+# Markdown functions
+#
+
+
+function unittestMock_markdownEscape(text):
+    return stringReplace(text, unittestMock_markdownEscapeRegex, '\\$1')
+endfunction
+
+unittestMock_markdownEscapeRegex = regexNew('([\\\\[\\]()<>"\'*_~`#=+|-])', 'g')
+
+
+function unittestMock_markdownHeaderId(text):
+    result = stringLower(text)
+    result = stringReplace(result, unittestMock_markdownHeaderId_start, '')
+    result = stringReplace(result, unittestMock_markdownHeaderId_end, '')
+    result = stringReplace(result, unittestMock_markdownHeaderId_remove, '')
+    return stringReplace(result, unittestMock_markdownHeaderId_dash, '-')
+endfunction
+
+unittestMock_markdownHeaderId_start = regexNew('^[^a-z0-9]+', 'g')
+unittestMock_markdownHeaderId_end = regexNew('[^a-z0-9]+$', 'g')
+unittestMock_markdownHeaderId_remove = regexNew('[\'"]', 'g')
+unittestMock_markdownHeaderId_dash = regexNew('[^a-z0-9]+', 'g')
+
+
+function unittestMock_markdownParse(data, args...):
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('markdownParse', args))
+
+    # Return the mocked markdownParse response
+    return arrayShift(data)
+endfunction
+
+
+function unittestMock_markdownTitle(data, args...):
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('markdownTitle', args))
+
+    # Return the mocked markdownTitle response
+    return arrayShift(data)
+endfunction
+
+
+#
+# Schema functions
+#
+
+
+function unittestMock_schemaElements(types, typeName):
+    userType = objectGet(types, typeName)
+    userTypeKey = arrayGet(objectKeys(userType), 0)
+    if userTypeKey == 'struct' && objectGet(objectGet(userType, 'struct'), 'union'):
+        userTypeKey = 'union'
+    endif
+    return arrayNew( \
+        arrayNew( \
+            objectNew('html', 'h1', 'elem', objectNew('text', userTypeKey + ' ' + typeName)) \
+        ) \
+    )
+endfunction
+
+
+#
+# Session storage functions
+#
+
+
+function unittestMock_sessionStorageClear(args...):
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('sessionStorageClear', args))
+
+    # Update the mock state
+    objectSet(unittestMockState, 'sessionStorage', objectNew())
+endfunction
+
+
+function unittestMock_sessionStorageGet(key):
+    return objectGet(objectGet(unittestMockState, 'sessionStorage'), key)
+endfunction
+
+
+function unittestMock_sessionStorageRemove(args...):
+    key = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('sessionStorageRemove', args))
+
+    # Update the mock state
+    objectDelete(objectGet(unittestMockState, 'sessionStorage'), key)
+endfunction
+
+
+function unittestMock_sessionStorageSet(args...):
+    key = arrayGet(args, 0)
+    value = arrayGet(args, 1)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('sessionStorageSet', args))
+
+    # Update the mock state
+    objectSet(objectGet(unittestMockState, 'sessionStorage'), key, value)
+endfunction
+
+
+#
+# System functions
+#
+
+
+function unittestMock_systemFetch(data, args...):
+    url = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('systemFetch', args))
+
+    # Return the mocked systemFetch response
+    return objectGet(data, url)
+endfunction
+
+
+#
+# Window functions
+#
+
+
+function unittestMock_windowHeight():
+    return unittestMockWindowHeight
+endfunction
+
+
+function unittestMock_windowWidth():
+    return unittestMockWindowWidth
 endfunction

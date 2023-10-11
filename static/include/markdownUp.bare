@@ -16,7 +16,7 @@ markdownUpWindowHeight = 768
 markdownUpWindowWidth = 1024
 
 
-# The mock MarkdownUp state
+# The simulated MarkdownUp state
 markdownUpState = objectNew( \
     'drawingFontSizePx', markdownUpDefaultFontSizePx, \
     'drawingHeight', 480, \
@@ -375,7 +375,17 @@ endfunction
 #
 
 
-function schemaElements():
+function schemaElements(types, typeName):
+    userType = objectGet(types, typeName)
+    userTypeKey = arrayGet(objectKeys(userType), 0)
+    if userTypeKey == 'struct' && objectGet(objectGet(userType, 'struct'), 'union'):
+        userTypeKey = 'union'
+    endif
+    return arrayNew( \
+        arrayNew( \
+            objectNew('html', 'h1', 'elem', objectNew('text', userTypeKey + ' ' + typeName)) \
+        ) \
+    )
 endfunction
 
 
