@@ -151,10 +151,10 @@
                     "doc": [
                         "Optional (default is null). The map of function name to mock function data.",
                         "The following functions make use of mock data:",
-                        "- **documentInputValue** - map of id to array of return values",
+                        "- **documentInputValue** - map of id to return value",
                         "- **markdownParse** - array of return values",
                         "- **markdownTitle** - array of return values",
-                        "- **systemFetch** - map of URL to array of return values"
+                        "- **systemFetch** - map of URL to return value"
                     ]
                 }
             ]

@@ -164,3 +164,45 @@ function testUnittestMockAll():
     ))
 endfunction
 unittestRunTest('testUnittestMockAll')
+
+
+function testUnittestMockAll_systemFetch_array():
+    # Setup mocks
+    unittestMockAll(objectNew( \
+        'systemFetch', objectNew( \
+            'test.json', objectNew('key', 'value'), \
+            'test2.json', objectNew('key2', 'value2') \
+        ) \
+    ))
+
+    # Call systemFetch with array of URLs
+    unittestDeepEqual( \
+        systemFetch(arrayNew('test.json', 'test2.json')), \
+        arrayNew( \
+            objectNew('key', 'value'), \
+            objectNew('key2', 'value2') \
+        ) \
+    )
+
+    # Reset mocks
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemFetch', arrayNew(arrayNew('test.json', 'test2.json'))) \
+    ))
+endfunction
+unittestRunTest('testUnittestMockAll_systemFetch_array')
+
+
+function testUnittestMockAll_schemaElements_union():
+    # Setup mocks
+    unittestMockAll()
+
+    # Call schemaElements with a union type
+    unittestDeepEqual( \
+        schemaElements(objectNew('TestUnion', objectNew('union', objectNew('name', 'TestUnion'))), 'TestUnion'), \
+        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'union TestUnion')))) \
+    )
+
+    # Reset mocks
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testUnittestMockAll_schemaElements_union')
