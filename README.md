@@ -113,7 +113,9 @@ Click here to [see the example in action](https://craigahobbs.github.io/markdown
 ### The MarkdownUp Include Library
 
 MarkdownUp provides some additional functionality that can be included at runtime. Consider the
-following example with the unit test include library:
+following example that uses the
+[unittest.mds](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='unittest.mds')
+system library:
 
 ~~~
 include <unittest.mds>
