@@ -67,9 +67,7 @@ unittestRunTest('testCode1SumNumberArrays')
 
 Unit tests may be run on the command line using the
 [BareScript CLI](https://github.com/craigahobbs/bare-script#the-barescript-command-line-interface-cli)
-and the
-[markdownUp.bare](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='markdownUp.bare')
-include library:
+and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
 
 ~~~
 npx bare -c 'include <markdownUp.bare>' test/runTests.mds
