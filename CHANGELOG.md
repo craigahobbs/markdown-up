@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.3 (2023-10-19)
+
+- [3a19224](https://github.com/craigahobbs/markdown-up/commit/3a19224) - if no post-render hash ID navigation, scroll window to top
+
 ## 2.3.2 (2023-10-18)
 
 - [4567361](https://github.com/craigahobbs/markdown-up/commit/4567361) - fix post-render hash-ID navigation
