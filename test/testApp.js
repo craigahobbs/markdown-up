@@ -866,11 +866,12 @@ elementModelRender(objectNew( \
 test('MarkdownUp, render location hash', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': ''});
-    window.location.hash = '#myid';
+    window.location.hash = "#var.vName='test'";
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
-    assert.equal(window.location.href, `${jsdomURL}#myid`);
+    assert(window.document.getElementById("var.vName='test'"));
+    assert.equal(window.location.href, `${jsdomURL}#var.vName='test'`);
 });
 
 
