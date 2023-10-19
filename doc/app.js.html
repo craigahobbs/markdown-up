@@ -222,9 +222,9 @@ export class MarkdownUp {
             return;
         }
 
-        // If there is a URL hash ID, re-navigate to go there since it was just rendered. After the
-        // first render, re-render is short-circuited by the unchanged hash param check above.
-        if (!isError &amp;&amp; getHashID(this.window.location.hash) !== null) {
+        // If the window location hash exists in the document, re-navigate there since it was just rendered.
+        // After the first render, re-render is short-circuited by the unchanged hash param check above.
+        if (!isError &amp;&amp; this.window.document.getElementById(this.window.location.hash.slice(1)) !== null) {
             this.window.location.href = this.window.location.hash;
         }
     }
