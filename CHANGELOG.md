@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2 (2023-10-18)
+
+- [4567361](https://github.com/craigahobbs/markdown-up/commit/4567361) - fix post-render hash-ID navigation
+
 ## 2.3.1 (2023-09-27)
 
 - [a7491fb](https://github.com/craigahobbs/markdown-up/commit/a7491fb) - library - add dataTable nowrap field format
