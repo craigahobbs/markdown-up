@@ -1,0 +1,214 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# The URL arguments model
+urlTypes = schemaParse( \
+    'typedef URLArgument[len > 0] URLArguments', \
+    '', \
+    'struct URLArgument', \
+    '    string(len > 0) name', \
+    '    optional URLArgumentType type', \
+    '    optional string(len > 0) global', \
+    '    optional bool explicit', \
+    '    optional object default', \
+    '    optional string(len > 0) description', \
+    '', \
+    'enum URLArgumentType', \
+    '    boolean', \
+    '    date', \
+    '    datetime', \
+    '    number', \
+    '    string' \
+)
+
+
+function urlArgs(urlArgs):
+    # Validate the URL args
+    urlArgs = schemaValidate(urlTypes, 'URLArguments', urlArgs)
+    if urlArgs == null:
+        return null
+    endif
+
+    # Create the arguments object
+    args = objectNew()
+    for urlArg in urlArgs:
+        # Get the argument value
+        global = urlGlobalName(urlArg)
+        value = urlValidateValue(systemGlobalGet(global), objectGet(urlArg, 'type'), global)
+
+        # Apply the default argument value, if any
+        if value == null:
+            value = objectGet(urlArg, 'default')
+        endif
+
+        # Set the argument value, if any
+        if value != null:
+            objectSet(args, objectGet(urlArg, 'name'), value)
+        endif
+    endfor
+
+    return args
+endfunction
+
+
+function urlCreate(urlArgs, args, explicit):
+    # Get the URL variables
+    urlVars = arrayNew()
+    for urlArg in urlArgs:
+        name = objectGet(urlArg, 'name')
+        type = objectGet(urlArg, 'type')
+        global = urlGlobalName(urlArg)
+
+        # Add the URL variable, if any
+        value = null
+        if objectHas(args, name):
+            value = urlValidateValue(objectGet(args, name), type, global)
+        elif !(explicit || objectGet(urlArg, 'explicit')):
+            value = urlValidateValue(systemGlobalGet(global), type, global)
+        endif
+
+        # Add the URL variable
+        if value != null:
+            arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(urlFormatValue(value, type)))
+        endif
+    endfor
+
+    # Create the URL
+    return if(arrayLength(urlVars), '#' + arrayJoin(urlVars, '&'), '#var=')
+endfunction
+
+
+function urlLink(urlArgs, text, args, explicit):
+    return '[' + markdownEscape(text) + '](' + urlCreate(urlArgs, args, explicit) + ')'
+endfunction
+
+
+function urlHelp(urlArgs):
+    # Create the help data
+    helpData = arrayNew()
+    anyDefault = false
+    anyExplicit = false
+    anyDescription = false
+    for urlArg in urlArgs:
+        type = objectGet(urlArg, 'type', 'string')
+        default = objectGet(urlArg, 'default')
+        explicit = objectGet(urlArg, 'explicit')
+        description = objectGet(urlArg, 'description')
+
+        # Add the help data row
+        arrayPush(helpData, objectNew( \
+            'Variable', urlGlobalName(urlArg), \
+            'Type', type, \
+            'Default', urlFormatValue(default, type), \
+            'Explicit', urlFormatValue(explicit, 'boolean'), \
+            'Description', if(description != null, description, '') \
+        ))
+
+        # Update the "any" field bools
+        anyDefault = defaultAny || (default != null)
+        anyExplicit = anyExplicit || explicit
+        anyDescription = anyDescription || description
+    endfor
+
+    # Render the help table
+    helpFields = arrayNew('Variable', 'Type')
+    if anyDefault:
+        arrayPush(helpFields, 'Default')
+    endif
+    if anyExplicit:
+        arrayPush(helpFields, 'Explicit')
+    endif
+    if anyDescription:
+        arrayPush(helpFields, 'Description')
+    endif
+    dataTable(helpData, objectNew('fields', helpFields))
+endfunction
+
+
+# Helper function to compute an argument's global name
+function urlGlobalName(urlArg):
+    global = objectGet(urlArg, 'global')
+    if global == null:
+        name = objectGet(urlArg, 'name')
+        global = 'v' + stringUpper(stringSlice(name, 0, 1)) + stringSlice(name, 1)
+    endif
+    return global
+endfunction
+
+
+# Helper function to format an argument value
+function urlFormatValue(value, type):
+    # No value?
+    if value == null:
+        return ''
+    endif
+
+    # Return the formatted value
+    if type == 'boolean':
+        return stringNew(value)
+    elif type == 'date':
+        return "'" + datetimeISOFormat(value, true) + "'"
+    elif type == 'datetime':
+        return "'" + datetimeISOFormat(value) + "'"
+    elif type == 'number':
+        return stringNew(value)
+    endif
+
+    # type == 'string'
+    return "'" + value + "'"
+endfunction
+
+
+# Helper function to validate an argument value's type
+function urlValidateValue(value, type, global):
+    # No value?
+    if value == null:
+        return null
+    endif
+
+    # Validate the value's type
+    if type == 'boolean':
+        if value != true && value != 1 && value != false && value != 0:
+            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            value = null
+        endif
+    elif type == 'date':
+        if stringLength(value) != null:
+            valueDatetime = datetimeISOParse(value)
+            if valueDatetime != null:
+                value = datetimeNewUTC(datetimeYear(valueDatetime), datetimeMonth(valueDatetime), datetimeDay(valueDatetime))
+            else:
+                systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                value = null
+            endif
+        else:
+            value = null
+        endif
+    elif type == 'datetime':
+        if stringLength(value) != null:
+            valueDatetime = datetimeISOParse(value)
+            if valueDatetime != null:
+                value = valueDatetime
+            else:
+                systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                value = null
+            endif
+        else:
+            value = null
+        endif
+    elif type == 'number':
+        if numberToFixed(value) == null:
+            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            value = null
+        endif
+    else:
+        # type == 'string'
+        if stringLength(value) == null:
+            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            value = null
+        endif
+    endif
+
+    return value
+endfunction
