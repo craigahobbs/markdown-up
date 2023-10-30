@@ -2,19 +2,43 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
+# Include sentinel
+if systemGlobalGet('argsTypes'):
+    return
+endif
+
+
 # The URL arguments model
-urlTypes = schemaParse( \
-    'typedef URLArgument[len > 0] URLArguments', \
+argsTypes = schemaParse( \
+    'group "Args"', \
     '', \
-    'struct URLArgument', \
+    '# An argument model list', \
+    'typedef ArgsArgument[len > 0] ArgsArguments', \
+    '', \
+    '# An argument model', \
+    'struct ArgsArgument', \
+    '', \
+    '    # The argument name', \
     '    string(len > 0) name', \
-    '    optional URLArgumentType type', \
+    '', \
+    '    # The argument type', \
+    '    optional ArgsType type', \
+    '', \
+    "    # The argument's global variable name", \
     '    optional string(len > 0) global', \
+    '', \
+    '    # If true, the argument is explicit.', \
+    '    # An explicit argument is only included in the URL if it is explicitly set in the arguments dictionary.', \
     '    optional bool explicit', \
+    '', \
+    '    # The default argument value', \
     '    optional object default', \
+    '', \
+    '    # The argument description', \
     '    optional string(len > 0) description', \
     '', \
-    'enum URLArgumentType', \
+    '# An argument value type', \
+    'enum ArgsType', \
     '    boolean', \
     '    date', \
     '    datetime', \
@@ -23,28 +47,28 @@ urlTypes = schemaParse( \
 )
 
 
-function urlArgs(urlArgs):
+function argsGet(arguments):
     # Validate the URL args
-    urlArgs = schemaValidate(urlTypes, 'URLArguments', urlArgs)
-    if urlArgs == null:
+    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
+    if arguments == null:
         return null
     endif
 
     # Create the arguments object
     args = objectNew()
-    for urlArg in urlArgs:
+    for argument in arguments:
         # Get the argument value
-        global = urlGlobalName(urlArg)
-        value = urlValidateValue(systemGlobalGet(global), objectGet(urlArg, 'type'), global)
+        global = argsGlobalName(argument)
+        value = argsValidateValue(systemGlobalGet(global), objectGet(argument, 'type'), global)
 
         # Apply the default argument value, if any
         if value == null:
-            value = objectGet(urlArg, 'default')
+            value = objectGet(argument, 'default')
         endif
 
         # Set the argument value, if any
         if value != null:
-            objectSet(args, objectGet(urlArg, 'name'), value)
+            objectSet(args, objectGet(argument, 'name'), value)
         endif
     endfor
 
@@ -52,25 +76,31 @@ function urlArgs(urlArgs):
 endfunction
 
 
-function urlCreate(urlArgs, args, explicit):
+function argsURL(arguments, args, explicit):
+    # Validate the URL args
+    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
+    if arguments == null:
+        return null
+    endif
+
     # Get the URL variables
     urlVars = arrayNew()
-    for urlArg in urlArgs:
-        name = objectGet(urlArg, 'name')
-        type = objectGet(urlArg, 'type')
-        global = urlGlobalName(urlArg)
+    for argument in arguments:
+        name = objectGet(argument, 'name')
+        type = objectGet(argument, 'type')
+        global = argsGlobalName(argument)
 
         # Add the URL variable, if any
         value = null
         if objectHas(args, name):
-            value = urlValidateValue(objectGet(args, name), type, global)
-        elif !(explicit || objectGet(urlArg, 'explicit')):
-            value = urlValidateValue(systemGlobalGet(global), type, global)
+            value = argsValidateValue(objectGet(args, name), type, global)
+        elif !(explicit || objectGet(argument, 'explicit')):
+            value = argsValidateValue(systemGlobalGet(global), type, global)
         endif
 
         # Add the URL variable
         if value != null:
-            arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(urlFormatValue(value, type)))
+            arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(argsFormatValue(value, type)))
         endif
     endfor
 
@@ -79,36 +109,42 @@ function urlCreate(urlArgs, args, explicit):
 endfunction
 
 
-function urlLink(urlArgs, text, args, explicit):
-    return '[' + markdownEscape(text) + '](' + urlCreate(urlArgs, args, explicit) + ')'
+function argsLink(arguments, text, args, explicit):
+    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit) + ')'
 endfunction
 
 
-function urlHelp(urlArgs):
+function argsHelp(arguments):
+    # Validate the URL args
+    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
+    if arguments == null:
+        return null
+    endif
+
     # Create the help data
     helpData = arrayNew()
     anyDefault = false
     anyExplicit = false
     anyDescription = false
-    for urlArg in urlArgs:
-        type = objectGet(urlArg, 'type', 'string')
-        default = objectGet(urlArg, 'default')
-        explicit = objectGet(urlArg, 'explicit')
-        description = objectGet(urlArg, 'description')
+    for argument in arguments:
+        type = objectGet(argument, 'type', 'string')
+        default = objectGet(argument, 'default')
+        explicit = objectGet(argument, 'explicit')
+        description = objectGet(argument, 'description')
 
         # Add the help data row
         arrayPush(helpData, objectNew( \
-            'Variable', urlGlobalName(urlArg), \
+            'Variable', argsGlobalName(argument), \
             'Type', type, \
-            'Default', urlFormatValue(default, type), \
-            'Explicit', urlFormatValue(explicit, 'boolean'), \
+            'Default', argsFormatValue(default, type), \
+            'Explicit', argsFormatValue(explicit, 'boolean'), \
             'Description', if(description != null, description, '') \
         ))
 
         # Update the "any" field bools
         anyDefault = defaultAny || (default != null)
         anyExplicit = anyExplicit || explicit
-        anyDescription = anyDescription || description
+        anyDescription = anyDescription || (description != null)
     endfor
 
     # Render the help table
@@ -127,10 +163,10 @@ endfunction
 
 
 # Helper function to compute an argument's global name
-function urlGlobalName(urlArg):
-    global = objectGet(urlArg, 'global')
+function argsGlobalName(argument):
+    global = objectGet(argument, 'global')
     if global == null:
-        name = objectGet(urlArg, 'name')
+        name = objectGet(argument, 'name')
         global = 'v' + stringUpper(stringSlice(name, 0, 1)) + stringSlice(name, 1)
     endif
     return global
@@ -138,7 +174,7 @@ endfunction
 
 
 # Helper function to format an argument value
-function urlFormatValue(value, type):
+function argsFormatValue(value, type):
     # No value?
     if value == null:
         return ''
@@ -161,7 +197,7 @@ endfunction
 
 
 # Helper function to validate an argument value's type
-function urlValidateValue(value, type, global):
+function argsValidateValue(value, type, global):
     # No value?
     if value == null:
         return null

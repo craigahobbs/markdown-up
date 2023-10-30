@@ -89,6 +89,9 @@ app: doc
     # Generate the library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json
 
+    # Generate the include library model documentation
+	$(NODE_DOCKER) npx bare -c "$$INCLUDE_LIBRARY_MODEL" > build/app/library/includeModel.json
+
 
 # JavaScript to generate the library model documentation
 define LIBRARY_MODEL
@@ -98,3 +101,13 @@ const types = {...dataTableTypes, ...lineChartTypes};
 console.log(JSON.stringify(types, null, 4));
 endef
 export LIBRARY_MODEL
+
+
+# BareScript to write the include library model documentation
+define INCLUDE_LIBRARY_MODEL
+include './static/include/args.mds'
+includeTypes = objectNew()
+objectAssign(includeTypes, argsTypes)
+systemLog(jsonStringify(includeTypes, 4))
+endef
+export INCLUDE_LIBRARY_MODEL
