@@ -110,7 +110,7 @@ endfunction
 unittestRunTest('testArgsParseAll')
 
 
-function testArgsParseAllInvalid():
+function testArgsParseInvalid():
     # Set argument globals
     systemGlobalSet('vPrint', 'invalid1')
     systemGlobalSet('vBegin', 'invalid2')
@@ -146,7 +146,26 @@ function testArgsParseAllInvalid():
     systemGlobalSet('vName', null)
     systemGlobalSet('vURL', null)
 endfunction
-unittestRunTest('testArgsParseAllInvalid')
+unittestRunTest('testArgsParseInvalid')
+
+
+function testArgsParseInvalidInt():
+    # Set argument globals
+    systemGlobalSet('vCount', 5.5)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsParse(testArgsArguments), \
+        objectNew('count', 3) \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 5.5 for URL argument "vCount"')) \
+    ))
+
+    # Clear argument globals
+    systemGlobalSet('vCount', null)
+endfunction
+unittestRunTest('testArgsParseInvalidInt')
 
 
 function testArgsURL():
@@ -193,7 +212,7 @@ endfunction
 unittestRunTest('testArgsURLObjectAll')
 
 
-function testArgsURLObjectAllInvalid():
+function testArgsURLObjectInvalid():
     unittestMockAll()
     unittestDeepEqual( \
         argsURL(testArgsArguments, objectNew( \
@@ -217,7 +236,22 @@ function testArgsURLObjectAllInvalid():
         arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 7 for URL argument "vURL"')) \
     ))
 endfunction
-unittestRunTest('testArgsURLObjectAllInvalid')
+unittestRunTest('testArgsURLObjectInvalid')
+
+
+function testArgsURLObjectInvalidInt():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'count', 5.5 \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 5.5 for URL argument "vCount"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectInvalidInt')
 
 
 function testArgsURLGlobalSome():
@@ -268,7 +302,7 @@ endfunction
 unittestRunTest('testArgsURLGlobalAll')
 
 
-function testArgsURLGlobalAllInvalid():
+function testArgsURLGlobalInvalid():
     # Set argument globals
     systemGlobalSet('vPrint', 'invalid1')
     systemGlobalSet('vBegin', 'invalid2')
@@ -294,7 +328,24 @@ function testArgsURLGlobalAllInvalid():
     systemGlobalSet('vName', null)
     systemGlobalSet('vURL', null)
 endfunction
-unittestRunTest('testArgsURLGlobalAllInvalid')
+unittestRunTest('testArgsURLGlobalInvalid')
+
+
+function testArgsURLGlobalInvalidInt():
+    # Set argument globals
+    systemGlobalSet('vCount', 5.5)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vCount', null)
+endfunction
+unittestRunTest('testArgsURLGlobalInvalidInt')
 
 
 function testArgsURLMixed():
