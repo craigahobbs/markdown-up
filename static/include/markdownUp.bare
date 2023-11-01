@@ -3,9 +3,10 @@
 
 
 # Include sentinel
-if systemGlobalGet('markdownUpState'):
+if systemGlobalGet('markdownUpSentinel'):
     return
 endif
+markdownUpSentinel = true
 
 
 # Constants

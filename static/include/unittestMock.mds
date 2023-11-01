@@ -3,9 +3,10 @@
 
 
 # Include sentinel
-if systemGlobalGet('unittestMockState'):
+if systemGlobalGet('unittestMockSentinel'):
     return
 endif
+unittestMockSentinel = true
 
 
 # Constants

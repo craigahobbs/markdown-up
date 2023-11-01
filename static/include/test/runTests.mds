@@ -12,6 +12,7 @@ if vBare:
     include 'testMarkdownUp.mds'
 else:
     markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
+    include 'testArgs.mds'
     include 'testForms.mds'
     include 'testUnittest.mds'
     include 'testUnittestMock.mds'

@@ -3,17 +3,20 @@
 
 
 # Include sentinel
-if systemGlobalGet('argsTypes'):
+if systemGlobalGet('argsSentinel'):
     return
 endif
+argsSentinel = true
 
 
 # The URL arguments model
 argsTypes = schemaParse( \
     'group "Args"', \
     '', \
+    '', \
     '# An argument model list', \
     'typedef ArgsArgument[len > 0] ArgsArguments', \
+    '', \
     '', \
     '# An argument model', \
     'struct ArgsArgument', \
@@ -28,7 +31,7 @@ argsTypes = schemaParse( \
     '    optional string(len > 0) global', \
     '', \
     '    # If true, the argument is explicit.', \
-    '    # An explicit argument is only included in the URL if it is explicitly set in the arguments dictionary.', \
+    '    # An explicit argument is only included in the URL if it is in the arguments object.', \
     '    optional bool explicit', \
     '', \
     '    # The default argument value', \
@@ -37,23 +40,35 @@ argsTypes = schemaParse( \
     '    # The argument description', \
     '    optional string(len > 0) description', \
     '', \
+    '', \
     '# An argument value type', \
     'enum ArgsType', \
-    '    boolean', \
+    '    bool', \
     '    date', \
     '    datetime', \
-    '    number', \
+    '    float', \
+    '    int', \
     '    string' \
 )
 
 
-function argsGet(arguments):
-    # Validate the URL args
-    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
-    if arguments == null:
-        return null
-    endif
+# $function: argsValidate
+# $group: args.mds
+# $doc: Validate an arguments model
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $return: The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails
+function argsValidate(arguments):
+    return schemaValidate(argsTypes, 'ArgsArguments', arguments)
+endfunction
 
+
+# $function: argsParse
+# $group: args.mds
+# $doc: Parse an [arguments model](includeModel.html#var.vName='ArgsArguments').
+# $doc: Argument globals are validated and added to the arguments object using the argument name.
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $return: The arguments object
+function argsParse(arguments):
     # Create the arguments object
     args = objectNew()
     for argument in arguments:
@@ -76,13 +91,14 @@ function argsGet(arguments):
 endfunction
 
 
+# $function: argsURL
+# $group: args.mds
+# $doc: Create a MarkdownUp application URL
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $arg args: The arguments object. Null argument values are excluded from the URL.
+# $arg explicit: If true, arguments are only included in the URL if they are in the arguments object
+# $return: The MarkdownUp application URL
 function argsURL(arguments, args, explicit):
-    # Validate the URL args
-    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
-    if arguments == null:
-        return null
-    endif
-
     # Get the URL variables
     urlVars = arrayNew()
     for argument in arguments:
@@ -95,7 +111,7 @@ function argsURL(arguments, args, explicit):
         if objectHas(args, name):
             value = argsValidateValue(objectGet(args, name), type, global)
         elif !(explicit || objectGet(argument, 'explicit')):
-            value = argsValidateValue(systemGlobalGet(global), type, global)
+            value = argsValidateValue(systemGlobalGet(global), type, global, false)
         endif
 
         # Add the URL variable
@@ -109,18 +125,24 @@ function argsURL(arguments, args, explicit):
 endfunction
 
 
+# $function: argsLink
+# $group: args.mds
+# $doc: Create a Markdown link text to a MarkdownUp application URL
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $arg text: The link text
+# $arg args: The arguments object
+# $arg explicit: If true, arguments are only included in the URL if they are in the arguments object
+# $return: The Markdown link text
 function argsLink(arguments, text, args, explicit):
     return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit) + ')'
 endfunction
 
 
+# $function: argsHelp
+# $group: args.mds
+# $doc: Output the [arguments model's](includeModel.html#var.vName='ArgsArguments') help
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
 function argsHelp(arguments):
-    # Validate the URL args
-    arguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
-    if arguments == null:
-        return null
-    endif
-
     # Create the help data
     helpData = arrayNew()
     anyDefault = false
@@ -137,12 +159,12 @@ function argsHelp(arguments):
             'Variable', argsGlobalName(argument), \
             'Type', type, \
             'Default', argsFormatValue(default, type), \
-            'Explicit', argsFormatValue(explicit, 'boolean'), \
+            'Explicit', argsFormatValue(explicit, 'bool'), \
             'Description', if(description != null, description, '') \
         ))
 
         # Update the "any" field bools
-        anyDefault = defaultAny || (default != null)
+        anyDefault = anyDefault || (default != null)
         anyExplicit = anyExplicit || explicit
         anyDescription = anyDescription || (description != null)
     endfor
@@ -181,13 +203,15 @@ function argsFormatValue(value, type):
     endif
 
     # Return the formatted value
-    if type == 'boolean':
+    if type == 'bool':
         return stringNew(value)
     elif type == 'date':
         return "'" + datetimeISOFormat(value, true) + "'"
     elif type == 'datetime':
         return "'" + datetimeISOFormat(value) + "'"
-    elif type == 'number':
+    elif type == 'float':
+        return stringNew(value)
+    elif type == 'int':
         return stringNew(value)
     endif
 
@@ -197,16 +221,18 @@ endfunction
 
 
 # Helper function to validate an argument value's type
-function argsValidateValue(value, type, global):
+function argsValidateValue(value, type, global, warn):
     # No value?
     if value == null:
         return null
     endif
 
     # Validate the value's type
-    if type == 'boolean':
+    if type == 'bool':
         if value != true && value != 1 && value != false && value != 0:
-            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
             value = null
         endif
     elif type == 'date':
@@ -215,7 +241,9 @@ function argsValidateValue(value, type, global):
             if valueDatetime != null:
                 value = datetimeNewUTC(datetimeYear(valueDatetime), datetimeMonth(valueDatetime), datetimeDay(valueDatetime))
             else:
-                systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                if warn != false:
+                    systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                endif
                 value = null
             endif
         else:
@@ -227,21 +255,34 @@ function argsValidateValue(value, type, global):
             if valueDatetime != null:
                 value = valueDatetime
             else:
-                systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                if warn != false:
+                    systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                endif
                 value = null
             endif
         else:
             value = null
         endif
-    elif type == 'number':
+    elif type == 'float':
         if numberToFixed(value) == null:
-            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
+            value = null
+        endif
+    elif type == 'int':
+        if numberToFixed(value) == null || value != mathFloor(value):
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
             value = null
         endif
     else:
         # type == 'string'
         if stringLength(value) == null:
-            systemLogDebug('MarkdownUp: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
             value = null
         endif
     endif
