@@ -4,6 +4,15 @@
 include '../forms.mds'
 
 
+async function testFormsSentinel():
+    unittestEqual(systemGlobalGet('formsSentinel'), true)
+    systemGlobalSet('formsSentinel', 1)
+    include '../forms.mds'
+    unittestEqual(systemGlobalGet('formsSentinel'), 1)
+endfunction
+unittestRunTestAsync('testFormsSentinel')
+
+
 function testFormsTextElements():
     unittestDeepEqual( \
         formsTextElements('testId', 'Hello', 30), \

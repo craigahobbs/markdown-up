@@ -1,6 +1,124 @@
 {
     "functions": [
         {
+            "name": "argsHelp",
+            "group": "args.mds",
+            "doc": [
+                "Output the [arguments model's](includeModel.html#var.vName='ArgsArguments') help"
+            ],
+            "args": [
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "The [arguments model](includeModel.html#var.vName='ArgsArguments')"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "argsLink",
+            "group": "args.mds",
+            "doc": [
+                "Create a Markdown link text to a MarkdownUp application URL"
+            ],
+            "args": [
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "The [arguments model](includeModel.html#var.vName='ArgsArguments')"
+                    ]
+                },
+                {
+                    "name": "text",
+                    "doc": [
+                        "The link text"
+                    ]
+                },
+                {
+                    "name": "args",
+                    "doc": [
+                        "The arguments object"
+                    ]
+                },
+                {
+                    "name": "explicit",
+                    "doc": [
+                        "If true, arguments are only included in the URL if they are in the arguments object"
+                    ]
+                }
+            ],
+            "return": [
+                "The Markdown link text"
+            ]
+        },
+        {
+            "name": "argsParse",
+            "group": "args.mds",
+            "doc": [
+                "Parse an [arguments model](includeModel.html#var.vName='ArgsArguments').",
+                "Argument globals are validated and added to the arguments object using the argument name."
+            ],
+            "args": [
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "The [arguments model](includeModel.html#var.vName='ArgsArguments')"
+                    ]
+                }
+            ],
+            "return": [
+                "The arguments object"
+            ]
+        },
+        {
+            "name": "argsURL",
+            "group": "args.mds",
+            "doc": [
+                "Create a MarkdownUp application URL"
+            ],
+            "args": [
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "The [arguments model](includeModel.html#var.vName='ArgsArguments')"
+                    ]
+                },
+                {
+                    "name": "args",
+                    "doc": [
+                        "The arguments object. Null argument values are excluded from the URL."
+                    ]
+                },
+                {
+                    "name": "explicit",
+                    "doc": [
+                        "If true, arguments are only included in the URL if they are in the arguments object"
+                    ]
+                }
+            ],
+            "return": [
+                "The MarkdownUp application URL"
+            ]
+        },
+        {
+            "name": "argsValidate",
+            "group": "args.mds",
+            "doc": [
+                "Validate an arguments model"
+            ],
+            "args": [
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "The [arguments model](includeModel.html#var.vName='ArgsArguments')"
+                    ]
+                }
+            ],
+            "return": [
+                "The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails"
+            ]
+        },
+        {
             "name": "formsLinkButtonElements",
             "group": "forms.mds",
             "doc": [

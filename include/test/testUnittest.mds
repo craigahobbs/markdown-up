@@ -46,6 +46,15 @@ async function testUnittest_testFailAsync():
 endfunction
 
 
+async function testUnittestSentinel():
+    unittestEqual(systemGlobalGet('unittestSentinel'), true)
+    systemGlobalSet('unittestSentinel', 1)
+    include '../unittest.mds'
+    unittestEqual(systemGlobalGet('unittestSentinel'), 1)
+endfunction
+unittestRunTestAsync('testUnittestSentinel')
+
+
 function testUnittestRunTest():
     # Setup mocks
     unittestMockAll()

@@ -1,0 +1,130 @@
+{
+    "ArgsArgument": {
+        "struct": {
+            "doc": [
+                "An argument model"
+            ],
+            "docGroup": "Args",
+            "members": [
+                {
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The argument name"
+                    ],
+                    "name": "name",
+                    "type": {
+                        "builtin": "string"
+                    }
+                },
+                {
+                    "doc": [
+                        "The argument type"
+                    ],
+                    "name": "type",
+                    "optional": true,
+                    "type": {
+                        "user": "ArgsType"
+                    }
+                },
+                {
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The argument's global variable name"
+                    ],
+                    "name": "global",
+                    "optional": true,
+                    "type": {
+                        "builtin": "string"
+                    }
+                },
+                {
+                    "doc": [
+                        "If true, the argument is explicit.",
+                        "An explicit argument is only included in the URL if it is in the arguments object."
+                    ],
+                    "name": "explicit",
+                    "optional": true,
+                    "type": {
+                        "builtin": "bool"
+                    }
+                },
+                {
+                    "doc": [
+                        "The default argument value"
+                    ],
+                    "name": "default",
+                    "optional": true,
+                    "type": {
+                        "builtin": "object"
+                    }
+                },
+                {
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The argument description"
+                    ],
+                    "name": "description",
+                    "optional": true,
+                    "type": {
+                        "builtin": "string"
+                    }
+                }
+            ],
+            "name": "ArgsArgument"
+        }
+    },
+    "ArgsArguments": {
+        "typedef": {
+            "attr": {
+                "lenGT": 0
+            },
+            "doc": [
+                "An argument model list"
+            ],
+            "docGroup": "Args",
+            "name": "ArgsArguments",
+            "type": {
+                "array": {
+                    "type": {
+                        "user": "ArgsArgument"
+                    }
+                }
+            }
+        }
+    },
+    "ArgsType": {
+        "enum": {
+            "doc": [
+                "An argument value type"
+            ],
+            "docGroup": "Args",
+            "name": "ArgsType",
+            "values": [
+                {
+                    "name": "bool"
+                },
+                {
+                    "name": "date"
+                },
+                {
+                    "name": "datetime"
+                },
+                {
+                    "name": "float"
+                },
+                {
+                    "name": "int"
+                },
+                {
+                    "name": "string"
+                }
+            ]
+        }
+    }
+}

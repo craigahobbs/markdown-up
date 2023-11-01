@@ -3,9 +3,10 @@
 
 
 # Include sentinel
-if systemGlobalGet('formsLinkButtonElements'):
+if systemGlobalGet('formsSentinel'):
     return
 endif
+formsSentinel = true
 
 
 # $function: formsTextElements

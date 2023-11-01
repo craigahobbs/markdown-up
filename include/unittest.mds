@@ -3,9 +3,10 @@
 
 
 # Include sentinel
-if systemGlobalGet('unittestTests'):
+if systemGlobalGet('unittestSentinel'):
     return
 endif
+unittestSentinel = true
 
 
 # Test statistics

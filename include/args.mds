@@ -1,0 +1,291 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+
+# Include sentinel
+if systemGlobalGet('argsSentinel'):
+    return
+endif
+argsSentinel = true
+
+
+# The URL arguments model
+argsTypes = schemaParse( \
+    'group "Args"', \
+    '', \
+    '', \
+    '# An argument model list', \
+    'typedef ArgsArgument[len > 0] ArgsArguments', \
+    '', \
+    '', \
+    '# An argument model', \
+    'struct ArgsArgument', \
+    '', \
+    '    # The argument name', \
+    '    string(len > 0) name', \
+    '', \
+    '    # The argument type', \
+    '    optional ArgsType type', \
+    '', \
+    "    # The argument's global variable name", \
+    '    optional string(len > 0) global', \
+    '', \
+    '    # If true, the argument is explicit.', \
+    '    # An explicit argument is only included in the URL if it is in the arguments object.', \
+    '    optional bool explicit', \
+    '', \
+    '    # The default argument value', \
+    '    optional object default', \
+    '', \
+    '    # The argument description', \
+    '    optional string(len > 0) description', \
+    '', \
+    '', \
+    '# An argument value type', \
+    'enum ArgsType', \
+    '    bool', \
+    '    date', \
+    '    datetime', \
+    '    float', \
+    '    int', \
+    '    string' \
+)
+
+
+# $function: argsValidate
+# $group: args.mds
+# $doc: Validate an arguments model
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $return: The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails
+function argsValidate(arguments):
+    return schemaValidate(argsTypes, 'ArgsArguments', arguments)
+endfunction
+
+
+# $function: argsParse
+# $group: args.mds
+# $doc: Parse an [arguments model](includeModel.html#var.vName='ArgsArguments').
+# $doc: Argument globals are validated and added to the arguments object using the argument name.
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $return: The arguments object
+function argsParse(arguments):
+    # Create the arguments object
+    args = objectNew()
+    for argument in arguments:
+        # Get the argument value
+        global = argsGlobalName(argument)
+        value = argsValidateValue(systemGlobalGet(global), objectGet(argument, 'type'), global)
+
+        # Apply the default argument value, if any
+        if value == null:
+            value = objectGet(argument, 'default')
+        endif
+
+        # Set the argument value, if any
+        if value != null:
+            objectSet(args, objectGet(argument, 'name'), value)
+        endif
+    endfor
+
+    return args
+endfunction
+
+
+# $function: argsURL
+# $group: args.mds
+# $doc: Create a MarkdownUp application URL
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $arg args: The arguments object. Null argument values are excluded from the URL.
+# $arg explicit: If true, arguments are only included in the URL if they are in the arguments object
+# $return: The MarkdownUp application URL
+function argsURL(arguments, args, explicit):
+    # Get the URL variables
+    urlVars = arrayNew()
+    for argument in arguments:
+        name = objectGet(argument, 'name')
+        type = objectGet(argument, 'type')
+        global = argsGlobalName(argument)
+
+        # Add the URL variable, if any
+        value = null
+        if objectHas(args, name):
+            value = argsValidateValue(objectGet(args, name), type, global)
+        elif !(explicit || objectGet(argument, 'explicit')):
+            value = argsValidateValue(systemGlobalGet(global), type, global, false)
+        endif
+
+        # Add the URL variable
+        if value != null:
+            arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(argsFormatValue(value, type)))
+        endif
+    endfor
+
+    # Create the URL
+    return if(arrayLength(urlVars), '#' + arrayJoin(urlVars, '&'), '#var=')
+endfunction
+
+
+# $function: argsLink
+# $group: args.mds
+# $doc: Create a Markdown link text to a MarkdownUp application URL
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+# $arg text: The link text
+# $arg args: The arguments object
+# $arg explicit: If true, arguments are only included in the URL if they are in the arguments object
+# $return: The Markdown link text
+function argsLink(arguments, text, args, explicit):
+    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit) + ')'
+endfunction
+
+
+# $function: argsHelp
+# $group: args.mds
+# $doc: Output the [arguments model's](includeModel.html#var.vName='ArgsArguments') help
+# $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
+function argsHelp(arguments):
+    # Create the help data
+    helpData = arrayNew()
+    anyDefault = false
+    anyExplicit = false
+    anyDescription = false
+    for argument in arguments:
+        type = objectGet(argument, 'type', 'string')
+        default = objectGet(argument, 'default')
+        explicit = objectGet(argument, 'explicit')
+        description = objectGet(argument, 'description')
+
+        # Add the help data row
+        arrayPush(helpData, objectNew( \
+            'Variable', argsGlobalName(argument), \
+            'Type', type, \
+            'Default', argsFormatValue(default, type), \
+            'Explicit', argsFormatValue(explicit, 'bool'), \
+            'Description', if(description != null, description, '') \
+        ))
+
+        # Update the "any" field bools
+        anyDefault = anyDefault || (default != null)
+        anyExplicit = anyExplicit || explicit
+        anyDescription = anyDescription || (description != null)
+    endfor
+
+    # Render the help table
+    helpFields = arrayNew('Variable', 'Type')
+    if anyDefault:
+        arrayPush(helpFields, 'Default')
+    endif
+    if anyExplicit:
+        arrayPush(helpFields, 'Explicit')
+    endif
+    if anyDescription:
+        arrayPush(helpFields, 'Description')
+    endif
+    dataTable(helpData, objectNew('fields', helpFields))
+endfunction
+
+
+# Helper function to compute an argument's global name
+function argsGlobalName(argument):
+    global = objectGet(argument, 'global')
+    if global == null:
+        name = objectGet(argument, 'name')
+        global = 'v' + stringUpper(stringSlice(name, 0, 1)) + stringSlice(name, 1)
+    endif
+    return global
+endfunction
+
+
+# Helper function to format an argument value
+function argsFormatValue(value, type):
+    # No value?
+    if value == null:
+        return ''
+    endif
+
+    # Return the formatted value
+    if type == 'bool':
+        return stringNew(value)
+    elif type == 'date':
+        return "'" + datetimeISOFormat(value, true) + "'"
+    elif type == 'datetime':
+        return "'" + datetimeISOFormat(value) + "'"
+    elif type == 'float':
+        return stringNew(value)
+    elif type == 'int':
+        return stringNew(value)
+    endif
+
+    # type == 'string'
+    return "'" + value + "'"
+endfunction
+
+
+# Helper function to validate an argument value's type
+function argsValidateValue(value, type, global, warn):
+    # No value?
+    if value == null:
+        return null
+    endif
+
+    # Validate the value's type
+    if type == 'bool':
+        if value != true && value != 1 && value != false && value != 0:
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
+            value = null
+        endif
+    elif type == 'date':
+        if stringLength(value) != null:
+            valueDatetime = datetimeISOParse(value)
+            if valueDatetime != null:
+                value = datetimeNewUTC(datetimeYear(valueDatetime), datetimeMonth(valueDatetime), datetimeDay(valueDatetime))
+            else:
+                if warn != false:
+                    systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                endif
+                value = null
+            endif
+        else:
+            value = null
+        endif
+    elif type == 'datetime':
+        if stringLength(value) != null:
+            valueDatetime = datetimeISOParse(value)
+            if valueDatetime != null:
+                value = valueDatetime
+            else:
+                if warn != false:
+                    systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                endif
+                value = null
+            endif
+        else:
+            value = null
+        endif
+    elif type == 'float':
+        if numberToFixed(value) == null:
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
+            value = null
+        endif
+    elif type == 'int':
+        if numberToFixed(value) == null || value != mathFloor(value):
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
+            value = null
+        endif
+    else:
+        # type == 'string'
+        if stringLength(value) == null:
+            if warn != false:
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+            endif
+            value = null
+        endif
+    endif
+
+    return value
+endfunction

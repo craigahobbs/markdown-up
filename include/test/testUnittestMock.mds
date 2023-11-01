@@ -5,6 +5,15 @@
 include '../unittestMock.mds'
 
 
+async function testUnittestMockSentinel():
+    unittestEqual(systemGlobalGet('unittestMockSentinel'), true)
+    systemGlobalSet('unittestMockSentinel', 1)
+    include '../unittestMock.mds'
+    unittestEqual(systemGlobalGet('unittestMockSentinel'), 1)
+endfunction
+unittestRunTestAsync('testUnittestMockSentinel')
+
+
 function testUnittestMockAll():
     # Setup mocks
     unittestMockAll(objectNew( \

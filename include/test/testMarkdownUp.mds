@@ -14,6 +14,15 @@ testMarkdownUp_markdownPrintStub = systemGlobalGet('markdownPrint')
 markdownPrint = testMarkdownUp_markdownPrintOriginal
 
 
+async function testMarkdownUpSentinel():
+    unittestEqual(systemGlobalGet('markdownUpSentinel'), true)
+    systemGlobalSet('markdownUpSentinel', 1)
+    include '../markdownUp.bare'
+    unittestEqual(systemGlobalGet('markdownUpSentinel'), 1)
+endfunction
+unittestRunTestAsync('testMarkdownUpSentinel')
+
+
 function testMarkdownUp_dataLineChart():
     unittestMockOneGeneric('systemLog')
     data = arrayNew(objectNew('A', 1, 'B', 2))
