@@ -37,13 +37,13 @@
                 {
                     "name": "args",
                     "doc": [
-                        "The arguments object"
+                        "Optional (default is null). The arguments object."
                     ]
                 },
                 {
                     "name": "explicit",
                     "doc": [
-                        "If true, arguments are only included in the URL if they are in the arguments object"
+                        "Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object."
                     ]
                 }
             ],
@@ -86,13 +86,13 @@
                 {
                     "name": "args",
                     "doc": [
-                        "The arguments object. Null argument values are excluded from the URL."
+                        "Optional (default is null). The arguments object. Null argument values are excluded from the URL."
                     ]
                 },
                 {
                     "name": "explicit",
                     "doc": [
-                        "If true, arguments are only included in the URL if they are in the arguments object"
+                        "Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object."
                     ]
                 }
             ],
