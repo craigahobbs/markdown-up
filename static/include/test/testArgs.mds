@@ -87,7 +87,7 @@ function testArgsParseAll():
     unittestDeepEqual( \
         argsParse(testArgsArguments), \
         objectNew( \
-            'print', 1, \
+            'print', true, \
             'begin', '2023-10-01T00:00:00.000Z', \
             'end', '2023-11-01T12:00:00.000Z', \
             'count', 5, \
@@ -149,6 +149,63 @@ endfunction
 unittestRunTest('testArgsParseInvalid')
 
 
+function testArgsParseInvalidBool():
+    # Set argument globals
+    systemGlobalSet('vPrint', 2)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsParse(testArgsArguments), \
+        objectNew('count', 3) \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 2 for URL argument "vPrint"')) \
+    ))
+
+    # Clear argument globals
+    systemGlobalSet('vPrint', null)
+endfunction
+unittestRunTest('testArgsParseInvalidBool')
+
+
+function testArgsParseInvalidDate():
+    # Set argument globals
+    systemGlobalSet('vBegin', 1)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsParse(testArgsArguments), \
+        objectNew('count', 3) \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vBegin"')) \
+    ))
+
+    # Clear argument globals
+    systemGlobalSet('vBegin', null)
+endfunction
+unittestRunTest('testArgsParseInvalidDate')
+
+
+function testArgsParseInvalidDatetime():
+    # Set argument globals
+    systemGlobalSet('vEnd', 1)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsParse(testArgsArguments), \
+        objectNew('count', 3) \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vEnd"')) \
+    ))
+
+    # Clear argument globals
+    systemGlobalSet('vEnd', null)
+endfunction
+unittestRunTest('testArgsParseInvalidDatetime')
+
+
 function testArgsParseInvalidInt():
     # Set argument globals
     systemGlobalSet('vCount', 5.5)
@@ -205,11 +262,24 @@ function testArgsURLObjectAll():
             'name', 'test', \
             'url', 'test.json' \
         )), \
-        "#var.vPrint=1&var.vBegin='2023-10-01'&var.vEnd='2023-11-01T12%3A00%3A00.000Z'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
+        "#var.vPrint=true&var.vBegin='2023-10-01'&var.vEnd='2023-11-01T12%3A00%3A00.000Z'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
 unittestRunTest('testArgsURLObjectAll')
+
+
+function testArgsURLObjectDefault():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'count', 3 \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testArgsURLObjectDefault')
 
 
 function testArgsURLObjectInvalid():
@@ -237,6 +307,51 @@ function testArgsURLObjectInvalid():
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalid')
+
+
+function testArgsURLObjectInvalidBool():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'print', 2 \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 2 for URL argument "vPrint"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectInvalidBool')
+
+
+function testArgsURLObjectInvalidDate():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'begin', 1 \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vBegin"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectInvalidDate')
+
+
+function testArgsURLObjectInvalidDatetime():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'end', 1 \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vEnd"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectInvalidDatetime')
 
 
 function testArgsURLObjectInvalidInt():
@@ -302,6 +417,23 @@ endfunction
 unittestRunTest('testArgsURLGlobalAll')
 
 
+function testArgsURLGlobalDefault():
+    # Set argument globals
+    systemGlobalSet('vCount', 3)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vCount', null)
+endfunction
+unittestRunTest('testArgsURLGlobalDefault')
+
+
 function testArgsURLGlobalInvalid():
     # Set argument globals
     systemGlobalSet('vPrint', 'invalid1')
@@ -331,6 +463,60 @@ endfunction
 unittestRunTest('testArgsURLGlobalInvalid')
 
 
+function testArgsURLGlobalInvalidBool():
+    # Set argument globals
+    systemGlobalSet('vPrint', 2)
+
+    arguments = arrayNew( \
+        objectNew('name', 'print', 'type', 'bool') \
+    )
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(arguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vPrint', null)
+endfunction
+unittestRunTest('testArgsURLGlobalInvalidBool')
+
+
+function testArgsURLGlobalInvalidDate():
+    # Set argument globals
+    systemGlobalSet('vBegin', 1)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vBegin', null)
+endfunction
+unittestRunTest('testArgsURLGlobalInvalidDate')
+
+
+function testArgsURLGlobalInvalidDatetime():
+    # Set argument globals
+    systemGlobalSet('vEnd', 1)
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vEnd', null)
+endfunction
+unittestRunTest('testArgsURLGlobalInvalidDatetime')
+
+
 function testArgsURLGlobalInvalidInt():
     # Set argument globals
     systemGlobalSet('vCount', 5.5)
@@ -358,7 +544,7 @@ function testArgsURLMixed():
             'print', 1, \
             'count', 5 \
         )), \
-        "#var.vPrint=1&var.vCount=5&var.vURL='test.json'" \
+        "#var.vPrint=true&var.vCount=5&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 
@@ -397,7 +583,7 @@ function testArgsLink():
             'print', 1, \
             'name', 'test 1' \
         )), \
-        "[Link\\-1](#var.vPrint=1&var.vName='test%201'&var.vURL='test.json')" \
+        "[Link\\-1](#var.vPrint=true&var.vName='test%201'&var.vURL='test.json')" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 
