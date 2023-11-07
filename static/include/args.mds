@@ -116,7 +116,7 @@ function argsURL(arguments, args, explicit):
         endif
 
         # Add the URL variable
-        if value != null && (default == null || value != default):
+        if value != null && (default == null || !argsValuesEqual(value, default, type)):
             arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(argsFormatValue(value, type)))
         endif
     endfor
@@ -160,7 +160,7 @@ function argsHelp(arguments):
             'Variable', argsGlobalName(argument), \
             'Type', type, \
             'Default', argsFormatValue(default, type), \
-            'Explicit', argsFormatValue(explicit, 'bool'), \
+            'Explicit', if(explicit, 'Yes', ''), \
             'Description', if(description != null, description, '') \
         ))
 
@@ -239,22 +239,24 @@ function argsValidateValue(value, type, global, warn):
             value = null
         endif
     elif type == 'date':
-        valueDatetime = datetimeISOParse(value)
-        if valueDatetime != null:
-            value = datetimeNewUTC(datetimeYear(valueDatetime), datetimeMonth(valueDatetime), datetimeDay(valueDatetime))
-        else:
+        valueOrig = value
+        if stringLength(value) != null:
+            value = datetimeISOParse(value)
+        endif
+        if datetimeYear(value) == null || datetimeHour(value) != 0 || datetimeMinute(value) != 0 || datetimeSecond(value) != 0:
             if warn != false:
-                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(valueOrig) + ' for URL argument "' + global + '"')
             endif
             value = null
         endif
     elif type == 'datetime':
-        valueDatetime = datetimeISOParse(value)
-        if valueDatetime != null:
-            value = valueDatetime
-        else:
+        valueOrig = value
+        if stringLength(value) != null:
+            value = datetimeISOParse(value)
+        endif
+        if datetimeYear(value) == null:
             if warn != false:
-                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(value) + ' for URL argument "' + global + '"')
+                systemLogDebug('MarkdownUp - args.mds: Invalid value ' + jsonStringify(valueOrig) + ' for URL argument "' + global + '"')
             endif
             value = null
         endif
@@ -283,4 +285,13 @@ function argsValidateValue(value, type, global, warn):
     endif
 
     return value
+endfunction
+
+
+# Helper function to determine if two values are equal
+function argsValuesEqual(value, valueOther, type):
+    if type == 'date' || type == 'datetime':
+        return (value - valueOther) == 0
+    endif
+    return value == valueOther
 endfunction

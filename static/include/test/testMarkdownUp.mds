@@ -117,7 +117,7 @@ unittestRunTest('testMarkdownUp_dataTable_datetime')
 
 function testMarkdownUp_dataTable_datetime_precision():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
+    data = arrayNew(objectNew('A', datetimeNew(2023, 9, 25)))
     model = objectNew('datetime', 'day')
     unittestEqual(dataTable(data, model), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
