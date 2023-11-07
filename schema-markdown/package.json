@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown",
-    "version": "1.2.8",
+    "version": "1.2.9",
     "description": "A schema definition and validation library",
     "keywords": [
         "schema",
@@ -24,8 +24,8 @@
         "test": "node --test test/"
     },
     "devDependencies": {
-        "c8": "~7.13",
-        "eslint": "~8.40",
+        "c8": "~8.0",
+        "eslint": "~8.52",
         "jsdoc": "~4.0"
     }
 }
