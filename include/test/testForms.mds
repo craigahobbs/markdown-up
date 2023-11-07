@@ -26,7 +26,6 @@ function testFormsTextElements():
                 'value', 'Hello' \
             ), \
             'callback', null, \
-            'callbackData', null, \
             'html', 'input' \
         ) \
     )
@@ -60,10 +59,9 @@ function testFormsTextElements_onEnter():
     )
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
     onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
-    onEnter = objectGet(elements, 'callbackData')
-    onKeyup(10, onEnter)
+    onKeyup(10)
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
-    onKeyup(13, onEnter)
+    onKeyup(13)
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
 unittestRunTest('testFormsTextElements_onEnter')
