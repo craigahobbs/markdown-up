@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.4 (2023-11-07)
+
+- [8329ea3](https://github.com/craigahobbs/markdown-up/commit/8329ea3) - library - replace elementModelRender callbackData with systemPartial
+
 ## 2.3.3 (2023-10-19)
 
 - [3a19224](https://github.com/craigahobbs/markdown-up/commit/3a19224) - if no post-render hash ID navigation, scroll window to top
