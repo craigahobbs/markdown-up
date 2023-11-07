@@ -189,7 +189,7 @@ unittestRunTest('testArgsParseInvalidDate')
 
 function testArgsParseInvalidDate2():
     # Set argument globals
-    systemGlobalSet('vBegin', '2023-11-01T12:30:00Z')
+    systemGlobalSet('vBegin', '2023-11-01T00:00:15Z')
 
     unittestMockAll()
     unittestDeepEqual( \
@@ -197,7 +197,7 @@ function testArgsParseInvalidDate2():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T12:30:00Z" for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T00:00:15Z" for URL argument "vBegin"')) \
     ))
 
     # Clear argument globals
@@ -406,12 +406,12 @@ function testArgsURLObjectInvalidDate2():
     unittestMockAll()
     unittestDeepEqual( \
         argsURL(testArgsArguments, objectNew( \
-            'begin', datetimeNewUTC(2023, 11, 1, 12, 30) \
+            'begin', datetimeNewUTC(2023, 11, 1, 0, 0, 15) \
         )), \
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T12:30:00.000Z" for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T00:00:15.000Z" for URL argument "vBegin"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDate2')
@@ -580,7 +580,7 @@ unittestRunTest('testArgsURLGlobalInvalidDate')
 
 function testArgsURLGlobalInvalidDate2():
     # Set argument globals
-    systemGlobalSet('vBegin', '2023-11-01T12:30:00Z')
+    systemGlobalSet('vBegin', '2023-11-01T00:00:15Z')
 
     unittestMockAll()
     unittestDeepEqual( \
