@@ -1263,62 +1263,6 @@ test('script library, elementModelRender callback', async () => {
 });
 
 
-test('script library, elementModelRender callback data', async () => {
-    const runtime = testRuntime();
-    let runtimeUpdateCount = 0;
-    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
-
-    // Event handler function
-    const onClickArgs = [];
-    const onClick = ([data], options) => {
-        assert.notEqual(options, null);
-        onClickArgs.push(data);
-    };
-
-    // Render the element model
-    const elementModel = [
-        {
-            'html': 'a',
-            'elem': {'text': 'Click me!'},
-            'callback': {'click': onClick},
-            'callbackData': 'hello!'
-        }
-    ];
-    markdownScriptFunctions.elementModelRender([elementModel], runtime.options);
-    const elements = runtime.resetElements();
-    const elementCallback = elements[0][0].callback;
-    assert.equal(typeof elementCallback, 'function');
-    assert.equal(elementCallback.constructor.name, 'Function');
-    delete elements[0][0].callback;
-    assert.deepEqual(elements, [
-        [
-            {'html': 'a', 'elem': {'text': 'Click me!'}}
-        ]
-    ]);
-    assert.deepEqual(onClickArgs, []);
-    assert.equal(runtimeUpdateCount, 0);
-
-    // Call the element callback
-    const mockElementEvents = {};
-    const mockElement = {
-        'addEventListener': (eventType, eventCallback) => {
-            mockElementEvents[eventType] = eventCallback;
-        }
-    };
-    elementCallback(mockElement);
-    assert.equal(typeof mockElementEvents.click, 'function');
-    assert.equal(mockElementEvents.click.constructor.name, 'AsyncFunction');
-    assert.deepEqual(onClickArgs, []);
-    assert.equal(runtimeUpdateCount, 0);
-
-    // Call the element handler function
-    const mockEvent = {};
-    await mockElementEvents.click(mockEvent);
-    assert.deepEqual(onClickArgs, ['hello!']);
-    assert.equal(runtimeUpdateCount, 1);
-});
-
-
 test('script library, elementModelRender callback async', async () => {
     const runtime = testRuntime();
     let runtimeUpdateCount = 0;

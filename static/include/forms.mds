@@ -28,13 +28,12 @@ function formsTextElements(id, text, size, onEnter):
             'value', text, \
             'size', size \
         ), \
-        'callback', if(onEnter != null, objectNew('keyup', formsTextOnKeyup)), \
-        'callbackData', if(onEnter != null, onEnter) \
+        'callback', if(onEnter != null, objectNew('keyup', systemPartial(formsTextOnKeyup, onEnter))) \
     )
 endfunction
 
 
-function formsTextOnKeyup(keyCode, onEnter):
+function formsTextOnKeyup(onEnter, keyCode):
     if keyCode == 13:
         onEnter()
     endif
