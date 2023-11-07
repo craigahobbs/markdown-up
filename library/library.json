@@ -785,7 +785,7 @@
             ],
             "args": [
                 {
-                    "name": "lines",
+                    "name": "lines...",
                     "doc": [
                         "The Markdown text lines (may contain nested arrays of un-split lines)"
                     ]
@@ -803,7 +803,7 @@
             ],
             "args": [
                 {
-                    "name": "lines",
+                    "name": "lines...",
                     "doc": [
                         "The Markdown text lines (may contain nested arrays of un-split lines)"
                     ]
