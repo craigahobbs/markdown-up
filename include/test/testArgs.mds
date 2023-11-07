@@ -88,8 +88,8 @@ function testArgsParseAll():
         argsParse(testArgsArguments), \
         objectNew( \
             'print', true, \
-            'begin', '2023-10-01T00:00:00.000Z', \
-            'end', '2023-11-01T12:00:00.000Z', \
+            'begin', datetimeNew(2023, 10, 1), \
+            'end', datetimeNewUTC(2023, 11, 1, 12), \
             'count', 5, \
             'number', 3.14, \
             'name', 'test', \
@@ -187,6 +187,25 @@ endfunction
 unittestRunTest('testArgsParseInvalidDate')
 
 
+function testArgsParseInvalidDate2():
+    # Set argument globals
+    systemGlobalSet('vBegin', '2023-11-01T12:30:00Z')
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsParse(testArgsArguments), \
+        objectNew('count', 3) \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T12:30:00Z" for URL argument "vBegin"')) \
+    ))
+
+    # Clear argument globals
+    systemGlobalSet('vBegin', null)
+endfunction
+unittestRunTest('testArgsParseInvalidDate2')
+
+
 function testArgsParseInvalidDatetime():
     # Set argument globals
     systemGlobalSet('vEnd', 1)
@@ -255,8 +274,8 @@ function testArgsURLObjectAll():
     unittestDeepEqual( \
         argsURL(testArgsArguments, objectNew( \
             'print', 1, \
-            'begin', '2023-10-01', \
-            'end', '2023-11-01T12:00:00Z', \
+            'begin', datetimeNew(2023, 10, 1), \
+            'end', datetimeNewUTC(2023, 11, 1, 12), \
             'count', 5, \
             'number', 3.14, \
             'name', 'test', \
@@ -280,6 +299,50 @@ function testArgsURLObjectDefault():
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
 unittestRunTest('testArgsURLObjectDefault')
+
+
+function testArgsURLObjectDefaultDate():
+    arguments = arrayNew( \
+        objectNew('name', 'begin', 'type', 'date', 'default', datetimeNew(2023, 11, 7)) \
+    )
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(arguments, objectNew( \
+            'begin', datetimeNew(2023, 11, 7) \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual( \
+        argsURL(arguments, objectNew( \
+            'begin', datetimeNew(2023, 11, 6) \
+        )), \
+        "#var.vBegin='2023-11-06'" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testArgsURLObjectDefaultDate')
+
+
+function testArgsURLObjectDefaultDatetime():
+    arguments = arrayNew( \
+        objectNew('name', 'end', 'type', 'datetime', 'default', datetimeNewUTC(2023, 11, 7, 12)) \
+    )
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(arguments, objectNew( \
+            'end', datetimeNewUTC(2023, 11, 7, 12) \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual( \
+        argsURL(arguments, objectNew( \
+            'end', datetimeNewUTC(2023, 11, 6, 12) \
+        )), \
+        "#var.vEnd='2023-11-06T12%3A00%3A00.000Z'" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testArgsURLObjectDefaultDatetime')
 
 
 function testArgsURLObjectInvalid():
@@ -337,6 +400,21 @@ function testArgsURLObjectInvalidDate():
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDate')
+
+
+function testArgsURLObjectInvalidDate2():
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'begin', datetimeNewUTC(2023, 11, 1, 12, 30) \
+        )), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T12:30:00.000Z" for URL argument "vBegin"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectInvalidDate2')
 
 
 function testArgsURLObjectInvalidDatetime():
@@ -500,6 +578,23 @@ endfunction
 unittestRunTest('testArgsURLGlobalInvalidDate')
 
 
+function testArgsURLGlobalInvalidDate2():
+    # Set argument globals
+    systemGlobalSet('vBegin', '2023-11-01T12:30:00Z')
+
+    unittestMockAll()
+    unittestDeepEqual( \
+        argsURL(testArgsArguments, objectNew()), \
+        '#var=' \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vBegin', null)
+endfunction
+unittestRunTest('testArgsURLGlobalInvalidDate2')
+
+
 function testArgsURLGlobalInvalidDatetime():
     # Set argument globals
     systemGlobalSet('vEnd', 1)
@@ -618,13 +713,13 @@ function testArgsHelp():
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('dataTable', arrayNew( \
             arrayNew( \
-                objectNew('Default', '',  'Description', '',         'Explicit', 'true', 'Type', 'bool',     'Variable', 'vPrint'), \
-                objectNew('Default', '',  'Description', '',         'Explicit', '',     'Type', 'date',     'Variable', 'vBegin'), \
-                objectNew('Default', '',  'Description', '',         'Explicit', '',     'Type', 'datetime', 'Variable', 'vEnd'), \
-                objectNew('Default', '3', 'Description', '',         'Explicit', '',     'Type', 'int',      'Variable', 'vCount'), \
-                objectNew('Default', '',  'Description', '',         'Explicit', '',     'Type', 'float',    'Variable', 'vNumber'), \
-                objectNew('Default', '',  'Description', 'The name', 'Explicit', '',     'Type', 'string',   'Variable', 'vName'), \
-                objectNew('Default', '',  'Description', '',         'Explicit', '',     'Type', 'string',   'Variable', 'vURL') \
+                objectNew('Default', '',  'Description', '',         'Explicit', 'Yes', 'Type', 'bool',     'Variable', 'vPrint'), \
+                objectNew('Default', '',  'Description', '',         'Explicit', '',    'Type', 'date',     'Variable', 'vBegin'), \
+                objectNew('Default', '',  'Description', '',         'Explicit', '',    'Type', 'datetime', 'Variable', 'vEnd'), \
+                objectNew('Default', '3', 'Description', '',         'Explicit', '',    'Type', 'int',      'Variable', 'vCount'), \
+                objectNew('Default', '',  'Description', '',         'Explicit', '',    'Type', 'float',    'Variable', 'vNumber'), \
+                objectNew('Default', '',  'Description', 'The name', 'Explicit', '',    'Type', 'string',   'Variable', 'vName'), \
+                objectNew('Default', '',  'Description', '',         'Explicit', '',    'Type', 'string',   'Variable', 'vURL') \
             ), \
             objectNew('fields', arrayNew('Variable', 'Type', 'Default', 'Explicit', 'Description')) \
         )) \
@@ -637,7 +732,7 @@ function testArgsHelpDefault():
     unittestMockAll()
     argsHelp(arrayNew( \
         objectNew('name', 'print', 'type', 'bool', 'default', true), \
-        objectNew('name', 'begin', 'type', 'date', 'default', datetimeNewUTC(2023, 11, 1)), \
+        objectNew('name', 'begin', 'type', 'date', 'default', datetimeNew(2023, 11, 1)), \
         objectNew('name', 'end', 'type', 'datetime', 'default', datetimeNewUTC(2023, 11, 1, 12)), \
         objectNew('name', 'count', 'type', 'int', 'default', 3), \
         objectNew('name', 'number', 'type', 'float', 'default', 2.72), \
@@ -671,8 +766,8 @@ function testArgsHelpExplicit():
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('dataTable', arrayNew( \
             arrayNew( \
-                objectNew('Default', '', 'Description', '', 'Explicit', 'true', 'Type', 'string', 'Variable', 'vName'), \
-                objectNew('Default', '', 'Description', '', 'Explicit', '',     'Type', 'string', 'Variable', 'vURL') \
+                objectNew('Default', '', 'Description', '', 'Explicit', 'Yes', 'Type', 'string', 'Variable', 'vName'), \
+                objectNew('Default', '', 'Description', '', 'Explicit', '',    'Type', 'string', 'Variable', 'vURL') \
             ), \
             objectNew('fields', arrayNew('Variable', 'Type', 'Explicit')) \
         )) \

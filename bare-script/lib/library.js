@@ -257,15 +257,17 @@ export const scriptFunctions = {
     // $group: Datetime
     // $doc: Get the day of the month of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC day of the month.
     // $return: The day of the month
-    'datetimeDay': ([datetime]) => (datetime instanceof Date ? datetime.getDate() : null),
+    'datetimeDay': ([datetime, utc = false]) => (datetime instanceof Date ? (utc ? datetime.getUTCDate() : datetime.getDate()) : null),
 
     // $function: datetimeHour
     // $group: Datetime
     // $doc: Get the hour of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC hour.
     // $return: The hour
-    'datetimeHour': ([datetime]) => (datetime instanceof Date ? datetime.getHours() : null),
+    'datetimeHour': ([datetime, utc = false]) => (datetime instanceof Date ? (utc ? datetime.getUTCHours() : datetime.getHours()) : null),
 
     // $function: datetimeISOFormat
     // $group: Datetime
@@ -276,9 +278,13 @@ export const scriptFunctions = {
     'datetimeISOFormat': ([datetime, isDate = false]) => {
         let result = null;
         if (datetime instanceof Date) {
-            result = datetime.toISOString();
             if (isDate) {
-                result = result.slice(0, result.indexOf('T'));
+                const year = datetime.getFullYear();
+                const month = datetime.getMonth() + 1;
+                const day = datetime.getDate();
+                result = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+            } else {
+                result = datetime.toISOString();
             }
         }
         return result;
@@ -295,15 +301,21 @@ export const scriptFunctions = {
     // $group: Datetime
     // $doc: Get the number of minutes of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC minutes.
     // $return: The number of minutes
-    'datetimeMinute': ([datetime]) => (datetime instanceof Date ? datetime.getMinutes() : null),
+    'datetimeMinute': ([datetime, utc = false]) => (
+        datetime instanceof Date ? (utc ? datetime.getUTCMinutes() : datetime.getMinutes()) : null
+    ),
 
     // $function: datetimeMonth
     // $group: Datetime
     // $doc: Get the number of the month (1-12) of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC month.
     // $return: The number of the month
-    'datetimeMonth': ([datetime]) => (datetime instanceof Date ? datetime.getMonth() + 1 : null),
+    'datetimeMonth': ([datetime, utc = false]) => (
+        datetime instanceof Date ? (utc ? datetime.getUTCMonth() + 1 : datetime.getMonth() + 1) : null
+    ),
 
     // $function: datetimeNew
     // $group: Datetime
@@ -345,8 +357,11 @@ export const scriptFunctions = {
     // $group: Datetime
     // $doc: Get the number of seconds of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC seconds.
     // $return: The number of seconds
-    'datetimeSecond': ([datetime]) => (datetime instanceof Date ? datetime.getSeconds() : null),
+    'datetimeSecond': ([datetime, utc = false]) => (
+        datetime instanceof Date ? (utc ? datetime.getUTCSeconds() : datetime.getSeconds()) : null
+    ),
 
     // $function: datetimeToday
     // $group: Datetime
@@ -361,8 +376,11 @@ export const scriptFunctions = {
     // $group: Datetime
     // $doc: Get the full year of a datetime
     // $arg datetime: The datetime
+    // $arg utc: Optional (default is false). If true, return the UTC year.
     // $return: The full year
-    'datetimeYear': ([datetime]) => (datetime instanceof Date ? datetime.getFullYear() : null),
+    'datetimeYear': ([datetime, utc = false]) => (
+        datetime instanceof Date ? (utc ? datetime.getUTCFullYear() : datetime.getFullYear()) : null
+    ),
 
 
     //
