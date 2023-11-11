@@ -45,6 +45,12 @@
                     "doc": [
                         "Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object."
                     ]
+                },
+                {
+                    "name": "headerId",
+                    "doc": [
+                        "Optional (default is null). If non-null, the URL's header ID."
+                    ]
                 }
             ],
             "return": [
@@ -93,6 +99,12 @@
                     "name": "explicit",
                     "doc": [
                         "Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object."
+                    ]
+                },
+                {
+                    "name": "headerId",
+                    "doc": [
+                        "Optional (default is null). If non-null, the URL's header ID."
                     ]
                 }
             ],
