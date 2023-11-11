@@ -97,8 +97,9 @@ endfunction
 # $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
 # $arg args: Optional (default is null). The arguments object. Null argument values are excluded from the URL.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
+# $arg headerId: Optional (default is null). If non-null, the URL's header ID.
 # $return: The MarkdownUp application URL
-function argsURL(arguments, args, explicit):
+function argsURL(arguments, args, explicit, headerId):
     # Get the URL variables
     urlVars = arrayNew()
     for argument in arguments:
@@ -122,7 +123,7 @@ function argsURL(arguments, args, explicit):
     endfor
 
     # Create the URL
-    return if(arrayLength(urlVars), '#' + arrayJoin(urlVars, '&'), '#var=')
+    return if(arrayLength(urlVars), '#' + arrayJoin(urlVars, '&'), '#var=') + if(headerId != null, '&' + markdownHeaderId(headerId), '')
 endfunction
 
 
@@ -133,9 +134,10 @@ endfunction
 # $arg text: The link text
 # $arg args: Optional (default is null). The arguments object.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
+# $arg headerId: Optional (default is null). If non-null, the URL's header ID.
 # $return: The Markdown link text
-function argsLink(arguments, text, args, explicit):
-    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit) + ')'
+function argsLink(arguments, text, args, explicit, headerId):
+    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit, headerId) + ')'
 endfunction
 
 
