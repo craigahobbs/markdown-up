@@ -659,6 +659,23 @@ endfunction
 unittestRunTest('testArgsURLHeaderId')
 
 
+function testArgsURLMarkdownUpURL():
+    # Set argument globals
+    systemGlobalSet('vURL', 'test.json')
+
+    unittestMockAll()
+    unittestEqual( \
+        argsURL(testArgsArguments, objectNew('name', 'test'), false, null, 'my doc.md'), \
+        "#url=my%20doc.md&var.vName='test'&var.vURL='test.json'" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vURL', null)
+endfunction
+unittestRunTest('testArgsURLMarkdownUpURL')
+
+
 function testArgsLink():
     # Set argument globals
     systemGlobalSet('vURL', 'test.json')
@@ -711,6 +728,23 @@ function testArgsLinkHeaderId():
     systemGlobalSet('vURL', null)
 endfunction
 unittestRunTest('testArgsLinkHeaderId')
+
+
+function testArgsLinkMarkdownUpURL():
+    # Set argument globals
+    systemGlobalSet('vURL', 'test.json')
+
+    unittestMockAll()
+    unittestEqual( \
+        argsLink(testArgsArguments, 'Link', objectNew('name', 'test'), false, null, 'my doc.md'), \
+        "[Link](#url=my%20doc.md&var.vName='test'&var.vURL='test.json')" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vURL', null)
+endfunction
+unittestRunTest('testArgsLinkMarkdownUpURL')
 
 
 function testArgsHelp():

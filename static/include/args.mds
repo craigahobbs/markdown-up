@@ -98,10 +98,17 @@ endfunction
 # $arg args: Optional (default is null). The arguments object. Null argument values are excluded from the URL.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
 # $arg headerId: Optional (default is null). If non-null, the URL's header ID.
+# $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The MarkdownUp application URL
-function argsURL(arguments, args, explicit, headerId):
-    # Get the URL variables
+function argsURL(arguments, args, explicit, headerId, url):
     urlVars = arrayNew()
+
+    # MarkdownUp URL hash param?
+    if url != null:
+        arrayPush(urlVars, 'url=' + urlEncodeComponent(url))
+    endif
+
+    # Get the URL variables
     for argument in arguments:
         name = objectGet(argument, 'name')
         type = objectGet(argument, 'type')
@@ -135,9 +142,10 @@ endfunction
 # $arg args: Optional (default is null). The arguments object.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
 # $arg headerId: Optional (default is null). If non-null, the URL's header ID.
+# $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The Markdown link text
-function argsLink(arguments, text, args, explicit, headerId):
-    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit, headerId) + ')'
+function argsLink(arguments, text, args, explicit, headerId, url):
+    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit, headerId, url) + ')'
 endfunction
 
 
