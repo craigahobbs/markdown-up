@@ -6,23 +6,30 @@
 # The MarkdownUp launcher index application
 #
 
+include <args.mds>
+
 
 async function markdownUpIndex():
+    # Parse arguments
+    arguments = argsValidate(arrayNew(objectNew('name', 'path')))
+    args = argsParse(arguments)
+    path = objectGet(args, 'path')
+
     # Fetch the index files/directories/parent API
-    index_url = 'markdown_up_index' + if(vPath != null, '?path=' + urlEncodeComponent(vPath), '')
+    index_url = 'markdown_up_index' + if(path != null, '?path=' + urlEncodeComponent(path), '')
     index = systemFetch(index_url)
 
     # Set the document title
-    path = objectGet(index, 'path')
-    title = 'MarkdownUp - ' + path
+    title = 'MarkdownUp - ' + objectGet(index, 'path')
     documentSetTitle(title)
 
     # Menu and title
     parent = objectGet(index, 'parent')
     markdownPrint( \
-        if(vPath == null, 'Root', '[Root](#var=)') + ' |', \
-        if(vPath == null, 'Parent', \
-            '[Parent](' + if(parent == null, '#var=', "#var.vPath='" + urlEncodeComponent(parent) + "'") + ')') + ' |', \
+        if(path == null, 'Root', argsLink(arguments, 'Root', objectNew('path', null))) + ' |', \
+        if(path == null, 'Parent', if(parent == null, \
+            argsLink(arguments, 'Parent', objectNew('path', null)), \
+            argsLink(arguments, 'Parent', objectNew('path', parent)))) + ' |', \
         '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
         '', \
         '# ' + title \
@@ -37,7 +44,7 @@ async function markdownUpIndex():
     if arrayLength(files):
         markdownPrint('', '## Files')
         for file in files:
-            fileURL = if(vPath != null, vPath + '/', '') + file
+            fileURL = if(path != null, path + '/', '') + file
             if arrayIndexOf(markdownFiles, file) != -1:
                 markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=)')
             else:
@@ -51,8 +58,8 @@ async function markdownUpIndex():
     if arrayLength(directories):
         markdownPrint('', '## Directories')
         for directory in directories:
-            directoryURL = if(vPath != null, vPath + '/', '') + directory
-            markdownPrint('', '[' + markdownEscape(directory) + "](#var.vPath='" + urlEncodeComponent(directoryURL) + "')")
+            directoryURL = if(path != null, path + '/', '') + directory
+            markdownPrint('', argsLink(arguments, directory, objectNew('path', directoryURL)))
         endfor
     endif
 
