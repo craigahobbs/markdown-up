@@ -29,7 +29,7 @@ async function testMarkdownUpIndex():
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - .' \
+            '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
         arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=)')), \
@@ -68,7 +68,7 @@ async function testMarkdownUpIndex_escapes():
                 'Parent |', \
                 '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
                 '', \
-                '# MarkdownUp - .' \
+                '# MarkdownUp \\- .' \
             ) \
         ), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
@@ -109,7 +109,7 @@ async function testMarkdownUpIndex_path():
             "[Parent](#var.vPath='.') |", \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - subdir' \
+            '# MarkdownUp \\- subdir' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
         arrayNew('markdownPrint', arrayNew('', '[a.md](#url=subdir%2Fa.md&var=)')), \
@@ -145,7 +145,7 @@ async function testMarkdownUpIndex_empty():
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - .' \
+            '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', 'No Markdown files or sub-directories found')) \
     ))
@@ -176,7 +176,7 @@ async function testMarkdownUpIndex_onlyMarkdown():
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - .' \
+            '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
         arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=)')), \
@@ -209,7 +209,7 @@ async function testMarkdownUpIndex_onlyHTML():
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - .' \
+            '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
         arrayNew('markdownPrint', arrayNew('', '[b.html](b.html)')) \
@@ -224,7 +224,7 @@ async function testMarkdownUpIndex_onlyDirectories():
         'systemFetch', objectNew( \
             'markdown_up_index', objectNew( \
                 'path', '.', \
-                'directories', arrayNew('sub1', 'sub2') \
+                'directories', arrayNew('sub2', 'sub1') \
             ) \
         ) \
     ))
@@ -241,7 +241,7 @@ async function testMarkdownUpIndex_onlyDirectories():
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
-            '# MarkdownUp - .' \
+            '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='sub1')")), \
