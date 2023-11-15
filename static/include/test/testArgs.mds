@@ -747,6 +747,17 @@ endfunction
 unittestRunTest('testArgsLinkMarkdownUpURL')
 
 
+function testArgsLinkMarkdownUpURL_noVars():
+    unittestMockAll()
+    unittestEqual( \
+        argsLink(testArgsArguments, 'Link', null, false, null, 'my doc.md'), \
+        "[Link](#url=my%20doc.md&var=)" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTest('testArgsLinkMarkdownUpURL_noVars')
+
+
 function testArgsHelp():
     unittestMockAll()
     argsHelp(testArgsArguments)
