@@ -1,14 +1,12 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-
-#
-# The MarkdownUp launcher index application
-#
-
 include <args.mds>
 
 
+#
+# The MarkdownUp launcher index application main entry point
+#
 async function markdownUpIndex():
     # Parse arguments
     arguments = argsValidate(arrayNew(objectNew('name', 'path')))
