@@ -85,12 +85,13 @@ function dataTable(data, model):
         for field in fields:
             # Format the value
             value = objectGet(row, field)
-            if stringLength(value) != null:
+            valueType = systemType(value)
+            if valueType == 'string':
                 valueFormat = value
             else:
                 valueFormat = numberToFixed(value, precisionNumber, precisionTrim)
                 if valueFormat == null:
-                    if datetimeYear(value) != null:
+                    if valueType == 'datetime':
                         valueFormat = datetimeISOFormat(value, precisionDatetime != null)
                     else:
                         valueFormat = stringNew(value)
