@@ -113,7 +113,7 @@ endfunction
 # $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
 # $arg args: Optional (default is null). The arguments object. Null argument values are excluded from the URL.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
-# $arg headerId: Optional (default is null). If non-null, the URL's header ID.
+# $arg headerId: Optional (default is null). If non-null, the URL's header ID. The special "top" header ID scrolls to the top of the page.
 # $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The MarkdownUp application URL
 function argsURL(arguments, args, explicit, headerId, url):
@@ -164,7 +164,7 @@ endfunction
 # $arg text: The link text
 # $arg args: Optional (default is null). The arguments object.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
-# $arg headerId: Optional (default is null). If non-null, the URL's header ID.
+# $arg headerId: Optional (default is null). If non-null, the URL's header ID. The special "top" header ID scrolls to the top of the page.
 # $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The Markdown link text
 function argsLink(arguments, text, args, explicit, headerId, url):

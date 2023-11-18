@@ -49,7 +49,7 @@
                 {
                     "name": "headerId",
                     "doc": [
-                        "Optional (default is null). If non-null, the URL's header ID."
+                        "Optional (default is null). If non-null, the URL's header ID. The special \"top\" header ID scrolls to the top of the page."
                     ]
                 },
                 {
@@ -110,7 +110,7 @@
                 {
                     "name": "headerId",
                     "doc": [
-                        "Optional (default is null). If non-null, the URL's header ID."
+                        "Optional (default is null). If non-null, the URL's header ID. The special \"top\" header ID scrolls to the top of the page."
                     ]
                 },
                 {
