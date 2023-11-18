@@ -58,7 +58,23 @@ argsTypes = schemaParse( \
 # $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
 # $return: The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails
 function argsValidate(arguments):
-    return schemaValidate(argsTypes, 'ArgsArguments', arguments)
+    validatedArguments = schemaValidate(argsTypes, 'ArgsArguments', arguments)
+
+    # Check for duplicate arguments
+    if validatedArguments != null:
+        argNames = objectNew()
+        for argument in arguments:
+            name = objectGet(argument, 'name')
+            if objectHas(argNames, name):
+                validatedArguments = null
+                systemLogDebug('MarkdownUp - args.mds: Duplicate argument "' + name + '"')
+            else:
+                objectSet(argNames, name, true)
+            endif
+        endfor
+    endif
+
+    return validatedArguments
 endfunction
 
 
@@ -103,11 +119,15 @@ endfunction
 function argsURL(arguments, args, explicit, headerId, url):
     # Get the URL variables
     urlVars = arrayNew()
+    argNames = objectNew()
     for argument in arguments:
         name = objectGet(argument, 'name')
         type = objectGet(argument, 'type')
         global = argsGlobalName(argument)
         default = objectGet(argument, 'default')
+
+        # Add the argument name (for unknown argument check below)
+        objectSet(argNames, name, null)
 
         # Add the URL variable, if any
         value = null
@@ -120,6 +140,13 @@ function argsURL(arguments, args, explicit, headerId, url):
         # Add the URL variable
         if value != null && (default == null || !argsValuesEqual(value, default, type)):
             arrayPush(urlVars, 'var.' + global + '=' + urlEncodeComponent(argsFormatValue(value, type)))
+        endif
+    endfor
+
+    # Check for unknown arguments
+    for name in objectKeys(args):
+        if !objectHas(argNames, name):
+            systemLogDebug('MarkdownUp - args.mds: Unknown argument "' + name + '"')
         endif
     endfor
 
