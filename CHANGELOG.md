@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.5 (2023-11-18)
+
+- [14e84ce](https://github.com/craigahobbs/markdown-up/commit/14e84ce) - add special "top" header ID
+
 ## 2.3.4 (2023-11-07)
 
 - [8329ea3](https://github.com/craigahobbs/markdown-up/commit/8329ea3) - library - replace elementModelRender callbackData with systemPartial
