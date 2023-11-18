@@ -326,9 +326,6 @@ test('MarkdownUp, run and render', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     const app = new MarkdownUp(window, {'menu': false});
@@ -342,13 +339,11 @@ test('MarkdownUp, run and render', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
 
     window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"darkMode": 1, "fontSize": 14, "lineHeight": 1.4}');
     window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
     documentElementStyleSetPropertyCalls.length = 0;
-    windowScrollToCalls.length = 0;
     await app.render(true);
     assert.equal(window.document.title, 'MarkdownUp');
     assert(window.document.body.innerHTML.startsWith(
@@ -359,7 +354,6 @@ test('MarkdownUp, run and render', async () => {
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.4em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
 });
 
 
@@ -368,9 +362,6 @@ test('MarkdownUp, render bad params', async () => {
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     window.location.hash = '#unknown=bad';
     const app = new MarkdownUp(window);
@@ -382,7 +373,6 @@ test('MarkdownUp, render bad params', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
 });
 
 
@@ -391,9 +381,6 @@ test('MarkdownUp, render menu toggle', async () => {
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     window.location.hash = '#';
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
@@ -405,7 +392,6 @@ test('MarkdownUp, render menu toggle', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
 
@@ -435,9 +421,6 @@ test('MarkdownUp, render menu view toggle', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
@@ -449,7 +432,6 @@ test('MarkdownUp, render menu view toggle', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -478,9 +460,6 @@ test('MarkdownUp, render menu dark mode toggle', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
@@ -492,7 +471,6 @@ test('MarkdownUp, render menu dark mode toggle', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -522,9 +500,6 @@ test('MarkdownUp, render menu cycle', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
@@ -536,7 +511,6 @@ test('MarkdownUp, render menu cycle', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -544,7 +518,6 @@ test('MarkdownUp, render menu cycle', async () => {
     let [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    windowScrollToCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -553,7 +526,6 @@ test('MarkdownUp, render menu cycle', async () => {
         ['--markdown-model-font-size', '14pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -561,7 +533,6 @@ test('MarkdownUp, render menu cycle', async () => {
     [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    windowScrollToCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -570,7 +541,6 @@ test('MarkdownUp, render menu cycle', async () => {
         ['--markdown-model-font-size', '16pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":16}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
@@ -581,9 +551,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"fontSize": 18}');
@@ -597,7 +564,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
         ['--markdown-model-font-size', '18pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
@@ -605,7 +571,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     const [, , , , , markdownButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    windowScrollToCalls.length = 0;
     markdownButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -614,7 +579,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
         ['--markdown-model-font-size', '8pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
@@ -622,9 +586,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
 
 test('MarkdownUp, render timeout', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     // Patch window.setTimeout and window.clearTimeout
     const windowTimeout = {'id': 0};
@@ -661,7 +622,6 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 1);
     assert.equal(window.document.title, '');
@@ -669,27 +629,21 @@ main()
 
     // Render again to test clearing the runtime timeout ID
     window.location.hash = '#';
-    windowScrollToCalls.length = 0;
     await app.render(true);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 2);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the timeout callback
-    windowScrollToCalls.length = 0;
     await windowTimeout.callback();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(windowTimeout.delay, 2000);
     assert.equal(app.runtimeTimeoutId, 3);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 
     // Call the timeout callback again
-    windowScrollToCalls.length = 0;
     await windowTimeout.callback();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(windowTimeout.delay, null);
     assert.equal(app.runtimeTimeoutId, null);
     assert.equal(window.document.title, '');
@@ -699,9 +653,6 @@ main()
 
 test('MarkdownUp, render resize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     // Patch window.addEventListener and window.removeEventListener
     const eventListener = {'resize': null};
@@ -730,7 +681,6 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(typeof eventListener.resize, 'function');
     assert.equal(typeof app.runtimeWindowResize, 'function');
     assert.equal(window.document.title, '');
@@ -738,18 +688,14 @@ main()
 
     // Render again to test clearing the runtime resize event handler
     window.location.hash = '#';
-    windowScrollToCalls.length = 0;
     await app.render(true);
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(typeof eventListener.resize, 'function');
     assert.equal(typeof app.runtimeWindowResize, 'function');
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello 1</p>'));
 
     // Call the resize callback
-    windowScrollToCalls.length = 0;
     await eventListener.resize();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(typeof eventListener.resize, 'function');
     assert.equal(typeof app.runtimeWindowResize, 'function');
     assert.equal(window.document.title, '');
@@ -759,10 +705,6 @@ main()
 
 test('MarkdownUp, render focus', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
@@ -787,7 +729,6 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 1">'));
 
@@ -796,9 +737,7 @@ main()
     assert.equal(testInput.selectionStart, 6);
     assert.equal(testInput.selectionEnd, 6);
 
-    windowScrollToCalls.length = 0;
     await testInput.click();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<input id="test-input" type="text" value="Text 2">'));
 
@@ -811,9 +750,6 @@ main()
 
 test('MarkdownUp, render document reset ID', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
 
     // Patch window.setTimeout and window.clearTimeout
     const windowTimeout = {'id': 0};
@@ -855,25 +791,20 @@ main()
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 1);
     assert.equal(window.document.title, '');
     assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
 
     // Call the timeout callback
-    windowScrollToCalls.length = 0;
     await windowTimeout.callback();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 2);
     assert.equal(window.document.title, '');
     assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
 
     // Call the timeout callback
-    windowScrollToCalls.length = 0;
     await windowTimeout.callback();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 3);
     assert.equal(window.document.title, '');
@@ -900,10 +831,6 @@ windowSetLocation('#url=other')
 
 test('MarkdownUp, render location callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
@@ -923,15 +850,12 @@ elementModelRender(objectNew( \
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
     assert.equal(window.location.href, `${jsdomURL}#`);
 
     const testSpan = window.document.getElementById('test-span');
-    windowScrollToCalls.length = 0;
     await testSpan.click();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
     assert.equal(window.location.href, `${jsdomURL}#url=other`);
@@ -956,12 +880,44 @@ test('MarkdownUp, render location hash', async () => {
 });
 
 
-test('MarkdownUp, render title', async () => {
+test('MarkdownUp, render location hash top', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const windowScrollToCalls = [];
     window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
+    window.scrollTo(0, 0);
+    windowScrollToCalls.length = 0;
 
+    const app = new MarkdownUp(window, {'markdownText': ''});
+    window.location.hash = "#var.vName='test'&top";
+    await app.render();
+    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    assert.equal(window.location.href, `${jsdomURL}#var.vName='test'&top`);
+});
+
+
+test('MarkdownUp, render location hash top exists', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const windowScrollToCalls = [];
+    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
+    window.scrollTo(0, 0);
+    windowScrollToCalls.length = 0;
+
+    const app = new MarkdownUp(window, {'markdownText': '# Top'});
+    window.location.hash = "#var.vName='test'&top";
+    await app.render();
+    assert.deepEqual(windowScrollToCalls, []);
+    assert.equal(window.document.title, 'Top');
+    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
+    assert.equal(window.location.href, `${jsdomURL}#var.vName='test'&top`);
+});
+
+
+test('MarkdownUp, render title', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
@@ -972,7 +928,6 @@ markdownPrint('Hello')
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
@@ -980,10 +935,6 @@ markdownPrint('Hello')
 
 test('MarkdownUp, render title callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
@@ -1003,14 +954,11 @@ elementModelRender(objectNew( \
     });
     window.location.hash = '#';
     await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<span id="test-span">Click Here</span>'));
 
     const testSpan = window.document.getElementById('test-span');
-    windowScrollToCalls.length = 0;
     await testSpan.click();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
 });
