@@ -26,15 +26,34 @@ unittestRunTestAsync('testArgsSentinel')
 
 
 function testArgsValidate():
+    unittestMockAll()
     unittestDeepEqual(argsValidate(testArgsArguments), testArgsArguments)
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
 unittestRunTest('testArgsValidate')
 
 
 function testArgsValidateInvalid():
+    unittestMockAll()
     unittestEqual(argsValidate(arrayNew()), null)
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
 unittestRunTest('testArgsValidateInvalid')
+
+
+function testArgsValidateDuplicate():
+    arguments = arrayNew( \
+        objectNew('name', 'name', 'type', 'string', 'description', 'The name'), \
+        objectNew('name', 'url', 'global', 'vURL'), \
+        objectNew('name', 'name', 'type', 'string') \
+    )
+    unittestMockAll()
+    unittestEqual(argsValidate(arguments), null)
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Duplicate argument "name"')) \
+    ))
+endfunction
+unittestRunTest('testArgsValidateDuplicate')
 
 
 function testArgsParse():
@@ -282,6 +301,22 @@ function testArgsURLObjectAll():
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
 unittestRunTest('testArgsURLObjectAll')
+
+
+function testArgsURLObjectUnknown():
+    unittestMockAll()
+    unittestEqual( \
+        argsURL(testArgsArguments, objectNew( \
+            'Name', 'test', \
+            'url', 'test.json' \
+        )), \
+        "#var.vURL='test.json'" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Unknown argument "Name"')) \
+    ))
+endfunction
+unittestRunTest('testArgsURLObjectUnknown')
 
 
 function testArgsURLObjectDefault():
