@@ -694,6 +694,23 @@ endfunction
 unittestRunTest('testArgsURLHeaderId')
 
 
+function testArgsURLHeaderIdTop():
+    # Set argument globals
+    systemGlobalSet('vURL', 'test.json')
+
+    unittestMockAll()
+    unittestEqual( \
+        argsURL(testArgsArguments, objectNew('name', 'test'), false, argsTopHeaderId), \
+        "#var.vName='test'&var.vURL='test.json'&_top" \
+    )
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    # Clear argument globals
+    systemGlobalSet('vURL', null)
+endfunction
+unittestRunTest('testArgsURLHeaderIdTop')
+
+
 function testArgsURLMarkdownUpURL():
     # Set argument globals
     systemGlobalSet('vURL', 'test.json')

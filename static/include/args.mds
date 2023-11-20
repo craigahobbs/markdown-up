@@ -154,12 +154,12 @@ function argsURL(arguments, args, explicit, headerText, url):
     # Create the URL
     return '#' + if(url != null, 'url=' + urlEncodeComponent(url) + '&', '') + \
         if(arrayLength(urlVars), arrayJoin(urlVars, '&'), 'var=') + \
-        if(headerText != null, '&' + if(headerText == argsTopHeaderID, argsTopHeaderID, markdownHeaderId(headerText)), '')
+        if(headerText != null, '&' + if(headerText == argsTopHeaderId, argsTopHeaderId, markdownHeaderId(headerText)), '')
 endfunction
 
 
 # The special "top" header ID
-argsTopHeaderID = '_top'
+argsTopHeaderId = '_top'
 
 
 # $function: argsLink
