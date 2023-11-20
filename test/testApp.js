@@ -332,7 +332,7 @@ test('MarkdownUp, run and render', async () => {
     await app.run();
     assert.equal(window.document.title, 'MarkdownUp');
     assert(window.document.body.innerHTML.startsWith(
-        '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
@@ -347,7 +347,7 @@ test('MarkdownUp, run and render', async () => {
     await app.render(true);
     assert.equal(window.document.title, 'MarkdownUp');
     assert(window.document.body.innerHTML.startsWith(
-        '<h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '1'],
@@ -794,21 +794,33 @@ main()
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 1);
     assert.equal(window.document.title, '');
-    assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div>' +
+            '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 1</p>'
+    );
 
     // Call the timeout callback
     await windowTimeout.callback();
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 2);
     assert.equal(window.document.title, '');
-    assert.equal(window.document.body.innerHTML, '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div>' +
+            '<h1 id="title">Title</h1><div id="resetID" style="display=none"></div><p>Hello 2</p>'
+    );
 
     // Call the timeout callback
     await windowTimeout.callback();
     assert.equal(windowTimeout.delay, 1000);
     assert.equal(app.runtimeTimeoutId, 3);
     assert.equal(window.document.title, '');
-    assert.equal(window.document.body.innerHTML, '<p>Hello 3</p>');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div>' +
+            '<p>Hello 3</p>'
+    );
 });
 
 
@@ -864,55 +876,12 @@ elementModelRender(objectNew( \
 
 test('MarkdownUp, render location hash', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-    window.scrollTo(0, 0);
-    windowScrollToCalls.length = 0;
-
     const app = new MarkdownUp(window, {'markdownText': ''});
     window.location.hash = "#var.vName='test'&subtitle";
     await app.render();
-    assert.deepEqual(windowScrollToCalls, []);
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
     assert.equal(window.location.href, `${jsdomURL}#var.vName='test'&subtitle`);
-});
-
-
-test('MarkdownUp, render location hash top', async () => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-    window.scrollTo(0, 0);
-    windowScrollToCalls.length = 0;
-
-    const app = new MarkdownUp(window, {'markdownText': ''});
-    window.location.hash = "#var.vName='test'&top";
-    await app.render();
-    assert.deepEqual(windowScrollToCalls, [[0, 0]]);
-    assert.equal(window.document.title, '');
-    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
-    assert.equal(window.location.href, `${jsdomURL}#var.vName='test'&top`);
-});
-
-
-test('MarkdownUp, render location hash top exists', async () => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-
-    const windowScrollToCalls = [];
-    window.scrollTo = (xc, yc) => windowScrollToCalls.push([xc, yc]);
-    window.scrollTo(0, 0);
-    windowScrollToCalls.length = 0;
-
-    const app = new MarkdownUp(window, {'markdownText': '# Top'});
-    window.location.hash = "#var.vName='test'&top";
-    await app.render();
-    assert.deepEqual(windowScrollToCalls, []);
-    assert.equal(window.document.title, 'Top');
-    assert(window.document.body.innerHTML.startsWith('<div class="menu-burger">'));
-    assert.equal(window.location.href, `${jsdomURL}#var.vName='test'&top`);
 });
 
 
@@ -980,8 +949,11 @@ test('MarkdownUp.main, help', async () => {
             'title': 'MarkdownUp',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 '<helpElements>'
             ]
@@ -1019,8 +991,11 @@ test('MarkdownUp.main', async () => {
             'title': 'Hello',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]}
@@ -1066,8 +1041,11 @@ test('MarkdownUp.main, url', async () => {
             'title': 'Hello',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': 'url=sub%2Fother.md&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'url=sub%2Fother.md&hello'}, 'elem': [{'text': 'Hello'}]},
@@ -1162,8 +1140,11 @@ markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [
@@ -1203,8 +1184,11 @@ markdownPrint(systemFetch('README.md', null, true))
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [
@@ -1281,8 +1265,11 @@ test('MarkdownUp.main, no title', async () => {
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
@@ -1303,8 +1290,11 @@ test('MarkdownUp.main, menu', async () => {
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    menuElements()
+                    [
+                        menuBurgerElements(),
+                        menuElements()
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
@@ -1324,7 +1314,10 @@ test('MarkdownUp.main, no menu', async () => {
         {
             'title': null,
             'elements': [
-                null,
+                [
+                    null,
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                ],
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
                 ]
@@ -1344,8 +1337,11 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    menuElements({'viewMarkdown': true})
+                    [
+                        menuBurgerElements(),
+                        menuElements({'viewMarkdown': true})
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
@@ -1364,8 +1360,11 @@ test('MarkdownUp.main, markdown', async () => {
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
@@ -1384,8 +1383,11 @@ test('MarkdownUp.main, darkMode', async () => {
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements({'darkMode': 1}),
-                    menuElements({'darkMode': 1})
+                    [
+                        menuBurgerElements({'darkMode': 1}),
+                        menuElements({'darkMode': 1})
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'p', 'elem': [{'text': 'Hello'}]}
@@ -1412,8 +1414,11 @@ markdownPrint('Hello')
             'title': 'markdown-script',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1457,8 +1462,11 @@ markdownPrint('2')
             'title': 'markdown-script',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1495,8 +1503,11 @@ markdownPrint(message)
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [
@@ -1542,8 +1553,11 @@ systemLogDebug('Hello')
             'title': 'markdown-script',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1588,8 +1602,11 @@ systemLogDebug('Hello')
             'title': 'markdown-script',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1636,8 +1653,11 @@ endfunction
             'title': 'markdown-script',
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
@@ -1678,8 +1698,11 @@ markdownPrint('varName = ' + varName)
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': 'var.varName=5&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [
@@ -1719,8 +1742,11 @@ markdownPrint('varName = ' + varName)
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': 'var.varName=foo%20bar&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [
@@ -1762,8 +1788,11 @@ foobar()
             'title': null,
             'elements': [
                 [
-                    menuBurgerElements(),
-                    null
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 [
                     [

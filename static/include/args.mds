@@ -113,10 +113,11 @@ endfunction
 # $arg arguments: The [arguments model](includeModel.html#var.vName='ArgsArguments')
 # $arg args: Optional (default is null). The arguments object. Null argument values are excluded from the URL.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
-# $arg headerId: Optional (default is null). If non-null, the URL's header ID. The special "top" header ID scrolls to the top of the page.
+# $arg headerText: Optional (default is null). If non-null, the URL's header text.
+# $arg headerText: The special "_top" header ID scrolls to the top of the page.
 # $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The MarkdownUp application URL
-function argsURL(arguments, args, explicit, headerId, url):
+function argsURL(arguments, args, explicit, headerText, url):
     # Get the URL variables
     urlVars = arrayNew()
     argNames = objectNew()
@@ -153,8 +154,12 @@ function argsURL(arguments, args, explicit, headerId, url):
     # Create the URL
     return '#' + if(url != null, 'url=' + urlEncodeComponent(url) + '&', '') + \
         if(arrayLength(urlVars), arrayJoin(urlVars, '&'), 'var=') + \
-        if(headerId != null, '&' + markdownHeaderId(headerId), '')
+        if(headerText != null, '&' + if(headerText == argsTopHeaderID, argsTopHeaderID, markdownHeaderId(headerText)), '')
 endfunction
+
+
+# The special "top" header ID
+argsTopHeaderID = '_top'
 
 
 # $function: argsLink
@@ -164,11 +169,12 @@ endfunction
 # $arg text: The link text
 # $arg args: Optional (default is null). The arguments object.
 # $arg explicit: Optional (default is false). If true, arguments are only included in the URL if they are in the arguments object.
-# $arg headerId: Optional (default is null). If non-null, the URL's header ID. The special "top" header ID scrolls to the top of the page.
+# $arg headerText: Optional (default is null). If non-null, the URL's header text.
+# $arg headerText: The special "_top" header ID scrolls to the top of the page.
 # $arg url: Optional (default is null). If non-null, the MarkdownUp URL hash parameter.
 # $return: The Markdown link text
-function argsLink(arguments, text, args, explicit, headerId, url):
-    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit, headerId, url) + ')'
+function argsLink(arguments, text, args, explicit, headerText, url):
+    return '[' + markdownEscape(text) + '](' + argsURL(arguments, args, explicit, headerText, url) + ')'
 endfunction
 
 
