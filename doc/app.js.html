@@ -222,17 +222,10 @@ export class MarkdownUp {
             return;
         }
 
-        // URL hash ID?
-        const hashId = getHashID(this.window.location.hash);
-        if (!isError &amp;&amp; hashId !== null) {
-            // Special "top" hash ID?
-            if (hashId === 'top' &amp;&amp; this.window.document.getElementById(this.window.location.hash.slice(1)) === null) {
-                this.window.scrollTo(0, 0);
-            } else {
-                // Re-navigate to scroll to the hash ID since it was just rendered. The re-render is
-                // short-circuited by the unchanged hash param check above.
-                this.window.location.href = this.window.location.hash;
-            }
+        // If there is a header ID, re-navigate to scroll to the header ID since it was just rendered.
+        // The re-render is short-circuited by the unchanged hash param check above.
+        if (!isError &amp;&amp; getHeaderId(this.window.location.hash) !== null) {
+            this.window.location.href = this.window.location.hash;
         }
     }
 
@@ -515,10 +508,10 @@ export class MarkdownUp {
                 hashParams.url = `${getBaseURL(resourceURL)}${hashParams.url}`;
             }
 
-            // Encode hash parameters with a hash ID
+            // Encode hash parameters with a header ID
             const paramString = encodeQueryString({...this.params, ...hashParams});
-            const hashID = getHashID(url);
-            return `#${paramString}${hashID !== null &amp;&amp; paramString !== '' ? '&amp;' : ''}${hashID !== null ? hashID : ''}`;
+            const headerId = getHeaderId(url);
+            return `#${paramString}${headerId !== null &amp;&amp; paramString !== '' ? '&amp;' : ''}${headerId !== null ? headerId : ''}`;
         }
 
         // Relative URL?
@@ -531,45 +524,52 @@ export class MarkdownUp {
 
 
     burgerElements() {
-        return !this.menu ? null : [
-            {
-                'html': 'div',
-                'attr': {'class': 'menu-burger'},
-                'elem': this.menuValueToggle('menu', {
-                    'size': 32,
-                    'noCheck': true,
-                    'path': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
-                })
-            },
-
-            // Popup menu
-            !('menu' in this.paramsSession) ? null : {
-                'html': 'div',
-                'attr': {'class': 'menu'},
-                'elem': [
-                    this.menuViewToggle('markdown', {
-                        'path': 'M4,2 L20,2 L20,22 L4,22 Z',
-                        'path2': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
-                    }),
-                    this.menuValueToggle('darkMode', {
-                        'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
-                    }, true),
-                    this.menuValueCycle('fontSize', this.fontSize, 2, {
-                        'path': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
-                        'strokeWidth': 4
-                    }),
-                    this.menuValueCycle('lineHeight', this.lineHeight, 0.2, {
-                        'path2': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
-                    }),
-                    this.menuValueToggle('debug', {
-                        'path': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
-                            'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
-                    }),
-                    this.menuViewToggle('help', {
-                        'path': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
+        const paramString = encodeQueryString({...this.params});
+        const topHeaderId = `${paramString}${paramString !== '' ? '&amp;' : ''}_top`;
+        return [
+            !this.menu ? null : [
+                {
+                    'html': 'div',
+                    'attr': {'class': 'menu-burger'},
+                    'elem': this.menuValueToggle('menu', {
+                        'size': 32,
+                        'noCheck': true,
+                        'path': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
                     })
-                ]
-            }
+                },
+
+                // Popup menu
+                !('menu' in this.paramsSession) ? null : {
+                    'html': 'div',
+                    'attr': {'class': 'menu'},
+                    'elem': [
+                        this.menuViewToggle('markdown', {
+                            'path': 'M4,2 L20,2 L20,22 L4,22 Z',
+                            'path2': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
+                        }),
+                        this.menuValueToggle('darkMode', {
+                            'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
+                        }, true),
+                        this.menuValueCycle('fontSize', this.fontSize, 2, {
+                            'path': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
+                            'strokeWidth': 4
+                        }),
+                        this.menuValueCycle('lineHeight', this.lineHeight, 0.2, {
+                            'path2': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
+                        }),
+                        this.menuValueToggle('debug', {
+                            'path': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
+                                'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
+                        }),
+                        this.menuViewToggle('help', {
+                            'path': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
+                        })
+                    ]
+                }
+            ],
+
+            // The top header ID
+            {'html': 'div', 'attr': {'id': topHeaderId, 'style': 'display=none; position: absolute; top: 0;'}}
         ];
     }
 
@@ -671,13 +671,13 @@ export class MarkdownUp {
 }
 
 
-// Get a URL's hash ID
-function getHashID(url) {
-    const matchId = url.match(rHashId);
+// Get a URL's header ID
+function getHeaderId(url) {
+    const matchId = url.match(rHeaderId);
     return matchId !== null ? matchId[1] : null;
 }
 
-const rHashId = /[#&amp;]([^=]+)$/;
+const rHeaderId = /[#&amp;]([^=]+)$/;
 
 
 // Test if a URL is relative
