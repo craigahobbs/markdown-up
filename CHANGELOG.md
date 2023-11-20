@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.6 (2023-11-20)
+
+- [268f7b7](https://github.com/craigahobbs/markdown-up/commit/268f7b7) - add "_top" header id
+
 ## 2.3.5 (2023-11-18)
 
 - [14e84ce](https://github.com/craigahobbs/markdown-up/commit/14e84ce) - add special "top" header ID
