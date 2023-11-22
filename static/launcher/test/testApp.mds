@@ -32,9 +32,9 @@ async function testMarkdownUpIndex():
             '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=&_top)')), \
         arrayNew('markdownPrint', arrayNew('', '[b.html](b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=c.md&var=)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=c.md&var=&_top)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='sub1')")), \
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
@@ -72,7 +72,7 @@ async function testMarkdownUpIndex_escapes():
             ) \
         ), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a\\+\\)b.md](#url=a%2B%29b.md&var=)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a\\+\\)b.md](#url=a%2B%29b.md&var=&_top)')), \
         arrayNew('markdownPrint', arrayNew('', '[b\\+\\)a.html](b+%29a.html)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub\\+\\)dir](#var.vPath='sub%2B%29dir')")) \
@@ -112,9 +112,9 @@ async function testMarkdownUpIndex_path():
             '# MarkdownUp \\- subdir' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=subdir%2Fa.md&var=)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=subdir%2Fa.md&var=&_top)')), \
         arrayNew('markdownPrint', arrayNew('', '[b.html](subdir/b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=subdir%2Fc.md&var=)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=subdir%2Fc.md&var=&_top)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='subdir%2Fsub1')")), \
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='subdir%2Fsub2')")) \
@@ -179,8 +179,8 @@ async function testMarkdownUpIndex_onlyMarkdown():
             '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=c.md&var=)')) \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](#url=a.md&var=&_top)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](#url=c.md&var=&_top)')) \
     ))
 endfunction
 unittestRunTestAsync('testMarkdownUpIndex_onlyMarkdown')
