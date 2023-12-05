@@ -242,9 +242,13 @@
                     ]
                 },
                 {
-                    "name": "arguments",
+                    "name": "options",
                     "doc": [
-                        "Optional (default is null). The [arguments model](includeModel.html#var.vName='ArgsArguments')."
+                        "The pager application options. The following options are available:",
+                        "- **arguments** - The [arguments model](includeModel.html#var.vName='ArgsArguments').",
+                        "  Must contain a string argument named \"page\".",
+                        "- **hideMenu** - Hide the menu links",
+                        "- **hideNav** - Hide the navigation links"
                     ]
                 }
             ]

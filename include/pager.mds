@@ -8,90 +8,119 @@ include <args.mds>
 # $group: pager.mds
 # $doc: The pager application main entry point
 # $arg pagerModel: The [pager model](includeModel.html#var.vName='Pager')
-# $arg arguments: Optional (default is null). The [arguments model](includeModel.html#var.vName='ArgsArguments').
-async function pagerMain(pagerModel, arguments):
+# $arg options: The pager application options. The following options are available:
+# $arg options: - **arguments** - The [arguments model](includeModel.html#var.vName='ArgsArguments').
+# $arg options:   Must contain a string argument named "page".
+# $arg options: - **hideMenu** - Hide the menu links
+# $arg options: - **hideNav** - Hide the navigation links
+async function pagerMain(pagerModel, options):
+    if options == null:
+        options = objectNew()
+    endif
+
     # Validate the pager model
     pagerModel = schemaValidate(pagerTypes, 'Pager', pagerModel)
     if pagerModel == null:
         return
     endif
-    pages = objectGet(pagerModel, 'pages')
 
-    # Find the default page
-    firstPage = null
-    for page in pages:
-        pageName = objectGet(page, 'name')
+    # Compute the visible and navigable pages
+    visiblePages = arrayNew()
+    navPages = arrayNew()
+    for page in objectGet(pagerModel, 'pages'):
         pageType = objectGet(page, 'type')
         pageTypeKey = arrayGet(objectKeys(pageType), 0)
+
+        # Visible page?
+        if !objectGet(page, 'hidden'):
+            arrayPush(visiblePages, page)
+        endif
+
+        # Navigable page?
         if pageTypeKey != 'link':
-            firstPage = page
-            break
+            arrayPush(navPages, page)
         endif
     endfor
 
     # Parse arguments
+    arguments = objectGet(options, 'arguments')
     if arguments == null:
         arguments = arrayNew( \
-            objectNew('name', 'page', 'default', objectGet(firstPage, 'name')) \
+            objectNew('name', 'page', 'default', objectGet(arrayGet(navPages, 0), 'name')) \
         )
     endif
     args = argsParse(arguments)
-    curPageName = objectGet(args, 'page')
 
-    # Render the menu
-    curPage = null
-    for page, ixPage in pages:
-        pageName = objectGet(page, 'name')
-        pageType = objectGet(page, 'type')
-        pageTypeKey = arrayGet(objectKeys(pageType), 0)
-
-        # Current page?
-        isCurrentPage = false
-        if pageTypeKey != 'link' && pageName == curPageName:
-            isCurrentPage = true
-            curPage = page
-        endif
-
-        # Function page?
-        separator = if(ixPage != 0, '|', null)
-        if pageTypeKey == 'function':
-            pageFunction = objectGet(pageType, 'function')
-            pageFunctionHidden = objectGet(pageFunction, 'hidden')
-            if !pageFunctionHidden:
-                if isCurrentPage:
-                    markdownPrint(separator, markdownEscape(pageName))
-                else:
-                    markdownPrint(separator, argsLink(arguments, pageName, objectNew('page', pageName)))
-                endif
-            endif
-        else:
-            # pageTypeKey == 'link'
-            pageLink = objectGet(pageType, 'link')
-            pageLinkURL = objectGet(pageLink, 'url')
-            markdownPrint(separator, '[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')')
+    # Determine the selected page
+    ixNavPage = 0
+    for page, ixPage in navPages:
+        if objectGet(page, 'name') == objectGet(args, 'page'):
+            ixNavPage = ixPage
+            break
         endif
     endfor
-    if curPage == null:
-        curPage = arrayGet(pages, firstPage)
+    navPage = arrayGet(navPages, ixNavPage)
+
+    # Render the menu
+    if !objectGet(options, 'hideMenu'):
+        for page, ixPage in visiblePages:
+            pageName = objectGet(page, 'name')
+            pageType = objectGet(page, 'type')
+            pageTypeKey = arrayGet(objectKeys(pageType), 0)
+
+            # Render the menu link
+            separator = if(ixPage != arrayLength(visiblePages) - 1, '&nbsp;|', '')
+            if pageTypeKey == 'function':
+                # Function page
+                pageFunction = objectGet(pageType, 'function')
+                pageFunctionHidden = objectGet(pageFunction, 'hidden')
+                if !pageFunctionHidden:
+                    if pageName == objectGet(navPage, 'name'):
+                        markdownPrint(markdownEscape(pageName) + separator)
+                    else:
+                        markdownPrint(argsLink(arguments, pageName, objectNew('page', pageName)) + separator)
+                    endif
+                endif
+            else:
+                # pageTypeKey == 'link'
+                pageLink = objectGet(pageType, 'link')
+                pageLinkURL = objectGet(pageLink, 'url')
+                markdownPrint('[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')' + separator)
+            endif
+        endfor
     endif
-    markdownPrint('')
+
+    # Render the start/next/prev buttons
+    if !objectGet(options, 'hideNav') && arrayLength(navPages) > 1:
+        startPageName = objectGet(arrayGet(navPages, 0), 'name')
+        prevPageName = if(ixNavPage - 1 >= 0, objectGet(arrayGet(navPages, ixNavPage - 1), 'name'), null)
+        nextPageName = if(ixNavPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixNavPage + 1), 'name'), null)
+        markdownPrint( \
+            '', \
+            '(&nbsp;' + argsLink(solarArguments, 'Start', objectNew('page', startPageName)) + '&nbsp;|', \
+            if(prevPageName != null, argsLink(solarArguments, 'Previous', objectNew('page', prevPageName)), 'Previous') + '&nbsp;|', \
+            if(nextPageName != null, argsLink(solarArguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)' \
+        )
+    endif
 
     # Function page?
-    curPageType = objectGet(curPage, 'type')
-    curPageTypeKey = arrayGet(objectKeys(curPageType), 0)
-    if curPageTypeKey == 'function':
-        curPageFunction = objectGet(curPageType, 'function')
+    navPageType = objectGet(navPage, 'type')
+    navPageTypeKey = arrayGet(objectKeys(navPageType), 0)
+    if navPageTypeKey == 'function':
+        navPageFunction = objectGet(navPageType, 'function')
 
         # Set the title
-        curPageTitle = objectGet(curPageFunction, 'title')
-        if curPageTitle != null:
-            documentSetTitle(curPageTitle)
-            markdownPrint('', '# ' + curPageTitle, '')
+        navPageTitle = objectGet(navPageFunction, 'title')
+        if navPageTitle != null:
+            documentSetTitle(navPageTitle)
+            markdownPrint('', '# ' + navPageTitle, '')
+        else:
+            markdownPrint('')
         endif
 
         # Call the page function
-        curPageFn = objectGet(curPageFunction, 'function')
-        curPageFn(args)
+        navPageFn = objectGet(navPageFunction, 'function')
+        navPageFn(args)
     endif
 endfunction
 
