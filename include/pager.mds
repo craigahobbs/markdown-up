@@ -67,9 +67,8 @@ async function pagerMain(pagerModel, arguments):
         else:
             # pageTypeKey == 'link'
             pageLink = objectGet(pageType, 'link')
-            pageLinkName = objectGet(pageLink, 'name')
             pageLinkURL = objectGet(pageLink, 'url')
-            markdownPrint(separator, '[' + markdownEscape(pageLinkName) + '](' + urlEncode(pageLinkURL) + ')')
+            markdownPrint(separator, '[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')')
         endif
     endfor
     if curPage == null:
@@ -141,9 +140,6 @@ pagerTypes = schemaParse( \
     '', \
     '# A page link', \
     'struct PagerPageLink', \
-    '', \
-    '    # The link name', \
-    '    string name', \
     '', \
     '    # The link URL', \
     '    string url' \

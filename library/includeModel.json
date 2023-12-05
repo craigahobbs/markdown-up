@@ -228,15 +228,6 @@
             "members": [
                 {
                     "doc": [
-                        "The link name"
-                    ],
-                    "name": "name",
-                    "type": {
-                        "builtin": "string"
-                    }
-                },
-                {
-                    "doc": [
                         "The link URL"
                     ],
                     "name": "url",
