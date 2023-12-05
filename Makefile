@@ -106,8 +106,10 @@ export LIBRARY_MODEL
 # BareScript to write the include library model documentation
 define INCLUDE_LIBRARY_MODEL
 include './static/include/args.mds'
+include './static/include/pager.mds'
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)
+objectAssign(includeTypes, pagerTypes)
 systemLog(jsonStringify(includeTypes, 4))
 endef
 export INCLUDE_LIBRARY_MODEL

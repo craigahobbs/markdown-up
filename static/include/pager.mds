@@ -1,0 +1,150 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include <args.mds>
+
+
+# $function: pagerMain
+# $group: pager.mds
+# $doc: The pager application main entry point
+# $arg pagerModel: The [pager model](includeModel.html#var.vName='Pager')
+# $arg arguments: Optional (default is null). The [arguments model](includeModel.html#var.vName='ArgsArguments').
+async function pagerMain(pagerModel, arguments):
+    # Validate the pager model
+    pagerModel = schemaValidate(pagerTypes, 'Pager', pagerModel)
+    if pagerModel == null:
+        return
+    endif
+    pages = objectGet(pagerModel, 'pages')
+
+    # Find the default page
+    firstPage = null
+    for page in pages:
+        pageName = objectGet(page, 'name')
+        pageType = objectGet(page, 'type')
+        pageTypeKey = arrayGet(objectKeys(pageType), 0)
+        if pageTypeKey != 'link':
+            firstPage = page
+            break
+        endif
+    endfor
+
+    # Parse arguments
+    if arguments == null:
+        arguments = arrayNew( \
+            objectNew('name', 'page', 'default', objectGet(firstPage, 'name')) \
+        )
+    endif
+    args = argsParse(arguments)
+    curPageName = objectGet(args, 'page')
+
+    # Render the menu
+    curPage = null
+    for page, ixPage in pages:
+        pageName = objectGet(page, 'name')
+        pageType = objectGet(page, 'type')
+        pageTypeKey = arrayGet(objectKeys(pageType), 0)
+
+        # Current page?
+        isCurrentPage = false
+        if pageTypeKey != 'link' && pageName == curPageName:
+            isCurrentPage = true
+            curPage = page
+        endif
+
+        # Function page?
+        separator = if(ixPage != 0, '|', null)
+        if pageTypeKey == 'function':
+            pageFunction = objectGet(pageType, 'function')
+            pageFunctionHidden = objectGet(pageFunction, 'hidden')
+            if !pageFunctionHidden:
+                if isCurrentPage:
+                    markdownPrint(separator, markdownEscape(pageName))
+                else:
+                    markdownPrint(separator, argsLink(arguments, pageName, objectNew('page', pageName)))
+                endif
+            endif
+        else:
+            # pageTypeKey == 'link'
+            pageLink = objectGet(pageType, 'link')
+            pageLinkName = objectGet(pageLink, 'name')
+            pageLinkURL = objectGet(pageLink, 'url')
+            markdownPrint(separator, '[' + markdownEscape(pageLinkName) + '](' + urlEncode(pageLinkURL) + ')')
+        endif
+    endfor
+    if curPage == null:
+        curPage = arrayGet(pages, firstPage)
+    endif
+    markdownPrint('')
+
+    # Function page?
+    curPageType = objectGet(curPage, 'type')
+    curPageTypeKey = arrayGet(objectKeys(curPageType), 0)
+    if curPageTypeKey == 'function':
+        curPageFunction = objectGet(curPageType, 'function')
+
+        # Set the title
+        curPageTitle = objectGet(curPageFunction, 'title')
+        if curPageTitle != null:
+            documentSetTitle(curPageTitle)
+            markdownPrint('', '# ' + curPageTitle, '')
+        endif
+
+        # Call the page function
+        curPageFn = objectGet(curPageFunction, 'function')
+        curPageFn(args)
+    endif
+endfunction
+
+
+# The pager model
+pagerTypes = schemaParse( \
+    '# A pager application model', \
+    'struct Pager', \
+    '', \
+    "    # The application's pages", \
+    '    PagerPage[len > 0] pages', \
+    '', \
+    '', \
+    '# A page model', \
+    'struct PagerPage', \
+    '', \
+    '    # The page name', \
+    '    string name', \
+    '', \
+    '    # The page type', \
+    '    PagerPageType type', \
+    '', \
+    '', \
+    '# The page type', \
+    'union PagerPageType', \
+    '', \
+    '    # A function page', \
+    '    PagerPageFunction function', \
+    '', \
+    '    # A navigation link', \
+    '    PagerPageLink link', \
+    '', \
+    '', \
+    '# A page function', \
+    'struct PagerPageFunction', \
+    '', \
+    '    # The page function', \
+    '    object function', \
+    '', \
+    '    # The page title', \
+    '    optional string title', \
+    '', \
+    '    # If true, the page is hidden', \
+    '    optional bool hidden', \
+    '', \
+    '', \
+    '# A page link', \
+    'struct PagerPageLink', \
+    '', \
+    '    # The link name', \
+    '    string name', \
+    '', \
+    '    # The link URL', \
+    '    string url' \
+)
