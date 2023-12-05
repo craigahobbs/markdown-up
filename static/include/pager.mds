@@ -72,15 +72,16 @@ async function pagerMain(pagerModel, options):
             pageTypeKey = arrayGet(objectKeys(pageType), 0)
 
             # Render the menu link
+            pageNameNbsp = stringReplace(pageName, ' ', '&nbsp;')
             separator = if(ixPage != arrayLength(visiblePages) - 1, '&nbsp;|', '')
             if pageTypeKey == 'link':
                 pageLink = objectGet(pageType, 'link')
                 pageLinkURL = objectGet(pageLink, 'url')
-                markdownPrint('[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')' + separator)
+                markdownPrint('[' + markdownEscape(pageNameNbsp) + '](' + urlEncode(pageLinkURL) + ')' + separator)
             elif pageName == objectGet(navPage, 'name'):
-                markdownPrint(markdownEscape(pageName) + separator)
+                markdownPrint(markdownEscape(pageNameNbsp) + separator)
             else:
-                markdownPrint(argsLink(arguments, pageName, objectNew('page', pageName)) + separator)
+                markdownPrint(argsLink(arguments, pageNameNbsp, objectNew('page', pageName)) + separator)
             endif
         endfor
     endif
