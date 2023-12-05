@@ -239,6 +239,25 @@
             "name": "PagerPageLink"
         }
     },
+    "PagerPageMarkdown": {
+        "struct": {
+            "doc": [
+                "A Markdown resource page"
+            ],
+            "members": [
+                {
+                    "doc": [
+                        "The Markdown resource URL"
+                    ],
+                    "name": "url",
+                    "type": {
+                        "builtin": "string"
+                    }
+                }
+            ],
+            "name": "PagerPageMarkdown"
+        }
+    },
     "PagerPageType": {
         "struct": {
             "doc": [
@@ -252,6 +271,15 @@
                     "name": "function",
                     "type": {
                         "user": "PagerPageFunction"
+                    }
+                },
+                {
+                    "doc": [
+                        "A markdown resource page"
+                    ],
+                    "name": "markdown",
+                    "type": {
+                        "user": "PagerPageMarkdown"
                     }
                 },
                 {

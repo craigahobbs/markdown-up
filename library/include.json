@@ -248,7 +248,8 @@
                         "- **arguments** - The [arguments model](includeModel.html#var.vName='ArgsArguments').",
                         "  Must contain a string argument named \"page\".",
                         "- **hideMenu** - Hide the menu links",
-                        "- **hideNav** - Hide the navigation links"
+                        "- **hideNav** - Hide the navigation links",
+                        "- **start** - The start page name"
                     ]
                 }
             ]

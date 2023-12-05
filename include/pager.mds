@@ -13,6 +13,7 @@ include <args.mds>
 # $arg options:   Must contain a string argument named "page".
 # $arg options: - **hideMenu** - Hide the menu links
 # $arg options: - **hideNav** - Hide the navigation links
+# $arg options: - **start** - The start page name
 async function pagerMain(pagerModel, options):
     if options == null:
         options = objectNew()
@@ -45,8 +46,9 @@ async function pagerMain(pagerModel, options):
     # Parse arguments
     arguments = objectGet(options, 'arguments')
     if arguments == null:
+        defaultPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
         arguments = arrayNew( \
-            objectNew('name', 'page', 'default', objectGet(arrayGet(navPages, 0), 'name')) \
+            objectNew('name', 'page', 'default', defaultPageName) \
         )
     endif
     args = argsParse(arguments)
@@ -70,29 +72,26 @@ async function pagerMain(pagerModel, options):
 
             # Render the menu link
             separator = if(ixPage != arrayLength(visiblePages) - 1, '&nbsp;|', '')
-            if pageTypeKey == 'function':
-                # Function page
-                pageFunction = objectGet(pageType, 'function')
-                pageFunctionHidden = objectGet(pageFunction, 'hidden')
-                if !pageFunctionHidden:
+            if pageTypeKey == 'link':
+                pageLink = objectGet(pageType, 'link')
+                pageLinkURL = objectGet(pageLink, 'url')
+                markdownPrint('[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')' + separator)
+            else:
+                hidden = pageTypeKey == 'function' && objectGet(objectGet(pageType, 'function'), 'hidden')
+                if !hidden:
                     if pageName == objectGet(navPage, 'name'):
                         markdownPrint(markdownEscape(pageName) + separator)
                     else:
                         markdownPrint(argsLink(arguments, pageName, objectNew('page', pageName)) + separator)
                     endif
                 endif
-            else:
-                # pageTypeKey == 'link'
-                pageLink = objectGet(pageType, 'link')
-                pageLinkURL = objectGet(pageLink, 'url')
-                markdownPrint('[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')' + separator)
             endif
         endfor
     endif
 
     # Render the start/next/prev buttons
     if !objectGet(options, 'hideNav') && arrayLength(navPages) > 1:
-        startPageName = objectGet(arrayGet(navPages, 0), 'name')
+        startPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
         prevPageName = if(ixNavPage - 1 >= 0, objectGet(arrayGet(navPages, ixNavPage - 1), 'name'), null)
         nextPageName = if(ixNavPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixNavPage + 1), 'name'), null)
         markdownPrint( \
@@ -107,20 +106,40 @@ async function pagerMain(pagerModel, options):
     navPageType = objectGet(navPage, 'type')
     navPageTypeKey = arrayGet(objectKeys(navPageType), 0)
     if navPageTypeKey == 'function':
-        navPageFunction = objectGet(navPageType, 'function')
-
         # Set the title
-        navPageTitle = objectGet(navPageFunction, 'title')
-        if navPageTitle != null:
-            documentSetTitle(navPageTitle)
-            markdownPrint('', '# ' + navPageTitle, '')
+        page = objectGet(navPageType, 'function')
+        pageTitle = objectGet(page, 'title')
+        if pageTitle != null:
+            documentSetTitle(pageTitle)
+            markdownPrint('', '# ' + markdownEscape(pageTitle), '')
         else:
             markdownPrint('')
         endif
 
         # Call the page function
-        navPageFn = objectGet(navPageFunction, 'function')
-        navPageFn(args)
+        pageFn = objectGet(page, 'function')
+        pageFn(args)
+    else:
+        # navPageTypeKey == 'function':
+        navPageMarkdown = objectGet(navPageType, 'markdown')
+
+        # Fetch the Markdown text
+        pageURL = objectGet(navPageMarkdown, 'url')
+        markdownText = systemFetch(pageURL, null, true)
+        if markdownText == null:
+            markdownPrint('', '**Error:** Failed to load "' + pageURL + '"')
+        else:
+            # Compute and set the page title
+            markdownModel = markdownParse(markdownText)
+            pageTitle = markdownTitle(markdownModel)
+            if pageTitle != null:
+                pageTitle = 'No Title'
+            endif
+            documentSetTitle(pageTitle)
+
+            # Render the Markdown text
+            markdownPrint('', markdownText)
+        endif
     endif
 endfunction
 
@@ -150,6 +169,9 @@ pagerTypes = schemaParse( \
     '    # A function page', \
     '    PagerPageFunction function', \
     '', \
+    '    # A markdown resource page', \
+    '    PagerPageMarkdown markdown', \
+    '', \
     '    # A navigation link', \
     '    PagerPageLink link', \
     '', \
@@ -165,6 +187,13 @@ pagerTypes = schemaParse( \
     '', \
     '    # If true, the page is hidden', \
     '    optional bool hidden', \
+    '', \
+    '', \
+    '# A Markdown resource page', \
+    'struct PagerPageMarkdown', \
+    '', \
+    '    # The Markdown resource URL', \
+    '    string url', \
     '', \
     '', \
     '# A page link', \
