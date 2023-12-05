@@ -97,9 +97,9 @@ async function pagerMain(pagerModel, options):
         nextPageName = if(ixNavPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixNavPage + 1), 'name'), null)
         markdownPrint( \
             '', \
-            '(&nbsp;' + argsLink(solarArguments, 'Start', objectNew('page', startPageName)) + '&nbsp;|', \
-            if(prevPageName != null, argsLink(solarArguments, 'Previous', objectNew('page', prevPageName)), 'Previous') + '&nbsp;|', \
-            if(nextPageName != null, argsLink(solarArguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)' \
+            '(&nbsp;' + argsLink(arguments, 'Start', objectNew('page', startPageName)) + '&nbsp;|', \
+            if(prevPageName != null, argsLink(arguments, 'Previous', objectNew('page', prevPageName)), 'Previous') + '&nbsp;|', \
+            if(nextPageName != null, argsLink(arguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)' \
         )
     endif
 
