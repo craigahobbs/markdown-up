@@ -4,6 +4,73 @@
 include <args.mds>
 
 
+# Include sentinel
+if systemGlobalGet('pagerSentinel'):
+    return
+endif
+pagerSentinel = true
+
+
+# The pager model
+pagerTypes = schemaParse( \
+    '# A pager application model', \
+    'struct Pager', \
+    '', \
+    "    # The application's pages", \
+    '    PagerPage[len > 0] pages', \
+    '', \
+    '', \
+    '# A page model', \
+    'struct PagerPage', \
+    '', \
+    '    # The page name', \
+    '    string name', \
+    '', \
+    '    # The page type', \
+    '    PagerPageType type', \
+    '', \
+    '', \
+    '# The page type', \
+    'union PagerPageType', \
+    '', \
+    '    # A function page', \
+    '    PagerPageFunction function', \
+    '', \
+    '    # A markdown resource page', \
+    '    PagerPageMarkdown markdown', \
+    '', \
+    '    # A navigation link', \
+    '    PagerPageLink link', \
+    '', \
+    '', \
+    '# A page function', \
+    'struct PagerPageFunction', \
+    '', \
+    '    # The page function', \
+    '    object function', \
+    '', \
+    '    # The page title', \
+    '    optional string title', \
+    '', \
+    '    # If true, the page is hidden', \
+    '    optional bool hidden', \
+    '', \
+    '', \
+    '# A Markdown resource page', \
+    'struct PagerPageMarkdown', \
+    '', \
+    '    # The Markdown resource URL', \
+    '    string url', \
+    '', \
+    '', \
+    '# A page link', \
+    'struct PagerPageLink', \
+    '', \
+    '    # The link URL', \
+    '    string url' \
+)
+
+
 # $function: pagerMain
 # $group: pager.mds
 # $doc: The pager application main entry point
@@ -139,63 +206,3 @@ async function pagerMain(pagerModel, options):
         endif
     endif
 endfunction
-
-
-# The pager model
-pagerTypes = schemaParse( \
-    '# A pager application model', \
-    'struct Pager', \
-    '', \
-    "    # The application's pages", \
-    '    PagerPage[len > 0] pages', \
-    '', \
-    '', \
-    '# A page model', \
-    'struct PagerPage', \
-    '', \
-    '    # The page name', \
-    '    string name', \
-    '', \
-    '    # The page type', \
-    '    PagerPageType type', \
-    '', \
-    '', \
-    '# The page type', \
-    'union PagerPageType', \
-    '', \
-    '    # A function page', \
-    '    PagerPageFunction function', \
-    '', \
-    '    # A markdown resource page', \
-    '    PagerPageMarkdown markdown', \
-    '', \
-    '    # A navigation link', \
-    '    PagerPageLink link', \
-    '', \
-    '', \
-    '# A page function', \
-    'struct PagerPageFunction', \
-    '', \
-    '    # The page function', \
-    '    object function', \
-    '', \
-    '    # The page title', \
-    '    optional string title', \
-    '', \
-    '    # If true, the page is hidden', \
-    '    optional bool hidden', \
-    '', \
-    '', \
-    '# A Markdown resource page', \
-    'struct PagerPageMarkdown', \
-    '', \
-    '    # The Markdown resource URL', \
-    '    string url', \
-    '', \
-    '', \
-    '# A page link', \
-    'struct PagerPageLink', \
-    '', \
-    '    # The link URL', \
-    '    string url' \
-)
