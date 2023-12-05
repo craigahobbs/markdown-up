@@ -126,5 +126,155 @@
                 }
             ]
         }
+    },
+    "Pager": {
+        "struct": {
+            "doc": [
+                "A pager application model"
+            ],
+            "members": [
+                {
+                    "attr": {
+                        "lenGT": 0
+                    },
+                    "doc": [
+                        "The application's pages"
+                    ],
+                    "name": "pages",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "user": "PagerPage"
+                            }
+                        }
+                    }
+                }
+            ],
+            "name": "Pager"
+        }
+    },
+    "PagerPage": {
+        "struct": {
+            "doc": [
+                "A page model"
+            ],
+            "members": [
+                {
+                    "doc": [
+                        "The page name"
+                    ],
+                    "name": "name",
+                    "type": {
+                        "builtin": "string"
+                    }
+                },
+                {
+                    "doc": [
+                        "The page type"
+                    ],
+                    "name": "type",
+                    "type": {
+                        "user": "PagerPageType"
+                    }
+                }
+            ],
+            "name": "PagerPage"
+        }
+    },
+    "PagerPageFunction": {
+        "struct": {
+            "doc": [
+                "A page function"
+            ],
+            "members": [
+                {
+                    "doc": [
+                        "The page function"
+                    ],
+                    "name": "function",
+                    "type": {
+                        "builtin": "object"
+                    }
+                },
+                {
+                    "doc": [
+                        "The page title"
+                    ],
+                    "name": "title",
+                    "optional": true,
+                    "type": {
+                        "builtin": "string"
+                    }
+                },
+                {
+                    "doc": [
+                        "If true, the page is hidden"
+                    ],
+                    "name": "hidden",
+                    "optional": true,
+                    "type": {
+                        "builtin": "bool"
+                    }
+                }
+            ],
+            "name": "PagerPageFunction"
+        }
+    },
+    "PagerPageLink": {
+        "struct": {
+            "doc": [
+                "A page link"
+            ],
+            "members": [
+                {
+                    "doc": [
+                        "The link name"
+                    ],
+                    "name": "name",
+                    "type": {
+                        "builtin": "string"
+                    }
+                },
+                {
+                    "doc": [
+                        "The link URL"
+                    ],
+                    "name": "url",
+                    "type": {
+                        "builtin": "string"
+                    }
+                }
+            ],
+            "name": "PagerPageLink"
+        }
+    },
+    "PagerPageType": {
+        "struct": {
+            "doc": [
+                "The page type"
+            ],
+            "members": [
+                {
+                    "doc": [
+                        "A function page"
+                    ],
+                    "name": "function",
+                    "type": {
+                        "user": "PagerPageFunction"
+                    }
+                },
+                {
+                    "doc": [
+                        "A navigation link"
+                    ],
+                    "name": "link",
+                    "type": {
+                        "user": "PagerPageLink"
+                    }
+                }
+            ],
+            "name": "PagerPageType",
+            "union": true
+        }
     }
 }

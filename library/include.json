@@ -229,6 +229,27 @@
             ]
         },
         {
+            "name": "pagerMain",
+            "group": "pager.mds",
+            "doc": [
+                "The pager application main entry point"
+            ],
+            "args": [
+                {
+                    "name": "pagerModel",
+                    "doc": [
+                        "The [pager model](includeModel.html#var.vName='Pager')"
+                    ]
+                },
+                {
+                    "name": "arguments",
+                    "doc": [
+                        "Optional (default is null). The [arguments model](includeModel.html#var.vName='ArgsArguments')."
+                    ]
+                }
+            ]
+        },
+        {
             "name": "unittestDeepEqual",
             "group": "unittest.mds",
             "doc": [
