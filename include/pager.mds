@@ -132,7 +132,7 @@ async function pagerMain(pagerModel, options):
             # Compute and set the page title
             markdownModel = markdownParse(markdownText)
             pageTitle = markdownTitle(markdownModel)
-            if pageTitle != null:
+            if pageTitle == null:
                 pageTitle = 'No Title'
             endif
             documentSetTitle(pageTitle)
