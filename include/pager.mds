@@ -33,7 +33,8 @@ async function pagerMain(pagerModel, options):
         pageTypeKey = arrayGet(objectKeys(pageType), 0)
 
         # Visible page?
-        if !objectGet(page, 'hidden'):
+        hidden = pageTypeKey == 'function' && objectGet(objectGet(pageType, 'function'), 'hidden')
+        if !hidden:
             arrayPush(visiblePages, page)
         endif
 
@@ -76,15 +77,10 @@ async function pagerMain(pagerModel, options):
                 pageLink = objectGet(pageType, 'link')
                 pageLinkURL = objectGet(pageLink, 'url')
                 markdownPrint('[' + markdownEscape(pageName) + '](' + urlEncode(pageLinkURL) + ')' + separator)
+            elif pageName == objectGet(navPage, 'name'):
+                markdownPrint(markdownEscape(pageName) + separator)
             else:
-                hidden = pageTypeKey == 'function' && objectGet(objectGet(pageType, 'function'), 'hidden')
-                if !hidden:
-                    if pageName == objectGet(navPage, 'name'):
-                        markdownPrint(markdownEscape(pageName) + separator)
-                    else:
-                        markdownPrint(argsLink(arguments, pageName, objectNew('page', pageName)) + separator)
-                    endif
-                endif
+                markdownPrint(argsLink(arguments, pageName, objectNew('page', pageName)) + separator)
             endif
         endfor
     endif
