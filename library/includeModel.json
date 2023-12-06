@@ -170,6 +170,16 @@
                 },
                 {
                     "doc": [
+                        "If true, the page is hidden"
+                    ],
+                    "name": "hidden",
+                    "optional": true,
+                    "type": {
+                        "builtin": "bool"
+                    }
+                },
+                {
+                    "doc": [
                         "The page type"
                     ],
                     "name": "type",
@@ -204,16 +214,6 @@
                     "optional": true,
                     "type": {
                         "builtin": "string"
-                    }
-                },
-                {
-                    "doc": [
-                        "If true, the page is hidden"
-                    ],
-                    "name": "hidden",
-                    "optional": true,
-                    "type": {
-                        "builtin": "bool"
                     }
                 }
             ],
