@@ -255,6 +255,24 @@
             ]
         },
         {
+            "name": "pagerValidate",
+            "group": "pager.mds",
+            "doc": [
+                "Validate a pager model"
+            ],
+            "args": [
+                {
+                    "name": "pagerModel",
+                    "doc": [
+                        "The [pager model](includeModel.html#var.vName='Pager')"
+                    ]
+                }
+            ],
+            "return": [
+                "The validated [pager model](includeModel.html#var.vName='Pager') or null if validation fails"
+            ]
+        },
+        {
             "name": "unittestDeepEqual",
             "group": "unittest.mds",
             "doc": [

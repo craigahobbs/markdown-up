@@ -350,9 +350,7 @@ async function testPagerNoPages():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('[Link1](page1.html)&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Link2](page2.html)')), \
-            arrayNew('markdownPrint', arrayNew('')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page')) \
         ) \
     )
 endfunction
@@ -373,8 +371,55 @@ async function testPagerNoLinks():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page')) \
         ) \
     )
 endfunction
 unittestRunTestAsync('testPagerNoLinks')
+
+
+async function testPagerInvalidPagerModel():
+    unittestMockAll()
+
+    pagerModel = objectNew( \
+        'pages', arrayNew( \
+            objectNew('name', 'Page1') \
+        ) \
+    )
+    pagerMain(pagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew() \
+    )
+endfunction
+unittestRunTestAsync('testPagerInvalidPagerModel')
+
+
+async function testPagerInvalidArgumentsModel():
+    unittestMockAll()
+
+    arguments = arrayNew(objectNew())
+    pagerMain(testPagerModel, objectNew('arguments', arguments))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew() \
+    )
+endfunction
+unittestRunTestAsync('testPagerInvalidArgumentsModel')
+
+
+async function testPagerInvalidStart():
+    unittestMockAll()
+
+    pagerMain(testPagerModel, objectNew('start', 'Unknown'))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page"Unknown"')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerInvalidStart')
