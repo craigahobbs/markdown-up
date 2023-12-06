@@ -71,6 +71,16 @@ pagerTypes = schemaParse( \
 )
 
 
+# $function: pagerValidate
+# $group: pager.mds
+# $doc: Validate a pager model
+# $arg pagerModel: The [pager model](includeModel.html#var.vName='Pager')
+# $return: The validated [pager model](includeModel.html#var.vName='Pager') or null if validation fails
+function pagerValidate(pagerModel):
+    return schemaValidate(pagerTypes, 'Pager', pagerModel)
+endfunction
+
+
 # $function: pagerMain
 # $group: pager.mds
 # $doc: The pager application main entry point
@@ -87,7 +97,7 @@ async function pagerMain(pagerModel, options):
     endif
 
     # Validate the pager model
-    pagerModel = schemaValidate(pagerTypes, 'Pager', pagerModel)
+    pagerModel = pagerValidate(pagerModel)
     if pagerModel == null:
         return
     endif
@@ -110,12 +120,14 @@ async function pagerMain(pagerModel, options):
     endfor
 
     # Parse arguments
-    arguments = argsValidate(objectGet(options, 'arguments'))
-    startPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
-    if arguments == null:
-        arguments = arrayNew( \
-            objectNew('name', 'page', 'default', startPageName) \
-        )
+    startPageName = objectGet(options, 'start', if(arrayLength(navPages), objectGet(arrayGet(navPages, 0), 'name'), null))
+    if objectHas(options, 'arguments'):
+        arguments = argsValidate(objectGet(options, 'arguments'))
+        if arguments == null:
+            return
+        endif
+    else:
+        arguments = arrayNew(objectNew('name', 'page', 'default', startPageName))
     endif
     args = argsParse(arguments)
 
@@ -130,6 +142,10 @@ async function pagerMain(pagerModel, options):
             startPage = page
         endif
     endfor
+    if startPage == null:
+        systemLogDebug('MarkdownUp - pager.mds: Unknown start page' + if(startPageName != null, '"' + startPageName + '"', ''))
+        return
+    endif
     if curPage == null:
         curPage = startPage
     endif
