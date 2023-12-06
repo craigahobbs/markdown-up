@@ -111,22 +111,28 @@ async function pagerMain(pagerModel, options):
 
     # Parse arguments
     arguments = argsValidate(objectGet(options, 'arguments'))
+    startPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
     if arguments == null:
-        defaultPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
         arguments = arrayNew( \
-            objectNew('name', 'page', 'default', defaultPageName) \
+            objectNew('name', 'page', 'default', startPageName) \
         )
     endif
     args = argsParse(arguments)
 
     # Determine the current page
-    curPage = objectGet(navPages, 0)
+    curPage = null
+    startPage = null
     for page in pages:
         if objectGet(page, 'name') == objectGet(args, 'page'):
             curPage = page
-            break
+        endif
+        if objectGet(page, 'name') == startPageName:
+            startPage = page
         endif
     endfor
+    if curPage == null:
+        curPage = startPage
+    endif
 
     # Determine the current page's navigable index, if any
     ixCurPage = -1
@@ -156,21 +162,21 @@ async function pagerMain(pagerModel, options):
                 markdownPrint(argsLink(arguments, pageNameNbsp, objectNew('page', pageName)) + separator)
             endif
         endfor
+        markdownPrint('')
     endif
 
     # Render the start/next/prev buttons
     if !objectGet(options, 'hideNav') && arrayLength(navPages) > 1 && ixCurPage != -1:
-        startPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
         if startPageName == objectGet(curPage, 'name'):
             startPageName = null
         endif
         prevPageName = if(ixCurPage != -1 && ixCurPage - 1 >= 0, objectGet(arrayGet(navPages, ixCurPage - 1), 'name'), null)
         nextPageName = if(ixCurPage != -1 && ixCurPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixCurPage + 1), 'name'), null)
         markdownPrint( \
-            '', \
             '(&nbsp;' + if(startPageName != null, argsLink(arguments, 'Start', objectNew('page', startPageName)), 'Start') + '&nbsp;|', \
             if(prevPageName != null, argsLink(arguments, 'Previous', objectNew('page', prevPageName)), 'Previous') + '&nbsp;|', \
-            if(nextPageName != null, argsLink(arguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)' \
+            if(nextPageName != null, argsLink(arguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)', \
+            '' \
         )
     endif
 
@@ -182,9 +188,7 @@ async function pagerMain(pagerModel, options):
         title = objectGet(objectGet(curPageType, 'function'), 'title')
         if title != null:
             documentSetTitle(title)
-            markdownPrint('', '# ' + markdownEscape(title), '')
-        else:
-            markdownPrint('')
+            markdownPrint('# ' + markdownEscape(title), '')
         endif
 
         # Call the page function
