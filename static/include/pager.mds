@@ -26,6 +26,9 @@ pagerTypes = schemaParse( \
     '    # The page name', \
     '    string name', \
     '', \
+    '    # If true, the page is hidden', \
+    '    optional bool hidden', \
+    '', \
     '    # The page type', \
     '    PagerPageType type', \
     '', \
@@ -51,9 +54,6 @@ pagerTypes = schemaParse( \
     '', \
     '    # The page title', \
     '    optional string title', \
-    '', \
-    '    # If true, the page is hidden', \
-    '    optional bool hidden', \
     '', \
     '', \
     '# A Markdown resource page', \
@@ -93,26 +93,24 @@ async function pagerMain(pagerModel, options):
     endif
 
     # Compute the visible and navigable pages
+    pages = objectGet(pagerModel, 'pages')
     visiblePages = arrayNew()
     navPages = arrayNew()
-    for page in objectGet(pagerModel, 'pages'):
-        pageType = objectGet(page, 'type')
-        pageTypeKey = arrayGet(objectKeys(pageType), 0)
-
+    for page in pages:
         # Visible page?
-        hidden = pageTypeKey == 'function' && objectGet(objectGet(pageType, 'function'), 'hidden')
-        if !hidden:
+        if !objectGet(page, 'hidden'):
             arrayPush(visiblePages, page)
-        endif
 
-        # Navigable page?
-        if pageTypeKey != 'link':
-            arrayPush(navPages, page)
+            # Navigable page?
+            pageTypeKey = arrayGet(objectKeys(objectGet(page, 'type')), 0)
+            if pageTypeKey != 'link':
+                arrayPush(navPages, page)
+            endif
         endif
     endfor
 
     # Parse arguments
-    arguments = objectGet(options, 'arguments')
+    arguments = argsValidate(objectGet(options, 'arguments'))
     if arguments == null:
         defaultPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
         arguments = arrayNew( \
@@ -121,15 +119,23 @@ async function pagerMain(pagerModel, options):
     endif
     args = argsParse(arguments)
 
-    # Determine the selected page
-    ixNavPage = 0
-    for page, ixPage in navPages:
+    # Determine the current page
+    curPage = objectGet(navPages, 0)
+    for page in pages:
         if objectGet(page, 'name') == objectGet(args, 'page'):
-            ixNavPage = ixPage
+            curPage = page
             break
         endif
     endfor
-    navPage = arrayGet(navPages, ixNavPage)
+
+    # Determine the current page's navigable index, if any
+    ixCurPage = -1
+    for navPage, ixNavPage in navPages:
+        if objectGet(navPage, 'name') == objectGet(curPage, 'name'):
+            ixCurPage = ixNavPage
+            break
+        endif
+    endfor
 
     # Render the menu
     if !objectGet(options, 'hideMenu'):
@@ -142,10 +148,9 @@ async function pagerMain(pagerModel, options):
             pageNameNbsp = stringReplace(pageName, ' ', '&nbsp;')
             separator = if(ixPage != arrayLength(visiblePages) - 1, '&nbsp;|', '')
             if pageTypeKey == 'link':
-                pageLink = objectGet(pageType, 'link')
-                pageLinkURL = objectGet(pageLink, 'url')
+                pageLinkURL = objectGet(objectGet(pageType, 'link'), 'url')
                 markdownPrint('[' + markdownEscape(pageNameNbsp) + '](' + urlEncode(pageLinkURL) + ')' + separator)
-            elif pageName == objectGet(navPage, 'name'):
+            elif pageName == objectGet(curPage, 'name'):
                 markdownPrint(markdownEscape(pageNameNbsp) + separator)
             else:
                 markdownPrint(argsLink(arguments, pageNameNbsp, objectNew('page', pageName)) + separator)
@@ -154,52 +159,51 @@ async function pagerMain(pagerModel, options):
     endif
 
     # Render the start/next/prev buttons
-    if !objectGet(options, 'hideNav') && arrayLength(navPages) > 1:
+    if !objectGet(options, 'hideNav') && arrayLength(navPages) > 1 && ixCurPage != -1:
         startPageName = objectGet(options, 'start', objectGet(arrayGet(navPages, 0), 'name'))
-        prevPageName = if(ixNavPage - 1 >= 0, objectGet(arrayGet(navPages, ixNavPage - 1), 'name'), null)
-        nextPageName = if(ixNavPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixNavPage + 1), 'name'), null)
+        if startPageName == objectGet(curPage, 'name'):
+            startPageName = null
+        endif
+        prevPageName = if(ixCurPage != -1 && ixCurPage - 1 >= 0, objectGet(arrayGet(navPages, ixCurPage - 1), 'name'), null)
+        nextPageName = if(ixCurPage != -1 && ixCurPage + 1 < arrayLength(navPages), objectGet(arrayGet(navPages, ixCurPage + 1), 'name'), null)
         markdownPrint( \
             '', \
-            '(&nbsp;' + argsLink(arguments, 'Start', objectNew('page', startPageName)) + '&nbsp;|', \
+            '(&nbsp;' + if(startPageName != null, argsLink(arguments, 'Start', objectNew('page', startPageName)), 'Start') + '&nbsp;|', \
             if(prevPageName != null, argsLink(arguments, 'Previous', objectNew('page', prevPageName)), 'Previous') + '&nbsp;|', \
             if(nextPageName != null, argsLink(arguments, 'Next', objectNew('page', nextPageName)), 'Next') + '&nbsp;)' \
         )
     endif
 
     # Function page?
-    navPageType = objectGet(navPage, 'type')
-    navPageTypeKey = arrayGet(objectKeys(navPageType), 0)
-    if navPageTypeKey == 'function':
+    curPageType = objectGet(curPage, 'type')
+    curPageTypeKey = arrayGet(objectKeys(curPageType), 0)
+    if curPageTypeKey == 'function':
         # Set the title
-        page = objectGet(navPageType, 'function')
-        pageTitle = objectGet(page, 'title')
-        if pageTitle != null:
-            documentSetTitle(pageTitle)
-            markdownPrint('', '# ' + markdownEscape(pageTitle), '')
+        title = objectGet(objectGet(curPageType, 'function'), 'title')
+        if title != null:
+            documentSetTitle(title)
+            markdownPrint('', '# ' + markdownEscape(title), '')
         else:
             markdownPrint('')
         endif
 
         # Call the page function
-        pageFn = objectGet(page, 'function')
+        pageFn = objectGet(objectGet(curPageType, 'function'), 'function')
         pageFn(args)
-    else:
-        # navPageTypeKey == 'function':
-        navPageMarkdown = objectGet(navPageType, 'markdown')
-
+    elif curPageTypeKey == 'markdown':
         # Fetch the Markdown text
-        pageURL = objectGet(navPageMarkdown, 'url')
-        markdownText = systemFetch(pageURL, null, true)
+        url = objectGet(objectGet(curPageType, 'markdown'), 'url')
+        markdownText = systemFetch(url, null, true)
         if markdownText == null:
             markdownPrint('', '**Error:** Failed to load "' + pageURL + '"')
         else:
             # Compute and set the page title
             markdownModel = markdownParse(markdownText)
-            pageTitle = markdownTitle(markdownModel)
-            if pageTitle == null:
-                pageTitle = 'No Title'
+            title = markdownTitle(markdownModel)
+            if title == null:
+                title = 'No Title'
             endif
-            documentSetTitle(pageTitle)
+            documentSetTitle(title)
 
             # Render the Markdown text
             markdownPrint('', markdownText)

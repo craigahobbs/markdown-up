@@ -6,11 +6,13 @@ include '../pager.mds'
 
 # Test page function
 function testPagerModel_page2():
+    markdownPrint('This is page 2')
 endfunction
 
 
 # Test page function #2
 function testPagerModel_page4():
+    markdownPrint('This is page 4')
 endfunction
 
 
@@ -23,8 +25,8 @@ testPagerModel = objectNew( \
             'function', testPagerModel_page2, 'title', 'Page 2'))), \
         objectNew('name', 'Page3', 'type', objectNew('link', objectNew( \
             'url', '#url=other.md'))), \
-        objectNew('name', 'Page4', 'type', objectNew('function', objectNew( \
-            'function', testPagerModel_page4, 'title', 'Page 4', 'hidden', true))) \
+        objectNew('name', 'Page4', 'hidden', true, 'type', objectNew('function', objectNew( \
+            'function', testPagerModel_page4))) \
     ) \
 )
 
@@ -57,7 +59,7 @@ async function testPagerNoArguments():
             arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
             arrayNew('markdownPrint', arrayNew( \
                 '', \
-                '(&nbsp;[Start](#var=)&nbsp;|', \
+                '(&nbsp;Start&nbsp;|', \
                 'Previous&nbsp;|', \
                 "[Next](#var.vPage='Page2')&nbsp;)" \
             )), \
@@ -73,15 +75,10 @@ unittestRunTestAsync('testPagerNoArguments')
 
 
 async function testPagerArguments():
-    unittestMockAll(objectNew( \
-        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
-        'markdownTitle', arrayNew('The Title'), \
-        'systemFetch', objectNew( \
-            'README.md', 'Hello!' \
-        ) \
-    ))
+    unittestMockAll()
 
     # Set argument Globals
+    systemGlobalSet('vPage', 'Page2')
     systemGlobalSet('vName', 'testName')
 
     arguments = argsValidate(arrayNew( \
@@ -93,24 +90,48 @@ async function testPagerArguments():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('Page&nbsp;1&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2'&var.vName='testName')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vName='testName')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
             arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
             arrayNew('markdownPrint', arrayNew( \
                 '', \
                 "(&nbsp;[Start](#var.vName='testName')&nbsp;|", \
-                'Previous&nbsp;|', \
-                "[Next](#var.vPage='Page2'&var.vName='testName')&nbsp;)" \
+                "[Previous](#var.vName='testName')&nbsp;|", \
+                'Next&nbsp;)' \
             )), \
-            arrayNew('systemFetch', arrayNew('README.md', null, true)), \
-            arrayNew('markdownParse', arrayNew('Hello!')), \
-            arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
-            arrayNew('documentSetTitle', arrayNew('The Title')), \
-            arrayNew('markdownPrint', arrayNew('', 'Hello!')) \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('', '# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
         ) \
     )
 
     # Clear argument globals
+    systemGlobalSet('vPage', null)
     systemGlobalSet('vName', null)
 endfunction
 unittestRunTestAsync('testPagerArguments')
+
+
+async function testPagerHidden():
+    unittestMockAll()
+
+    # Set argument Globals
+    systemGlobalSet('vPage', 'Page4')
+
+    pagerMain(testPagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var=)&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew('This is page 4')) \
+        ) \
+    )
+
+    # Clear argument globals
+    systemGlobalSet('vPage', null)
+endfunction
+unittestRunTestAsync('testPagerHidden')
