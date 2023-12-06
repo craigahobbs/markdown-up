@@ -199,7 +199,7 @@ async function pagerMain(pagerModel, options):
         url = objectGet(objectGet(curPageType, 'markdown'), 'url')
         markdownText = systemFetch(url, null, true)
         if markdownText == null:
-            markdownPrint('', '**Error:** Failed to load "' + pageURL + '"')
+            markdownPrint('**Error:** Failed to load "' + url + '"')
         else:
             # Compute and set the page title
             markdownModel = markdownParse(markdownText)

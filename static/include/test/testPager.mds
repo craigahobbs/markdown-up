@@ -75,6 +75,32 @@ endfunction
 unittestRunTestAsync('testPagerMarkdown')
 
 
+async function testPagerMarkdownNotFound():
+    unittestMockAll()
+
+    pagerMain(testPagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew('Page&nbsp;1&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                '(&nbsp;Start&nbsp;|', \
+                'Previous&nbsp;|', \
+                "[Next](#var.vPage='Page2')&nbsp;)", \
+                '' \
+            )), \
+            arrayNew('systemFetch', arrayNew('README.md', null, true)), \
+            arrayNew('markdownPrint', arrayNew('**Error:** Failed to load "README.md"')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerMarkdownNotFound')
+
+
 async function testPagerFunction():
     unittestMockAll()
 
@@ -286,3 +312,69 @@ async function testPagerHideNav():
     )
 endfunction
 unittestRunTestAsync('testPagerHideNav')
+
+
+async function testPagerSinglePage():
+    unittestMockAll()
+
+    pagerModel = objectNew( \
+        'pages', arrayNew( \
+            objectNew('name', 'Page2', 'type', objectNew('function', objectNew('function', testPagerModel_page2))) \
+        ) \
+    )
+    pagerMain(pagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew('Page2')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerSinglePage')
+
+
+async function testPagerNoPages():
+    unittestMockAll()
+
+    pagerModel = objectNew( \
+        'pages', arrayNew( \
+            objectNew('name', 'Link1', 'type', objectNew('link', objectNew('url', 'page1.html'))), \
+            objectNew('name', 'Link2', 'type', objectNew('link', objectNew('url', 'page2.html'))) \
+        ) \
+    )
+    pagerMain(pagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew('[Link1](page1.html)&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew('[Link2](page2.html)')), \
+            arrayNew('markdownPrint', arrayNew('')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerNoPages')
+
+
+async function testPagerNoLinks():
+    unittestMockAll()
+
+    pagerModel = objectNew( \
+        'pages', arrayNew( \
+            objectNew('name', 'Page2', 'hidden', true, 'type', objectNew('function', objectNew('function', testPagerModel_page2))), \
+            objectNew('name', 'Page4', 'hidden', true, 'type', objectNew('function', objectNew('function', testPagerModel_page4))) \
+        ) \
+    )
+    pagerMain(pagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew('')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerNoLinks')
