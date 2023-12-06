@@ -40,7 +40,7 @@ endfunction
 unittestRunTestAsync('testPagerSentinel')
 
 
-async function testPagerNoArguments():
+async function testPagerMarkdown():
     unittestMockAll(objectNew( \
         'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
         'markdownTitle', arrayNew('The Title'), \
@@ -57,11 +57,12 @@ async function testPagerNoArguments():
             arrayNew('markdownPrint', arrayNew('Page&nbsp;1&nbsp;|')), \
             arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
             arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
             arrayNew('markdownPrint', arrayNew( \
-                '', \
                 '(&nbsp;Start&nbsp;|', \
                 'Previous&nbsp;|', \
-                "[Next](#var.vPage='Page2')&nbsp;)" \
+                "[Next](#var.vPage='Page2')&nbsp;)", \
+                '' \
             )), \
             arrayNew('systemFetch', arrayNew('README.md', null, true)), \
             arrayNew('markdownParse', arrayNew('Hello!')), \
@@ -71,13 +72,143 @@ async function testPagerNoArguments():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerNoArguments')
+unittestRunTestAsync('testPagerMarkdown')
+
+
+async function testPagerFunction():
+    unittestMockAll()
+
+    pagerMain(testPagerModel, objectNew('start', 'Page2'))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|", \
+                "[Previous](#var.vPage='Page%201')&nbsp;|", \
+                'Next&nbsp;)', \
+                '' \
+            )), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerFunction')
+
+
+async function testPagerLink():
+    unittestMockAll()
+
+    pagerMain(testPagerModel, objectNew('start', 'Page3'))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerLink')
+
+
+async function testPagerHidden():
+    unittestMockAll()
+
+    pagerMain(testPagerModel, objectNew('start', 'Page4'))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew('This is page 4')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerHidden')
+
+
+async function testPagerArg():
+    unittestMockAll()
+
+    # Set argument globals
+    systemGlobalSet('vPage', 'Page2')
+
+    pagerMain(testPagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var=)&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;[Start](#var=)&nbsp;|", \
+                "[Previous](#var=)&nbsp;|", \
+                'Next&nbsp;)', \
+                '' \
+            )), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
+        ) \
+    )
+
+    # Clear argument globals
+    systemGlobalSet('vPage', null)
+endfunction
+unittestRunTestAsync('testPagerArg')
+
+
+async function testPagerArgUnknown():
+    unittestMockAll()
+
+    # Set argument globals
+    systemGlobalSet('vPage', 'Unknown')
+
+    pagerMain(testPagerModel, objectNew('start', 'Page2'))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|", \
+                "[Previous](#var.vPage='Page%201')&nbsp;|", \
+                'Next&nbsp;)', \
+                '' \
+            )), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
+        ) \
+    )
+
+    # Clear argument globals
+    systemGlobalSet('vPage', null)
+endfunction
+unittestRunTestAsync('testPagerArgUnknown')
 
 
 async function testPagerArguments():
     unittestMockAll()
 
-    # Set argument Globals
+    # Set argument globals
     systemGlobalSet('vPage', 'Page2')
     systemGlobalSet('vName', 'testName')
 
@@ -93,14 +224,15 @@ async function testPagerArguments():
             arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vName='testName')&nbsp;|")), \
             arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
             arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
             arrayNew('markdownPrint', arrayNew( \
-                '', \
                 "(&nbsp;[Start](#var.vName='testName')&nbsp;|", \
                 "[Previous](#var.vName='testName')&nbsp;|", \
-                'Next&nbsp;)' \
+                'Next&nbsp;)', \
+                '' \
             )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
-            arrayNew('markdownPrint', arrayNew('', '# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
             arrayNew('markdownPrint', arrayNew('This is page 2')) \
         ) \
     )
@@ -112,26 +244,45 @@ endfunction
 unittestRunTestAsync('testPagerArguments')
 
 
-async function testPagerHidden():
+async function testPagerHideMenu():
     unittestMockAll()
 
-    # Set argument Globals
-    systemGlobalSet('vPage', 'Page4')
-
-    pagerMain(testPagerModel)
+    pagerMain(testPagerModel, objectNew('start', 'Page2', 'hideMenu', true))
 
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var=)&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
-            arrayNew('markdownPrint', arrayNew('This is page 4')) \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|", \
+                "[Previous](#var.vPage='Page%201')&nbsp;|", \
+                'Next&nbsp;)', \
+                '' \
+            )), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
         ) \
     )
-
-    # Clear argument globals
-    systemGlobalSet('vPage', null)
 endfunction
-unittestRunTestAsync('testPagerHidden')
+unittestRunTestAsync('testPagerHideMenu')
+
+
+async function testPagerHideNav():
+    unittestMockAll()
+
+    pagerMain(testPagerModel, objectNew('start', 'Page2', 'hideNav', true))
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
+            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
+            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
+            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')) \
+        ) \
+    )
+endfunction
+unittestRunTestAsync('testPagerHideNav')
