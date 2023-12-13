@@ -40,19 +40,20 @@
             'markdownText': `\
 ~~~ markdown-script
 include 'https://craigahobbs.github.io/bare-script/library/app.mds'
+
 bareDocMain( \\
-    arrayNew( \\
-        'include.json' \\
-    ), \\
+    'include.json', \\
     'The MarkdownUp Include Library', \\
     arrayNew( \\
         arrayNew('BareScript', 'https://craigahobbs.github.io/bare-script/language/'), \\
         arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
     ), \\
     objectNew( \\
-        'markdownUp.bare', 'content/markdownUp.md', \
-        'unittest.mds', 'content/unittest.md', \
-        'unittestMock.mds', 'content/unittestMock.md' \
+        'args.mds', 'content/args.md', \\
+        'markdownUp.bare', 'content/markdownUp.md', \\
+        'pager.mds', 'content/pager.md', \\
+        'unittest.mds', 'content/unittest.md', \\
+        'unittestMock.mds', 'content/unittestMock.md' \\
     ) \\
 )
 ~~~
