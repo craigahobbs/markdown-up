@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0 (2023-12-14)
+
+- [bfba3d0](https://github.com/craigahobbs/markdown-up/commit/bfba3d0) - move view state to hash parameters
+
 ## 2.3.6 (2023-11-20)
 
 - [268f7b7](https://github.com/craigahobbs/markdown-up/commit/268f7b7) - add "_top" header id
