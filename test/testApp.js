@@ -326,13 +326,13 @@ test('MarkdownUp, run and render', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#';
-    window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
+    window.location.hash = '#view=help';
     const app = new MarkdownUp(window, {'menu': false});
     await app.run();
     assert.equal(window.document.title, 'MarkdownUp');
     assert(window.document.body.innerHTML.startsWith(
-        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
+        '<div id="view=help&amp;_top" style="display=none; position: absolute; top: 0;"></div>' +
+            '<h1 id="view=help&amp;type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
@@ -340,14 +340,15 @@ test('MarkdownUp, run and render', async () => {
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
-    window.location.hash = '#';
+    window.location.hash = '#view=help';
     window.localStorage.setItem('MarkdownUp', '{"darkMode": 1, "fontSize": 14, "lineHeight": 1.4}');
-    window.sessionStorage.setItem('MarkdownUp', '{"view": "help"}');
+    window.sessionStorage.setItem('MarkdownUp', '{}');
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render(true);
     assert.equal(window.document.title, 'MarkdownUp');
     assert(window.document.body.innerHTML.startsWith(
-        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="type_MarkdownUp">struct MarkdownUp</h1>'
+        '<div id="view=help&amp;_top" style="display=none; position: absolute; top: 0;"></div>' +
+            '<h1 id="view=help&amp;type_MarkdownUp">struct MarkdownUp</h1>'
     ));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '1'],
@@ -423,9 +424,9 @@ test('MarkdownUp, render menu view toggle', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': '# Hello\n\nHello!'});
     await app.render();
-    assert.equal(window.document.title, '');
+    assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
@@ -437,20 +438,37 @@ test('MarkdownUp, render menu view toggle', async () => {
 
     // Click the Markdown menu button and wait for the render
     let [, , , markdownButton] = window.document.getElementsByTagName('div');
+    window.document.title = '';
     window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
-    assert(window.document.body.innerHTML.endsWith('<div class="markdown">Hello!</div>'));
+    assert.equal(window.location.hash, '#view=markdown');
+    assert.equal(window.document.title, '');
+    assert.equal(window.document.body.innerHTML, '');
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
-    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"view":"markdown"}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    await app.render();
+    assert.equal(window.document.title, 'Hello');
+    assert(window.document.body.innerHTML.endsWith('<div class="markdown"># Hello\n\nHello!</div>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button again
     [, , , markdownButton] = window.document.getElementsByTagName('div');
+    window.document.title = '';
+    window.document.body.innerHTML = '';
     markdownButton.click();
     await sleep(0);
+    assert.equal(window.location.hash, '');
+    assert.equal(window.document.title, '');
+    assert.equal(window.document.body.innerHTML, '');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+    await app.render();
+    assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
-    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
 
@@ -936,11 +954,11 @@ elementModelRender(objectNew( \
 test('MarkdownUp.main, help', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window);
-    app.updateParams(null, null, '{"view": "help"}');
+    app.updateParams('view=help', null, null);
     const result = deleteElementCallbacks(await app.main());
     assert.deepEqual(
         result.elements[1][0][0],
-        {'html': 'h1', 'attr': {'id': 'type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
+        {'html': 'h1', 'attr': {'id': 'view=help&type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
     );
     result.elements[1] = '<helpElements>';
     assert.deepEqual(
@@ -953,7 +971,7 @@ test('MarkdownUp.main, help', async () => {
                         menuBurgerElements(),
                         null
                     ],
-                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                    {'html': 'div', 'attr': {'id': 'view=help&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 '<helpElements>'
             ]
@@ -1330,7 +1348,7 @@ test('MarkdownUp.main, no menu', async () => {
 test('MarkdownUp.main, menu cycle and toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('', '{"fontSize": 18}', '{"menu": 1, "view": "markdown"}');
+    app.updateParams('view=markdown', '{"fontSize": 18}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
@@ -1341,7 +1359,7 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
                         menuBurgerElements(),
                         menuElements({'viewMarkdown': true})
                     ],
-                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                    {'html': 'div', 'attr': {'id': 'view=markdown&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
@@ -1353,7 +1371,7 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
 test('MarkdownUp.main, markdown', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('', null, '{"view": "markdown"}');
+    app.updateParams('view=markdown', null, null);
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
@@ -1364,7 +1382,7 @@ test('MarkdownUp.main, markdown', async () => {
                         menuBurgerElements(),
                         null
                     ],
-                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                    {'html': 'div', 'attr': {'id': 'view=markdown&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
                 {'html': 'div', 'attr': {'class': 'markdown'}, 'elem': {'text': 'Hello'}}
             ]
