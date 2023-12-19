@@ -127,6 +127,7 @@ function dataTable(data, model):
     headerFields = headerFields + '|'
 
     # Output the table header
+    systemLog('')
     systemLog(headerSeparator)
     systemLog(headerFields)
     systemLog(headerSeparator)

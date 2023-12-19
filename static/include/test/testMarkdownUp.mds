@@ -52,6 +52,7 @@ function testMarkdownUp_dataTable():
     data = arrayNew(objectNew('A', 1.495, 'B', 2))
     unittestEqual(dataTable(data), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew('+======+===+')), \
         arrayNew('systemLog', arrayNew('| A    | B |')), \
         arrayNew('systemLog', arrayNew('+======+===+')), \
@@ -71,6 +72,7 @@ function testMarkdownUp_dataTable_fields():
     )
     unittestEqual(dataTable(data, model), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew('+===+===+')), \
         arrayNew('systemLog', arrayNew('| A | C |')), \
         arrayNew('systemLog', arrayNew('+===+===+')), \
@@ -90,6 +92,7 @@ function testMarkdownUp_dataTable_precision():
     )
     unittestEqual(dataTable(data, model), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew('+=====+=====+')), \
         arrayNew('systemLog', arrayNew('| A   | B   |')), \
         arrayNew('systemLog', arrayNew('+=====+=====+')), \
@@ -105,6 +108,7 @@ function testMarkdownUp_dataTable_datetime():
     data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
     unittestEqual(dataTable(data), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew('+==========================+')), \
         arrayNew('systemLog', arrayNew('| A                        |')), \
         arrayNew('systemLog', arrayNew('+==========================+')), \
@@ -121,6 +125,7 @@ function testMarkdownUp_dataTable_datetime_precision():
     model = objectNew('datetime', 'day')
     unittestEqual(dataTable(data, model), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew('+============+')), \
         arrayNew('systemLog', arrayNew('| A          |')), \
         arrayNew('systemLog', arrayNew('+============+')), \
@@ -147,6 +152,7 @@ function testMarkdownUp_dataTable_formats():
     )
     unittestEqual(dataTable(data, model), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
         arrayNew('systemLog', arrayNew("|    A     |        B | CCCCCCCCCC |")), \
         arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
