@@ -29,9 +29,9 @@
         "schema-markdown-doc": "~1.6"
     },
     "devDependencies": {
-        "c8": "~8.0",
+        "c8": "~9.1",
         "eslint": "~8.56",
         "jsdoc": "~4.0",
-        "jsdom": "~23.0"
+        "jsdom": "~24.0"
     }
 }
