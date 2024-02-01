@@ -360,7 +360,7 @@ endfunction
 
 function markdownUp_markdownPrintHelper(lines):
     for line in lines:
-        if arrayLength(line) != null:
+        if systemType(line) == 'array':
             markdownUp_markdownPrintHelper(line)
         else:
             systemLog(line)
