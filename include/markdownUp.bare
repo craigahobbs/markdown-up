@@ -330,24 +330,24 @@ endfunction
 
 
 function markdownEscape(text):
-    return stringReplace(text, markdownUp_markdownEscapeRegex, '\\$1')
+    return regexReplace(markdownUp_markdownEscapeRegex, text, '\\$1')
 endfunction
 
-markdownUp_markdownEscapeRegex = regexNew('([\\\\[\\]()<>"\'*_~`#=+|-])', 'g')
+markdownUp_markdownEscapeRegex = regexNew('([\\\\[\\]()<>"\'*_~`#=+|-])')
 
 
 function markdownHeaderId(text):
     result = stringLower(text)
-    result = stringReplace(result, markdownUp_markdownHeaderId_start, '')
-    result = stringReplace(result, markdownUp_markdownHeaderId_end, '')
-    result = stringReplace(result, markdownUp_markdownHeaderId_remove, '')
-    return stringReplace(result, markdownUp_markdownHeaderId_dash, '-')
+    result = regexReplace(markdownUp_markdownHeaderId_start, result, '')
+    result = regexReplace(markdownUp_markdownHeaderId_end, result, '')
+    result = regexReplace(markdownUp_markdownHeaderId_remove, result, '')
+    return regexReplace(markdownUp_markdownHeaderId_dash, result, '-')
 endfunction
 
-markdownUp_markdownHeaderId_start = regexNew('^[^a-z0-9]+', 'g')
-markdownUp_markdownHeaderId_end = regexNew('[^a-z0-9]+$', 'g')
-markdownUp_markdownHeaderId_remove = regexNew('[\'"]', 'g')
-markdownUp_markdownHeaderId_dash = regexNew('[^a-z0-9]+', 'g')
+markdownUp_markdownHeaderId_start = regexNew('^[^a-z0-9]+')
+markdownUp_markdownHeaderId_end = regexNew('[^a-z0-9]+$')
+markdownUp_markdownHeaderId_remove = regexNew('[\'"]')
+markdownUp_markdownHeaderId_dash = regexNew('[^a-z0-9]+')
 
 
 function markdownParse():

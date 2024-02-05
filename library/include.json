@@ -342,7 +342,7 @@
                         "- **documentInputValue** - map of id to return value",
                         "- **markdownParse** - array of return values",
                         "- **markdownTitle** - array of return values",
-                        "- **systemFetch** - map of URL to return value"
+                        "- **systemFetch** - map of URL to response text"
                     ]
                 }
             ]
