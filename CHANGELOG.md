@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1 (2024-02-05)
+
+- [3046f2e](https://github.com/craigahobbs/markdown-up/commit/3046f2e) - bare-script 2.3
+
 ## 2.4.0 (2023-12-14)
 
 - [bfba3d0](https://github.com/craigahobbs/markdown-up/commit/bfba3d0) - move view state to hash parameters
