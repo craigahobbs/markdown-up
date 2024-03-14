@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0 (2024-03-14)
+
+- [78c2479](https://github.com/craigahobbs/markdown-up/commit/78c2479) - bare-script 3.0
+
+  See the [BareScript 3.0 changelog](https://github.com/craigahobbs/bare-script/blob/main/CHANGELOG.md#300-2024-03-11)
+  for more details on breaking changes. If your application is affected by these changes, my apologies - please drop
+  me a note so I know you're out there. :)
+
 ## 2.4.1 (2024-02-05)
 
 - [3046f2e](https://github.com/craigahobbs/markdown-up/commit/3046f2e) - bare-script 2.3
