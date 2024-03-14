@@ -93,13 +93,11 @@ function markdownPartElements(part, options, usedHeaderIds) {
  * This is the asynchronous form of the [markdownElements function]{@link module:lib/elements.markdownElements}.
  * Use this form of the function if you have one or more asynchronous code block functions.
  *
- * @async
  * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
  * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The Markdown's [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
-// eslint-disable-next-line require-await
-export async function markdownElementsAsync(markdown, options = null) {
+export function markdownElementsAsync(markdown, options = null) {
     const usedHeaderIds = (options !== null && 'usedHeaderIds' in options ? options.usedHeaderIds : new Set());
     return markdownPartsElementsAsync(markdown.parts, options, usedHeaderIds);
 }
@@ -108,7 +106,6 @@ export async function markdownElementsAsync(markdown, options = null) {
 async function markdownPartsElementsAsync(parts, options, usedHeaderIds) {
     const elements = [];
     for (const part of parts) {
-        // eslint-disable-next-line no-await-in-loop
         elements.push(await markdownPartElementsAsync(part, options, usedHeaderIds));
     }
     return elements;
@@ -123,7 +120,6 @@ async function markdownPartElementsAsync(part, options, usedHeaderIds) {
         const {items} = part.list;
         const itemElements = [];
         for (const item of items) {
-            // eslint-disable-next-line no-await-in-loop
             itemElements.push(await markdownPartsElementsAsync(item.parts, options, usedHeaderIds));
         }
         return markdownListPartElements(part, itemElements.map((elem) => ({'html': 'li', 'elem': elem})));
