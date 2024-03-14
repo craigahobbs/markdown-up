@@ -53,7 +53,7 @@ function testFormsTextElements_onEnter():
                 'type', 'text', \
                 'value', 'Hello' \
             ), \
-            'callback', objectNew(), \
+            'callback', objectNew('keyup', null), \
             'html', 'input' \
         ) \
     )
@@ -82,7 +82,7 @@ function testFormsLinkButtonElements():
             'html', 'a', \
             'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
             'elem', objectNew('text', 'Hello'), \
-            'callback', objectNew() \
+            'callback', objectNew('click', null) \
         ) \
     )
     unittestEqual(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)

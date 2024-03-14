@@ -15,7 +15,7 @@ async function markdownUpIndex():
 
     # Fetch the index files/directories/parent API
     index_url = 'markdown_up_index' + if(path != null, '?path=' + urlEncodeComponent(path), '')
-    index = systemFetch(index_url)
+    index = jsonParse(systemFetch(index_url))
 
     # Set the document title
     title = 'MarkdownUp - ' + objectGet(index, 'path')

@@ -106,7 +106,7 @@ function testArgsParseAll():
         objectNew( \
             'print', true, \
             'begin', datetimeNew(2023, 10, 1), \
-            'end', datetimeNewUTC(2023, 11, 1, 12), \
+            'end', datetimeISOParse(vEnd), \
             'count', 5, \
             'number', 3.14, \
             'name', 'test', \
@@ -285,18 +285,20 @@ unittestRunTest('testArgsURLObjectSome')
 
 
 function testArgsURLObjectAll():
+    endDatetime = datetimeNew(2023, 11, 1, 12)
+    endURL = urlEncodeComponent(datetimeISOFormat(endDatetime))
     unittestMockAll()
     unittestEqual( \
         argsURL(testArgsArguments, objectNew( \
             'print', 1, \
             'begin', datetimeNew(2023, 10, 1), \
-            'end', datetimeNewUTC(2023, 11, 1, 12), \
+            'end', endDatetime, \
             'count', 5, \
             'number', 3.14, \
             'name', 'test', \
             'url', 'test.json' \
         )), \
-        "#var.vPrint=true&var.vBegin='2023-10-01'&var.vEnd='2023-11-01T12%3A00%3A00.000Z'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
+        "#var.vPrint=true&var.vBegin='2023-10-01'&var.vEnd='" + endURL + "'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
@@ -349,17 +351,19 @@ unittestRunTest('testArgsURLObjectDefaultDate')
 
 
 function testArgsURLObjectDefaultDatetime():
+    endDatetime = datetimeNew(2023, 11, 6, 12)
+    endURL = urlEncodeComponent(datetimeISOFormat(endDatetime))
     arguments = arrayNew( \
-        objectNew('name', 'end', 'type', 'datetime', 'default', datetimeNewUTC(2023, 11, 7, 12)) \
+        objectNew('name', 'end', 'type', 'datetime', 'default', datetimeNew(2023, 11, 7, 12)) \
     )
     unittestMockAll()
     unittestEqual( \
-        argsURL(arguments, objectNew('end', datetimeNewUTC(2023, 11, 7, 12))), \
+        argsURL(arguments, objectNew('end', datetimeNew(2023, 11, 7, 12))), \
         '#var=' \
     )
     unittestEqual( \
-        argsURL(arguments, objectNew('end', datetimeNewUTC(2023, 11, 6, 12))), \
-        "#var.vEnd='2023-11-06T12%3A00%3A00.000Z'" \
+        argsURL(arguments, objectNew('end', endDatetime)), \
+        "#var.vEnd='" + endURL + "'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
@@ -420,13 +424,15 @@ unittestRunTest('testArgsURLObjectInvalidDate')
 
 
 function testArgsURLObjectInvalidDate2():
+    beginDatetime = datetimeNew(2023, 11, 1, 0, 0, 15)
+    beginStr = datetimeISOFormat(beginDatetime)
     unittestMockAll()
     unittestEqual( \
-        argsURL(testArgsArguments, objectNew('begin', datetimeNewUTC(2023, 11, 1, 0, 0, 15))), \
+        argsURL(testArgsArguments, objectNew('begin', beginDatetime)), \
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T00:00:15.000Z" for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "' + beginStr + '" for URL argument "vBegin"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDate2')
@@ -487,10 +493,11 @@ function testArgsURLGlobalAll():
     systemGlobalSet('vName', 'test')
     systemGlobalSet('vURL', 'test.json')
 
+    endURL = urlEncodeComponent(datetimeISOFormat(datetimeISOParse(vEnd)))
     unittestMockAll()
     unittestEqual( \
         argsURL(testArgsArguments, objectNew()), \
-        "#var.vBegin='2023-10-01'&var.vEnd='2023-11-01T12%3A00%3A00.000Z'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
+        "#var.vBegin='2023-10-01'&var.vEnd='" + endURL + "'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 
@@ -832,11 +839,13 @@ unittestRunTest('testArgsHelp')
 
 
 function testArgsHelpDefault():
+    endDefault = datetimeNew(2023, 11, 1, 12)
+    endDefaultStr = "'" + stringNew(endDefault) + "'"
     unittestMockAll()
     argsHelp(arrayNew( \
         objectNew('name', 'print', 'type', 'bool', 'default', true), \
         objectNew('name', 'begin', 'type', 'date', 'default', datetimeNew(2023, 11, 1)), \
-        objectNew('name', 'end', 'type', 'datetime', 'default', datetimeNewUTC(2023, 11, 1, 12)), \
+        objectNew('name', 'end', 'type', 'datetime', 'default', endDefault), \
         objectNew('name', 'count', 'type', 'int', 'default', 3), \
         objectNew('name', 'number', 'type', 'float', 'default', 2.72), \
         objectNew('name', 'name', 'default', 'test'), \
@@ -845,13 +854,13 @@ function testArgsHelpDefault():
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('dataTable', arrayNew( \
             arrayNew( \
-                objectNew('Default', 'true',                       'Description', '', 'Explicit', '', 'Type', 'bool',     'Variable', 'vPrint'), \
-                objectNew('Default', "'2023-11-01'",               'Description', '', 'Explicit', '', 'Type', 'date',     'Variable', 'vBegin'), \
-                objectNew('Default', "'2023-11-01T12:00:00.000Z'", 'Description', '', 'Explicit', '', 'Type', 'datetime', 'Variable', 'vEnd'), \
-                objectNew('Default', '3',                          'Description', '', 'Explicit', '', 'Type', 'int',      'Variable', 'vCount'), \
-                objectNew('Default', '2.72',                       'Description', '', 'Explicit', '', 'Type', 'float',    'Variable', 'vNumber'), \
-                objectNew('Default', "'test'",                     'Description', '', 'Explicit', '', 'Type', 'string',   'Variable', 'vName'), \
-                objectNew('Default', "'test.json'",                'Description', '', 'Explicit', '', 'Type', 'string',   'Variable', 'vURL') \
+                objectNew('Default', 'true',         'Description', '', 'Explicit', '', 'Type', 'bool',     'Variable', 'vPrint'), \
+                objectNew('Default', "'2023-11-01'", 'Description', '', 'Explicit', '', 'Type', 'date',     'Variable', 'vBegin'), \
+                objectNew('Default', endDefaultStr,  'Description', '', 'Explicit', '', 'Type', 'datetime', 'Variable', 'vEnd'), \
+                objectNew('Default', '3',            'Description', '', 'Explicit', '', 'Type', 'int',      'Variable', 'vCount'), \
+                objectNew('Default', '2.72',         'Description', '', 'Explicit', '', 'Type', 'float',    'Variable', 'vNumber'), \
+                objectNew('Default', "'test'",       'Description', '', 'Explicit', '', 'Type', 'string',   'Variable', 'vName'), \
+                objectNew('Default', "'test.json'",  'Description', '', 'Explicit', '', 'Type', 'string',   'Variable', 'vURL') \
             ), \
             objectNew('fields', arrayNew('Variable', 'Type', 'Default')) \
         )) \

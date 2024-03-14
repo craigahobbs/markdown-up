@@ -105,15 +105,16 @@ unittestRunTest('testMarkdownUp_dataTable_precision')
 
 function testMarkdownUp_dataTable_datetime():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', datetimeNewUTC(2023, 9, 25)))
+    dt = datetimeNew(2023, 9, 25)
+    data = arrayNew(objectNew('A', dt))
     unittestEqual(dataTable(data), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+==========================+')), \
-        arrayNew('systemLog', arrayNew('| A                        |')), \
-        arrayNew('systemLog', arrayNew('+==========================+')), \
-        arrayNew('systemLog', arrayNew('| 2023-09-25T00:00:00.000Z |')), \
-        arrayNew('systemLog', arrayNew('+==========================+')) \
+        arrayNew('systemLog', arrayNew('+===========================+')), \
+        arrayNew('systemLog', arrayNew('| A                         |')), \
+        arrayNew('systemLog', arrayNew('+===========================+')), \
+        arrayNew('systemLog', arrayNew('| ' + datetimeISOFormat(dt) + ' |')), \
+        arrayNew('systemLog', arrayNew('+===========================+')) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_datetime')

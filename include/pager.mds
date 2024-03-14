@@ -213,7 +213,7 @@ async function pagerMain(pagerModel, options):
     elif curPageTypeKey == 'markdown':
         # Fetch the Markdown text
         url = objectGet(objectGet(curPageType, 'markdown'), 'url')
-        markdownText = systemFetch(url, null, true)
+        markdownText = systemFetch(url)
         if markdownText == null:
             markdownPrint('**Error:** Failed to load "' + url + '"')
         else:

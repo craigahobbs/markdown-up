@@ -64,7 +64,7 @@ async function testPagerMarkdown():
                 "[Next](#var.vPage='Page2')&nbsp;)", \
                 '' \
             )), \
-            arrayNew('systemFetch', arrayNew('README.md', null, true)), \
+            arrayNew('systemFetch', arrayNew('README.md')), \
             arrayNew('markdownParse', arrayNew('Hello!')), \
             arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
             arrayNew('documentSetTitle', arrayNew('The Title')), \
@@ -93,7 +93,7 @@ async function testPagerMarkdownNotFound():
                 "[Next](#var.vPage='Page2')&nbsp;)", \
                 '' \
             )), \
-            arrayNew('systemFetch', arrayNew('README.md', null, true)), \
+            arrayNew('systemFetch', arrayNew('README.md')), \
             arrayNew('markdownPrint', arrayNew('**Error:** Failed to load "README.md"')) \
         ) \
     )

@@ -32,9 +32,9 @@
 /** @module lib/lineChart */
 
 import {formatValue, parameterValue, valueParameter} from './dataUtil.js';
-import {compareValues} from 'bare-script/lib/data.js';
 import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import {validateType} from 'schema-markdown/lib/schema.js';
+import {valueCompare} from 'bare-script/lib/value.js';
 
 
 // The line chart model's Schema Markdown
@@ -213,7 +213,7 @@ export function lineChartElements(data, lineChart, options = null) {
     data.sort((row1, row2) => {
         const x1 = row1[xField] ?? null;
         const x2 = row2[xField] ?? null;
-        return compareValues(x1, x2);
+        return valueCompare(x1, x2);
     });
 
     // Generate the line points - [(label, color, points), ...]
