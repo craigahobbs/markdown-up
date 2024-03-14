@@ -399,16 +399,19 @@ function unittestMock_systemFetch(data, args...):
     arrayPush(unittestMockCalls, arrayNew('systemFetch', args))
 
     # Array of URLs?
-    if systemType(url) == 'array':
+    urlType = systemType(url)
+    if urlType == 'array':
         result = arrayNew()
         for urlItem in url:
-            arrayPush(result, objectGet(data, urlItem))
+            urlActual = if(systemType(urlItem) == 'object', objectGet(urlItem, 'url'), urlItem)
+            arrayPush(result, objectGet(data, urlActual))
         endfor
         return result
     endif
 
     # Return the mocked systemFetch response
-    return objectGet(data, url)
+    urlActual = if(urlType == 'object', objectGet(url, 'url'), url)
+    return objectGet(data, urlActual)
 endfunction
 
 

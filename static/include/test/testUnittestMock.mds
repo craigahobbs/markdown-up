@@ -117,7 +117,7 @@ function testUnittestMockAll():
     unittestEqual(sessionStorageGet('key2'), null)
 
     # System
-    unittestDeepEqual(systemFetch('test.json', null, true), '{"key": "value"}')
+    unittestDeepEqual(systemFetch('test.json'), '{"key": "value"}')
     systemLog('Hello')
     systemLogDebug('Hello Debug')
 
@@ -164,7 +164,7 @@ function testUnittestMockAll():
         arrayNew('sessionStorageSet', arrayNew('key2', 'value2')), \
         arrayNew('sessionStorageRemove', arrayNew('key2')), \
         arrayNew('sessionStorageClear', arrayNew()), \
-        arrayNew('systemFetch', arrayNew('test.json', null, true)), \
+        arrayNew('systemFetch', arrayNew('test.json')), \
         arrayNew('systemLog', arrayNew('Hello')), \
         arrayNew('systemLogDebug', arrayNew('Hello Debug')), \
         arrayNew('windowSetLocation', arrayNew('test.html')), \
@@ -186,7 +186,7 @@ function testUnittestMockAll_systemFetch_array():
 
     # Call systemFetch with array of URLs
     unittestDeepEqual( \
-        systemFetch(arrayNew('test.json', 'test2.json'), null, true), \
+        systemFetch(arrayNew('test.json', objectNew('url', 'test2.json'))), \
         arrayNew( \
             '{"key": "value"}', \
             '{"key2": "value2"}' \
@@ -195,10 +195,32 @@ function testUnittestMockAll_systemFetch_array():
 
     # Reset mocks
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew(arrayNew('test.json', 'test2.json'), null, true)) \
+        arrayNew('systemFetch', arrayNew(arrayNew('test.json', objectNew('url', 'test2.json')))) \
     ))
 endfunction
 unittestRunTest('testUnittestMockAll_systemFetch_array')
+
+
+function testUnittestMockAll_systemFetch_request_model():
+    # Setup mocks
+    unittestMockAll(objectNew( \
+        'systemFetch', objectNew( \
+            'test.json', '{"key": "value"}' \
+        ) \
+    ))
+
+    # Call systemFetch with a request model
+    unittestDeepEqual( \
+        systemFetch(objectNew('url', 'test.json')), \
+        '{"key": "value"}' \
+    )
+
+    # Reset mocks
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('systemFetch', arrayNew(objectNew('url', 'test.json'))) \
+    ))
+endfunction
+unittestRunTest('testUnittestMockAll_systemFetch_request_model')
 
 
 function testUnittestMockAll_schemaElements_union():

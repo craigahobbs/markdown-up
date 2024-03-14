@@ -1191,7 +1191,7 @@ test('MarkdownUp.main, fetch script', async () => {
     const app = new MarkdownUp(window, {
         'markdownText': `\
 ~~~ markdown-script
-markdownPrint(systemFetch('README.md', null, true))
+markdownPrint(systemFetch('README.md'))
 ~~~
 `
     });

@@ -28,8 +28,8 @@ test('validateDataTable, error', () => {
 
 test('dataTableElements', () => {
     const data = [
-        {'A': 1, 'B': 'abc', 'C': new Date(Date.UTC(2022, 7, 30))},
-        {'A': 2, 'B': 'def', 'C': new Date(Date.UTC(2022, 7, 31))}
+        {'A': 1, 'B': 'abc', 'C': new Date(2022, 7, 30)},
+        {'A': 2, 'B': 'def', 'C': new Date(2022, 7, 31)}
     ];
     assert.deepEqual(dataTableElements(data), {
         'html': 'table',
@@ -202,8 +202,8 @@ test('dataTableElements, model category fields', () => {
 
 test('dataTableElements, model precision and trim', () => {
     const data = [
-        {'A': 1.25, 'B': new Date(Date.UTC(2023, 7, 1))},
-        {'A': 2.04, 'B': new Date(Date.UTC(2023, 8, 1))}
+        {'A': 1.25, 'B': new Date(2023, 7, 1)},
+        {'A': 2.04, 'B': new Date(2023, 8, 1)}
     ];
     const dataTable = validateDataTable({'precision': 1, 'datetime': 'month', 'trim': false});
     validateDataTable(dataTable);
