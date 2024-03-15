@@ -81,35 +81,49 @@ app: doc
 	done
 
     # Generate the library documentation
-	if ! $(NODE_DOCKER) npx baredoc lib/scriptLibrary.js > build/app/library/library.json; then cat build/app/library/library.json; exit 1; fi
+	$(NODE_DOCKER) npx baredoc lib/scriptLibrary.js -o build/app/library/library.json
 
     # Generate the include library documentation
-	if ! $(NODE_DOCKER) npx baredoc static/include/*.mds > build/app/library/include.json; then cat build/app/library/include.json; exit 1; fi
+	$(NODE_DOCKER) npx baredoc static/include/*.mds -o build/app/library/include.json
 
     # Generate the library model documentation
-	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL" > build/app/library/model.json
+	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
 
     # Generate the include library model documentation
-	$(NODE_DOCKER) npx bare -c "$$INCLUDE_LIBRARY_MODEL" > build/app/library/includeModel.json
+	$(NODE_DOCKER) npx bare -c "$$INCLUDE_LIBRARY_MODEL_JS" -v vTypeModelPath '"build/app/library/includeModel.json"'
 
 
 # JavaScript to generate the library model documentation
-define LIBRARY_MODEL
+define LIBRARY_MODEL_JS
+import {argv} from 'node:process';
 import {dataTableTypes} from "./lib/dataTable.js";
 import {lineChartTypes} from "./lib/lineChart.js";
+import {valueJSON} from 'bare-script/lib/value.js';
+import {writeFileSync} from 'node:fs';
+
+// Command-line arguments
+const [, typeModelPath] = argv;
+
+// Create the library type model
 const types = {...dataTableTypes, ...lineChartTypes};
-console.log(JSON.stringify(types, null, 4));
+
+// Write the library type model
+writeFileSync(typeModelPath, valueJSON(types));
 endef
-export LIBRARY_MODEL
+export LIBRARY_MODEL_JS
 
 
 # BareScript to write the include library model documentation
-define INCLUDE_LIBRARY_MODEL
+define INCLUDE_LIBRARY_MODEL_JS
 include './static/include/args.mds'
 include './static/include/pager.mds'
+
+# Create the include library type model
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)
 objectAssign(includeTypes, pagerTypes)
-systemLog(jsonStringify(includeTypes, 4))
+
+# Write the include library type model
+systemFetch(objectNew('url', vTypeModelPath, 'body', jsonStringify(includeTypes)))
 endef
-export INCLUDE_LIBRARY_MODEL
+export INCLUDE_LIBRARY_MODEL_JS
