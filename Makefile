@@ -90,7 +90,7 @@ app: doc
 	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
 
     # Generate the include library model documentation
-	$(NODE_DOCKER) npx bare -c "$$INCLUDE_LIBRARY_MODEL_JS" -v vTypeModelPath '"build/app/library/includeModel.json"'
+	$(NODE_DOCKER) node --input-type=module -e "$$INCLUDE_LIBRARY_MODEL_JS" build/app/library/includeModel.json
 
 
 # JavaScript to generate the library model documentation
@@ -115,15 +115,29 @@ export LIBRARY_MODEL_JS
 
 # BareScript to write the include library model documentation
 define INCLUDE_LIBRARY_MODEL_JS
+import {fetchReadWrite, logStdout} from 'bare-script/lib/optionsNode.js';
+import {argv} from 'node:process';
+import {executeScriptAsync} from 'bare-script/lib/runtimeAsync.js';
+import {parseScript} from 'bare-script/lib/parser.js';
+import {valueJSON} from 'bare-script/lib/value.js';
+import {writeFileSync} from 'node:fs';
+
+// Command-line arguments
+const [, typeModelPath] = argv;
+
+// Create the include library type model
+const script = parseScript(`
 include './static/include/args.mds'
 include './static/include/pager.mds'
 
-# Create the include library type model
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)
 objectAssign(includeTypes, pagerTypes)
+return includeTypes
+`);
+const includeTypes = await executeScriptAsync(script, {'fetchFn': fetchReadWrite, 'logFn': logStdout});
 
-# Write the include library type model
-systemFetch(objectNew('url', vTypeModelPath, 'body', jsonStringify(includeTypes)))
+// Write the include library type model
+writeFileSync(typeModelPath, valueJSON(includeTypes));
 endef
 export INCLUDE_LIBRARY_MODEL_JS
