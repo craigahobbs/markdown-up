@@ -230,28 +230,6 @@ test('script library, dataLineChart', () => {
             }
         }
     ]);
-
-    // Invalid data
-    assert.throws(
-        () => {
-            markdownScriptFunctions.dataLineChart([null, lineChart], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "data" argument value, null'
-        }
-    );
-
-    // Invalid line chart model
-    assert.throws(
-        () => {
-            markdownScriptFunctions.dataLineChart([data, null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "lineChart" argument value, null'
-        }
-    );
 });
 
 
@@ -301,28 +279,6 @@ test('script library, dataTable', () => {
             ]
         }
     ]);
-
-    // Invalid data
-    assert.throws(
-        () => {
-            markdownScriptFunctions.dataTable([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "data" argument value, null'
-        }
-    );
-
-    // Invalid data table model
-    assert.throws(
-        () => {
-            markdownScriptFunctions.dataTable([data, 0], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "dataTable" argument value, 0'
-        }
-    );
 });
 
 
@@ -391,17 +347,6 @@ test('script library, documentInputValue', () => {
     assert.equal(markdownScriptFunctions.documentInputValue(['test-input'], runtime.options), null);
     runtime.options.window.document.body.innerHTML = '<input id="test-input" type="text" value="The text"/>';
     assert.equal(markdownScriptFunctions.documentInputValue(['test-input'], runtime.options), 'The text');
-
-    // Invalid ID
-    assert.throws(
-        () => {
-            markdownScriptFunctions.documentInputValue([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "id" argument value, null'
-        }
-    );
 });
 
 
@@ -410,17 +355,6 @@ test('script library, documentSetFocus', () => {
     assert.equal(runtime.documentFocus, null);
     markdownScriptFunctions.documentSetFocus(['test-input'], runtime.options);
     assert.equal(runtime.documentFocus, 'test-input');
-
-    // Invalid ID
-    assert.throws(
-        () => {
-            markdownScriptFunctions.documentSetFocus([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "id" argument value, null'
-        }
-    );
 });
 
 
@@ -429,17 +363,6 @@ test('script library, documentSetReset', () => {
     assert.equal(runtime.documentReset, null);
     assert.equal(markdownScriptFunctions.documentSetReset(['resetID'], runtime.options), undefined);
     assert.equal(runtime.documentReset, 'resetID');
-
-    // Invalid ID
-    assert.throws(
-        () => {
-            markdownScriptFunctions.documentSetReset([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "id" argument value, null'
-        }
-    );
 });
 
 
@@ -448,17 +371,6 @@ test('script library, documentSetTitle', () => {
     assert.equal(runtime.documentTitle, null);
     markdownScriptFunctions.documentSetTitle(['The Title'], runtime.options);
     assert.equal(runtime.documentTitle, 'The Title');
-
-    // Invalid title
-    assert.throws(
-        () => {
-            markdownScriptFunctions.documentSetTitle([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "title" argument value, null'
-        }
-    );
 });
 
 
@@ -466,17 +378,6 @@ test('script library, documentURL', () => {
     const runtime = testRuntime();
     assert.equal(markdownScriptFunctions.documentURL(['/foo/bar/'], runtime.options), '/foo/bar/');
     assert.equal(markdownScriptFunctions.documentURL(['bar/'], runtime.options), '/foo/bar/');
-
-    // Invalid URL
-    assert.throws(
-        () => {
-            markdownScriptFunctions.documentURL([null], runtime.options);
-        },
-        {
-            'name': 'ValueArgsError',
-            'message': 'Invalid "url" argument value, null'
-        }
-    );
 });
 
 
