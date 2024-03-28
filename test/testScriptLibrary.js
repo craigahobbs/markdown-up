@@ -237,8 +237,8 @@ test('script library, dataLineChart', () => {
             markdownScriptFunctions.dataLineChart([null, lineChart], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "dataLineChart" called with invalid "data" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "data" argument value, null'
         }
     );
 
@@ -248,8 +248,8 @@ test('script library, dataLineChart', () => {
             markdownScriptFunctions.dataLineChart([data, null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "dataLineChart" called with invalid "lineChart" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "lineChart" argument value, null'
         }
     );
 });
@@ -308,8 +308,8 @@ test('script library, dataTable', () => {
             markdownScriptFunctions.dataTable([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "dataTable" called with invalid "data" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "data" argument value, null'
         }
     );
 
@@ -319,8 +319,8 @@ test('script library, dataTable', () => {
             markdownScriptFunctions.dataTable([data, 0], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "dataTable" called with invalid "dataTable" argument value, 0'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "dataTable" argument value, 0'
         }
     );
 });
@@ -398,8 +398,8 @@ test('script library, documentInputValue', () => {
             markdownScriptFunctions.documentInputValue([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "documentInputValue" called with invalid "id" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "id" argument value, null'
         }
     );
 });
@@ -417,8 +417,8 @@ test('script library, documentSetFocus', () => {
             markdownScriptFunctions.documentSetFocus([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "documentSetFocus" called with invalid "id" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "id" argument value, null'
         }
     );
 });
@@ -436,8 +436,8 @@ test('script library, documentSetReset', () => {
             markdownScriptFunctions.documentSetReset([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "documentSetReset" called with invalid "id" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "id" argument value, null'
         }
     );
 });
@@ -455,8 +455,8 @@ test('script library, documentSetTitle', () => {
             markdownScriptFunctions.documentSetTitle([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "documentSetTitle" called with invalid "title" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "title" argument value, null'
         }
     );
 });
@@ -473,8 +473,8 @@ test('script library, documentURL', () => {
             markdownScriptFunctions.documentURL([null], runtime.options);
         },
         {
-            'name': 'Error',
-            'message': 'Function "documentURL" called with invalid "url" argument value, null'
+            'name': 'ValueArgsError',
+            'message': 'Invalid "url" argument value, null'
         }
     );
 });
