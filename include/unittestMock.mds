@@ -41,6 +41,10 @@ unittestMockState = objectCopy(unittestMockStateDefault)
 # $arg data: - **markdownTitle** - array of return values
 # $arg data: - **systemFetch** - map of URL to response text
 function unittestMockAll(data):
+    if data == null:
+        data = objectNew()
+    endif
+
     # Data
     unittestMockOneGeneric('dataLineChart')
     unittestMockOneGeneric('dataTable')

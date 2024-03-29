@@ -132,7 +132,7 @@ function argsURL(arguments, args, explicit, headerText, url):
 
         # Add the URL variable, if any
         value = null
-        if objectHas(args, name):
+        if args != null && objectHas(args, name):
             value = argsValidateValue(objectGet(args, name), type, global)
         elif !(explicit || objectGet(argument, 'explicit')):
             value = argsValidateValue(systemGlobalGet(global), type, global, false)
@@ -145,11 +145,13 @@ function argsURL(arguments, args, explicit, headerText, url):
     endfor
 
     # Check for unknown arguments
-    for name in objectKeys(args):
-        if !objectHas(argNames, name):
-            systemLogDebug('MarkdownUp - args.mds: Unknown argument "' + name + '"')
-        endif
-    endfor
+    if args != null:
+        for name in objectKeys(args):
+            if !objectHas(argNames, name):
+                systemLogDebug('MarkdownUp - args.mds: Unknown argument "' + name + '"')
+            endif
+        endfor
+    endif
 
     # Create the URL
     return '#' + if(url != null, 'url=' + urlEncodeComponent(url) + '&', '') + \
