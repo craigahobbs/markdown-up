@@ -807,12 +807,49 @@ test('script library, drawOnClick callback error', async () => {
 });
 
 
-test('script library, drawOnClick drawing click', () => {
+test('script library, drawOnClick drawing click', async () => {
     const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Test click handler function
+    let clickCount = 0;
+    const clickHandler = ([px, py], options) => {
+        assert.equal(px, 5);
+        assert.equal(py, 10);
+        assert.notEqual(options, null);
+        clickCount += 1;
+    };
+
+    // Mock element
+    const elementEvents = {};
+    const element = {
+        'addEventListener': (eventType, eventCallback) => {
+            elementEvents[eventType] = eventCallback;
+        }
+    };
+
+    // Mock event
+    const event = {
+        'target': {
+            'ownerSVGElement': {
+                'getBoundingClientRect': () => ({'left': 0, 'top': 0})
+            }
+        },
+        'clientX': 5,
+        'clientY': 10
+    };
+
+    // Draw a rect and set an on-click event
     markdownScriptFunctions.drawNew([50, 50], runtime.options);
-    markdownScriptFunctions.drawOnClick([null], runtime.options);
+    markdownScriptFunctions.drawOnClick([clickHandler], runtime.options);
+
+    // Get the runtime elements
     const elements = runtime.resetElements();
     assert.equal(typeof elements[0].elem.callback, 'function');
+    elements[0].elem.callback(element);
+    assert.equal(typeof elementEvents.click, 'function');
+    assert.equal(elementEvents.click.constructor.name, 'AsyncFunction');
     delete elements[0].elem.callback;
     assert.deepEqual(elements, [
         {
@@ -824,6 +861,11 @@ test('script library, drawOnClick drawing click', () => {
             }
         }
     ]);
+
+    // Click the rect
+    await elementEvents.click(event);
+    assert.equal(clickCount, 1);
+    assert.equal(runtimeUpdateCount, 1);
 });
 
 
