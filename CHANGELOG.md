@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1 (2024-03-30)
+
+- [b5f4e1f](https://github.com/craigahobbs/markdown-up/commit/b5f4e1f) - improved script library function argument validation
+
 ## 3.0.0 (2024-03-14)
 
 - [78c2479](https://github.com/craigahobbs/markdown-up/commit/78c2479) - bare-script 3.0
