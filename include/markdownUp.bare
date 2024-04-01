@@ -50,12 +50,12 @@ function dataTable(data, model):
 
     # Determine the table fields
     fields = arrayNew()
-    modelFields = objectGet(model, 'fields')
-    modelCategories = objectGet(model, 'categories')
+    modelFields = if(model != null, objectGet(model, 'fields'))
+    modelCategories = if(model != null, objectGet(model, 'categories'))
     if modelFields != null || modelCategories != null:
         arrayExtend(fields, modelCategories)
         arrayExtend(fields, modelFields)
-    else:
+    elif arrayLength(data) > 0:
         arrayExtend(fields, objectKeys(arrayGet(data, 0)))
     endif
     if !arrayLength(fields):
@@ -63,10 +63,10 @@ function dataTable(data, model):
     endif
 
     # Get precision and formatting
-    precisionDatetime = objectGet(model, 'datetime')
-    precisionNumber = objectGet(model, 'precision', 2)
-    precisionTrim = objectGet(model, 'trim', true)
-    formats = objectGet(model, 'formats')
+    precisionDatetime = if(model != null, objectGet(model, 'datetime'))
+    precisionNumber = if(model != null, objectGet(model, 'precision', 2), 2)
+    precisionTrim = if(model != null, objectGet(model, 'trim', true), true)
+    formats = if(model != null, objectGet(model, 'formats'))
 
     # Compute the field header widths
     widths = objectNew()
@@ -88,15 +88,12 @@ function dataTable(data, model):
             valueType = systemType(value)
             if valueType == 'string':
                 valueFormat = value
-            else:
+            elif valueType == 'number':
                 valueFormat = numberToFixed(value, precisionNumber, precisionTrim)
-                if valueFormat == null:
-                    if valueType == 'datetime':
-                        valueFormat = datetimeISOFormat(value, precisionDatetime != null)
-                    else:
-                        valueFormat = stringNew(value)
-                    endif
-                endif
+            elif valueType == 'datetime':
+                valueFormat = datetimeISOFormat(value, precisionDatetime != null)
+            else:
+                valueFormat = stringNew(value)
             endif
             objectSet(rowFormat, field, valueFormat)
 
@@ -112,7 +109,8 @@ function dataTable(data, model):
     headerSeparator = ''
     for field in fields:
         width = objectGet(widths, field)
-        align = objectGet(objectGet(formats, field), 'align')
+        format = if(formats != null, objectGet(formats, field))
+        align = if(format != null, objectGet(format, 'align'))
         headerSeparator = headerSeparator + '+=' + markdownUpValueField('', width, align, '=') + '='
     endfor
     headerSeparator = headerSeparator + '+'
@@ -121,7 +119,8 @@ function dataTable(data, model):
     headerFields = ''
     for field in fields:
         width = objectGet(widths, field)
-        align = objectGet(objectGet(formats, field), 'align')
+        format = if(formats != null, objectGet(formats, field))
+        align = if(format != null, objectGet(format, 'align'))
         headerFields = headerFields + '| ' + markdownUpValueField(field, width, align, ' ') + ' '
     endfor
     headerFields = headerFields + '|'
@@ -137,7 +136,8 @@ function dataTable(data, model):
         line = ''
         for field in fields:
             width = objectGet(widths, field)
-            align = objectGet(objectGet(formats, field), 'align')
+            format = if(formats != null, objectGet(formats, field))
+            align = if(format != null, objectGet(format, 'align'))
             line = line + '| ' + markdownUpValueField(objectGet(row, field), width, align, ' ') + ' '
         endfor
         line = line + '|'
