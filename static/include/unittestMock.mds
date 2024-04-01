@@ -41,17 +41,13 @@ unittestMockState = objectCopy(unittestMockStateDefault)
 # $arg data: - **markdownTitle** - array of return values
 # $arg data: - **systemFetch** - map of URL to response text
 function unittestMockAll(data):
-    if data == null:
-        data = objectNew()
-    endif
-
     # Data
     unittestMockOneGeneric('dataLineChart')
     unittestMockOneGeneric('dataTable')
 
     # Document
     unittestMockOne('documentFontSize', unittestMock_documentFontSize)
-    unittestMockOne('documentInputValue', systemPartial(unittestMock_documentInputValue, objectGet(data, 'documentInputValue')))
+    unittestMockOne('documentInputValue', systemPartial(unittestMock_documentInputValue, if(data != null, objectGet(data, 'documentInputValue'))))
     unittestMockOneGeneric('documentSetFocus')
     unittestMockOneGeneric('documentSetReset')
     unittestMockOneGeneric('documentSetTitle')
@@ -91,9 +87,9 @@ function unittestMockAll(data):
     # Markdown
     unittestMockOne('markdownEscape', unittestMock_markdownEscape)
     unittestMockOne('markdownHeaderId', unittestMock_markdownHeaderId)
-    unittestMockOne('markdownParse', systemPartial(unittestMock_markdownParse, objectGet(data, 'markdownParse')))
+    unittestMockOne('markdownParse', systemPartial(unittestMock_markdownParse, if(data != null, objectGet(data, 'markdownParse'))))
     unittestMockOneGeneric('markdownPrint')
-    unittestMockOne('markdownTitle', systemPartial(unittestMock_markdownTitle, objectGet(data, 'markdownTitle')))
+    unittestMockOne('markdownTitle', systemPartial(unittestMock_markdownTitle, if(data != null, objectGet(data, 'markdownTitle'))))
 
     # Schema
     unittestMockOne('schemaElements', unittestMock_schemaElements)
@@ -105,7 +101,7 @@ function unittestMockAll(data):
     unittestMockOne('sessionStorageSet', unittestMock_sessionStorageSet)
 
     # System
-    unittestMockOne('systemFetch', systemPartial(unittestMock_systemFetch, objectGet(data, 'systemFetch')))
+    unittestMockOne('systemFetch', systemPartial(unittestMock_systemFetch, if(data != null, objectGet(data, 'systemFetch'))))
     unittestMockOneGeneric('systemLog')
     unittestMockOneGeneric('systemLogDebug')
 
@@ -183,7 +179,7 @@ function unittestMock_documentInputValue(data, args...):
     arrayPush(unittestMockCalls, arrayNew('documentInputValue', args))
 
     # Return the mocked documentInputValue response
-    return objectGet(data, id)
+    return if(data != null, objectGet(data, id))
 endfunction
 
 
@@ -317,7 +313,7 @@ function unittestMock_markdownParse(data, args...):
     arrayPush(unittestMockCalls, arrayNew('markdownParse', args))
 
     # Return the mocked markdownParse response
-    return arrayShift(data)
+    return if(data != null, arrayShift(data))
 endfunction
 
 
@@ -326,7 +322,7 @@ function unittestMock_markdownTitle(data, args...):
     arrayPush(unittestMockCalls, arrayNew('markdownTitle', args))
 
     # Return the mocked markdownTitle response
-    return arrayShift(data)
+    return if(data != null, arrayShift(data))
 endfunction
 
 
@@ -408,14 +404,14 @@ function unittestMock_systemFetch(data, args...):
         result = arrayNew()
         for urlItem in url:
             urlActual = if(systemType(urlItem) == 'object', objectGet(urlItem, 'url'), urlItem)
-            arrayPush(result, objectGet(data, urlActual))
+            arrayPush(result, if(data != null, objectGet(data, urlActual)))
         endfor
         return result
     endif
 
     # Return the mocked systemFetch response
     urlActual = if(urlType == 'object', objectGet(url, 'url'), url)
-    return objectGet(data, urlActual)
+    return if(data != null, objectGet(data, urlActual))
 endfunction
 
 
