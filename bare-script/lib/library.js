@@ -1302,8 +1302,11 @@ function regexEnsureGlobal(regex) {
             flagsCache = {};
             sourceCache[flags] = flagsCache;
         }
-        regexGlobal = new RegExp(source, `${flags}g`);
-        flagsCache[flags] = regexGlobal;
+        regexGlobal = flagsCache[flags] ?? null;
+        if (regexGlobal === null) {
+            regexGlobal = new RegExp(source, `${flags}g`);
+            flagsCache[flags] = regexGlobal;
+        }
     }
     return regexGlobal;
 }
