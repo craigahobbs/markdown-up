@@ -308,7 +308,7 @@ export class MarkdownUp {
         const urlOverride = 'url' in this.params &amp;&amp; this.params.url !== '';
         const url = urlOverride ? this.params.url : this.url;
         const scriptOptions = this.createScriptOptions(url);
-        let markdownText = null;
+        let markdownText;
         let timeBegin;
         if (this.markdownText !== null &amp;&amp; !urlOverride) {
             ({markdownText} = this);
