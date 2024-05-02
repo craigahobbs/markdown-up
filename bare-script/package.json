@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "bare-script",
-    "version": "3.0.8",
+    "version": "3.0.9",
     "description": "BareScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -31,7 +31,7 @@
     },
     "devDependencies": {
         "c8": "~9.1",
-        "eslint": "~8.57",
+        "eslint": "~9.1",
         "jsdoc": "~4.0"
     }
 }
