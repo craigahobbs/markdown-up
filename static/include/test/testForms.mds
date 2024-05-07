@@ -39,7 +39,7 @@ function testFormsTextElements_onEnterCallback():
 endfunction
 
 
-function testFormsTextElements_onEnter():
+async function testFormsTextElements_onEnter():
     systemGlobalSet('testFormsTextElements_onEnterCount', 0)
     elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallback)
     unittestDeepEqual( \
@@ -64,7 +64,41 @@ function testFormsTextElements_onEnter():
     onKeyup(13)
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
-unittestRunTest('testFormsTextElements_onEnter')
+unittestRunTestAsync('testFormsTextElements_onEnter')
+
+
+async function testFormsTextElements_onEnterCallbackAsync():
+    clickCount = systemGlobalGet('testFormsTextElements_onEnterCount')
+    systemGlobalSet('testFormsTextElements_onEnterCount', clickCount + 1)
+endfunction
+
+
+async function testFormsTextElements_onEnterAsync():
+    systemGlobalSet('testFormsTextElements_onEnterCount', 0)
+    elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallbackAsync)
+    unittestDeepEqual( \
+        elements, \
+        objectNew( \
+            'attr', objectNew( \
+                'autocomplete', 'off', \
+                'id', 'testId', \
+                'size', 30, \
+                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type', 'text', \
+                'value', 'Hello' \
+            ), \
+            'callback', objectNew('keyup', null), \
+            'html', 'input' \
+        ) \
+    )
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
+    onKeyup(10)
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
+    onKeyup(13)
+    unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
+endfunction
+unittestRunTestAsync('testFormsTextElements_onEnterAsync')
 
 
 function testFormsLinkButtonElementsCallback():

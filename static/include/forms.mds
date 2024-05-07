@@ -33,7 +33,7 @@ function formsTextElements(id, text, size, onEnter):
 endfunction
 
 
-function formsTextOnKeyup(onEnter, keyCode):
+async function formsTextOnKeyup(onEnter, keyCode):
     if keyCode == 13:
         onEnter()
     endif
