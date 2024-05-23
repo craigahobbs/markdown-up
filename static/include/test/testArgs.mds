@@ -298,7 +298,7 @@ function testArgsURLObjectAll():
             'name', 'test', \
             'url', 'test.json' \
         )), \
-        "#var.vPrint=true&var.vBegin='2023-10-01'&var.vEnd='" + endURL + "'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
+        "#var.vBegin='2023-10-01'&var.vCount=5&var.vEnd='" + endURL + "'&var.vName='test'&var.vNumber=3.14&var.vPrint=true&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
@@ -497,7 +497,7 @@ function testArgsURLGlobalAll():
     unittestMockAll()
     unittestEqual( \
         argsURL(testArgsArguments, objectNew()), \
-        "#var.vBegin='2023-10-01'&var.vEnd='" + endURL + "'&var.vCount=5&var.vNumber=3.14&var.vName='test'&var.vURL='test.json'" \
+        "#var.vBegin='2023-10-01'&var.vCount=5&var.vEnd='" + endURL + "'&var.vName='test'&var.vNumber=3.14&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 
@@ -657,7 +657,7 @@ function testArgsURLMixed():
             'print', 1, \
             'count', 5 \
         )), \
-        "#var.vPrint=true&var.vCount=5&var.vURL='test.json'" \
+        "#var.vCount=5&var.vPrint=true&var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 
@@ -745,7 +745,7 @@ function testArgsLink():
             'print', 1, \
             'name', 'test 1' \
         )), \
-        "[Link\\-1](#var.vPrint=true&var.vName='test%201'&var.vURL='test.json')" \
+        "[Link\\-1](#var.vName='test%201'&var.vPrint=true&var.vURL='test.json')" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 

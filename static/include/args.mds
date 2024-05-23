@@ -144,6 +144,9 @@ function argsURL(arguments, args, explicit, headerText, url):
         endif
     endfor
 
+    # Sort the URL variables for general consistency
+    arraySort(urlVars)
+
     # Check for unknown arguments
     if args != null:
         for name in objectKeys(args):
