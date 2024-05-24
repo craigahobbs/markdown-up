@@ -1698,6 +1698,34 @@ test('script library, sessionStorageRemove', () => {
 
 
 //
+// URL functions
+//
+
+
+test('script library, urlObjectCreate', async () => {
+    const runtime = testRuntime();
+
+    runtime.options.window.URL.createObjectURL = (blob) => {
+        createObjectURLCalls.unshift(blob);
+        return `<obj>`;
+    };
+    const createObjectURLCalls = [];
+
+    // Default content type
+    assert.equal(markdownScriptFunctions.urlObjectCreate(['The file text'], runtime.options), '<obj>');
+    let [blob] = createObjectURLCalls;
+    assert.equal(await blob.text(), 'The file text');
+    assert.equal(await blob.type, 'text/plain');
+
+    // With content type
+    assert.equal(markdownScriptFunctions.urlObjectCreate(['The file text', 'text/markdown'], runtime.options), '<obj>');
+    [blob] = createObjectURLCalls;
+    assert.equal(await blob.text(), 'The file text');
+    assert.equal(await blob.type, 'text/markdown');
+});
+
+
+//
 // Window functions
 //
 
