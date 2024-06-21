@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown-doc",
-    "version": "1.6.2",
+    "version": "1.6.3",
     "description": "Schema Markdown documentation library",
     "keywords": [
         "schema",
@@ -25,9 +25,10 @@
         "markdown-model": "~1.8"
     },
     "devDependencies": {
-        "c8": "~7.13",
+        "bare-script": "~3.0",
+        "c8": "~10.1",
         "element-model": "~1.1",
-        "eslint": "~8.40",
+        "eslint": "~9.5",
         "jsdoc": "~4.0"
     }
 }

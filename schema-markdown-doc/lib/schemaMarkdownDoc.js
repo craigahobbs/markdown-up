@@ -173,13 +173,11 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
     // Struct?
     if ('struct' in userType) {
         const {struct} = userType;
-        const members = 'members' in struct ? getStructMembers(types, struct) : null;
-        const memberAttrElem = members !== null
-            ? Object.fromEntries(members.map((member) => [member.name, attrElements(member)])) : null;
-        const hasAttr = members !== null && Object.values(memberAttrElem).some((attrElem) => attrElem !== null);
-        const memberDocElem = members !== null
-            ? Object.fromEntries(members.map(({name, doc}) => [name, markdownElementsNull(doc)])) : null;
-        const hasDoc = members !== null && Object.values(memberDocElem).some((docElem) => docElem !== null);
+        const members = getStructMembers(types, struct);
+        const memberAttrElem = Object.fromEntries(members.map((member) => [member.name, attrElements(member)]));
+        const hasAttr = Object.values(memberAttrElem).some((attrElem) => attrElem !== null);
+        const memberDocElem = Object.fromEntries(members.map(({name, doc}) => [name, markdownElementsNull(doc)]));
+        const hasDoc = Object.values(memberDocElem).some((docElem) => docElem !== null);
 
         // Return the struct documentation element model
         const isUnion = ('union' in struct && struct.union);
@@ -195,7 +193,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
             markdownElementsNull(struct.doc),
 
             // Struct members
-            !members || !members.length ? markdownElementsNull('The struct is empty.') : {'html': 'table', 'elem': [
+            !members.length ? markdownElementsNull('The struct is empty.') : {'html': 'table', 'elem': [
                 {'html': 'tr', 'elem': [
                     {'html': 'th', 'elem': {'text': 'Name'}},
                     {'html': 'th', 'elem': {'text': 'Type'}},
