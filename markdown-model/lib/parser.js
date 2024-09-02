@@ -171,7 +171,7 @@ export function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
 
     // Process markdown text line by line
     let emptyLine = true;
-    let emptyLinePrev = true;
+    let emptyLinePrev;
     const markdownStrings = (typeof markdown === 'string' ? [markdown] : markdown);
     for (const markdownString of markdownStrings) {
         if (markdownString === null) {

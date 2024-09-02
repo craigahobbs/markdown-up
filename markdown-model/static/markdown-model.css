@@ -155,6 +155,7 @@ ul, ol {
     margin-left: 2em;
 }
 li {
+    list-style-type: disc;
     margin-top: 0.5em;
 }
 table {
