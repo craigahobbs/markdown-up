@@ -29,7 +29,7 @@ clean:
 
 
 help:
-	@echo '            [app|run|test-include|test-launcher]'
+	@echo '            [app|run|test-include]'
 
 
 .PHONY: test-include
@@ -38,13 +38,6 @@ test-include: build/npm.build
 	$(NODE_DOCKER) npx bare -s static/include/*.bare static/include/*.mds static/include/test/*.mds
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
-
-
-.PHONY: test-launcher
-commit: test-launcher
-test-launcher: build/npm.build
-	$(NODE_DOCKER) npx bare -s static/launcher/*.mds static/launcher/test/*.mds
-	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/launcher/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
 
 
 .PHONY: app run
