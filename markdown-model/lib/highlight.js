@@ -177,6 +177,12 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
         'string': [rStringSingle, rStringDouble, '`(?:[^`\\\\]|\\\\[\\s\\S])*`']
     },
 
+    // JSON
+    'json': {
+        'literal': [rBoolean, rNumber, rNull],
+        'string': [rStringDouble]
+    },
+
     // Markdown
     'markdown': {
         'literal': [rCommentHash]
