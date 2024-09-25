@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1.0 (2024-09-25)
+
+- [18700b7](https://github.com/craigahobbs/markdown-up/commit/18700b7) - markdown-model 2.0, schema-markdown-doc 1.7
+
+- [da3dbf3](https://github.com/craigahobbs/markdown-up/commit/da3dbf3) - move index app to markdown-up-py
+
+- [e2f8789](https://github.com/craigahobbs/markdown-up/commit/e2f8789) - improved set focus after location fix
+
+- [8c6c878](https://github.com/craigahobbs/markdown-up/commit/8c6c878) - set focus after location \(to fix focus\)
+
+- [375cb20](https://github.com/craigahobbs/markdown-up/commit/375cb20) - add urlObjectCreate function
+
 ## 3.0.1 (2024-03-30)
 
 - [b5f4e1f](https://github.com/craigahobbs/markdown-up/commit/b5f4e1f) - improved script library function argument validation
