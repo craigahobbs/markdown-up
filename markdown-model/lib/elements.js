@@ -4,6 +4,7 @@
 /** @module lib/elements */
 
 import {getMarkdownParagraphText} from './parser.js';
+import {highlightElements} from './highlight.js';
 
 
 /**
@@ -80,7 +81,7 @@ function markdownPartElements(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return markdownCodeBlockPartElements(part);
+        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);
@@ -137,7 +138,7 @@ async function markdownPartElementsAsync(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return markdownCodeBlockPartElements(part);
+        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);
@@ -150,18 +151,6 @@ function markdownListPartElements(part, listItemElements) {
         'html': 'start' in list ? 'ol' : 'ul',
         'attr': 'start' in list && list.start > 1 ? {'start': `${list.start}`} : null,
         'elem': listItemElements
-    };
-}
-
-
-function markdownCodeBlockPartElements(part) {
-    const {codeBlock} = part;
-    return {
-        'html': 'pre',
-        'elem': {
-            'html': 'code',
-            'elem': codeBlock.lines.map((line) => ({'text': `${line}\n`}))
-        }
     };
 }
 

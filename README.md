@@ -69,7 +69,7 @@ parse CSV, render data tables, draw line charts, and more. For more information,
 
 For example:
 
-```
+``` markdown
 # Dynamic Markdown Example
 
 ~~~ markdown-script
@@ -117,7 +117,7 @@ following example that uses the
 [unittest.mds](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='unittest.mds')
 system library:
 
-~~~
+~~~ barescript
 include <unittest.mds>
 
 function testSanity():

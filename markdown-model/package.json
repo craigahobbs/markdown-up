@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-model",
-    "version": "1.8.7",
+    "version": "2.0.0",
     "description": "Markdown object model, parser, and renderer",
     "keywords": [
         "markdown",

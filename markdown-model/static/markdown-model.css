@@ -25,9 +25,9 @@
         calc(0 * var(--markdown-model-dark-mode) + 255 * var(--markdown-model-light-mode))
     );
     --markdown-model-color-background-pre: rgb(
-        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
-        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
-        calc(16 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode))
+        calc(32 * var(--markdown-model-dark-mode) + 239 * var(--markdown-model-light-mode)),
+        calc(35 * var(--markdown-model-dark-mode) + 243 * var(--markdown-model-light-mode)),
+        calc(39 * var(--markdown-model-dark-mode) + 244 * var(--markdown-model-light-mode))
     );
     --markdown-model-color-background-code: rgb(
         calc(80 * var(--markdown-model-dark-mode) + 230 * var(--markdown-model-light-mode)),
@@ -38,6 +38,33 @@
         calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode)),
         calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode)),
         calc(80 * var(--markdown-model-dark-mode) + 192 * var(--markdown-model-light-mode))
+    );
+
+    /* Syntax-highlighting color variables */
+    --markdown-model-color-highlight-builtin: rgb(
+        calc(230 * var(--markdown-model-dark-mode) + 193 * var(--markdown-model-light-mode)),
+        calc(192 * var(--markdown-model-dark-mode) + 132 * var(--markdown-model-light-mode)),
+        calc(123 * var(--markdown-model-dark-mode) +   1 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-highlight-comment: rgb(
+        calc( 92 * var(--markdown-model-dark-mode) + 160 * var(--markdown-model-light-mode)),
+        calc( 99 * var(--markdown-model-dark-mode) + 161 * var(--markdown-model-light-mode)),
+        calc(112 * var(--markdown-model-dark-mode) + 167 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-highlight-keyword: rgb(
+        calc(198 * var(--markdown-model-dark-mode) + 166 * var(--markdown-model-light-mode)),
+        calc(120 * var(--markdown-model-dark-mode) +  38 * var(--markdown-model-light-mode)),
+        calc(221 * var(--markdown-model-dark-mode) + 164 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-highlight-literal: rgb(
+        calc( 86 * var(--markdown-model-dark-mode) +   1 * var(--markdown-model-light-mode)),
+        calc(182 * var(--markdown-model-dark-mode) + 132 * var(--markdown-model-light-mode)),
+        calc(194 * var(--markdown-model-dark-mode) + 187 * var(--markdown-model-light-mode))
+    );
+    --markdown-model-color-highlight-string: rgb(
+        calc(152 * var(--markdown-model-dark-mode) +  80 * var(--markdown-model-light-mode)),
+        calc(195 * var(--markdown-model-dark-mode) + 161 * var(--markdown-model-light-mode)),
+        calc(121 * var(--markdown-model-dark-mode) +  79 * var(--markdown-model-light-mode))
     );
 
     /* Font size and line height variables */
@@ -117,7 +144,7 @@ blockquote {
 }
 pre {
     background-color: var(--markdown-model-color-background-pre);
-    font-family: Courier New, monospace;
+    font-family: monospace;
     font-size: 0.9rem;
     margin-top: 1em;
     margin-bottom: 1em;
