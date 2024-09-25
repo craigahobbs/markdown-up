@@ -1615,12 +1615,7 @@ test('script library, schemaElements action URLs', () => {
                         'html': 'pre',
                         'elem': {
                             'html': 'code',
-                            'elem': [
-                                {'text': '{\n'},
-                                {'text': '    "error": "<code>",\n'},
-                                {'text': '    "message": "<message>"\n'},
-                                {'text': '}\n'}
-                            ]
+                            'elem': {'text': '{\n    "error": "<code>",\n    "message": "<message>"\n}\n'}
                         }
                     },
                     {'html': 'p', 'elem': [{'text': '"message" is optional. "<code>" is one of the following values:'}]}

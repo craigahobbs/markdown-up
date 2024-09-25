@@ -24,9 +24,9 @@
     "dependencies": {
         "bare-script": "~3.0",
         "element-model": "~1.1",
-        "markdown-model": "~1.8",
+        "markdown-model": "~2.0",
         "schema-markdown": "~1.2",
-        "schema-markdown-doc": "~1.6"
+        "schema-markdown-doc": "~1.7"
     },
     "devDependencies": {
         "c8": "~10.1",
