@@ -13,6 +13,9 @@ pagerSentinel = true
 
 # The pager model
 pagerTypes = schemaParse( \
+    'group "Pager"', \
+    '', \
+    '', \
     '# A pager application model', \
     'struct Pager', \
     '', \
