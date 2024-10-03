@@ -61,6 +61,11 @@
         calc(182 * var(--markdown-model-dark-mode) + 132 * var(--markdown-model-light-mode)),
         calc(194 * var(--markdown-model-dark-mode) + 187 * var(--markdown-model-light-mode))
     );
+    --markdown-model-color-highlight-preprocessor: rgb(
+        calc( 97 * var(--markdown-model-dark-mode) +  64 * var(--markdown-model-light-mode)),
+        calc(174 * var(--markdown-model-dark-mode) + 120 * var(--markdown-model-light-mode)),
+        calc(238 * var(--markdown-model-dark-mode) + 242 * var(--markdown-model-light-mode))
+    );
     --markdown-model-color-highlight-string: rgb(
         calc(152 * var(--markdown-model-dark-mode) +  80 * var(--markdown-model-light-mode)),
         calc(195 * var(--markdown-model-dark-mode) + 161 * var(--markdown-model-light-mode)),
