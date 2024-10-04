@@ -110,13 +110,19 @@ struct Highlight
 `);
 
 
+// Helper to create a word list regular expression
+function createWordListRegex(...words) {
+    return `\\b(?:${words.map((str) => escapeMarkdownText(str)).join('|')})\\b`;
+}
+
+
 // Common regular expression source
-const rBoolean = '\\b(?:false|true)\\b';
+const rBoolean = createWordListRegex('false', 'true');
 const rCommentHash = '#[^\\n\\r]*';
 const rCommentSlashSlash = '\\/\\/[^\\n\\r]*';
 const rCommentSlashStar = '\\/\\*[\\s\\S]*?\\*\\/';
 const rNumber = '(?:\\b|[+-]?)\\d+(?:\\.\\d*)?(?:e[+-]\\d+)?\\b';
-const rNull = '\\bnull\\b';
+const rNull = createWordListRegex('null');
 const rStringSingle = "'(?:[^'\\\\]|\\\\.)*'";
 const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
@@ -169,12 +175,12 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     'c': {
         'builtin': [
             createWordListRegex(
-                'printf', 'scanf', 'malloc', 'calloc', 'realloc', 'free', 'memcpy', 'memmove', 'memset', 'strlen',
-                'strcpy', 'strncpy', 'strcat', 'strncat', 'strcmp', 'strncmp', 'strchr', 'strstr', 'fopen', 'fclose',
-                'fread', 'fwrite', 'fprintf', 'fscanf', 'sprintf', 'sscanf', 'fseek', 'ftell', 'rewind', 'feof',
-                'perror', 'exit', 'atoi', 'atof', 'abs', 'div', 'rand', 'srand', 'time', 'clock', 'qsort', 'bsearch',
-                'system', 'toupper', 'tolower', 'isalnum', 'isalpha', 'isdigit', 'islower', 'isupper', 'strtol',
-                'strtoul', 'strtod', 'strtof', 'strtoll', 'strtoull', 'snprintf', 'vsnprintf'
+                'abs', 'atof', 'atoi', 'bsearch', 'calloc', 'clock', 'div', 'exit', 'fclose', 'feof', 'fopen',
+                'fprintf', 'fread', 'free', 'fscanf', 'fseek', 'ftell', 'fwrite', 'isalnum', 'isalpha', 'isdigit',
+                'islower', 'isupper', 'malloc', 'memcpy', 'memmove', 'memset', 'perror', 'printf', 'qsort', 'rand',
+                'realloc', 'rewind', 'scanf', 'snprintf', 'sprintf', 'srand', 'sscanf', 'strcat', 'strchr', 'strcmp',
+                'strcpy', 'strlen', 'strncat', 'strncmp', 'strncpy', 'strstr', 'strtod', 'strtof', 'strtol', 'strtoll',
+                'strtoul', 'strtoull', 'system', 'time', 'tolower', 'toupper', 'vsnprintf'
             )
         ],
         'comment': [rCommentSlashSlash, rCommentSlashStar],
@@ -187,11 +193,114 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
                 '_Noreturn', '_Static_assert', '_Thread_local'
             )
         ],
-        'literal': [rBoolean, rNumber, '\\bNULL\\b'],
+        'literal': [rBoolean, rNumber, createWordListRegex('NULL')],
         'preprocessor': [
-            '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line|region|endregion)\\b'
+            '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
         ],
         'string': [rStringSingle, rStringDouble]
+    },
+
+    // cpp
+    'cpp': {
+        'builtin': [
+            createWordListRegex(
+                'accumulate', 'advance', 'algorithm', 'all_of', 'any_of', 'array', 'async', 'begin', 'bind', 'bitset',
+                'cbegin', 'cend', 'cerr', 'chrono', 'cin', 'clog', 'cmath', 'condition_variable', 'copy', 'cout',
+                'cref', 'cstdio', 'cstdlib', 'cstring', 'deque', 'distance', 'duration', 'end', 'equal_range',
+                'exception', 'fill', 'find', 'find_if', 'forward', 'function', 'future', 'get', 'initializer_list',
+                'invalid_argument', 'iostream', 'list', 'lock_guard', 'logic_error', 'lower_bound', 'make_pair',
+                'make_tuple', 'map', 'max', 'max_element', 'mem_fn', 'min', 'min_element', 'move', 'mutex', 'next',
+                'none_of', 'out_of_range', 'packaged_task', 'pair', 'prev', 'priority_queue', 'promise', 'queue',
+                'ratio', 'recursive_mutex', 'ref', 'remove', 'remove_if', 'reverse', 'runtime_error', 'set',
+                'shared_ptr', 'sort', 'stack', 'std', 'stod', 'stof', 'stoi', 'stol', 'stold', 'stoll', 'stoul',
+                'stoull', 'string', 'swap', 'system_error', 'this_thread', 'thread', 'tie', 'time_point', 'to_string',
+                'transform', 'tuple', 'unique', 'unique_lock', 'unique_ptr', 'unordered_map', 'unordered_set',
+                'upper_bound', 'vector', 'wcerr', 'wcin', 'wclog', 'wcout', 'weak_ptr'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'alignas', 'alignof', 'and', 'and_eq', 'asm', 'auto', 'bitand', 'bitor', 'bool', 'break', 'case',
+                'catch', 'char', 'char8_t', 'char16_t', 'char32_t', 'class', 'compl', 'concept', 'const', 'consteval',
+                'constexpr', 'constinit', 'const_cast', 'continue', 'co_await', 'co_return', 'co_yield', 'decltype',
+                'default', 'delete', 'do', 'double', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern',
+                'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new',
+                'noexcept', 'not', 'not_eq', 'nullptr', 'operator', 'or', 'or_eq', 'private', 'protected', 'public',
+                'reflexpr', 'register', 'reinterpret_cast', 'requires', 'return', 'short', 'signed', 'sizeof', 'static',
+                'static_assert', 'static_cast', 'struct', 'switch', 'synchronized', 'template', 'this', 'thread_local',
+                'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual',
+                'void', 'volatile', 'wchar_t', 'while', 'xor', 'xor_eq'
+            )
+        ],
+        'literal': [rBoolean, rNumber, createWordListRegex('NULL')],
+        'preprocessor': [
+            '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
+        ],
+        'string': [
+            rStringSingle,
+            rStringDouble,
+            'R"([^\\s]*)\\((?:[\\s\\S]*?)\\)\\1"' // Raw string literals
+        ]
+    },
+
+    // C#
+    'csharp': {
+        'builtin': [
+            createWordListRegex(
+                'Array', 'BitConverter', 'Boolean', 'Byte', 'Char', 'Console', 'DateTime', 'DateTimeOffset', 'Decimal',
+                'Delegate', 'Double', 'Enum', 'Exception', 'GC', 'Guid', 'Int16', 'Int32', 'Int64', 'Math', 'Object', 'Random',
+                'SByte', 'Single', 'String', 'StringBuilder', 'TimeSpan', 'UInt16', 'UInt32', 'UInt64', 'Void'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'abstract', 'add', 'alias', 'as', 'ascending', 'async', 'await', 'base', 'bool', 'break', 'byte', 'by',
+                'case', 'catch', 'char', 'checked', 'class', 'const', 'continue', 'decimal', 'default', 'delegate',
+                'descending', 'do', 'double', 'dynamic', 'else', 'enum', 'equals', 'event', 'explicit', 'extern', 'false',
+                'finally', 'fixed', 'float', 'for', 'foreach', 'from', 'get', 'global', 'goto', 'group', 'if', 'implicit',
+                'in', 'int', 'interface', 'internal', 'into', 'is', 'join', 'let', 'lock', 'long', 'namespace', 'nameof',
+                'new', 'null', 'object', 'on', 'operator', 'orderby', 'out', 'override', 'params', 'partial', 'private',
+                'protected', 'public', 'readonly', 'ref', 'remove', 'return', 'sbyte', 'sealed', 'select', 'set', 'short',
+                'sizeof', 'stackalloc', 'static', 'string', 'struct', 'switch', 'this', 'throw', 'true', 'try', 'typeof',
+                'uint', 'ulong', 'unchecked', 'unsafe', 'ushort', 'using', 'value', 'var', 'virtual', 'void', 'volatile',
+                'when', 'where', 'while', 'yield'
+            )
+        ],
+        'literal': [rBoolean, rNull, rNumber],
+        'preprocessor': [
+            '^\\s*#(?:define|elif|else|endif|error|if|line|pragma|region|endregion|undef|warning)\\b'
+        ],
+        'string': ['@"(?:[^"]|"")*"', rStringSingle, rStringDouble]
+    },
+
+    // Java
+    'java': {
+        'builtin': [
+            createWordListRegex(
+                'Appendable', 'AutoCloseable', 'Boolean', 'Byte', 'CharSequence', 'Character', 'Class', 'ClassLoader',
+                'ClassValue', 'Cloneable', 'Comparable', 'Compiler', 'Double', 'Enum', 'Float',
+                'InheritableThreadLocal', 'Integer', 'Iterable', 'Long', 'Math', 'Number', 'Object', 'Package',
+                'Process', 'ProcessBuilder', 'Readable', 'Runnable', 'Runtime', 'RuntimePermission', 'SecurityManager',
+                'Short', 'StackTraceElement', 'StrictMath', 'String', 'StringBuffer', 'StringBuilder', 'System',
+                'Thread', 'ThreadGroup', 'ThreadLocal', 'Throwable', 'Void'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue',
+                'default', 'do', 'double', 'else', 'enum', 'exports', 'extends', 'final', 'finally', 'float', 'for',
+                'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'module', 'native',
+                'new', 'open', 'opens', 'package', 'private', 'protected', 'public', 'requires', 'return', 'short',
+                'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
+                'transitive', 'try', 'uses', 'var', 'void', 'volatile', 'while'
+            )
+        ],
+        'literal': [rBoolean, rNull, rNumber],
+        'preprocessor': ['@\\w+'],
+        'string': ['"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
     },
 
     // JavaScript (ES6)
@@ -215,7 +324,7 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
                 'yield'
             )
         ],
-        'literal': [rBoolean, rNumber, rNull, '\\bundefined\\b'],
+        'literal': [rBoolean, rNumber, rNull, createWordListRegex('undefined')],
         'string': [rStringSingle, rStringDouble, '`(?:[^`\\\\]|\\\\[\\s\\S])*`']
     },
 
@@ -274,7 +383,7 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
                 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try', 'while', 'with', 'yield'
             )
         ],
-        'literal': ['\\b(?:False|True|None)\\b', rNumber],
+        'literal': [createWordListRegex('False', 'True', 'None'), rNumber],
         'string': ["'''[\\s\\S]*?'''", '"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
     },
 
@@ -306,6 +415,57 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
             )
         ],
         'string': [rStringSingle, rStringDouble]
+    },
+
+    // SQL
+    'sql': {
+        'builtin': [
+            createWordListRegex(
+                'ABS', 'ACOS', 'ASIN', 'ATAN', 'ATAN2', 'AVG', 'BIGINT', 'BINARY', 'BLOB', 'BOOLEAN', 'CAST', 'CEIL',
+                'CEILING', 'CHAR', 'COALESCE', 'CONCAT', 'COS', 'COUNT', 'CURRENT_DATE', 'CURRENT_TIME',
+                'CURRENT_TIMESTAMP', 'DATE', 'DATETIME', 'DECIMAL', 'DOUBLE', 'EXP', 'FLOAT', 'FLOOR', 'INT', 'INTEGER',
+                'LENGTH', 'LN', 'LOG', 'LOG10', 'LOWER', 'MAX', 'MIN', 'NCHAR', 'NOW', 'NUMERIC', 'PI', 'POWER', 'RAND',
+                'REAL', 'ROUND', 'SIN', 'SMALLINT', 'SQRT', 'SUM', 'TAN', 'TEXT', 'TIME', 'TIMESTAMP', 'TRIM', 'UPPER',
+                'VARCHAR',
+
+                // SQL builtins are case-insensitive so include lowercase versions
+                'abs', 'acos', 'asin', 'atan', 'atan2', 'avg', 'bigint', 'binary', 'blob', 'boolean', 'cast', 'ceil',
+                'ceiling', 'char', 'coalesce', 'concat', 'cos', 'count', 'current_date', 'current_time',
+                'current_timestamp', 'date', 'datetime', 'decimal', 'double', 'exp', 'float', 'floor', 'int', 'integer',
+                'length', 'ln', 'log', 'log10', 'lower', 'max', 'min', 'nchar', 'now', 'numeric', 'pi', 'power', 'rand',
+                'real', 'round', 'sin', 'smallint', 'sqrt', 'sum', 'tan', 'text', 'time', 'timestamp', 'trim', 'upper',
+                'varchar'
+            )
+        ],
+        'comment': ['--[^\\n\\r]*', rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'ADD', 'ALL', 'ALTER', 'AND', 'AS', 'ASC', 'BETWEEN', 'CASE', 'CHECK', 'CREATE', 'DATABASE', 'DELETE',
+                'DESC', 'DISTINCT', 'DROP', 'EXISTS', 'FROM', 'GROUP', 'HAVING', 'IN', 'INSERT', 'INTO', 'IS', 'JOIN',
+                'LIKE', 'LIMIT', 'NOT', 'NULL', 'ON', 'OR', 'ORDER', 'SELECT', 'SET', 'TABLE', 'UNION', 'UPDATE',
+                'VALUES', 'WHERE',
+
+                // SQL builtins are case-insensitive so include lowercase versions
+                'add', 'all', 'alter', 'and', 'as', 'asc', 'between', 'case', 'check', 'create', 'database', 'delete',
+                'desc', 'distinct', 'drop', 'exists', 'from', 'group', 'having', 'in', 'insert', 'into', 'is', 'join',
+                'like', 'limit', 'not', 'null', 'on', 'or', 'order', 'select', 'set', 'table', 'union', 'update',
+                'values', 'where'
+            )
+        ],
+        'literal': [createWordListRegex('FALSE', 'NULL', 'TRUE'), rNumber],
+        'string': ["'(?:[^']|'')*'"]
+    },
+
+    // XML
+    'xml': {
+        'comment': ['<!--[\\s\\S]*?-->'],
+        'literal': ['&#[0-9]+;', '&(?:amp|apos|gt|lt|quot);'],
+        'preprocessor': [
+            '<\\?.*?\\?>',
+            '<!DOCTYPE[^>]*>',
+            '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>'
+        ],
+        'string': [rStringSingle, rStringDouble]
     }
 });
 
@@ -315,6 +475,14 @@ const highlightAliases = {
     // BareScript
     'bare-script': 'barescript',
     'markdown-script': 'barescript',
+
+    // C#
+    'c#': 'csharp',
+    'cake': 'csharp',
+    'cakescript': 'csharp',
+
+    // C++
+    'c++': 'cpp',
 
     // JavaScript
     'js': 'javascript',
@@ -334,14 +502,17 @@ const highlightAliases = {
     // Shell
     'sh': 'shell',
     'bash': 'shell',
-    'zsh': 'shell'
+    'zsh': 'shell',
+
+    // SQL
+    'plsql': 'sql',
+    'tsql': 'sql',
+
+    // XML
+    'rss': 'xml',
+    'xsd': 'xml',
+    'wsdl': 'xml'
 };
-
-
-// Helper to create a word list regular expression
-function createWordListRegex(...words) {
-    return `\\b(?:${words.map((str) => escapeMarkdownText(str)).join('|')})\\b`;
-}
 
 
 // The code block language to regex object
