@@ -91,22 +91,25 @@ typedef Highlight{} HighlightMap
 struct Highlight
 
     # Built-in regular expressions
-    optional string[] builtin
+    optional string[len > 0] builtin
 
     # Comment regular expressions
-    optional string[] comment
+    optional string[len > 0] comment
 
     # Keyword regular expressions
-    optional string[] keyword
+    optional string[len > 0] keyword
 
     # Literal regular expressions
-    optional string[] literal
+    optional string[len > 0] literal
 
     # Preprocessor regular expressions
-    optional string[] preprocessor
+    optional string[len > 0] preprocessor
 
     # String regular expressions
-    optional string[] string
+    optional string[len > 0] string
+
+    # Tag regular expressions
+    optional string[len > 0] tag
 `);
 
 
@@ -237,11 +240,7 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
         'preprocessor': [
             '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
         ],
-        'string': [
-            rStringSingle,
-            rStringDouble,
-            'R"([^\\s]*)\\((?:[\\s\\S]*?)\\)\\1"' // Raw string literals
-        ]
+        'string': [rStringSingle, rStringDouble, 'R"([^\\s]*)\\((?:[\\s\\S]*?)\\)\\1"']
     },
 
     // C#
@@ -338,11 +337,15 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     'makefile': {
         'builtin': [
             createWordListRegex(
-                'abspath', 'addprefix', 'addsuffix', 'basename', 'call', 'dir', 'error', 'eval', 'file', 'filter',
-                'filter-out', 'findstring', 'firstword', 'foreach', 'if', 'join', 'lastword', 'notdir', 'origin',
-                'patsubst', 'realpath', 'shell', 'sort', 'strip', 'subst', 'suffix', 'value', 'warning', 'wildcard',
-                'word', 'wordlist', 'words'
-            )
+                'abspath', 'addprefix', 'addsuffix', 'and', 'basename', 'call', 'dir', 'error', 'eval', 'file',
+                'filter', 'filter-out', 'findstring', 'firstword', 'foreach', 'guile', 'if', 'info', 'join', 'lastword',
+                'notdir', 'or', 'origin', 'patsubst', 'realpath', 'shell', 'sort', 'strip', 'subst', 'suffix', 'value',
+                'warning', 'wildcard', 'word', 'wordlist', 'words',
+            ),
+
+            // Automatic variables
+            '\\$[@<^+?*%|]',
+            '\\$\\([@<^+?*%][DF]\\)'
         ],
         'comment': [rCommentHash],
         'keyword': [
@@ -352,14 +355,36 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
             )
         ],
         'preprocessor': [
-            '^ *\\.(?:PHONY|phony)'
+            `^ *\\.(?:${[
+                'PHONY', 'SUFFIXES', 'DEFAULT', 'PRECIOUS', 'INTERMEDIATE', 'SECONDARY', 'SECONDEXPANSION',
+                'DELETE_ON_ERROR', 'LOW_RESOLUTION_TIME', 'SILENT', 'EXPORT_ALL_VARIABLES', 'IGNORE', 'POSIX', 'MAKE',
+                'NOTPARALLEL', 'ONESHELL', 'RECIPEPREFIX',
+
+                // Makefile special target names are case-insensitive so include lowercase versions
+                'phony', 'suffixes', 'default', 'precious', 'intermediate', 'secondary', 'secondexpansion',
+                'delete_on_error', 'low_resolution_time', 'silent', 'export_all_variables', 'ignore', 'posix', 'make',
+                'notparallel', 'oneshell', 'recipeprefix'
+            ].join('|')}) *:`
         ],
-        'string': [rStringSingle, rStringDouble]
+        'string': [rStringSingle, rStringDouble],
+        'tag': ['^ *[A-Za-z0-9_\\-][A-Za-z0-9_\\-/.]* *:(?!=)']
     },
 
     // Markdown
     'markdown': {
-        'literal': [rCommentHash]
+        'preprocessor': [
+            // List bullets
+            '^\\s*[-+*]\\s',
+            '^\\s*\\d+\\.\\s'
+        ],
+        'string': [
+            // Links
+            '\\[([^\\]]+)\\]\\(([^)\\s]+)(?:\\s+"[^"]+")?\\)'
+        ],
+        'tag': [
+            // Titles
+            rCommentHash
+        ]
     },
 
     // Python
@@ -465,7 +490,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
             '<!DOCTYPE[^>]*>',
             '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>'
         ],
-        'string': [rStringSingle, rStringDouble]
+        'string': [rStringSingle, rStringDouble],
+        'tag': ['<\\/?\\s*(?:[A-Za-z_][A-Za-z0-9_.:-]*)']
     }
 });
 
