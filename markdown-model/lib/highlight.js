@@ -383,7 +383,7 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
         ],
         'tag': [
             // Titles
-            rCommentHash
+            '^\\s*#[^\\n\\r]*'
         ]
     },
 
