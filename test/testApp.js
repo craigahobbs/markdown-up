@@ -341,7 +341,7 @@ test('MarkdownUp, run and render', async () => {
     ]);
 
     window.location.hash = '#view=help';
-    window.localStorage.setItem('MarkdownUp', '{"darkMode": 1, "fontSize": 14, "lineHeight": 1.4}');
+    window.localStorage.setItem('MarkdownUp', '{"darkMode": true, "fontSize": 14, "lineHeight": 1.4}');
     window.sessionStorage.setItem('MarkdownUp', '{}');
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render(true);
@@ -472,11 +472,17 @@ test('MarkdownUp, render menu view toggle', async () => {
 });
 
 
-test('MarkdownUp, render menu dark mode toggle', async () => {
+test('MarkdownUp, render menu dark mode toggle, system light mode', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    const windowMatchMediaCalls= [];
+    window.matchMedia = (query) => {
+        windowMatchMediaCalls.push(query);
+        return {'matches': false};
+    };
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
@@ -489,24 +495,108 @@ test('MarkdownUp, render menu dark mode toggle', async () => {
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
+    assert.deepEqual(windowMatchMediaCalls, [
+        '(prefers-color-scheme: dark)'
+    ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button and wait for the render
     let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    windowMatchMediaCalls.length = 0;
     darkModeButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
-    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":1}');
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '1'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(windowMatchMediaCalls, []);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":true}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button again
     [, , , , darkModeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    windowMatchMediaCalls.length = 0;
     darkModeButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(windowMatchMediaCalls, []);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+});
+
+
+test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    const documentElementStyleSetPropertyCalls = [];
+    window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
+
+    const windowMatchMediaCalls= [];
+    window.matchMedia = (query) => {
+        windowMatchMediaCalls.push(query);
+        return {'matches': true};
+    };
+
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '1'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(windowMatchMediaCalls, [
+        '(prefers-color-scheme: dark)'
+    ]);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the dark mode menu button and wait for the render
+    let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    windowMatchMediaCalls.length = 0;
+    darkModeButton.click();
+    await sleep(0);
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '0'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(windowMatchMediaCalls, []);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":false}');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the dark mode menu button again
+    [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    window.document.body.innerHTML = '';
+    documentElementStyleSetPropertyCalls.length = 0;
+    windowMatchMediaCalls.length = 0;
+    darkModeButton.click();
+    await sleep(0);
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--markdown-model-dark-mode', '1'],
+        ['--markdown-model-font-size', '12pt'],
+        ['--markdown-model-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
@@ -1394,7 +1484,7 @@ test('MarkdownUp.main, markdown', async () => {
 test('MarkdownUp.main, darkMode', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': 'Hello'});
-    app.updateParams('', '{"darkMode": 1}', '{"menu": 1}');
+    app.updateParams('', '{"darkMode": true}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
         {
