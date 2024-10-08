@@ -69,7 +69,7 @@ struct MarkdownUp
 struct MarkdownUpLocal
 
     # If set, dark mode is enabled
-    optional int(== 1) darkMode
+    optional bool darkMode
 
     # The font size
     optional int(>= 8, &lt;= 18) fontSize
@@ -103,14 +103,14 @@ enum MarkdownUpView
  * The MarkdownUp application options
  *
  * @typedef {Object} MarkdownUpOptions
- * @property {boolean} [darkMode = false] - If true, use dark mode by default
- * @property {number} [fontSize = 12] - The font size, in points
+ * @property {?boolean} [darkMode = false] - If true, use dark mode by default
+ * @property {?number} [fontSize = 12] - The font size, in points
  * @property {?Object} [globals = null] - Global script runtime variables
- * @property {number} [lineHeight = 1.2] - The line height, in em
+ * @property {?number} [lineHeight = 1.2] - The line height, in em
  * @property {?string} [markdownText = null] - The default Markdown text
- * @property {boolean} [menu = true] - If true, show the menu
- * @property {string} [systemPrefix] - The markdown-script system include prefix
- * @property {string} [url = 'README.md'] - The default resource URL
+ * @property {?boolean} [menu = true] - If true, show the menu
+ * @property {?string} [systemPrefix] - The markdown-script system include prefix
+ * @property {?string} [url = 'README.md'] - The default resource URL
  */
 
 
@@ -129,7 +129,8 @@ export class MarkdownUp {
         this.params = null;
         this.paramsLocal = null;
         this.paramsSession = null;
-        this.darkMode = (options !== null ? options.darkMode : null) ?? false;
+        this.darkMode = (options !== null ? options.darkMode : null) ??
+            (this.window.matchMedia &amp;&amp; this.window.matchMedia('(prefers-color-scheme: dark)').matches);
         this.fontSize = (options !== null ? options.fontSize : null) ?? 12;
         this.globals = (options !== null ? options.globals : null) ?? null;
         this.lineHeight = (options !== null ? options.lineHeight : null) ?? 1.2;
@@ -545,9 +546,9 @@ export class MarkdownUp {
                             'path': 'M4,2 L20,2 L20,22 L4,22 Z',
                             'path2': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
                         }),
-                        this.menuValueToggle('darkMode', {
+                        this.menuDarkModeToggle({
                             'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
-                        }, true),
+                        }),
                         this.menuValueCycle('fontSize', this.fontSize, 2, {
                             'path': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
                             'strokeWidth': 4
@@ -572,18 +573,16 @@ export class MarkdownUp {
     }
 
 
-    menuValueToggle(valueName, icon, isLocal = false) {
-        const params = (isLocal ? this.paramsLocal : this.paramsSession);
-        icon.checked = valueName in params;
+    menuValueToggle(valueName, icon) {
+        icon.checked = valueName in this.paramsSession;
         return this.menuButton(
             () => {
-                if (valueName in params) {
-                    delete params[valueName];
+                if (valueName in this.paramsSession) {
+                    delete this.paramsSession[valueName];
                 } else {
-                    params[valueName] = 1;
+                    this.paramsSession[valueName] = 1;
                 }
-                const storage = (isLocal ? this.window.localStorage : this.window.sessionStorage);
-                storage.setItem('MarkdownUp', JSON.stringify(params));
+                this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
                 this.render(true);
             },
             icon
@@ -602,6 +601,24 @@ export class MarkdownUp {
                     params.view = viewValue;
                 }
                 this.window.location.href = `#${encodeQueryString(params)}`;
+            },
+            icon
+        );
+    }
+
+
+    menuDarkModeToggle(icon) {
+        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
+        icon.checked = isDarkMode;
+        return this.menuButton(
+            () => {
+                if (isDarkMode !== this.darkMode) {
+                    delete this.paramsLocal.darkMode;
+                } else {
+                    this.paramsLocal.darkMode = !isDarkMode;
+                }
+                this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
+                this.render(true);
             },
             icon
         );
