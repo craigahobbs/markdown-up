@@ -1234,6 +1234,76 @@ test('MarkdownUp.main, url', async () => {
 });
 
 
+test('MarkdownUp.main, code block', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchResolve = (url) => {
+        assert.equal(url, 'README.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve(`\
+# Hello
+
+~~~
+Code
+~~~
+`);
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const copyCalls = [];
+    window.navigator.clipboard = {
+        'writeText': (text) => {
+            copyCalls.push(text);
+        }
+    };
+    const app = new MarkdownUp(window);
+    app.updateParams('');
+    const mainElements = await app.main();
+    const copyCallback = mainElements.elements[1][1][0].elem.callback;
+    assert.deepEqual(
+        deleteElementCallbacks(mainElements),
+        {
+            'title': 'Hello',
+            'elements': [
+                [
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                ],
+                [
+                    {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]},
+                    [
+                        {
+                            'html': 'p',
+                            'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
+                            'elem': {'html': 'a', 'elem': {'text': 'Copy'}}
+                        },
+                        {
+                            'html': 'pre',
+                            'attr': {'style': 'margin-top: 0.25em'},
+                            'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                        }
+                    ]
+                ]
+            ]
+        }
+    );
+
+    // Test the copy callback
+    const element = {
+        'addEventListener': (event, eventFn) => {
+            assert.equal(event, 'click');
+            eventFn();
+        }
+    };
+    copyCallback(element);
+    assert.deepEqual(copyCalls, ['Code\n']);
+});
+
+
 test('MarkdownUp.main, fontSize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {'markdownText': `\

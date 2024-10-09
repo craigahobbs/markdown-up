@@ -35,7 +35,7 @@ test('script library, dataLineChart', () => {
         {'a': 2, 'b': 1}
     ];
     const lineChart = {'x': 'a', 'y': ['b']};
-    assert.deepEqual(markdownScriptFunctions.dataLineChart([data, lineChart], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.dataLineChart([data, lineChart], runtime.options), undefined);
     assert.equal(runtime.drawingWidth, 640);
     assert.equal(runtime.drawingHeight, 320);
     assert.deepEqual(runtime.resetElements(), [
@@ -239,7 +239,7 @@ test('script library, dataTable', () => {
         {'a': 1, 'b': 3},
         {'a': 2, 'b': 1}
     ];
-    assert.deepEqual(markdownScriptFunctions.dataTable([data], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.dataTable([data], runtime.options), undefined);
     assert.deepEqual(runtime.resetElements(), [
         {
             'html': 'table',
@@ -289,7 +289,7 @@ test('script library, dataTable model', () => {
         {'a': 2, 'b': 1}
     ];
     const dataTable = {'fields': ['a']};
-    assert.deepEqual(markdownScriptFunctions.dataTable([data, dataTable], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.dataTable([data, dataTable], runtime.options), undefined);
     assert.deepEqual(runtime.resetElements(), [
         {
             'html': 'table',
@@ -1611,13 +1611,17 @@ test('script library, schemaElements action URLs', () => {
                 null,
                 [
                     {'html': 'p', 'elem': [{'text': 'If an application error occurs, the response is of the form:'}]},
-                    {
-                        'html': 'pre',
-                        'elem': {
-                            'html': 'code',
-                            'elem': {'text': '{\n    "error": "<code>",\n    "message": "<message>"\n}\n'}
+                    [
+                        null,
+                        {
+                            'html': 'pre',
+                            'attr': null,
+                            'elem': {
+                                'html': 'code',
+                                'elem': {'text': '{\n    "error": "<code>",\n    "message": "<message>"\n}\n'}
+                            }
                         }
-                    },
+                    ],
                     {'html': 'p', 'elem': [{'text': '"message" is optional. "<code>" is one of the following values:'}]}
                 ],
                 {
@@ -1723,6 +1727,28 @@ test('script library, urlObjectCreate', async () => {
 //
 // Window functions
 //
+
+
+test('script library, windowClipboardRead', async () => {
+    const runtime = testRuntime();
+    runtime.options.window.navigator.clipboard = {
+        'readText': () => 'Hello!'
+    };
+    assert.equal(await markdownScriptFunctions.windowClipboardRead([], runtime.options), 'Hello!');
+});
+
+
+test('script library, windowClipboardWrite', async () => {
+    const runtime = testRuntime();
+    const writeTextCalls = [];
+    runtime.options.window.navigator.clipboard = {
+        'writeText': (text) => {
+            writeTextCalls.push(text);
+        }
+    };
+    assert.equal(await markdownScriptFunctions.windowClipboardWrite(['Hello!'], runtime.options), undefined);
+    assert.deepEqual(writeTextCalls, ['Hello!']);
+});
 
 
 test('script library, windowHeight', () => {

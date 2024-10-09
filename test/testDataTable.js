@@ -251,12 +251,23 @@ test('dataTableElements, format markdown fields', () => {
     const data = [
         {'A': '**1**', 'B': '**bold**', 'C': 5},
         {'A': '*2*', 'B': '*italic*', 'C': 6},
-        {'A': '3', 'B': '[Link](test.html)', 'C': 7}
+        {'A': '3', 'B': '[Link](test.html)', 'C': 7},
+        {'A': '4', 'B': '~~~\nCode\n~~~', 'C': 8}
     ];
-    const options = {'urlFn': (url) => `/${url}`};
+    const copyCalls = [];
+    const options = {
+        'copyFn': (text) => {
+            copyCalls.push(text);
+        },
+        'urlFn': (url) => `/${url}`
+    };
     const dataTable = validateDataTable({'categories': ['A'], 'formats': {'A': {'markdown': true}, 'B': {'markdown': true}}});
     validateDataTable(dataTable);
-    assert.deepEqual(dataTableElements(data, dataTable, options), {
+    const elements = dataTableElements(data, dataTable, options);
+    const copyElement = elements.elem[1][3].elem[1][0].elem[0][0].elem;
+    const copyCallback = copyElement.callback;
+    delete copyElement.callback;
+    assert.deepEqual(elements, {
         'html': 'table',
         'elem': [
             {
@@ -277,22 +288,12 @@ test('dataTableElements, format markdown fields', () => {
                     'elem': [
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'html': 'strong', 'elem': [{'text': '1'}]}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'html': 'strong', 'elem': [{'text': '1'}]}]}
                             ]}
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'html': 'strong', 'elem': [{'text': 'bold'}]}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'html': 'strong', 'elem': [{'text': 'bold'}]}]}
                             ]},
                             {'html': 'td', 'attr': null, 'elem': {'text': '5'}}
                         ]
@@ -303,22 +304,12 @@ test('dataTableElements, format markdown fields', () => {
                     'elem': [
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'html': 'em', 'elem': [{'text': '2'}]}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'html': 'em', 'elem': [{'text': '2'}]}]}
                             ]}
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'html': 'em', 'elem': [{'text': 'italic'}]}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'html': 'em', 'elem': [{'text': 'italic'}]}]}
                             ]},
                             {'html': 'td', 'attr': null, 'elem': {'text': '6'}}
                         ]
@@ -329,30 +320,57 @@ test('dataTableElements, format markdown fields', () => {
                     'elem': [
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'text': '3'}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'text': '3'}]}
                             ]}
                         ],
                         [
                             {'html': 'td', 'attr': null, 'elem': [
-                                {
-                                    'html': 'p',
-                                    'elem': [
-                                        {'html': 'a', 'attr': {'href': '/test.html'}, 'elem': [{'text': 'Link'}]}
-                                    ]
-                                }
+                                {'html': 'p', 'elem': [{'html': 'a', 'attr': {'href': '/test.html'}, 'elem': [{'text': 'Link'}]}]}
                             ]},
                             {'html': 'td', 'attr': null, 'elem': {'text': '7'}}
+                        ]
+                    ]
+                },
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [
+                            {'html': 'td', 'attr': null, 'elem': [
+                                {'html': 'p', 'elem': [{'text': '4'}]}
+                            ]}
+                        ],
+                        [
+                            {'html': 'td', 'attr': null, 'elem': [
+                                [
+                                    {
+                                        'html': 'p',
+                                        'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
+                                        'elem': {'html': 'a', 'elem': {'text': 'Copy'}}
+                                    },
+                                    {
+                                        'html': 'pre',
+                                        'attr': {'style': 'margin-top: 0.25em'},
+                                        'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                                    }
+                                ]
+                            ]},
+                            {'html': 'td', 'attr': null, 'elem': {'text': '8'}}
                         ]
                     ]
                 }
             ]
         ]
     });
+
+    // Test the copy callback
+    const element = {
+        'addEventListener': (event, eventFn) => {
+            assert.equal(event, 'click');
+            eventFn();
+        }
+    };
+    copyCallback(element);
+    assert.deepEqual(copyCalls, ['Code\n']);
 });
 
 
