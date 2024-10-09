@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.0 (2024-10-09)
+
+- [fb76593](https://github.com/craigahobbs/markdown-up/commit/fb76593)
+
+  - markdown-model 2.1
+  - schema-markdown-doc 1.8
+  - add windowClipboardRead and windowClipboardWrite functions
+
+- [f8cde8f](https://github.com/craigahobbs/markdown-up/commit/f8cde8f) - auto-detect dark mode
+
 ## 3.1.0 (2024-09-25)
 
 - [18700b7](https://github.com/craigahobbs/markdown-up/commit/18700b7) - markdown-model 2.0, schema-markdown-doc 1.7
