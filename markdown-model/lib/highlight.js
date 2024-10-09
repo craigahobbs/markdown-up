@@ -13,28 +13,35 @@ import {parseSchemaMarkdown} from '../../schema-markdown/lib/parser.js';
  *
  * @property {string?} language - The code block language
  * @property {string[]} lines - The code block lines
+ * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The syntax-highlighted code [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
-export function highlightElements(languageArg, lines) {
+export function highlightElements(languageArg, lines, options = null) {
     // Get the highlight regex
-    let language = (languageArg !== null ? languageArg.toLowerCase() : null);
-    let regex = null;
-    if (language !== null) {
-        regex = highlightRegex[language] ?? null;
-        if (regex === null) {
-            language = highlightAliases[language];
-            if (language !== null) {
-                regex = highlightRegex[language] ?? null;
-            }
-        }
-    }
+    const language = (languageArg !== null ? languageArg.toLowerCase() : null);
+    const regex = (language !== null ? highlightMap[language] ?? null : null);
 
     // Join the text lines
     let text = lines.map((line) => (line.endsWith('\n') ? line : `${line}\n`)).join('');
 
+    // The copy link elements
+    const copyElements = options === null || !('copyFn' in options) ? null : {
+        'html': 'p', 'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'}, 'elem': {
+            'html': 'a', 'elem': {'text': 'Copy'}, 'callback': (element) => {
+                element.addEventListener('click', () => {
+                    options.copyFn(`${lines.join('\n')}\n`);
+                }, false);
+            }
+        }
+    };
+    const preAttr = (copyElements !== null ? {'style': 'margin-top: 0.25em'} : null);
+
     // No language specified or unknown language?
     if (regex === null) {
-        return {'html': 'pre', 'elem': {'html': 'code', 'elem': {'text': text}}};
+        return [
+            copyElements,
+            {'html': 'pre', 'attr': preAttr, 'elem': {'html': 'code', 'elem': {'text': text}}}
+        ];
     }
 
     // Match the highlight spans
@@ -77,18 +84,19 @@ export function highlightElements(languageArg, lines) {
     }
 
     // Create the code block elements
-    return {'html': 'pre', 'elem': {'html': 'code', 'elem': spans}};
+    return [
+        copyElements,
+        {'html': 'pre', 'attr': preAttr, 'elem': {'html': 'code', 'elem': spans}}
+    ];
 }
 
 
 // The syntax-highlight model
 const highlightTypes = parseSchemaMarkdown(`\
-# Code block language to highlight model map
-typedef Highlight{} HighlightMap
-
-
 # Code syntax-highlighting model
 struct Highlight
+    # The language names/aliases. The first name is the preferred name.
+    string[len > 0] names
 
     # Built-in regular expressions
     optional string[len > 0] builtin
@@ -131,9 +139,10 @@ const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
 
 // The code block language to highlight model map
-const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
+const highlightModels = [
     // BareScript
-    'barescript': {
+    {
+        'names': ['barescript', 'bare-script', 'markdown-script'],
         'builtin': [
             createWordListRegex(
                 'arrayCopy', 'arrayExtend', 'arrayGet', 'arrayIndexOf', 'arrayJoin', 'arrayLastIndexOf', 'arrayLength',
@@ -175,7 +184,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // C
-    'c': {
+    {
+        'names': ['c'],
         'builtin': [
             createWordListRegex(
                 'abs', 'atof', 'atoi', 'bsearch', 'calloc', 'clock', 'div', 'exit', 'fclose', 'feof', 'fopen',
@@ -203,8 +213,9 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
         'string': [rStringSingle, rStringDouble]
     },
 
-    // cpp
-    'cpp': {
+    // C++
+    {
+        'names': ['c++', 'cpp'],
         'builtin': [
             createWordListRegex(
                 'accumulate', 'advance', 'algorithm', 'all_of', 'any_of', 'array', 'async', 'begin', 'bind', 'bitset',
@@ -244,7 +255,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // C#
-    'csharp': {
+    {
+        'names': ['c#', 'csharp', 'cake', 'cakescript'],
         'builtin': [
             createWordListRegex(
                 'Array', 'BitConverter', 'Boolean', 'Byte', 'Char', 'Console', 'DateTime', 'DateTimeOffset', 'Decimal',
@@ -275,7 +287,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // Java
-    'java': {
+    {
+        'names': ['java'],
         'builtin': [
             createWordListRegex(
                 'Appendable', 'AutoCloseable', 'Boolean', 'Byte', 'CharSequence', 'Character', 'Class', 'ClassLoader',
@@ -303,7 +316,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // JavaScript (ES6)
-    'javascript': {
+    {
+        'names': ['javascript', 'js', 'node'],
         'builtin': [
             createWordListRegex(
                 'Array', 'ArrayBuffer', 'Boolean', 'console', 'DataView', 'Date', 'decodeURI', 'decodeURIComponent',
@@ -328,13 +342,15 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // JSON
-    'json': {
+    {
+        'names': ['json'],
         'literal': [rBoolean, rNumber, rNull],
         'string': [rStringDouble]
     },
 
     // Makefile
-    'makefile': {
+    {
+        'names': ['makefile', 'make', 'mf', 'bsdmake'],
         'builtin': [
             createWordListRegex(
                 'abspath', 'addprefix', 'addsuffix', 'and', 'basename', 'call', 'dir', 'error', 'eval', 'file',
@@ -371,7 +387,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // Markdown
-    'markdown': {
+    {
+        'names': ['markdown', 'md'],
         'preprocessor': [
             // List bullets
             '^\\s*[-+*]\\s',
@@ -388,7 +405,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // Python
-    'python': {
+    {
+        'names': ['python', 'python3'],
         'builtin': [
             createWordListRegex(
                 '__import__', 'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'breakpoint', 'bytearray', 'bytes',
@@ -413,7 +431,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // Schema Markdown
-    'schema-markdown': {
+    {
+        'names': ['schema-markdown'],
         'builtin': [
             createWordListRegex('bool', 'date', 'datetime', 'float', 'int', 'object', 'string', 'uuid')
         ],
@@ -428,7 +447,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // Shell
-    'shell': {
+    {
+        'names': ['shell', 'sh', 'bash', 'zsh'],
         'builtin': [
             createWordListRegex('alias', 'declare', 'echo', 'exit', 'export', 'let', 'set', 'unset')
         ],
@@ -443,7 +463,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // SQL
-    'sql': {
+    {
+        'names': ['sql', 'plsql', 'tsql'],
         'builtin': [
             createWordListRegex(
                 'ABS', 'ACOS', 'ASIN', 'ATAN', 'ATAN2', 'AVG', 'BIGINT', 'BINARY', 'BLOB', 'BOOLEAN', 'CAST', 'CEIL',
@@ -482,7 +503,8 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
     },
 
     // XML
-    'xml': {
+    {
+        'names': ['xml', 'rss', 'xsd', 'wsdl'],
         'comment': ['<!--[\\s\\S]*?-->'],
         'literal': ['&#[0-9]+;', '&(?:amp|apos|gt|lt|quot);'],
         'preprocessor': [
@@ -493,71 +515,39 @@ const highlightLanguages = validateType(highlightTypes, 'HighlightMap', {
         'string': [rStringSingle, rStringDouble],
         'tag': ['<\\/?\\s*(?:[A-Za-z_][A-Za-z0-9_.:-]*)']
     }
-});
+];
 
 
-// The code block alias to language map
-const highlightAliases = {
-    // BareScript
-    'bare-script': 'barescript',
-    'markdown-script': 'barescript',
+// Helper to translate an array of highlight models to a map of language name/alias to compiled highligh regex
+function compileHighlightModels(highlights) {
+    const highlightMap = {};
+    for (const highlight of highlights) {
+        const highlightRegex = {};
+        const parts = [];
 
-    // C#
-    'c#': 'csharp',
-    'cake': 'csharp',
-    'cakescript': 'csharp',
+        // Validate the highlight model
+        validateType(highlightTypes, 'Highlight', highlight);
 
-    // C++
-    'c++': 'cpp',
+        // Create regex-based regex
+        for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
+            if (memberName !== 'names' && memberName in highlight) {
+                const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
+                highlightRegex[memberName] = new RegExp(`^(?:${part})`);
+                parts.push(part);
+            }
+        }
 
-    // JavaScript
-    'js': 'javascript',
-    'node': 'javascript',
+        // Add the special aggregate-highlight-matching regexp
+        highlightRegex.highlight = new RegExp(parts.map((part) => `(?:${part})`).join('|'), 'm');
 
-    // Makefile
-    'bsdmake': 'makefile',
-    'make': 'makefile',
-    'mf': 'makefile',
-
-    // Markdown
-    'md': 'markdown',
-
-    // Python
-    'python3': 'python',
-
-    // Shell
-    'sh': 'shell',
-    'bash': 'shell',
-    'zsh': 'shell',
-
-    // SQL
-    'plsql': 'sql',
-    'tsql': 'sql',
-
-    // XML
-    'rss': 'xml',
-    'xsd': 'xml',
-    'wsdl': 'xml'
-};
-
-
-// The code block language to regex object
-const highlightRegex = Object.fromEntries(Object.keys(highlightLanguages).map((language) => {
-    const highlight = highlightLanguages[language];
-    const regex = {};
-    const parts = [];
-
-    // Create regex-based regex
-    for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
-        if (memberName in highlight) {
-            const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
-            regex[memberName] = new RegExp(`^(?:${part})`);
-            parts.push(part);
+        // Add the name/alias mapping
+        for (const name of highlight.names) {
+            highlightMap[name] = highlightRegex;
         }
     }
+    return highlightMap;
+}
 
-    // Aggregate highlight matching regexp
-    regex.highlight = new RegExp(parts.map((part) => `(?:${part})`).join('|'), 'm');
 
-    return [language, regex];
-}));
+// The map of language name/alias to compiled highligh regex
+const highlightMap = compileHighlightModels(highlightModels);

@@ -12,6 +12,7 @@ import {highlightElements} from './highlight.js';
  *
  * @typedef {Object} MarkdownElementsOptions
  * @property {Object.<string, object>} [codeBlocks] - The [code block]{@link module:lib/elements~CodeBlockFn} render-function map
+ * @property {function} [copyFn] - The [copy function]{@link module:lib/elements~CopyFn}
  * @property {function} [urlFn] - The [URL modifier function]{@link module:lib/elements~URLFn}
  * @property {boolean} [headerIds] - If true, generate header IDs
  * @property {Set} [usedHeaderIds] - Set of used header IDs
@@ -30,6 +31,13 @@ import {highlightElements} from './highlight.js';
  * @property {string} language - The code block language
  * @property {string[]} lines - The code blocks lines
  * @property {number} [startLineNumber] - The code blocks lines
+ */
+
+/**
+ * A copy (to the clipboard) function
+ *
+ * @callback CopyFn
+ * @param {string} text - The text to copy
  */
 
 /**
@@ -81,7 +89,7 @@ function markdownPartElements(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines);
+        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines, options);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);
@@ -138,7 +146,7 @@ async function markdownPartElementsAsync(part, options, usedHeaderIds) {
         if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
             return options.codeBlocks[codeBlock.language](codeBlock);
         }
-        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines);
+        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines, options);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);

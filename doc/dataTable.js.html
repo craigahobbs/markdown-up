@@ -117,7 +117,9 @@ export function validateDataTable(dataTable) {
  * The data table options object
  *
  * @typedef {Object} DataTableOptions
- * @property {function} [urlFn] - The
+ * @property {?function} [copyFn] - The
+ *     [Markdown copy function]{@link https://craigahobbs.github.io/markdown-model/module-lib_elements.html#~CopyFn}
+ * @property {?function} [urlFn] - The
  *     [Markdown URL modifier function]{@link https://craigahobbs.github.io/markdown-model/module-lib_elements.html#~URLFn}
  */
 
@@ -150,7 +152,10 @@ export function dataTableElements(data, dataTable = null, options = null) {
 
     // Generate the data table's element model
     const fieldFormats = (dataTable !== null ? (dataTable.formats ?? null) : null);
-    const markdownOptions = (options !== null &amp;&amp; 'urlFn' in options ? {'urlFn': options.urlFn} : null);
+    const markdownOptions = {
+        'copyFn': (options !== null ? options.copyFn : null) ?? null,
+        'urlFn': (options !== null ? options.urlFn : null) ?? null
+    };
     const formatPrecision = (dataTable !== null ? (dataTable.precision ?? null) : null);
     const formatDatetime = (dataTable !== null ? (dataTable.datetime ?? null) : null);
     const formatTrim = (dataTable !== null ? (dataTable.trim ?? null) : null);
