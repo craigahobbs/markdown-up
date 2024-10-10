@@ -128,12 +128,10 @@ function createWordListRegex(...words) {
 
 
 // Common regular expression source
-const rBoolean = createWordListRegex('false', 'true');
 const rCommentHash = '#[^\\n\\r]*';
 const rCommentSlashSlash = '\\/\\/[^\\n\\r]*';
 const rCommentSlashStar = '\\/\\*[\\s\\S]*?\\*\\/';
-const rNumber = '(?:\\b|[+-]?)\\d+(?:\\.\\d*)?(?:e[+-]\\d+)?\\b';
-const rNull = createWordListRegex('null');
+const rNumber = '(?:\\b|[+-])\\d+(?:\\.\\d*)?(?:e[+-]\\d+)?\\b';
 const rStringSingle = "'(?:[^'\\\\]|\\\\.)*'";
 const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
@@ -179,7 +177,7 @@ const highlightModels = [
                 'function', 'if', 'in', 'include', 'jump', 'jumpif', 'return', 'while'
             )
         ],
-        'literal': [rBoolean, rNumber, rNull],
+        'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
         'string': [rStringSingle, rStringDouble]
     },
 
@@ -206,7 +204,7 @@ const highlightModels = [
                 '_Noreturn', '_Static_assert', '_Thread_local'
             )
         ],
-        'literal': [rBoolean, rNumber, createWordListRegex('NULL')],
+        'literal': [createWordListRegex('true', 'false', 'NULL'), rNumber],
         'preprocessor': [
             '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
         ],
@@ -247,7 +245,7 @@ const highlightModels = [
                 'void', 'volatile', 'wchar_t', 'while', 'xor', 'xor_eq'
             )
         ],
-        'literal': [rBoolean, rNumber, createWordListRegex('NULL')],
+        'literal': [createWordListRegex('true', 'false', 'NULL'), rNumber],
         'preprocessor': [
             '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
         ],
@@ -279,7 +277,7 @@ const highlightModels = [
                 'when', 'where', 'while', 'yield'
             )
         ],
-        'literal': [rBoolean, rNull, rNumber],
+        'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
         'preprocessor': [
             '^\\s*#(?:define|elif|else|endif|error|if|line|pragma|region|endregion|undef|warning)\\b'
         ],
@@ -310,7 +308,7 @@ const highlightModels = [
                 'transitive', 'try', 'uses', 'var', 'void', 'volatile', 'while'
             )
         ],
-        'literal': [rBoolean, rNull, rNumber],
+        'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
         'preprocessor': ['@\\w+'],
         'string': ['"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
     },
@@ -337,14 +335,14 @@ const highlightModels = [
                 'yield'
             )
         ],
-        'literal': [rBoolean, rNumber, rNull, createWordListRegex('undefined')],
+        'literal': [createWordListRegex('true', 'false', 'null', 'undefined'), rNumber],
         'string': [rStringSingle, rStringDouble, '`(?:[^`\\\\]|\\\\[\\s\\S])*`']
     },
 
     // JSON
     {
         'names': ['json'],
-        'literal': [rBoolean, rNumber, rNull],
+        'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
         'string': [rStringDouble]
     },
 
