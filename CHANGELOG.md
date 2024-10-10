@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1 (2024-10-09)
+
+- [b61be8e](https://github.com/craigahobbs/markdown-up/commit/b61be8e) - fix script runtime markdown options
+
 ## 3.2.0 (2024-10-09)
 
 - [fb76593](https://github.com/craigahobbs/markdown-up/commit/fb76593)
