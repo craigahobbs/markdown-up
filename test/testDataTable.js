@@ -264,9 +264,9 @@ test('dataTableElements, format markdown fields', () => {
     const dataTable = validateDataTable({'categories': ['A'], 'formats': {'A': {'markdown': true}, 'B': {'markdown': true}}});
     validateDataTable(dataTable);
     const elements = dataTableElements(data, dataTable, options);
-    const copyElement = elements.elem[1][3].elem[1][0].elem[0][0].elem;
-    const copyCallback = copyElement.callback;
-    delete copyElement.callback;
+    const copyElem = elements.elem[1][3].elem[1][0].elem[0][0].elem;
+    const copyCallback = copyElem.callback;
+    delete copyElem.callback;
     assert.deepEqual(elements, {
         'html': 'table',
         'elem': [

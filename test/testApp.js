@@ -1578,16 +1578,25 @@ test('MarkdownUp.main, darkMode', async () => {
 
 test('MarkdownUp.main, markdown-script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    const copyCalls = [];
+    window.navigator.clipboard = {
+        'writeText': (text) => {
+            copyCalls.push(text);
+        }
+    };
     const app = new MarkdownUp(window, {'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
-markdownPrint('Hello')
+markdownPrint('Hello', '~~~', 'Code', '~~~')
 ~~~
 `});
     app.updateParams('');
+    const mainElements = await app.main();
+    const copyElem = mainElements.elements[1][1][0][1][0].elem;
+    const copyCallback = copyElem.callback;
     assert.deepEqual(
-        deleteElementCallbacks(await app.main()),
+        deleteElementCallbacks(mainElements),
         {
             'title': 'markdown-script',
             'elements': [
@@ -1602,13 +1611,35 @@ markdownPrint('Hello')
                     {'html': 'h1', 'attr': {'id': 'markdown-script'}, 'elem': [{'text': 'markdown-script'}]},
                     [
                         [
-                            {'html': 'p', 'elem': [{'text': 'Hello'}]}
+                            {'html': 'p', 'elem': [{'text': 'Hello'}]},
+                            [
+                                {
+                                    'html': 'p',
+                                    'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
+                                    'elem': {'html': 'a', 'elem': {'text': 'Copy'}}
+                                },
+                                {
+                                    'html': 'pre',
+                                    'attr': {'style': 'margin-top: 0.25em'},
+                                    'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                                }
+                            ]
                         ]
                     ]
                 ]
             ]
         }
     );
+
+    // Test the copy callback
+    const element = {
+        'addEventListener': (event, eventFn) => {
+            assert.equal(event, 'click');
+            eventFn();
+        }
+    };
+    copyCallback(element);
+    assert.deepEqual(copyCalls, ['Code\n']);
 });
 
 
