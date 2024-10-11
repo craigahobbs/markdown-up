@@ -64,6 +64,7 @@ export function highlightElements(languageArg, lines, options = null) {
         for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
             if (memberName in regex && regex[memberName].test(highlightText)) {
                 color = `var(--markdown-model-color-highlight-${memberName})`;
+                break;
             }
         }
 
@@ -249,7 +250,7 @@ const highlightModels = [
         'preprocessor': [
             '^[ \\t]*#(?:define|include|ifdef|ifndef|endif|if|else|elif|undef|pragma|error|warning|line)\\b'
         ],
-        'string': [rStringSingle, rStringDouble, 'R"([^\\s]*)\\((?:[\\s\\S]*?)\\)\\1"']
+        'string': [rStringSingle, rStringDouble, 'R"(?<cppRaw>[^\\s]*)\\((?:[\\s\\S]*?)\\)\\k<cppRaw>"']
     },
 
     // C#
@@ -267,19 +268,19 @@ const highlightModels = [
             createWordListRegex(
                 'abstract', 'add', 'alias', 'as', 'ascending', 'async', 'await', 'base', 'bool', 'break', 'byte', 'by',
                 'case', 'catch', 'char', 'checked', 'class', 'const', 'continue', 'decimal', 'default', 'delegate',
-                'descending', 'do', 'double', 'dynamic', 'else', 'enum', 'equals', 'event', 'explicit', 'extern', 'false',
-                'finally', 'fixed', 'float', 'for', 'foreach', 'from', 'get', 'global', 'goto', 'group', 'if', 'implicit',
-                'in', 'int', 'interface', 'internal', 'into', 'is', 'join', 'let', 'lock', 'long', 'namespace', 'nameof',
-                'new', 'null', 'object', 'on', 'operator', 'orderby', 'out', 'override', 'params', 'partial', 'private',
-                'protected', 'public', 'readonly', 'ref', 'remove', 'return', 'sbyte', 'sealed', 'select', 'set', 'short',
-                'sizeof', 'stackalloc', 'static', 'string', 'struct', 'switch', 'this', 'throw', 'true', 'try', 'typeof',
-                'uint', 'ulong', 'unchecked', 'unsafe', 'ushort', 'using', 'value', 'var', 'virtual', 'void', 'volatile',
-                'when', 'where', 'while', 'yield'
+                'descending', 'do', 'double', 'dynamic', 'else', 'enum', 'equals', 'event', 'explicit', 'extern',
+                'finally', 'fixed', 'float', 'for', 'foreach', 'from', 'get', 'global', 'goto', 'group', 'if',
+                'implicit', 'in', 'int', 'interface', 'internal', 'into', 'is', 'join', 'let', 'lock', 'long',
+                'namespace', 'nameof', 'new', 'object', 'on', 'operator', 'orderby', 'out', 'override', 'params',
+                'partial', 'private', 'protected', 'public', 'readonly', 'ref', 'remove', 'return', 'sbyte', 'sealed',
+                'select', 'set', 'short', 'sizeof', 'stackalloc', 'static', 'string', 'struct', 'switch', 'this',
+                'throw', 'try', 'typeof', 'uint', 'ulong', 'unchecked', 'unsafe', 'ushort', 'using', 'value', 'var',
+                'virtual', 'void', 'volatile', 'when', 'where', 'while', 'yield'
             )
         ],
         'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
         'preprocessor': [
-            '^\\s*#(?:define|elif|else|endif|error|if|line|pragma|region|endregion|undef|warning)\\b'
+            '^[ \\t]*#(?:define|elif|else|endif|error|if|line|pragma|region|endregion|undef|warning)\\b'
         ],
         'string': ['@"(?:[^"]|"")*"', rStringSingle, rStringDouble]
     },
@@ -387,18 +388,22 @@ const highlightModels = [
     // Markdown
     {
         'names': ['markdown', 'md'],
-        'preprocessor': [
+        'literal': [
             // List bullets
-            '^\\s*[-+*]\\s',
-            '^\\s*\\d+\\.\\s'
-        ],
-        'string': [
+            '^[ \\t]*[-+*]\\s',
+            '^[ \\t]*\\d+\\.\\s',
+
             // Links
-            '\\[([^\\]]+)\\]\\(([^)\\s]+)(?:\\s+"[^"]+")?\\)'
+            '\\[(?:[^\\]]+)\\]\\((?:[^)\\s]+)(?:\\s+"[^"]+")?\\)'
+        ],
+
+        'string': [
+            // Fenced code blocks
+            '^(?<mdFence> *(?:`{3,}|~{3,}))[\\s\\S]+?\\n\\k<mdFence> *$'
         ],
         'tag': [
             // Titles
-            '^\\s*#[^\\n\\r]*'
+            '^ *#[^\\n\\r]*'
         ]
     },
 
@@ -530,7 +535,7 @@ function compileHighlightModels(highlights) {
         for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
             if (memberName !== 'names' && memberName in highlight) {
                 const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
-                highlightRegex[memberName] = new RegExp(`^(?:${part})`);
+                highlightRegex[memberName] = new RegExp(`^(?:${part})`, 'm');
                 parts.push(part);
             }
         }
