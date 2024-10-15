@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown-doc",
-    "version": "1.9.0",
+    "version": "2.0.0",
     "description": "Schema Markdown documentation library",
     "keywords": [
         "schema",
@@ -22,7 +22,7 @@
         "test": "node --test test/"
     },
     "dependencies": {
-        "markdown-model": "~2.1"
+        "markdown-model": "~2.2"
     },
     "devDependencies": {
         "bare-script": "~3.0",

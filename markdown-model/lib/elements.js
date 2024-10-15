@@ -3,8 +3,8 @@
 
 /** @module lib/elements */
 
+import {codeBlockElements} from './highlight.js';
 import {getMarkdownParagraphText} from './parser.js';
-import {highlightElements} from './highlight.js';
 
 
 /**
@@ -12,7 +12,8 @@ import {highlightElements} from './highlight.js';
  *
  * @typedef {Object} MarkdownElementsOptions
  * @property {Object.<string, object>} [codeBlocks] - The [code block]{@link module:lib/elements~CodeBlockFn} render-function map
- * @property {function} [copyFn] - The [copy function]{@link module:lib/elements~CopyFn}
+ * @property {function} [copyFn] - The [copy function]{@link module:lib/elements~CopyFn}. Copy links
+ *     for fenced code blocks are only rendered when `codeFn` is present.
  * @property {function} [urlFn] - The [URL modifier function]{@link module:lib/elements~URLFn}
  * @property {boolean} [headerIds] - If true, generate header IDs
  * @property {Set} [usedHeaderIds] - Set of used header IDs
@@ -22,13 +23,14 @@ import {highlightElements} from './highlight.js';
  * A code block render function
  *
  * @callback CodeBlockFn
- * @param {object} codeBlock - The [code block model]{@link module:lib/elements~CodeBlock}
+ * @param {Object} codeBlock - The [code block model]{@link module:lib/elements~CodeBlock}
+ * @param {?Object} options - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The code block's element model
  */
 
 /**
  * @typedef {Object} CodeBlock
- * @property {string} language - The code block language
+ * @property {?string} language - The code block language
  * @property {string[]} lines - The code blocks lines
  * @property {number} [startLineNumber] - The code blocks lines
  */
@@ -53,7 +55,7 @@ import {highlightElements} from './highlight.js';
  * Generate an element model from a Markdown model.
  *
  * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
- * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
+ * @param {?Object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The Markdown's [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
 export function markdownElements(markdown, options = null) {
@@ -85,11 +87,7 @@ function markdownPartElements(part, options, usedHeaderIds) {
 
     // Code block?
     } else if (partKey === 'codeBlock') {
-        const {codeBlock} = part;
-        if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
-            return options.codeBlocks[codeBlock.language](codeBlock);
-        }
-        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines, options);
+        return codeBlockElements(part.codeBlock, options);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);
@@ -103,7 +101,7 @@ function markdownPartElements(part, options, usedHeaderIds) {
  * Use this form of the function if you have one or more asynchronous code block functions.
  *
  * @param {Object} markdown - The [Markdown model]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Markdown'}
- * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
+ * @param {?Object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The Markdown's [element model]{@link https://github.com/craigahobbs/element-model#readme}
  */
 export function markdownElementsAsync(markdown, options = null) {
@@ -142,11 +140,7 @@ async function markdownPartElementsAsync(part, options, usedHeaderIds) {
 
     // Code block?
     } else if (partKey === 'codeBlock') {
-        const {codeBlock} = part;
-        if (options !== null && 'codeBlocks' in options && 'language' in codeBlock && codeBlock.language in options.codeBlocks) {
-            return options.codeBlocks[codeBlock.language](codeBlock);
-        }
-        return highlightElements(part.codeBlock.language ?? null, part.codeBlock.lines, options);
+        return codeBlockElements(part.codeBlock, options);
     }
 
     return markdownPartElementsBase(part, options, usedHeaderIds);

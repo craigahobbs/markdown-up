@@ -9,18 +9,81 @@ import {parseSchemaMarkdown} from '../../schema-markdown/lib/parser.js';
 
 
 /**
+ * Render a code block
+ *
+ * @param {Object} codeBlock - The [code block model]{@link module:lib/elements~CodeBlock}
+ * @param {?Object} options - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
+ * @returns {*} The code block's [element model]{@link https://github.com/craigahobbs/element-model#readme}
+ */
+export function codeBlockElements(codeBlock, options) {
+    if ('language' in codeBlock) {
+        const language = codeBlock.language.toLowerCase();
+
+        // Options-provided code block render function?
+        if (options !== null && 'codeBlocks' in options && language in options.codeBlocks) {
+            return options.codeBlocks[language](codeBlock, options);
+        }
+
+        // Built-in code block render function?
+        if (language in highlightBuiltin) {
+            return highlightBuiltin[language](codeBlock, options);
+        }
+    }
+
+    // No-syntax-highlighing code block render
+    return highlightElements(null, codeBlock.lines, options);
+}
+
+
+/**
+ * Compile an array of highlight models
+ *
+ * @param {Object[]} markdown - The array of
+ *     [Highlight models]{@link https://craigahobbs.github.io/markdown-model/model/#var.vName='Highlight'}
+ * @returns {Object} The map of language name/alias to [code block render function]{@link module:lib/elements~CodeBlockFn}
+ */
+export function compileHighlightModels(highlights) {
+    const highlightMap = {};
+    for (const highlight of highlights) {
+        const highlightRegex = {};
+        const parts = [];
+
+        // Validate the highlight model
+        validateType(highlightTypes, 'Highlight', highlight);
+
+        // Create regex-based regex
+        for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
+            if (memberName !== 'names' && memberName in highlight) {
+                const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
+                highlightRegex[memberName] = new RegExp(`^(?:${part})`, 'm');
+                parts.push(part);
+            }
+        }
+
+        // Add the special aggregate-highlight-matching regexp
+        highlightRegex.highlight = new RegExp(parts.map((part) => `(?:${part})`).join('|'), 'm');
+
+        // Add the name/alias to code block render function
+        const highlightFn = (codeBlock, options) => highlightElements(highlightRegex, codeBlock.lines, options);
+        for (const name of highlight.names) {
+            highlightMap[name] = highlightFn;
+        }
+    }
+    return highlightMap;
+}
+
+
+/**
  * Generate a syntax-highlighed code block element model
  *
- * @property {string?} language - The code block language
- * @property {string[]} lines - The code block lines
- * @param {?object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
+ * @param {?Object} highlightRegex - The compiled highlight model regex
+ * @param {string[]} lines - The code block lines
+ * @param {?Object} [options] - The [options object]{@link module:lib/elements~MarkdownElementsOptions}
  * @returns {*} The syntax-highlighted code [element model]{@link https://github.com/craigahobbs/element-model#readme}
+ *
+ * @ignore
  */
-export function highlightElements(languageArg, lines, options = null) {
-    // Get the highlight regex
-    const language = (languageArg !== null ? languageArg.toLowerCase() : null);
-    const regex = (language !== null ? highlightMap[language] ?? null : null);
-
+function highlightElements(highlightRegex, lines, options = null) {
     // Join the text lines
     let text = lines.map((line) => (line.endsWith('\n') ? line : `${line}\n`)).join('');
 
@@ -37,7 +100,7 @@ export function highlightElements(languageArg, lines, options = null) {
     const preAttr = (copyElements !== null ? {'style': 'margin-top: 0.25em'} : null);
 
     // No language specified or unknown language?
-    if (regex === null) {
+    if (highlightRegex === null) {
         return [
             copyElements,
             {'html': 'pre', 'attr': preAttr, 'elem': {'html': 'code', 'elem': {'text': text}}}
@@ -46,7 +109,7 @@ export function highlightElements(languageArg, lines, options = null) {
 
     // Match the highlight spans
     const spans = [];
-    const rHighlight = regex.highlight;
+    const rHighlight = highlightRegex.highlight;
     while (true) {
         const mHighlight = rHighlight.exec(text);
         if (mHighlight === null) {
@@ -62,7 +125,7 @@ export function highlightElements(languageArg, lines, options = null) {
         // Determine the highlight color
         let color;
         for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
-            if (memberName in regex && regex[memberName].test(highlightText)) {
+            if (memberName in highlightRegex && highlightRegex[memberName].test(highlightText)) {
                 color = `var(--markdown-model-color-highlight-${memberName})`;
                 break;
             }
@@ -93,7 +156,10 @@ export function highlightElements(languageArg, lines, options = null) {
 
 
 // The syntax-highlight model
-const highlightTypes = parseSchemaMarkdown(`\
+export const highlightTypes = parseSchemaMarkdown(`\
+group "Syntax Highlighting"
+
+
 # Code syntax-highlighting model
 struct Highlight
     # The language names/aliases. The first name is the preferred name.
@@ -137,8 +203,8 @@ const rStringSingle = "'(?:[^'\\\\]|\\\\.)*'";
 const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
 
-// The code block language to highlight model map
-const highlightModels = [
+// The map of code block language name/alias to code block render functions
+const highlightBuiltin = compileHighlightModels([
     // BareScript
     {
         'names': ['barescript', 'bare-script', 'markdown-script'],
@@ -518,39 +584,4 @@ const highlightModels = [
         'string': [rStringSingle, rStringDouble],
         'tag': ['<\\/?\\s*(?:[A-Za-z_][A-Za-z0-9_.:-]*)']
     }
-];
-
-
-// Helper to translate an array of highlight models to a map of language name/alias to compiled highligh regex
-function compileHighlightModels(highlights) {
-    const highlightMap = {};
-    for (const highlight of highlights) {
-        const highlightRegex = {};
-        const parts = [];
-
-        // Validate the highlight model
-        validateType(highlightTypes, 'Highlight', highlight);
-
-        // Create regex-based regex
-        for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
-            if (memberName !== 'names' && memberName in highlight) {
-                const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
-                highlightRegex[memberName] = new RegExp(`^(?:${part})`, 'm');
-                parts.push(part);
-            }
-        }
-
-        // Add the special aggregate-highlight-matching regexp
-        highlightRegex.highlight = new RegExp(parts.map((part) => `(?:${part})`).join('|'), 'm');
-
-        // Add the name/alias mapping
-        for (const name of highlight.names) {
-            highlightMap[name] = highlightRegex;
-        }
-    }
-    return highlightMap;
-}
-
-
-// The map of language name/alias to compiled highligh regex
-const highlightMap = compileHighlightModels(highlightModels);
+]);

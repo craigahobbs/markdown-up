@@ -374,7 +374,8 @@ export class MarkdownUp {
         // Copy the markdown options and override the markdown-script code block renderer
         const scriptMarkdownOptions = {...scriptOptions.markdownOptions};
         scriptMarkdownOptions.codeBlocks = {...scriptMarkdownOptions.codeBlocks};
-        scriptMarkdownOptions.codeBlocks['markdown-script'] = (codeBlock) => markdownScriptCodeBlock(codeBlock, scriptOptions);
+        scriptMarkdownOptions.codeBlocks['markdown-script'] =
+            (codeBlock, _options) => markdownScriptCodeBlock(codeBlock, scriptOptions);
 
         // Render the Markdown
         const result = {
