@@ -26,7 +26,7 @@
         "element-model": "~1.1",
         "markdown-model": "~2.1",
         "schema-markdown": "~1.2",
-        "schema-markdown-doc": "~1.8"
+        "schema-markdown-doc": "~1.9"
     },
     "devDependencies": {
         "c8": "~10.1",

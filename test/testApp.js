@@ -1234,6 +1234,67 @@ test('MarkdownUp.main, url', async () => {
 });
 
 
+test('MarkdownUp.main, markdownText url override', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchResolve = (url) => {
+        assert.equal(url, 'other.md');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('# Hello\n\nGoodbye');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
+    app.updateParams('url=other.md');
+    assert.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': 'Hello',
+            'elements': [
+                [
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': 'url=other.md&_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                ],
+                [
+                    {'html': 'h1', 'attr': {'id': 'url=other.md&hello'}, 'elem': [{'text': 'Hello'}]},
+                    {'html': 'p', 'elem': [{'text': 'Goodbye'}]}
+                ]
+            ]
+        }
+    );
+});
+
+
+test('MarkdownUp.main, markdownText url override empty', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
+    app.updateParams('url=');
+    assert.deepEqual(
+        deleteElementCallbacks(await app.main()),
+        {
+            'title': 'Goodbye',
+            'elements': [
+                [
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': 'url=&_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                ],
+                [
+                    {'html': 'h1', 'attr': {'id': 'url=&goodbye'}, 'elem': [{'text': 'Goodbye'}]},
+                    {'html': 'p', 'elem': [{'text': 'Hello'}]}
+                ]
+            ]
+        }
+    );
+});
+
+
 test('MarkdownUp.main, code block', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const fetchResolve = (url) => {

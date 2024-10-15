@@ -12,10 +12,17 @@ import test from 'node:test';
 // Generic test runtime options
 const testRuntime = () => {
     const {window} = new JSDOM('', {'url': 'https://github.com/craigahobbs/markdown-up'});
+    const urlFn = (url) => (url.startsWith('/') ? url : `/foo/${url}`);
     const options = {
         'debug': true,
         'fontSize': 12,
-        'urlFn': (url) => (url.startsWith('/') ? url : `/foo/${url}`),
+        'markdownOptions': {
+            'codeBlocks': {},
+            urlFn,
+            'headerIds': true,
+            'usedHeaderIds': new Set()
+        },
+        urlFn,
         window
     };
     options.runtime = new MarkdownScriptRuntime(options);
