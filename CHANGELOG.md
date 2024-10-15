@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.0 (2024-10-15)
+
+- [5e752de](https://github.com/craigahobbs/markdown-up/commit/5e752de) - markdown-model 2.2, schema-markdown-doc 2.0
+
+- [37aa0b2](https://github.com/craigahobbs/markdown-up/commit/37aa0b2)
+  - schema-markdown-doc 1.9
+  - add runtime markdownElements options
+
 ## 3.2.1 (2024-10-09)
 
 - [b61be8e](https://github.com/craigahobbs/markdown-up/commit/b61be8e) - fix script runtime markdown options
