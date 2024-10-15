@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "schema-markdown-doc",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "description": "Schema Markdown documentation library",
     "keywords": [
         "schema",

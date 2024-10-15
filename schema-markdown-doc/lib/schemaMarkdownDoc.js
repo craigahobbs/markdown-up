@@ -17,8 +17,11 @@ const nbsp = String.fromCharCode(160);
  *
  * @typedef {Object} SchemaMarkdownDocOptions
  * @property {string} [params] - The page's hash param string with tag removed
- * @property {Object[]} [actionURLs] -
- *     The [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL'} override
+ * @property {Object[]} [actionURLs] - The
+ *     [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL'} override
+ * @property {?Object} [markdownOptions] - The
+ *     [markdownElements options]{@link https://craigahobbs.github.io/markdown-model/module-lib_elements.html#~MarkdownElementsOptions}
+ *     object
  */
 
 
@@ -62,8 +65,10 @@ export function schemaMarkdownDoc(types, typeName, options = null) {
 }
 
 
-function markdownElementsNull(text = null) {
-    return text !== null ? markdownElements(parseMarkdown(text)) : null;
+function markdownElementsNull(text, options) {
+    const markdownText = text ?? null;
+    const markdownOptions = (options !== null ? (options.markdownOptions ?? null) : null);
+    return markdownText !== null ? markdownElements(parseMarkdown(markdownText), markdownOptions) : null;
 }
 
 
@@ -176,7 +181,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         const members = getStructMembers(types, struct);
         const memberAttrElem = Object.fromEntries(members.map((member) => [member.name, attrElements(member)]));
         const hasAttr = Object.values(memberAttrElem).some((attrElem) => attrElem !== null);
-        const memberDocElem = Object.fromEntries(members.map(({name, doc}) => [name, markdownElementsNull(doc)]));
+        const memberDocElem = Object.fromEntries(members.map(({name, doc}) => [name, markdownElementsNull(doc, options)]));
         const hasDoc = Object.values(memberDocElem).some((docElem) => docElem !== null);
 
         // Return the struct documentation element model
@@ -190,10 +195,10 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
                     {'html': 'a', 'attr': {'href': `#${typeHref(base, options)}`}, 'elem': {'text': base}}
                 ])
             ]},
-            markdownElementsNull(struct.doc),
+            markdownElementsNull(struct.doc, options),
 
             // Struct members
-            !members.length ? markdownElementsNull('The struct is empty.') : {'html': 'table', 'elem': [
+            !members.length ? markdownElementsNull('The struct is empty.', options) : {'html': 'table', 'elem': [
                 {'html': 'tr', 'elem': [
                     {'html': 'th', 'elem': {'text': 'Name'}},
                     {'html': 'th', 'elem': {'text': 'Type'}},
@@ -214,7 +219,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         const enum_ = userType.enum;
         const values = 'values' in enum_ ? getEnumValues(types, enum_) : null;
         const valueDocElem = values !== null
-            ? Object.fromEntries(values.map(({name, doc}) => [name, markdownElementsNull(doc)])) : null;
+            ? Object.fromEntries(values.map(({name, doc}) => [name, markdownElementsNull(doc, options)])) : null;
         const hasDoc = values !== null && Object.values(valueDocElem).some((docElem) => docElem !== null);
 
         // Return the enumeration documentation element model
@@ -224,11 +229,11 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
                 {'text': 'Bases: '},
                 enum_.bases.map((base) => ({'html': 'a', 'attr': {'href': `#${typeHref(base, options)}`}, 'elem': {'text': base}}))
             ]},
-            markdownElementsNull(enum_.doc),
-            introMarkdown !== null ? markdownElementsNull(introMarkdown) : null,
+            markdownElementsNull(enum_.doc, options),
+            markdownElementsNull(introMarkdown, options),
 
             // Enumeration values
-            !values || !values.length ? markdownElementsNull('The enum is empty.') : {'html': 'table', 'elem': [
+            !values || !values.length ? markdownElementsNull('The enum is empty.', options) : {'html': 'table', 'elem': [
                 {'html': 'tr', 'elem': [
                     {'html': 'th', 'elem': {'text': 'Value'}},
                     hasDoc ? {'html': 'th', 'elem': {'text': 'Description'}} : null
@@ -248,7 +253,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         // Return the typedef documentation element model
         return [
             titleElements(`typedef ${typeName}`),
-            markdownElementsNull(typedef.doc),
+            markdownElementsNull(typedef.doc, options),
 
             // Typedef type description
             {'html': 'table', 'elem': [
@@ -311,7 +316,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         // Return the action documentation element model
         return [
             titleElements(`action ${typeName}`),
-            markdownElementsNull(action.doc),
+            markdownElementsNull(action.doc, options),
             actionURLs === null || !actionURLs.length ? null : [
                 {'html': 'p', 'elem': [
                     {'html': 'b', 'elem': {'text': 'Note: '}},
