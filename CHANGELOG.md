@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1 (2024-10-16)
+
+- [8b73c21](https://github.com/craigahobbs/markdown-up/commit/8b73c21) - add codeBlocks option
+
 ## 3.3.0 (2024-10-15)
 
 - [5e752de](https://github.com/craigahobbs/markdown-up/commit/5e752de) - markdown-model 2.2, schema-markdown-doc 2.0
