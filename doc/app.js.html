@@ -103,6 +103,9 @@ enum MarkdownUpView
  * The MarkdownUp application options
  *
  * @typedef {Object} MarkdownUpOptions
+ * @property {?Object.&lt;string, function>} [codeBlocks = null] - The
+ *     [code block]{@link https://craigahobbs.github.io/markdown-model/module-lib_elements.html#~CodeBlockFn}
+ *     render function map
  * @property {?boolean} [darkMode = false] - If true, use dark mode by default
  * @property {?number} [fontSize = 12] - The font size, in points
  * @property {?Object} [globals = null] - Global script runtime variables
@@ -129,6 +132,7 @@ export class MarkdownUp {
         this.params = null;
         this.paramsLocal = null;
         this.paramsSession = null;
+        this.codeBlocks = (options !== null ? options.codeBlocks : null) ?? null;
         this.darkMode = (options !== null ? options.darkMode : null) ??
             (this.window.matchMedia &amp;&amp; this.window.matchMedia('(prefers-color-scheme: dark)').matches);
         this.fontSize = (options !== null ? options.fontSize : null) ?? 12;
@@ -431,7 +435,7 @@ export class MarkdownUp {
         // Create the markdown options object
         const urlFn = (url) => this.modifyURL(url);
         const markdownOptions = {
-            'codeBlocks': {},
+            'codeBlocks': this.codeBlocks ?? {},
             urlFn,
             'headerIds': true,
             'usedHeaderIds': new Set()
