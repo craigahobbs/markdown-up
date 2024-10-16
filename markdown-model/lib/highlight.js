@@ -195,8 +195,8 @@ function createWordListRegex(...words) {
 
 
 // Common regular expression source
-const rCommentHash = '#[^\\n\\r]*';
-const rCommentSlashSlash = '\\/\\/[^\\n\\r]*';
+const rCommentHash = '#.*$';
+const rCommentSlashSlash = '\\/\\/.*$';
 const rCommentSlashStar = '\\/\\*[\\s\\S]*?\\*\\/';
 const rNumber = '(?:\\b|[+-])\\d+(?:\\.\\d*)?(?:e[+-]\\d+)?\\b';
 const rStringSingle = "'(?:[^'\\\\]|\\\\.)*'";
@@ -455,6 +455,10 @@ const highlightBuiltin = compileHighlightModels([
     {
         'names': ['markdown', 'md'],
         'literal': [
+            // Fenced code blocks
+            '^(?<mdFence> *(?:`{3,}|~{3,}))[\\s\\S]+?\\n\\k<mdFence> *$'
+        ],
+        'string': [
             // List bullets
             '^[ \\t]*[-+*]\\s',
             '^[ \\t]*\\d+\\.\\s',
@@ -462,14 +466,9 @@ const highlightBuiltin = compileHighlightModels([
             // Links
             '\\[(?:[^\\]]+)\\]\\((?:[^)\\s]+)(?:\\s+"[^"]+")?\\)'
         ],
-
-        'string': [
-            // Fenced code blocks
-            '^(?<mdFence> *(?:`{3,}|~{3,}))[\\s\\S]+?\\n\\k<mdFence> *$'
-        ],
         'tag': [
             // Titles
-            '^ *#[^\\n\\r]*'
+            '^ *#.*$'
         ]
     },
 
@@ -552,7 +551,7 @@ const highlightBuiltin = compileHighlightModels([
                 'varchar'
             )
         ],
-        'comment': ['--[^\\n\\r]*', rCommentSlashStar],
+        'comment': ['--.*$', rCommentSlashStar],
         'keyword': [
             createWordListRegex(
                 'ADD', 'ALL', 'ALTER', 'AND', 'AS', 'ASC', 'BETWEEN', 'CASE', 'CHECK', 'CREATE', 'DATABASE', 'DELETE',
