@@ -351,6 +351,41 @@ const highlightBuiltin = compileHighlightModels([
         'string': ['@"(?:[^"]|"")*"', rStringSingle, rStringDouble]
     },
 
+    // Go
+    {
+        'names': ['go', 'golang'],
+        'builtin': [
+            createWordListRegex(
+                'append', 'cap', 'close', 'complex', 'copy', 'delete', 'imag', 'len', 'make', 'new', 'panic', 'print',
+                'println', 'real', 'recover'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'bool', 'break', 'case', 'chan', 'const', 'continue', 'default', 'defer', 'else', 'fallthrough', 'for',
+                'func', 'go', 'goto', 'if', 'import', 'interface', 'int', 'int8', 'int16', 'int32', 'int64', 'map',
+                'package', 'range', 'return', 'select', 'struct', 'switch', 'type', 'uint', 'uint8', 'uint16', 'uint32',
+                'uint64', 'uintptr', 'var'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'iota', 'nil', 'true'), rNumber, rStringSingle],
+        'string': [rStringDouble, '`[^`]*`']
+    },
+
+    // HTML
+    {
+        'names': ['html', 'xhtml'],
+        'comment': ['<!--[\\s\\S]*?-->'],
+        'literal': ['&#[0-9]+;', '&(?:amp|apos|copy|eacute|hellip|gt|lt|mdash|nbsp|quot|reg|rsquo|sect|semi|szlig|uuml);'],
+        'preprocessor': [
+            '<!DOCTYPE[^>]*>',
+            '<!\\[CDATA\\[[\\s\\S]*?\\]\\]>'
+        ],
+        'string': [rStringSingle, rStringDouble],
+        'tag': ['<\\/?\\s*(?:[A-Za-z_][A-Za-z0-9_.:-]*)']
+    },
+
     // Java
     {
         'names': ['java'],
@@ -568,6 +603,40 @@ const highlightBuiltin = compileHighlightModels([
         ],
         'literal': [createWordListRegex('FALSE', 'NULL', 'TRUE'), rNumber],
         'string': ["'(?:[^']|'')*'"]
+    },
+
+    // TypeScript
+    {
+        'names': ['typescript', 'ts'],
+        'builtin': [
+            createWordListRegex(
+                'AbortController', 'AbortSignal', 'Array', 'ArrayBuffer', 'AsyncGenerator', 'AsyncGeneratorFunction',
+                'AsyncIterable', 'AsyncIterableIterator', 'Atomics', 'Awaited', 'BigInt', 'BigInt64Array',
+                'BigUint64Array', 'Boolean', 'Capitalize', 'DataView', 'Date', 'Error', 'EvalError', 'Exclude',
+                'Extract', 'Float32Array', 'Float64Array', 'Function', 'Generator', 'GeneratorFunction', 'Infinity',
+                'InstanceType', 'Int16Array', 'Int32Array', 'Int8Array', 'Intl', 'JSON', 'Lowercase', 'Map', 'Math',
+                'NaN', 'NonNullable', 'Number', 'Object', 'Omit', 'Parameters', 'Partial', 'Pick', 'Promise', 'Proxy',
+                'RangeError', 'Readonly', 'Record', 'ReferenceError', 'Reflect', 'RegExp', 'Required', 'ReturnType',
+                'Set', 'SharedArrayBuffer', 'String', 'Symbol', 'SyntaxError', 'ThisType', 'TypeError', 'URIError',
+                'Uint16Array', 'Uint32Array', 'Uint8Array', 'Uint8ClampedArray', 'Uncapitalize', 'Uppercase', 'WeakMap',
+                'WeakSet', 'console'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'abstract', 'any', 'as', 'asserts', 'async', 'await', 'boolean', 'break', 'case', 'catch', 'class',
+                'const', 'constructor', 'continue', 'debugger', 'declare', 'default', 'delete', 'do', 'else', 'enum',
+                'export', 'extends', 'finally', 'for', 'from', 'function', 'get', 'global', 'if', 'implements',
+                'import', 'in', 'infer', 'instanceof', 'interface', 'is', 'keyof', 'let', 'module', 'namespace',
+                'never', 'new', 'of', 'package', 'private', 'protected', 'public', 'readonly', 'require', 'return',
+                'set', 'static', 'super', 'switch', 'this', 'throw', 'try', 'type', 'typeof', 'unique', 'unknown',
+                'var', 'void', 'while', 'with', 'yield'
+            )
+        ],
+        'literal': [createWordListRegex('true', 'false', 'null', 'undefined'), rNumber],
+        'preprocessor': ['@\\w+'],
+        'string': [rStringSingle, rStringDouble, '`(?:[^`\\\\]|\\\\[\\s\\S])*`']
     },
 
     // XML

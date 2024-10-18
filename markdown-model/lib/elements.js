@@ -11,7 +11,7 @@ import {getMarkdownParagraphText} from './parser.js';
  * The markdownElements function's options object
  *
  * @typedef {Object} MarkdownElementsOptions
- * @property {Object.<string, object>} [codeBlocks] - The [code block]{@link module:lib/elements~CodeBlockFn} render-function map
+ * @property {Object.<string, function>} [codeBlocks] - The [code block]{@link module:lib/elements~CodeBlockFn} render function map
  * @property {function} [copyFn] - The [copy function]{@link module:lib/elements~CopyFn}. Copy links
  *     for fenced code blocks are only rendered when `codeFn` is present.
  * @property {function} [urlFn] - The [URL modifier function]{@link module:lib/elements~URLFn}
