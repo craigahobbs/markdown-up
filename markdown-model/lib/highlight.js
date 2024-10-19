@@ -533,6 +533,46 @@ const highlightBuiltin = compileHighlightModels([
         'string': ["'''[\\s\\S]*?'''", '"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
     },
 
+    // Rust
+    {
+        'names': ['rust', 'rs'],
+        'builtin': [
+            createWordListRegex(
+                'AsMut', 'AsRef', 'Box', 'Clone', 'Copy', 'Default', 'Drop', 'Err', 'ExactSizeIterator', 'Extend', 'Fn',
+                'FnMut', 'FnOnce', 'From', 'Iterator', 'None', 'Ok', 'Option', 'Ord', 'PartialEq', 'PartialOrd',
+                'Result', 'Send', 'Sized', 'Some', 'String', 'Sync', 'ToOwned', 'Vec', 'assert', 'assert_eq',
+                'assert_ne', 'cfg', 'column', 'concat', 'concat_idents', 'debug_assert', 'debug_assert_eq',
+                'debug_assert_ne', 'env', 'eprint', 'eprintln', 'file', 'format', 'format_args', 'include',
+                'include_bytes', 'include_str', 'line', 'module_path', 'option_env', 'panic', 'print', 'println',
+                'stringify', 'thread_local', 'todo', 'unimplemented', 'unreachable', 'vec', 'write', 'writeln'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'Self', 'abstract', 'as', 'async', 'await', 'become', 'bool', 'box', 'break', 'char', 'const',
+                'continue', 'crate', 'do', 'dyn', 'else', 'enum', 'extern', 'final', 'fn', 'for', 'f32', 'f64', 'if',
+                'impl', 'in', 'i128', 'i16', 'i32', 'i64', 'i8', 'int', 'isize', 'let', 'loop', 'macro', 'match', 'mod',
+                'move', 'mut', 'override', 'priv', 'pub', 'ref', 'return', 'self', 'static', 'str', 'struct', 'super',
+                'trait', 'try', 'type', 'typeof', 'u128', 'u16', 'u32', 'u64', 'u8', 'uint', 'unsafe', 'unsized', 'use',
+                'usize', 'virtual', 'where', 'while', 'yield'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'true'), rNumber],
+        'preprocessor': ['#\\!?\\[.*?\\]'],
+        'string': [
+            rStringSingle,
+            rStringDouble,
+            'b"(?:[^"\\\\]|\\\\.)*"',
+            'br"(?:[^"])*"',
+            'br#"(?:[^"]|"(?!#))*"#',
+            'br##"(?:[^"]|"(?!##))*"##',
+            'r"(?:[^"])*"',
+            'r#"(?:[^"]|"(?!#))*"#',
+            'r##"(?:[^"]|"(?!##))*"##'
+        ]
+    },
+
     // Schema Markdown
     {
         'names': ['schema-markdown'],
@@ -603,6 +643,46 @@ const highlightBuiltin = compileHighlightModels([
         ],
         'literal': [createWordListRegex('FALSE', 'NULL', 'TRUE'), rNumber],
         'string': ["'(?:[^']|'')*'"]
+    },
+
+    // Swift
+    {
+        'names': ['swift'],
+        'builtin': [
+            createWordListRegex(
+                'abs', 'acos', 'asin', 'assert', 'atan', 'atan2', 'cos', 'cosh', 'debugPrint', 'dump', 'exp', 'exp2',
+                'fabs', 'fatalError', 'floor', 'fmod', 'log', 'log10', 'log2', 'max', 'min', 'numericCast', 'pow',
+                'precondition', 'print', 'readLine', 'reduce', 'round', 'sin', 'sinh', 'sort', 'sqrt', 'stride', 'swap',
+                'tan', 'tanh', 'type(of)', 'unsafeBitCast', 'withUnsafeBytes', 'withUnsafePointer', 'zip'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'Any', 'AnyClass', 'AnyObject', 'Array', 'ArraySlice', 'Bool', 'Character', 'ClosedRange', 'Dictionary',
+                'Double', 'Error', 'Float', 'Float80', 'Int', 'Int16', 'Int32', 'Int64', 'Int8', 'Never', 'Optional',
+                'Range', 'Self', 'Set', 'String', 'Substring', 'Type', 'UInt', 'UInt16', 'UInt32', 'UInt64', 'UInt8',
+                'UnsafeBufferPointer', 'UnsafeMutableBufferPointer', 'UnsafeMutablePointer',
+                'UnsafeMutableRawBufferPointer', 'UnsafeMutableRawPointer', 'UnsafePointer', 'UnsafeRawBufferPointer',
+                'UnsafeRawPointer', 'Void', 'as', 'associatedtype', 'associativity', 'break', 'case', 'catch', 'class',
+                'continue', 'convenience', 'default', 'defer', 'deinit', 'didSet', 'do', 'dynamic', 'else', 'enum',
+                'extension', 'fallthrough', 'fileprivate', 'final', 'for', 'func', 'get', 'guard', 'if', 'import', 'in',
+                'indirect', 'infix', 'init', 'inout', 'internal', 'is', 'lazy', 'left', 'let', 'mutating', 'none',
+                'nonmutating', 'open', 'operator', 'optional', 'override', 'postfix', 'precedence', 'prefix', 'private',
+                'protocol', 'public', 'rethrows', 'required', 'return', 'right', 'self', 'set', 'static', 'struct',
+                'subscript', 'super', 'switch', 'throw', 'throws', 'try', 'typealias', 'unowned', 'var', 'weak',
+                'where', 'while', 'willSet'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'nil', 'true'), rNumber],
+        'preprocessor': [
+            `#(?:${[
+                'available', 'colorLiteral', 'column', 'dsohandle', 'else', 'elseif', 'endif', 'error', 'file',
+                'fileID', 'fileLiteral', 'filePath', 'function', 'if', 'imageLiteral', 'keyPath', 'line', 'selector',
+                'sourceLocation', 'warning'
+            ].join('|')})\\b`
+        ],
+        'string': ['"""[\\s\\S]*?"""', rStringDouble]
     },
 
     // TypeScript
