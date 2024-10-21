@@ -453,6 +453,28 @@ endfunction
 unittestRunTest('testMarkdownUp_sessionStorage')
 
 
+function testMarkdownUp_urlObjectCreate():
+    unittestEqual(urlObjectCreate('Hello!', 'text/plain'), 'blob:text/plain-Hello!')
+    unittestEqual(urlObjectCreate('abcdefghijklmnopqrstuvwxyz', 'text/plain'), 'blob:text/plain-abcdefghijklmnopqrst')
+endfunction
+unittestRunTest('testMarkdownUp_urlObjectCreate')
+
+
+function testMarkdownUp_windowClipboardRead():
+    unittestEqual(windowClipboardRead(), '')
+    windowClipboardWrite('Hello!')
+    unittestEqual(windowClipboardRead(), 'Hello!')
+endfunction
+unittestRunTest('testMarkdownUp_windowClipboardRead')
+
+
+function testMarkdownUp_windowClipboardWrite():
+    windowClipboardWrite('Hello!')
+    unittestEqual(windowClipboardRead(), 'Hello!')
+endfunction
+unittestRunTest('testMarkdownUp_windowClipboardWrite')
+
+
 function testMarkdownUp_windowHeight():
     unittestEqual(windowHeight(), 768)
 endfunction

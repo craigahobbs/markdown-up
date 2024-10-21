@@ -23,7 +23,8 @@ markdownUpState = objectNew( \
     'drawingHeight', 480, \
     'drawingWidth', 640, \
     'localStorage', objectNew(), \
-    'sessionStorage', objectNew() \
+    'sessionStorage', objectNew(), \
+    'windowClipboard', '' \
 )
 
 
@@ -418,8 +419,28 @@ endfunction
 
 
 #
+# URL functions
+#
+
+
+function urlObjectCreate(data, contentType):
+    return 'blob:' + urlEncode(contentType) + '-' + urlEncode(if(stringLength(data) < 20, data, stringSlice(data, 0, 20)))
+endfunction
+
+
+#
 # Window functions
 #
+
+
+function windowClipboardRead():
+    return objectGet(markdownUpState, 'windowClipboard')
+endfunction
+
+
+function windowClipboardWrite(text):
+    return objectSet(markdownUpState, 'windowClipboard', text)
+endfunction
 
 
 function windowHeight():

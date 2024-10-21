@@ -121,7 +121,14 @@ function testUnittestMockAll():
     systemLog('Hello')
     systemLogDebug('Hello Debug')
 
+    # URL
+    unittestEqual(urlObjectCreate('Hello!', 'text/plain'), 'blob:text/plain-Hello!')
+    unittestEqual(urlObjectCreate('abcdefghijklmnopqrstuvwxyz', 'text/plain'), 'blob:text/plain-abcdefghijklmnopqrst')
+
     # Window
+    unittestEqual(windowClipboardRead(), '')
+    windowClipboardWrite('Hello!')
+    unittestEqual(windowClipboardRead(), 'Hello!')
     unittestEqual(windowHeight(), 768)
     windowSetLocation('test.html')
     windowSetResize(null)
