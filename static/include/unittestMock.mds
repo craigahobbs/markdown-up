@@ -25,7 +25,8 @@ unittestMockStateDefault = objectNew( \
     'drawingHeight', 480, \
     'drawingWidth', 640, \
     'localStorage', objectNew(), \
-    'sessionStorage', objectNew() \
+    'sessionStorage', objectNew(), \
+    'windowClipboard', '' \
 )
 unittestMockState = objectCopy(unittestMockStateDefault)
 
@@ -105,7 +106,12 @@ function unittestMockAll(data):
     unittestMockOneGeneric('systemLog')
     unittestMockOneGeneric('systemLogDebug')
 
+    # URL
+    unittestMockOne('urlObjectCreate', unittestMock_urlObjectCreate)
+
     # Window
+    unittestMockOne('windowClipboardRead', unittestMock_windowClipboardRead)
+    unittestMockOne('windowClipboardWrite', unittestMock_windowClipboardWrite)
     unittestMockOne('windowHeight', unittestMock_windowHeight)
     unittestMockOneGeneric('windowSetLocation')
     unittestMockOneGeneric('windowSetResize')
@@ -416,8 +422,28 @@ endfunction
 
 
 #
+# URL functions
+#
+
+
+function unittestMock_urlObjectCreate(data, contentType):
+    return 'blob:' + urlEncode(contentType) + '-' + urlEncode(if(stringLength(data) < 20, data, stringSlice(data, 0, 20)))
+endfunction
+
+
+#
 # Window functions
 #
+
+
+function unittestMock_windowClipboardRead():
+    return objectGet(unittestMockState, 'windowClipboard')
+endfunction
+
+
+function unittestMock_windowClipboardWrite(text):
+    objectSet(unittestMockState, 'windowClipboard', text)
+endfunction
 
 
 function unittestMock_windowHeight():
