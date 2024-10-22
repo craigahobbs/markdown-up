@@ -4,7 +4,6 @@
 /** @module lib/highlight */
 
 import {getStructMembers, validateType} from '../../schema-markdown/lib/schema.js';
-import {escapeMarkdownText} from './parser.js';
 import {parseSchemaMarkdown} from '../../schema-markdown/lib/parser.js';
 
 
@@ -190,8 +189,16 @@ struct Highlight
 
 // Helper to create a word list regular expression
 function createWordListRegex(...words) {
-    return `\\b(?:${words.map((str) => escapeMarkdownText(str)).join('|')})\\b`;
+    return `\\b(?:${words.map((str) => escapeRegexText(str)).join('|')})\\b`;
 }
+
+
+// Helper to escape regular expression text
+function escapeRegexText(text) {
+    return text.replace(rRegexEscape, '\\$&');
+}
+
+const rRegexEscape = /[.*+?^${}()|[\]\\]/g;
 
 
 // Common regular expression source
@@ -351,6 +358,51 @@ const highlightBuiltin = compileHighlightModels([
         'string': ['@"(?:[^"]|"")*"', rStringSingle, rStringDouble]
     },
 
+    // CSS
+    {
+        'names': ['css'],
+        'comment': [rCommentSlashStar],
+        'keyword': [
+            `\\b(?:${[
+                'align-content', 'align-items', 'align-self', 'animation', 'animation-delay', 'animation-direction',
+                'animation-duration', 'animation-fill-mode', 'animation-iteration-count', 'animation-name',
+                'animation-play-state', 'animation-timing-function', 'background', 'background-attachment',
+                'background-blend-mode', 'background-clip', 'background-color', 'background-image', 'background-origin',
+                'background-position', 'background-repeat', 'background-size', 'border', 'border-bottom',
+                'border-bottom-color', 'border-bottom-left-radius', 'border-bottom-right-radius', 'border-bottom-style',
+                'border-bottom-width', 'border-collapse', 'border-color', 'border-image', 'border-image-outset',
+                'border-image-repeat', 'border-image-slice', 'border-image-source', 'border-image-width', 'border-left',
+                'border-left-color', 'border-left-style', 'border-left-width', 'border-radius', 'border-right',
+                'border-right-color', 'border-right-style', 'border-right-width', 'border-spacing', 'border-style',
+                'border-top', 'border-top-color', 'border-top-left-radius', 'border-top-right-radius',
+                'border-top-style', 'border-top-width', 'border-width', 'bottom', 'box-shadow', 'box-sizing',
+                'caption-side', 'clear', 'clip', 'color', 'column-count', 'column-fill', 'column-gap', 'column-rule',
+                'column-rule-color', 'column-rule-style', 'column-rule-width', 'column-span', 'column-width', 'columns',
+                'content', 'counter-increment', 'counter-reset', 'cursor', 'direction', 'display', 'empty-cells',
+                'flex', 'flex-basis', 'flex-direction', 'flex-flow', 'flex-grow', 'flex-shrink', 'flex-wrap', 'float',
+                'font', 'font-family', 'font-size', 'font-style', 'font-variant', 'font-weight', 'height',
+                'justify-content', 'left', 'letter-spacing', 'line-height', 'list-style', 'list-style-image',
+                'list-style-position', 'list-style-type', 'margin', 'margin-bottom', 'margin-left', 'margin-right',
+                'margin-top', 'max-height', 'max-width', 'min-height', 'min-width', 'opacity', 'order', 'outline',
+                'outline-color', 'outline-offset', 'outline-style', 'outline-width', 'overflow', 'overflow-x',
+                'overflow-y', 'padding', 'padding-bottom', 'padding-left', 'padding-right', 'padding-top',
+                'page-break-after', 'page-break-before', 'page-break-inside', 'perspective', 'perspective-origin',
+                'position', 'quotes', 'resize', 'right', 'table-layout', 'text-align', 'text-decoration',
+                'text-decoration-color', 'text-decoration-line', 'text-decoration-style', 'text-indent',
+                'text-overflow', 'text-shadow', 'text-transform', 'top', 'transform', 'transform-origin',
+                'transform-style', 'transition', 'transition-delay', 'transition-duration', 'transition-property',
+                'transition-timing-function', 'vertical-align', 'visibility', 'white-space', 'width', 'word-break',
+                'word-spacing', 'word-wrap', 'z-index'
+            ].map((text) => escapeRegexText(text)).join('|')}):`
+        ],
+        'literal': [
+            '#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\\b',
+            '(?:\\b|[-+]?)(?:\\d*\\.\\d+|\\d+)(?:[eE][-+]?\\d+)?(?:(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)\\b|%)?'
+        ],
+        'preprocessor': ['@\\w+'],
+        'string': [rStringSingle, rStringDouble]
+    },
+
     // Go
     {
         'names': ['go', 'golang'],
@@ -448,6 +500,41 @@ const highlightBuiltin = compileHighlightModels([
         'string': [rStringDouble]
     },
 
+    // Lua
+    {
+        'names': ['lua'],
+        'builtin': [
+            createWordListRegex(
+                'assert', 'collectgarbage', 'coroutine', 'coroutine.create', 'coroutine.resume', 'coroutine.running',
+                'coroutine.status', 'coroutine.wrap', 'coroutine.yield', 'debug', 'debug.debug', 'debug.gethook',
+                'debug.getinfo', 'debug.getlocal', 'debug.getmetatable', 'debug.getregistry', 'debug.getupvalue',
+                'debug.sethook', 'debug.setlocal', 'debug.setmetatable', 'debug.setupvalue', 'debug.traceback',
+                'dofile', 'error', 'getmetatable', 'io', 'ipairs', 'load', 'loadfile', 'math', 'math.abs', 'math.acos',
+                'math.asin', 'math.atan', 'math.ceil', 'math.cos', 'math.deg', 'math.exp', 'math.floor', 'math.fmod',
+                'math.huge', 'math.log', 'math.max', 'math.maxinteger', 'math.min', 'math.mininteger', 'math.modf',
+                'math.pi', 'math.rad', 'math.random', 'math.randomseed', 'math.sin', 'math.sqrt', 'math.tan',
+                'math.tointeger', 'math.type', 'math.ult', 'next', 'os', 'os.clock', 'os.date', 'os.difftime',
+                'os.execute', 'os.exit', 'os.getenv', 'os.remove', 'os.rename', 'os.setlocale', 'os.time', 'os.tmpname',
+                'package', 'package.loadlib', 'package.searchpath', 'pairs', 'pcall', 'print', 'rawequal', 'rawget',
+                'rawlen', 'rawset', 'select', 'setmetatable', 'string', 'string.byte', 'string.char', 'string.dump',
+                'string.find', 'string.format', 'string.gmatch', 'string.gsub', 'string.len', 'string.lower',
+                'string.match', 'string.pack', 'string.packsize', 'string.rep', 'string.reverse', 'string.sub',
+                'string.unpack', 'string.upper', 'table', 'table.concat', 'table.insert', 'table.move', 'table.pack',
+                'table.remove', 'table.sort', 'table.unpack', 'tonumber', 'tostring', 'type', 'utf8', 'utf8.char',
+                'utf8.charpattern', 'utf8.codepoint', 'utf8.codes', 'utf8.len', 'utf8.offset', 'xpcall'
+            )
+        ],
+        'comment': ['--\\[(?<luaComment>=*)\\[[\\s\\S]*?\\]\\k<luaComment>\\]', '--.*$'],
+        'keyword': [
+            createWordListRegex(
+                'and', 'break', 'do', 'else', 'elseif', 'end', 'for', 'function', 'goto', 'if', 'in', 'local', 'not',
+                'or', 'repeat', 'return', 'then', 'until', 'while'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'nil', 'true'), rNumber],
+        'string': [rStringSingle, rStringDouble, '\\[(?<luaString>=*)\\[[\\s\\S]*?\\]\\k<luaString>\\]']
+    },
+
     // Makefile
     {
         'names': ['makefile', 'make', 'mf', 'bsdmake'],
@@ -531,6 +618,30 @@ const highlightBuiltin = compileHighlightModels([
         ],
         'literal': [createWordListRegex('False', 'True', 'None'), rNumber],
         'string': ["'''[\\s\\S]*?'''", '"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
+    },
+
+    // R
+    {
+        'names': ['r', 'rscript', 'splus'],
+        'builtin': [
+            createWordListRegex(
+                'abs', 'acos', 'acosh', 'all', 'any', 'anyNA', 'as.character', 'as.complex', 'as.double', 'as.integer',
+                'as.logical', 'as.numeric', 'attr', 'attributes', 'c', 'call', 'ceiling', 'class', 'colnames', 'cos',
+                'cosh', 'cummax', 'cummin', 'cumprod', 'cumsum', 'data.frame', 'deparse', 'dim', 'dimnames', 'exp',
+                'floor', 'get', 'grep', 'grepl', 'identical', 'is.na', 'length', 'list', 'log', 'log10', 'log2', 'max',
+                'mean', 'min', 'names', 'nchar', 'paste', 'paste0', 'print', 'prod', 'rbind', 'rep', 'return', 'round',
+                'rownames', 'seq', 'sin', 'sinh', 'sqrt', 'sum', 'tan', 'tanh'
+            )
+        ],
+        'comment': [rCommentHash],
+        'keyword': [
+            createWordListRegex('break', 'else', 'for', 'function', 'if', 'in', 'next', 'repeat', 'while')
+        ],
+        'literal': [
+            createWordListRegex('FALSE', 'Inf', 'NA', 'NA_character_', 'NA_complex_', 'NA_integer_', 'NA_real_', 'NaN', 'NULL', 'TRUE'),
+            rNumber
+        ],
+        'string': [rStringSingle, rStringDouble]
     },
 
     // Rust
