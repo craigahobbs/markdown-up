@@ -441,7 +441,13 @@ function unittestMock_windowClipboardRead():
 endfunction
 
 
-function unittestMock_windowClipboardWrite(text):
+function unittestMock_windowClipboardWrite(args...):
+    text = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('windowClipboardWrite', args))
+
+    # Update the mock state
     objectSet(unittestMockState, 'windowClipboard', text)
 endfunction
 
