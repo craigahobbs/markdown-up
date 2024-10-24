@@ -54,7 +54,7 @@ export function compileHighlightModels(highlights) {
         for (const memberName of getStructMembers(highlightTypes, highlightTypes.Highlight.struct).map((member) => member.name)) {
             if (memberName !== 'names' && memberName in highlight) {
                 const part = highlight[memberName].map((str) => `(?:${str})`).join('|');
-                highlightRegex[memberName] = new RegExp(`^(?:${part})`, 'm');
+                highlightRegex[memberName] = new RegExp(`^(?:${part})`);
                 parts.push(part);
             }
         }
