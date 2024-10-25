@@ -205,7 +205,7 @@ const rRegexEscape = /[.*+?^${}()|[\]\\]/g;
 const rCommentHash = '#.*$';
 const rCommentSlashSlash = '\\/\\/.*$';
 const rCommentSlashStar = '\\/\\*[\\s\\S]*?\\*\\/';
-const rNumber = '(?:\\b|[+-])\\d+(?:\\.\\d*)?(?:e[+-]\\d+)?\\b';
+const rNumber = '(?:\\b|[-+])(?:0x[\\da-fA-F]+|\\d*\\.?\\d+(?:e[-+]?\\d+)?)';
 const rStringSingle = "'(?:[^'\\\\]|\\\\.)*'";
 const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
@@ -397,7 +397,7 @@ const highlightBuiltin = compileHighlightModels([
         ],
         'literal': [
             '#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?\\b',
-            '(?:\\b|[-+]?)(?:\\d*\\.\\d+|\\d+)(?:[eE][-+]?\\d+)?(?:(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)\\b|%)?'
+            '(?:\\b|[-+])(?:\\d*\\.\\d+|\\d+)(?:[eE][-+]?\\d+)?(?:(?:px|em|rem|%|vh|vw|vmin|vmax|cm|mm|in|pt|pc|ex|ch)\\b|%)?'
         ],
         'preprocessor': ['@\\w+'],
         'string': [rStringSingle, rStringDouble]
@@ -591,6 +591,71 @@ const highlightBuiltin = compileHighlightModels([
         'tag': [
             // Titles
             '^ *#.*$'
+        ]
+    },
+
+    // PowerShell
+    {
+        'names': ['powershell', 'posh', 'pwsh'],
+        'builtin': [
+            createWordListRegex(
+                'Add-Content', 'Add-Member', 'Clear-Content', 'Clear-Host', 'Clear-Item', 'Clear-Variable',
+                'Compare-Object', 'ConvertFrom-Json', 'Convert-Path', 'ConvertTo-Html', 'ConvertTo-Json', 'Copy-Item',
+                'Enter-PSSession', 'Export-Csv', 'Export-Json', 'ForEach-Object', 'Format-List', 'Format-Table',
+                'Get-Alias', 'Get-ChildItem', 'Get-Command', 'Get-Content', 'Get-Date', 'Get-Help', 'Get-Item',
+                'Get-ItemProperty', 'Get-Location', 'Get-Member', 'Get-Process', 'Get-Service', 'Get-Variable',
+                'Group-Object', 'Import-Csv', 'Import-Module', 'Invoke-Command', 'Invoke-Expression',
+                'Invoke-WebRequest', 'Measure-Object', 'Move-Item', 'New-Alias', 'New-Item', 'New-Module', 'New-Object',
+                'New-PSSession', 'New-Variable', 'Out-File', 'Out-Host', 'Out-Null', 'Read-Host', 'Remove-Item',
+                'Remove-Variable', 'Rename-Item', 'Select-Object', 'Set-Alias', 'Set-Content', 'Set-Item',
+                'Set-Location', 'Set-Variable', 'Sort-Object', 'Split-Path', 'Start-Process', 'Stop-Process',
+                'Test-Connection', 'Test-Path', 'Where-Object', 'Write-Host', 'Write-Output'
+            )
+        ],
+        'comment': [
+            // Hash comments (but not preprocessor)
+            '#(?![a-z]).*$',
+            // Block comments
+            '<#[\\s\\S]*?#>'
+        ],
+        'keyword': [
+            createWordListRegex(
+                'begin', 'break', 'catch', 'class', 'configuration', 'continue', 'data', 'define', 'do', 'dynamicparam',
+                'else', 'elseif', 'end', 'enum', 'exit', 'filter', 'finally', 'for', 'foreach', 'from', 'function',
+                'hidden', 'if', 'in', 'inlinescript', 'parallel', 'param', 'process', 'return', 'sequence', 'static',
+                'switch', 'throw', 'trap', 'try', 'until', 'using', 'var', 'while', 'workflow'
+            )
+        ],
+        'literal': [
+            // Boolean and null literals
+            '\\$(?:true|false|null)\\b',
+            // Arrays
+            '@\\([^)]*\\)',
+            // Hash tables
+            '@\\{[^}]*\\}',
+            // Common type literals
+            '\\[(?:string|int|long|bool|byte|char|decimal|double|float|array|hashtable|switch|xml)\\]',
+            rNumber
+        ],
+        'preprocessor': [
+            // Module and namespace requirements
+            '^\\s*(?:requires|using)\\s+(?:module|namespace)\\s+[A-Za-z0-9_.-]+\\s*$',
+            // PowerShell requirement statements
+            '#requires\\s+-(?:Version|PSEdition|RunAsAdministrator|Modules)\\b',
+            // Region start
+            '#region\\b[^\\n]*',
+            // Region end
+            '#endregion\\b[^\\n]*'
+        ],
+        'string': [
+            // Here-string with variable expansion
+            '@"[\\s\\S]*?"@',
+            // Here-string without variable expansion
+            '@\'[\\s\\S]*?\'@',
+            rStringSingle,
+            rStringDouble,
+            // Variable expansion expressions
+            '\\$\\([^)]+\\)'
         ]
     },
 
@@ -796,6 +861,76 @@ const highlightBuiltin = compileHighlightModels([
         'string': ['"""[\\s\\S]*?"""', rStringDouble]
     },
 
+    // SystemVerilog
+    {
+        'names': ['systemverilog', 'verilog'],
+        'builtin': [
+            createWordListRegex(
+                '$bits', '$bitstoreal', '$bitstoshortreal', '$cast', '$countbits', '$countones', '$display', '$error',
+                '$exit', '$fatal', '$fell', '$feof', '$fgets', '$finish', '$floor', '$fopen', '$fscanf', '$fwrite',
+                '$getc', '$high', '$increment', '$info', '$isunbounded', '$isunknown', '$left', '$length', '$low',
+                '$monitor', '$onehot', '$onehot0', '$random', '$readmemb', '$readmemh', '$realtime', '$realtobits',
+                '$right', '$rose', '$sampled', '$shortrealtobits', '$signed', '$size', '$stable', '$stop', '$strobe',
+                '$system', '$test$plusargs', '$time', '$timeformat', '$timescale', '$typename', '$undefined',
+                '$unsigned', '$urandom', '$urandom_range', '$value$plusargs', '$warning', '$width', '$write'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'accept_on', 'alias', 'always', 'always_comb', 'always_ff', 'always_latch', 'and', 'assert', 'assign',
+                'assume', 'automatic', 'before', 'begin', 'bind', 'bins', 'binsof', 'bit', 'break', 'buf', 'bufif0',
+                'bufif1', 'byte', 'case', 'casex', 'casez', 'cell', 'chandle', 'checker', 'class', 'clocking', 'cmos',
+                'config', 'const', 'constraint', 'context', 'continue', 'cover', 'covergroup', 'coverpoint', 'cross',
+                'deassign', 'default', 'defparam', 'design', 'disable', 'dist', 'do', 'edge', 'else', 'end', 'endcase',
+                'endchecker', 'endclass', 'endclocking', 'endconfig', 'endfunction', 'endgenerate', 'endgroup',
+                'endinterface', 'endmodule', 'endpackage', 'endprimitive', 'endprogram', 'endproperty', 'endsequence',
+                'endspecify', 'endtable', 'endtask', 'enum', 'event', 'eventually', 'expect', 'export', 'extends',
+                'extern', 'final', 'first_match', 'for', 'force', 'foreach', 'forever', 'fork', 'forkjoin', 'function',
+                'generate', 'genvar', 'global', 'highz0', 'highz1', 'if', 'iff', 'ifnone', 'ignore_bins',
+                'illegal_bins', 'implements', 'implies', 'import', 'incdir', 'include', 'initial', 'inout', 'input',
+                'inside', 'instance', 'int', 'integer', 'interface', 'intersect', 'join', 'join_any', 'join_none',
+                'large', 'let', 'liblist', 'library', 'local', 'localparam', 'logic', 'longint', 'macromodule',
+                'matches', 'medium', 'modport', 'module', 'nand', 'negedge', 'nettype', 'new', 'nexttime', 'nmos',
+                'nor', 'noshowcancelled', 'not', 'notif0', 'notif1', 'null', 'or', 'output', 'package', 'packed',
+                'parameter', 'pmos', 'posedge', 'primitive', 'priority', 'program', 'property', 'protected', 'pull0',
+                'pull1', 'pulldown', 'pullup', 'pulsestyle_ondetect', 'pulsestyle_onevent', 'pure', 'rand', 'randc',
+                'randcase', 'randsequence', 'rcmos', 'real', 'realtime', 'ref', 'reg', 'reject_on', 'release', 'repeat',
+                'restrict', 'return', 'rnmos', 'rpmos', 'rtran', 'rtranif0', 'rtranif1', 's_always', 's_eventually',
+                's_nexttime', 's_until', 's_until_with', 'scalared', 'sequence', 'shortint', 'shortreal',
+                'showcancelled', 'signed', 'small', 'solve', 'specify', 'specparam', 'static', 'string', 'strong',
+                'strong0', 'strong1', 'struct', 'super', 'supply0', 'supply1', 'sync_accept_on', 'sync_reject_on',
+                'table', 'tagged', 'task', 'this', 'throughout', 'time', 'timeprecision', 'timeunit', 'tran', 'tranif0',
+                'tranif1', 'tri', 'tri0', 'tri1', 'triand', 'trior', 'trireg', 'type', 'typedef', 'union', 'unique',
+                'unique0', 'unsigned', 'until', 'until_with', 'untyped', 'use', 'uwire', 'var', 'vectored', 'virtual',
+                'void', 'wait', 'wait_order', 'wand', 'weak', 'weak0', 'weak1', 'while', 'wildcard', 'wire', 'with',
+                'within', 'wor', 'xnor', 'xor'
+            )
+        ],
+        'literal': [
+            // Special tick values
+            "'[01xXzZ]\\b",
+            // Boolean literals and null
+            createWordListRegex('1step', 'FALSE', 'TRUE', 'false', 'true', 'null'),
+            // Real numbers with optional exponents
+            '\\b\\d+(?:_\\d+)*\\.\\d+(?:_\\d+)*(?:e[-+]?\\d+(?:_\\d+)*)?\\b',
+            // Based numbers with size specification
+            "\\b\\d+(?:_\\d+)*'[sS]?[bBoOdDhH][0-9a-fA-F_xXzZ]+\\b",
+            // Based numbers without size (default 32-bit)
+            "'[sS]?[bBoOdDhH][0-9a-fA-F_xXzZ]+\\b",
+            // Basic numbers
+            '\\b\\d+(?:_\\d+)*\\b'
+        ],
+        'preprocessor': [
+            `^[ \\t]*\`(?:${[
+                'begin_keywords', 'celldefine', 'default_nettype', 'define', 'else', 'elsif', 'end_keywords',
+                'endcelldefine', 'endif', 'ifdef', 'ifndef', 'include', 'line', 'nounconnected_drive', 'pragma',
+                'resetall', 'timescale', 'unconnected_drive', 'undef', 'undefineall'
+            ].join('|')})\\b`
+        ],
+        'string': [rStringSingle, rStringDouble]
+    },
+
     // TypeScript
     {
         'names': ['typescript', 'ts'],
@@ -842,5 +977,29 @@ const highlightBuiltin = compileHighlightModels([
         ],
         'string': [rStringSingle, rStringDouble],
         'tag': ['<\\/?\\s*(?:[A-Za-z_][A-Za-z0-9_.:-]*)']
+    },
+
+    // YAML
+    {
+        'names': ['yaml', 'yml'],
+        'comment': [rCommentHash],
+        'literal': [
+            // Boolean literals and null
+            createWordListRegex(
+                'false', 'False', 'FALSE', 'no', 'No', 'NO', 'null', 'Null', 'NULL', 'off', 'Off', 'OFF',
+                'on', 'On', 'ON', 'true', 'True', 'TRUE', 'yes', 'Yes', 'YES', '~'
+            ),
+            // Dates (ISO 8601) - must come before numbers!
+            '\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[-+]\\d{2}:?\\d{2})?)?',
+            // Numbers
+            rNumber
+        ],
+        'string': [rStringSingle, rStringDouble],
+        'tag': [
+            // Key indicators
+            '^[ \\t]*.+?:\\s',
+            // List item markers
+            '^[ \\t]*-\\s'
+        ]
     }
 ]);
