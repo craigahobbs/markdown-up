@@ -594,6 +594,41 @@ const highlightBuiltin = compileHighlightModels([
         ]
     },
 
+    // PHP
+    {
+        'names': ['php'],
+        'builtin': [
+            createWordListRegex(
+                'array_filter', 'array_key_exists', 'array_keys', 'array_map', 'array_merge', 'array_pop', 'array_push',
+                'array_shift', 'array_slice', 'array_unshift', 'array_values', 'count', 'date', 'define', 'explode',
+                'fclose', 'file_exists', 'file_get_contents', 'file_put_contents', 'fopen', 'header', 'htmlentities',
+                'htmlspecialchars', 'implode', 'in_array', 'is_array', 'is_null', 'is_numeric', 'is_string',
+                'json_decode', 'json_encode', 'mysqli_query', 'preg_match', 'preg_replace', 'print_r', 'session_start',
+                'sort', 'sprintf', 'str_replace', 'strlen', 'strpos', 'strtolower', 'substr', 'time', 'trim', 'var_dump'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar, rCommentHash],
+        'keyword': [
+            createWordListRegex(
+                '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class',
+                'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif', 'empty',
+                'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit', 'extends',
+                'final', 'finally', 'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include',
+                'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list', 'match', 'namespace', 'new',
+                'or', 'print', 'private', 'protected', 'public', 'require', 'require_once', 'return', 'static',
+                'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor', 'yield', 'yield from'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'null', 'true'), rNumber],
+        'preprocessor': ['^[ \\t]*#(?:include|require)\\b'],
+        'string': [
+            rStringSingle,
+            rStringDouble,
+            '<<<[\'"]?(?<phpString>[A-Za-z_][A-Za-z0-9_]*)[\'"]?[\\s\\S]+?\\k<phpString>(;?|\\b)',
+            '`(?:[^`\\\\]|\\\\.)*`'
+        ]
+    },
+
     // PowerShell
     {
         'names': ['powershell', 'posh', 'pwsh'],
@@ -705,6 +740,31 @@ const highlightBuiltin = compileHighlightModels([
         'literal': [
             createWordListRegex('FALSE', 'Inf', 'NA', 'NA_character_', 'NA_complex_', 'NA_integer_', 'NA_real_', 'NaN', 'NULL', 'TRUE'),
             rNumber
+        ],
+        'string': [rStringSingle, rStringDouble]
+    },
+
+    // Ruby
+    {
+        'names': ['ruby', 'rb', 'jruby', 'macruby', 'rake', 'rbx'],
+        'builtin': [
+            createWordListRegex(
+                'Array', 'Class', 'Dir', 'File', 'Hash', 'Integer', 'Module', 'Object', 'String', 'lambda', 'print',
+                'proc', 'puts', 'raise', 'require', 'require_relative'
+            )
+        ],
+        'comment': [rCommentHash, '=begin\\b[\\s\\S]*?^=end\\b'],
+        'keyword': [
+            createWordListRegex(
+                'alias', 'and', 'begin', 'break', 'case', 'class', 'def', 'do', 'else', 'elsif', 'end', 'ensure',
+                'false', 'if', 'module', 'nil', 'not', 'or', 'rescue', 'return', 'self', 'super', 'then', 'true',
+                'unless', 'until', 'when', 'while', 'yield'
+            )
+        ],
+        'literal': [rNumber, ':[a-zA-Z_][a-zA-Z0-9_]*\\b'],
+        'preprocessor': [
+            '^[ \\t]*(?:__END__|require|include|extend)\\b',
+            '@{1,2}[a-zA-Z_][a-zA-Z0-9_]*\\b'
         ],
         'string': [rStringSingle, rStringDouble]
     },
