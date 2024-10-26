@@ -500,6 +500,33 @@ const highlightBuiltin = compileHighlightModels([
         'string': [rStringDouble]
     },
 
+    // Kotlin
+    {
+        'names': ['kotlin'],
+        'builtin': [
+            createWordListRegex(
+                'Any', 'Array', 'Boolean', 'Byte', 'Char', 'CharSequence', 'Class', 'Collection', 'Comparable',
+                'Double', 'Enum', 'Float', 'Function', 'Int', 'Iterable', 'List', 'Long', 'Map', 'Nothing', 'Number',
+                'Object', 'Pair', 'Range', 'Regex', 'Set', 'Short', 'String', 'Triple', 'Unit'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'abstract', 'actual', 'annotation', 'as', 'break', 'by', 'catch', 'class', 'companion', 'const',
+                'constructor', 'continue', 'crossinline', 'data', 'delegate', 'do', 'dynamic', 'else', 'enum', 'expect',
+                'external', 'field', 'file', 'final', 'finally', 'for', 'fun', 'get', 'if', 'import', 'in', 'infix',
+                'init', 'inline', 'inner', 'interface', 'internal', 'is', 'lateinit', 'noinline', 'object', 'open',
+                'operator', 'out', 'override', 'package', 'private', 'protected', 'public', 'reified', 'return',
+                'sealed', 'set', 'super', 'suspend', 'tailrec', 'this', 'throw', 'try', 'typealias', 'val', 'var',
+                'vararg', 'when', 'where', 'while'
+            )
+        ],
+        'literal': [createWordListRegex('false', 'null', 'true'), rNumber],
+        'preprocessor': ['@\\w+'],
+        'string': ['"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
+    },
+
     // Lua
     {
         'names': ['lua'],
@@ -624,7 +651,7 @@ const highlightBuiltin = compileHighlightModels([
         'string': [
             rStringSingle,
             rStringDouble,
-            '<<<[\'"]?(?<phpString>[A-Za-z_][A-Za-z0-9_]*)[\'"]?[\\s\\S]+?\\k<phpString>(;?|\\b)',
+            '<<<(?<phpString>[A-Za-z_][A-Za-z0-9_]*)[\\s\\S]+?\\k<phpString>(;?|\\b)',
             '`(?:[^`\\\\]|\\\\.)*`'
         ]
     },
@@ -634,25 +661,12 @@ const highlightBuiltin = compileHighlightModels([
         'names': ['powershell', 'posh', 'pwsh'],
         'builtin': [
             createWordListRegex(
-                'Add-Content', 'Add-Member', 'Clear-Content', 'Clear-Host', 'Clear-Item', 'Clear-Variable',
-                'Compare-Object', 'ConvertFrom-Json', 'Convert-Path', 'ConvertTo-Html', 'ConvertTo-Json', 'Copy-Item',
-                'Enter-PSSession', 'Export-Csv', 'Export-Json', 'ForEach-Object', 'Format-List', 'Format-Table',
-                'Get-Alias', 'Get-ChildItem', 'Get-Command', 'Get-Content', 'Get-Date', 'Get-Help', 'Get-Item',
-                'Get-ItemProperty', 'Get-Location', 'Get-Member', 'Get-Process', 'Get-Service', 'Get-Variable',
-                'Group-Object', 'Import-Csv', 'Import-Module', 'Invoke-Command', 'Invoke-Expression',
-                'Invoke-WebRequest', 'Measure-Object', 'Move-Item', 'New-Alias', 'New-Item', 'New-Module', 'New-Object',
-                'New-PSSession', 'New-Variable', 'Out-File', 'Out-Host', 'Out-Null', 'Read-Host', 'Remove-Item',
-                'Remove-Variable', 'Rename-Item', 'Select-Object', 'Set-Alias', 'Set-Content', 'Set-Item',
-                'Set-Location', 'Set-Variable', 'Sort-Object', 'Split-Path', 'Start-Process', 'Stop-Process',
-                'Test-Connection', 'Test-Path', 'Where-Object', 'Write-Host', 'Write-Output'
+                'ForEach-Object', 'Get-Command', 'Get-Content', 'Get-Help', 'Import-Module', 'Out-Host', 'Out-Null',
+                'Read-Host', 'Select-Object', 'Test-Path', 'Where-Object', 'Write-Error', 'Write-Host', 'Write-Output',
+                'Write-Warning'
             )
         ],
-        'comment': [
-            // Hash comments (but not preprocessor)
-            '#(?![a-z]).*$',
-            // Block comments
-            '<#[\\s\\S]*?#>'
-        ],
+        'comment': ['#(?![a-z]).*$', '<#[\\s\\S]*?#>'],
         'keyword': [
             createWordListRegex(
                 'begin', 'break', 'catch', 'class', 'configuration', 'continue', 'data', 'define', 'do', 'dynamicparam',
@@ -661,37 +675,9 @@ const highlightBuiltin = compileHighlightModels([
                 'switch', 'throw', 'trap', 'try', 'until', 'using', 'var', 'while', 'workflow'
             )
         ],
-        'literal': [
-            // Boolean and null literals
-            '\\$(?:true|false|null)\\b',
-            // Arrays
-            '@\\([^)]*\\)',
-            // Hash tables
-            '@\\{[^}]*\\}',
-            // Common type literals
-            '\\[(?:string|int|long|bool|byte|char|decimal|double|float|array|hashtable|switch|xml)\\]',
-            rNumber
-        ],
-        'preprocessor': [
-            // Module and namespace requirements
-            '^\\s*(?:requires|using)\\s+(?:module|namespace)\\s+[A-Za-z0-9_.-]+\\s*$',
-            // PowerShell requirement statements
-            '#requires\\s+-(?:Version|PSEdition|RunAsAdministrator|Modules)\\b',
-            // Region start
-            '#region\\b[^\\n]*',
-            // Region end
-            '#endregion\\b[^\\n]*'
-        ],
-        'string': [
-            // Here-string with variable expansion
-            '@"[\\s\\S]*?"@',
-            // Here-string without variable expansion
-            '@\'[\\s\\S]*?\'@',
-            rStringSingle,
-            rStringDouble,
-            // Variable expansion expressions
-            '\\$\\([^)]+\\)'
-        ]
+        'literal': ['\\$(?:true|True|false|False|null|Null)\\b', rNumber],
+        'preprocessor': ['^[ \\t]*#(?:requires|region|endregion)\\b'],
+        'string': ['@"[\\s\\S]*?"@', '@\'[\\s\\S]*?\'@', rStringSingle, rStringDouble]
     },
 
     // Python
@@ -807,6 +793,32 @@ const highlightBuiltin = compileHighlightModels([
             'r#"(?:[^"]|"(?!#))*"#',
             'r##"(?:[^"]|"(?!##))*"##'
         ]
+    },
+
+    // Scala
+    {
+        'names': ['scala'],
+        'builtin': [
+            createWordListRegex(
+                'Array', 'ArrayBuffer', 'Boolean', 'Byte', 'Char', 'Collection', 'Double', 'Either', 'Float', 'Future',
+                'Int', 'Iterable', 'List', 'Long', 'Map', 'Option', 'Ordering', 'Promise', 'Range', 'Seq', 'Set',
+                'Short', 'String', 'StringBuilder', 'StringContext', 'Symbol', 'Timer', 'Tuple1', 'Tuple2', 'Tuple3',
+                'Unit', 'Vector', 'filter', 'flatMap', 'fold', 'foreach', 'map', 'mkString', 'println', 'printf',
+                'readLine', 'reduce', 'reverse', 'sorted', 'sys', 'zip'
+            )
+        ],
+        'comment': [rCommentSlashSlash, rCommentSlashStar],
+        'keyword': [
+            createWordListRegex(
+                'abstract', 'case', 'catch', 'class', 'def', 'do', 'else', 'enum', 'extends', 'false', 'final',
+                'finally', 'for', 'forSome', 'given', 'if', 'implicit', 'import', 'lazy', 'match', 'new', 'null',
+                'object', 'override', 'package', 'private', 'protected', 'return', 'sealed', 'super', 'then', 'this',
+                'throw', 'trait', 'try', 'true', 'type', 'using', 'val', 'var', 'while', 'with', 'yield'
+            )
+        ],
+        'literal': [createWordListRegex('true', 'false', 'null'), rNumber],
+        'preprocessor': ['@\\w+'],
+        'string': ['"""[\\s\\S]*?"""', rStringSingle, rStringDouble]
     },
 
     // Schema Markdown
@@ -1044,22 +1056,15 @@ const highlightBuiltin = compileHighlightModels([
         'names': ['yaml', 'yml'],
         'comment': [rCommentHash],
         'literal': [
-            // Boolean literals and null
             createWordListRegex(
                 'false', 'False', 'FALSE', 'no', 'No', 'NO', 'null', 'Null', 'NULL', 'off', 'Off', 'OFF',
                 'on', 'On', 'ON', 'true', 'True', 'TRUE', 'yes', 'Yes', 'YES', '~'
             ),
             // Dates (ISO 8601) - must come before numbers!
             '\\d{4}-\\d{2}-\\d{2}(?:T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[-+]\\d{2}:?\\d{2})?)?',
-            // Numbers
             rNumber
         ],
         'string': [rStringSingle, rStringDouble],
-        'tag': [
-            // Key indicators
-            '^[ \\t]*.+?:\\s',
-            // List item markers
-            '^[ \\t]*-\\s'
-        ]
+        'tag': ['^[ \\t]*.+?:\\s', '^[ \\t]*-\\s']
     }
 ]);
