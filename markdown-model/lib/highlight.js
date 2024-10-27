@@ -212,6 +212,35 @@ const rStringDouble = '"(?:[^"\\\\]|\\\\.)*"';
 
 // The map of code block language name/alias to code block render functions
 const highlightBuiltin = compileHighlightModels([
+    // Assembly
+    {
+        'names': ['assembly', 'asm', 'nasm', 'gas'],
+        'builtin': [
+            createWordListRegex(
+                // x86/x64 (general, stack, base pointers - both 32 and 64 bit)
+                'al', 'bl', 'cl', 'dl', 'eax', 'ebx', 'ecx', 'edx', 'esp', 'ebp', 'esi', 'edi', 'rax', 'rbx', 'rcx',
+                'rdx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11',
+                // ARM core registers
+                'r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10', 'r11', 'r12', 'sp', 'lr', 'pc',
+                // RISC-V core registers
+                'zero', 'ra', 'sp', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 't0', 't1', 's0', 's1'
+            )
+        ],
+        'comment': [';.*$', rCommentHash],
+        'keyword': [
+            createWordListRegex(
+                'mov', 'push', 'pop', 'lea', 'add', 'sub', 'mul', 'div', 'inc', 'dec', 'and', 'or', 'xor', 'not', 'shl',
+                'shr', 'jmp', 'je', 'jne', 'jz', 'jg', 'jl', 'call', 'ret', 'cmp', 'test'
+            )
+        ],
+        'preprocessor': [
+            '^[ \\t]*[%.]?(?:section|global|extern|equ|byte|word|dword|ascii|include)\\b'
+        ],
+        'literal': ['\\b[0-9][0-9a-fA-F]*h\\b', '\\b[01]+b\\b', rNumber],
+        'string': [rStringSingle, rStringDouble],
+        'tag': ['^[ \\t]*[a-zA-Z_][a-zA-Z0-9_]*:']
+    },
+
     // BareScript
     {
         'names': ['barescript', 'bare-script', 'markdown-script'],
