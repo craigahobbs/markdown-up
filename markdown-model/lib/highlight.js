@@ -218,8 +218,8 @@ const highlightBuiltin = compileHighlightModels([
         'comment': [';.*$', rCommentHash],
         'keyword': [
             createWordListRegex(
-                'mov', 'push', 'pop', 'lea', 'add', 'sub', 'mul', 'div', 'inc', 'dec', 'and', 'or', 'xor', 'not', 'shl',
-                'shr', 'jmp', 'je', 'jne', 'jz', 'jg', 'jl', 'call', 'ret', 'cmp', 'test'
+                'add', 'and', 'call', 'cmp', 'dec', 'div', 'inc', 'int', 'jmp', 'mov', 'mul', 'not', 'or', 'pop',
+                'push', 'ret', 'shl', 'shr', 'sub', 'test', 'xor'
             )
         ],
         'preprocessor': [
