@@ -215,17 +215,6 @@ const highlightBuiltin = compileHighlightModels([
     // Assembly
     {
         'names': ['assembly', 'asm', 'nasm', 'gas'],
-        'builtin': [
-            createWordListRegex(
-                // x86/x64 (general, stack, base pointers - both 32 and 64 bit)
-                'al', 'bl', 'cl', 'dl', 'eax', 'ebx', 'ecx', 'edx', 'esp', 'ebp', 'esi', 'edi', 'rax', 'rbx', 'rcx',
-                'rdx', 'rsp', 'rbp', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11',
-                // ARM core registers
-                'r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10', 'r11', 'r12', 'sp', 'lr', 'pc',
-                // RISC-V core registers
-                'zero', 'ra', 'sp', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 't0', 't1', 's0', 's1'
-            )
-        ],
         'comment': [';.*$', rCommentHash],
         'keyword': [
             createWordListRegex(
