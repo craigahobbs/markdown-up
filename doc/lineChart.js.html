@@ -89,10 +89,10 @@ struct LineChartAxisTicks
     optional int(>= 0) count
 
     # The value of the first tick mark. Default is the minimum axis value.
-    optional object start
+    optional any start
 
     # The value of the last tick mark. Default is the maximum axis value.
-    optional object end
+    optional any end
 
     # The number of tick mark labels to skip after a rendered label
     optional int(> 0) skip
@@ -102,7 +102,7 @@ struct LineChartAxisTicks
 struct LineChartAxisAnnotation
 
     # The axis value
-    object value
+    any value
 
     # The annotation label
     optional string label
