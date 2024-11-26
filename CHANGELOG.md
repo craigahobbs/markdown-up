@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.2 (2024-11-25)
+
+- [793512e](https://github.com/craigahobbs/markdown-up/commit/793512e) - ensure application window events are handled sequentially
+
+- [e4b8a68](https://github.com/craigahobbs/markdown-up/commit/e4b8a68) - update schema-markdown usage
+
 ## 3.3.1 (2024-10-16)
 
 - [8b73c21](https://github.com/craigahobbs/markdown-up/commit/8b73c21) - add codeBlocks option
