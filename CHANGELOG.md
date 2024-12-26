@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.3 (2024-12-26)
+
+- [0eeb5fd](https://github.com/craigahobbs/markdown-up/commit/0eeb5fd) - add documentElementClick, documentInputFileText, and documentInputFileURL functions
+
 ## 3.3.2 (2024-11-25)
 
 - [793512e](https://github.com/craigahobbs/markdown-up/commit/793512e) - ensure application window events are handled sequentially
