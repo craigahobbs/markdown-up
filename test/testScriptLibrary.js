@@ -341,9 +341,167 @@ test('script library, dataTable model', () => {
 //
 
 
+test('script library, documentElementClick', () => {
+    const runtime = testRuntime();
+
+    // Create an element with a click callback
+    const clicks = [];
+    const onClick = () => {
+        clicks.push(1);
+    };
+    runtime.options.window.document.body.innerHTML = '<div id="test-element"/>';
+    const element = runtime.options.window.document.getElementById('test-element');
+    element.addEventListener('click', onClick);
+
+    // Click
+    assert.equal(markdownScriptFunctions.documentElementClick(['test-element'], runtime.options), undefined);
+    assert.equal(clicks.length, 1);
+
+    // Unknown element
+    clicks.length = 0;
+    assert.equal(markdownScriptFunctions.documentElementClick(['test-unknown'], runtime.options), undefined);
+    assert.equal(clicks.length, 0);
+});
+
+
 test('script library, documentFontSize', () => {
     const runtime = testRuntime();
     assert.equal(markdownScriptFunctions.documentFontSize([], runtime.options), 16);
+});
+
+
+test('script library, documentInputFileText', async () => {
+    const runtime = testRuntime();
+
+    // Mock FileReader
+    class MockFileReader {
+        readAsText(file) {
+            // Simulate async file reading
+            setTimeout(() => {
+                this.result = `${file.name} content`;
+                this.onload();
+            }, 0);
+        }
+    }
+
+    // Mock FileReader and document.getElementById
+    runtime.options.window.FileReader = MockFileReader;
+    runtime.options.window.document.getElementById = () => ({
+        'files': [
+            new File(['file1 content'], 'file1.txt', {'type': 'text/plain'}),
+            new File(['file2 content'], 'file2.txt', {'type': 'text/plain'})
+        ]
+    });
+
+    // Test the file read
+    assert.deepEqual(
+        await markdownScriptFunctions.documentInputFileText(['test-input'], runtime.options),
+        ['file1.txt content', 'file2.txt content']
+    );
+});
+
+
+test('script library, documentInputFileText error', async () => {
+    const runtime = testRuntime();
+
+    // Mock FileReader
+    class MockFileReader {
+        readAsText(_file) {
+            // Simulate async file reading with error
+            setTimeout(() => {
+                this.error = new Error('Mock file read error');
+                this.onerror();
+            }, 0);
+        }
+    }
+
+    // Mock FileReader and document.getElementById
+    runtime.options.window.FileReader = MockFileReader;
+    runtime.options.window.document.getElementById = () => ({
+        'files': [
+            new File(['file1 content'], 'file1.txt', {'type': 'text/plain'})
+        ]
+    });
+
+    // Test that the error is propagated
+    await assert.rejects(
+        () => markdownScriptFunctions.documentInputFileText(['test-input'], runtime.options),
+    );
+});
+
+
+test('script library, documentInputFileText unknown element', async () => {
+    const runtime = testRuntime();
+    assert.equal(await markdownScriptFunctions.documentInputFileText(['test-input'], runtime.options), null);
+});
+
+
+test('script library, documentInputFileURL', async () => {
+    const runtime = testRuntime();
+
+    // Mock FileReader
+    class MockFileReader {
+        readAsDataURL(file) {
+            // Simulate async file reading
+            setTimeout(() => {
+                this.result = `data:${file.type};base64,${file.name}_content_base64`;
+                this.onload();
+            }, 0);
+        }
+    }
+
+    // Mock FileReader and document.getElementById
+    runtime.options.window.FileReader = MockFileReader;
+    runtime.options.window.document.getElementById = () => ({
+        'files': [
+            new File(['file1 content'], 'file1.txt', {'type': 'text/plain'}),
+            new File(['file2 content'], 'file2.txt', {'type': 'text/plain'})
+        ]
+    });
+
+    // Test the file read
+    assert.deepEqual(
+        await markdownScriptFunctions.documentInputFileURL(['test-input'], runtime.options),
+        [
+            'data:text/plain;base64,file1.txt_content_base64',
+            'data:text/plain;base64,file2.txt_content_base64'
+        ]
+    );
+});
+
+
+test('script library, documentInputFileURL error', async () => {
+    const runtime = testRuntime();
+
+    // Mock FileReader
+    class MockFileReader {
+        readAsDataURL(_file) {
+            // Simulate async file reading with error
+            setTimeout(() => {
+                this.error = new Error('Mock file read error');
+                this.onerror();
+            }, 0);
+        }
+    }
+
+    // Mock FileReader and document.getElementById
+    runtime.options.window.FileReader = MockFileReader;
+    runtime.options.window.document.getElementById = () => ({
+        'files': [
+            new File(['file1 content'], 'file1.txt', {'type': 'text/plain'})
+        ]
+    });
+
+    // Test that the error is propagated
+    await assert.rejects(
+        () => markdownScriptFunctions.documentInputFileURL(['test-input'], runtime.options),
+    );
+});
+
+
+test('script library, documentInputFileURL unknown element', async () => {
+    const runtime = testRuntime();
+    assert.equal(await markdownScriptFunctions.documentInputFileURL(['test-input'], runtime.options), null);
 });
 
 
