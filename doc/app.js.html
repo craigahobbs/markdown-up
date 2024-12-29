@@ -40,19 +40,12 @@ import {markdownScriptFunctions} from './scriptLibrary.js';
 import {parseExpression} from 'bare-script/lib/parser.js';
 import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import {renderElements} from 'element-model/lib/elementModel.js';
-import {schemaMarkdownDoc} from 'schema-markdown-doc/lib/schemaMarkdownDoc.js';
 import {validateType} from 'schema-markdown/lib/schema.js';
 
 
 // The application's hash parameter type model
 const markdownUpTypes = parseSchemaMarkdown(`\
-#
-# [MarkdownUp](https://github.com/craigahobbs/markdown-up#readme) is a Markdown viewer.
-#
-# ## Hash Parameters
-#
-# MarkdownUp recognizes the following hash parameters:
-#
+# The MarkdownUp hash parameters
 struct MarkdownUp
 
     # The resource URL
@@ -91,9 +84,6 @@ struct MarkdownUpSession
 # A MarkdownUp application view
 enum MarkdownUpView
 
-    # Display the hash parameters documentation
-    help
-
     # Show the resource's Markdown text
     markdown
 `);
@@ -109,6 +99,7 @@ enum MarkdownUpView
  * @property {?boolean} [darkMode = false] - If true, use dark mode by default
  * @property {?number} [fontSize = 12] - The font size, in points
  * @property {?Object} [globals = null] - Global script runtime variables
+ * @property {?string} [helpURL] - The help URL
  * @property {?number} [lineHeight = 1.2] - The line height, in em
  * @property {?string} [markdownText = null] - The default Markdown text
  * @property {?boolean} [menu = true] - If true, show the menu
@@ -137,6 +128,7 @@ export class MarkdownUp {
             (this.window.matchMedia &amp;&amp; this.window.matchMedia('(prefers-color-scheme: dark)').matches);
         this.fontSize = (options !== null ? options.fontSize : null) ?? 12;
         this.globals = (options !== null ? options.globals : null) ?? null;
+        this.helpURL = (options !== null ? options.helpURL : null) ?? 'https://craigahobbs.github.io/markdown-up';
         this.lineHeight = (options !== null ? options.lineHeight : null) ?? 1.2;
         this.markdownText = (options !== null ? options.markdownText : null) ?? null;
         this.menu = (options !== null ? options.menu : null) ?? true;
@@ -298,21 +290,6 @@ export class MarkdownUp {
     async main() {
         const url = this.getResourceURL();
         const scriptOptions = this.createScriptOptions();
-
-        // Help?
-        if (this.params.view === 'help') {
-            const schemaMarkdownDocOptions = {
-                'params': encodeQueryString(this.params),
-                'markdownOptions': scriptOptions.markdownOptions
-            };
-            return {
-                'title': 'MarkdownUp',
-                'elements': [
-                    this.burgerElements(),
-                    schemaMarkdownDoc(markdownUpTypes, 'MarkdownUp', schemaMarkdownDocOptions)
-                ]
-            };
-        }
 
         // Get the Markdown text
         let markdownText;
@@ -592,7 +569,7 @@ export class MarkdownUp {
                             'path': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
                                 'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
                         }),
-                        this.menuViewToggle('help', {
+                        this.menuLink(this.helpURL, {
                             'path': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
                         })
                     ]
@@ -602,6 +579,16 @@ export class MarkdownUp {
             // The top header ID
             {'html': 'div', 'attr': {'id': topHeaderId, 'style': 'display=none; position: absolute; top: 0;'}}
         ];
+    }
+
+
+    menuLink(url, icon) {
+        return this.menuButton(
+            () => {
+                this.window.location.href = url;
+            },
+            icon
+        );
     }
 
 

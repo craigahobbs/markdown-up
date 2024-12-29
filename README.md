@@ -52,9 +52,7 @@ application stub file, index.html. For example:
     ...
 ~~~
 
-To view a different Markdown resource, set the application's
-["url" hash parameter](https://craigahobbs.github.io/markdown-up/#cmd.help=1)
-(i.e., "http://127.0.0.1:8000#url=other.md").
+To view a different Markdown resource, set the application's "url" hash parameter (i.e., "http://127.0.0.1:8000#url=other.md").
 
 
 ## Dynamic Markdown Applications
