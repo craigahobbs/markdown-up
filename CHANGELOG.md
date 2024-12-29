@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.4 (2024-12-29)
+
+- [a313430](https://github.com/craigahobbs/markdown-up/commit/a313430) - simplify help menu button behavior
+
 ## 3.3.3 (2024-12-26)
 
 - [0eeb5fd](https://github.com/craigahobbs/markdown-up/commit/0eeb5fd) - add documentElementClick, documentInputFileText, and documentInputFileURL functions
