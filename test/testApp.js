@@ -326,30 +326,30 @@ test('MarkdownUp, run and render', async () => {
     const documentElementStyleSetPropertyCalls = [];
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
-    window.location.hash = '#view=help';
-    const app = new MarkdownUp(window, {'menu': false});
+    window.location.hash = '#';
+    const app = new MarkdownUp(window, {'markdownText': '# Title\n\nHello!', 'menu': false});
     await app.run();
-    assert.equal(window.document.title, 'MarkdownUp');
-    assert(window.document.body.innerHTML.startsWith(
-        '<div id="view=help&amp;_top" style="display=none; position: absolute; top: 0;"></div>' +
-            '<h1 id="view=help&amp;type_MarkdownUp">struct MarkdownUp</h1>'
-    ));
+    assert.equal(window.document.title, 'Title');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
+    );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
         ['--markdown-model-font-size', '12pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
 
-    window.location.hash = '#view=help';
+    window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"darkMode": true, "fontSize": 14, "lineHeight": 1.4}');
     window.sessionStorage.setItem('MarkdownUp', '{}');
     documentElementStyleSetPropertyCalls.length = 0;
     await app.render(true);
-    assert.equal(window.document.title, 'MarkdownUp');
-    assert(window.document.body.innerHTML.startsWith(
-        '<div id="view=help&amp;_top" style="display=none; position: absolute; top: 0;"></div>' +
-            '<h1 id="view=help&amp;type_MarkdownUp">struct MarkdownUp</h1>'
-    ));
+    assert.equal(window.document.title, 'Title');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
+    );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '1'],
         ['--markdown-model-font-size', '14pt'],
@@ -622,11 +622,11 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the Markdown menu button and wait for the render
-    let [, , , , , markdownButton] = window.document.getElementsByTagName('div');
+    // Click the font-size menu button and wait for the render
+    let [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    markdownButton.click();
+    fontSizeButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
@@ -637,11 +637,11 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the Markdown menu button again to cycle-over
-    [, , , , , markdownButton] = window.document.getElementsByTagName('div');
+    // Click the font-size menu button again to cycle-over
+    [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    markdownButton.click();
+    fontSizeButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
@@ -675,11 +675,11 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the Markdown menu button and wait for the render
-    const [, , , , , markdownButton] = window.document.getElementsByTagName('div');
+    // Click the font-size menu button and wait for the render
+    const [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
-    markdownButton.click();
+    fontSizeButton.click();
     await sleep(0);
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
@@ -689,6 +689,26 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+});
+
+
+test('MarkdownUp, render menu help', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!', 'helpURL': '#help'});
+    await app.render();
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+
+    // Click the help menu button and wait for the render
+    const [, , , , , , , , helpButton] = window.document.getElementsByTagName('div');
+    window.document.body.innerHTML = '';
+    helpButton.click();
+    await sleep(0);
+    assert.equal(window.document.body.innerHTML, '');
+    assert.equal(window.location.href, 'https://github.com/craigahobbs/markdown-up#help');
 });
 
 
@@ -1038,35 +1058,6 @@ elementModelRender(objectNew( \
     await testSpan.click();
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello</p>'));
-});
-
-
-test('MarkdownUp.main, help', async () => {
-    const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window);
-    app.updateParams('view=help', null, null);
-    const result = deleteElementCallbacks(await app.main());
-    assert.deepEqual(
-        result.elements[1][0][0],
-        {'html': 'h1', 'attr': {'id': 'view=help&type_MarkdownUp'}, 'elem': {'text': 'struct MarkdownUp'}}
-    );
-    result.elements[1] = '<helpElements>';
-    assert.deepEqual(
-        result,
-        {
-            'title': 'MarkdownUp',
-            'elements': [
-                [
-                    [
-                        menuBurgerElements(),
-                        null
-                    ],
-                    {'html': 'div', 'attr': {'id': 'view=help&_top', 'style': 'display=none; position: absolute; top: 0;'}}
-                ],
-                '<helpElements>'
-            ]
-        }
-    );
 });
 
 
