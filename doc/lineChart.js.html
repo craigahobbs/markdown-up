@@ -69,6 +69,9 @@ struct LineChart
     # The color encoding field
     optional string color
 
+    # The color encoding value order
+    optional string[len > 0] colorOrder
+
     # The X-axis tick marks
     optional LineChartAxisTicks xTicks
 
@@ -208,6 +211,7 @@ export function lineChartElements(data, lineChart, options = null) {
     const xField = lineChart.x;
     const yFields = lineChart.y;
     const colorField = lineChart.color ?? null;
+    const colorOrder = lineChart.colorOrder ?? null;
 
     // Sort the rows by the X field
     data.sort((row1, row2) => {
@@ -247,7 +251,21 @@ export function lineChartElements(data, lineChart, options = null) {
         }
 
         // Add the points
-        const colorValues = Array.from(colorValueSet.values()).sort();
+        let colorValues;
+        if (colorOrder !== null) {
+            colorValues = Array.from(colorValueSet.values()).sort((cv1, cv2) => {
+                const ix1 = colorOrder.indexOf(cv1);
+                const ix2 = colorOrder.indexOf(cv2);
+                if (ix1 !== -1 &amp;&amp; ix2 !== -1) {
+                    return ix1 &lt; ix2 ? -1 : 1;
+                } else if (ix1 === -1 &amp;&amp; ix2 === -1) {
+                    return cv1 &lt; cv2 ? -1 : 1;
+                }
+                return ix1 !== -1 ? -1 : 1;
+            });
+        } else {
+            colorValues = Array.from(colorValueSet.values()).sort();
+        }
         const colorValueCount = colorValues.length;
         for (let ixColorValue = 0; ixColorValue &lt; colorValueCount; ixColorValue += 1) {
             const colorValue = colorValues[ixColorValue];
@@ -392,7 +410,7 @@ export function lineChartElements(data, lineChart, options = null) {
         const labelWidth = label.length * chartFontWidthRatio * colorLegendFontSize;
         return labelWidth > labelMax ? labelWidth : labelMax;
     }, 0);
-    const colorLegendX = yFields.length === 1 &amp;&amp; !('color' in lineChart) ? null : Math.max(
+    const colorLegendX = yFields.length === 1 &amp;&amp; colorField === null ? null : Math.max(
         chartWidth - chartBorderSize - colorLegendLabelWidth - colorLegendSampleWidth,
         0.6 * chartWidth
     );
