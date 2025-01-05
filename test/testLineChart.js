@@ -1122,6 +1122,516 @@ test('lineChartElements, color field multiple fields', () => {
 });
 
 
+test('lineChartElements, color field multiple fields order', () => {
+    const data = [
+        {'A': 1, 'B': 1, 'C': 'a'},
+        {'A': 1, 'B': 1, 'C': 'b'},
+        {'A': 1, 'B': 1, 'C': 'c'},
+        {'A': 1, 'B': 1, 'C': 'd'},
+        {'A': 1, 'B': 1, 'C': 'g'},
+        {'A': 1, 'B': 1, 'C': 'e'},
+        {'A': 1, 'B': 1, 'C': 'f'}
+    ];
+    const lineChart = {'x': 'A', 'y': ['B'], 'color': 'C', 'colorOrder': ['d', 'b', 'f']};
+    validateLineChart(lineChart);
+    assert.deepEqual(lineChartElements(data, lineChart), {
+        'svg': 'svg',
+        'attr': {
+            'width': 640,
+            'height': 320
+        },
+        'elem': [
+            {
+                'svg': 'rect',
+                'attr': {
+                    'width': 640,
+                    'height': 320,
+                    'fill': 'white'
+                }
+            },
+            null,
+            {
+                'svg': 'text',
+                'attr': {
+                    'font-family': 'Arial, Helvetica, sans-serif',
+                    'font-size': '16.000px',
+                    'fill': 'black',
+                    'style': 'font-weight: bold',
+                    'x': '16.000',
+                    'y': '136.725',
+                    'transform': 'rotate(-90 16.000, 136.725)',
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'hanging'
+                },
+                'elem': {
+                    'text': 'B'
+                }
+            },
+            [
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 63.150 255.950 H 58.150'
+                        }
+                    },
+                    null
+                ],
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 63.150 255.950 H 58.150'
+                        }
+                    },
+                    null
+                ],
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 63.150 255.950 H 58.150'
+                        }
+                    },
+                    null
+                ]
+            ],
+            [
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '54.400',
+                        'y': '255.950',
+                        'text-anchor': 'end',
+                        'dominant-baseline': 'auto'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                },
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '54.400',
+                        'y': '255.950',
+                        'text-anchor': 'end',
+                        'dominant-baseline': 'auto'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                },
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '54.400',
+                        'y': '255.950',
+                        'text-anchor': 'end',
+                        'dominant-baseline': 'auto'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                }
+            ],
+            {
+                'svg': 'text',
+                'attr': {
+                    'font-family': 'Arial, Helvetica, sans-serif',
+                    'font-size': '16.000px',
+                    'fill': 'black',
+                    'style': 'font-weight: bold',
+                    'x': '324.975',
+                    'y': '304.000',
+                    'text-anchor': 'middle',
+                    'dominant-baseline': 'auto'
+                },
+                'elem': {
+                    'text': 'A'
+                }
+            },
+            [
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 65.150 257.950 V 262.950'
+                        }
+                    },
+                    null
+                ],
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 65.150 257.950 V 262.950'
+                        }
+                    },
+                    null
+                ],
+                [
+                    {
+                        'svg': 'path',
+                        'attr': {
+                            'stroke': 'black',
+                            'stroke-width': '1.000',
+                            'fill': 'none',
+                            'd': 'M 65.150 257.950 V 262.950'
+                        }
+                    },
+                    null
+                ]
+            ],
+            [
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '65.150',
+                        'y': '266.700',
+                        'text-anchor': 'start',
+                        'dominant-baseline': 'hanging'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                },
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '65.150',
+                        'y': '266.700',
+                        'text-anchor': 'start',
+                        'dominant-baseline': 'hanging'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                },
+                {
+                    'svg': 'text',
+                    'attr': {
+                        'font-family': 'Arial, Helvetica, sans-serif',
+                        'font-size': '16.000px',
+                        'fill': 'black',
+                        'x': '65.150',
+                        'y': '266.700',
+                        'text-anchor': 'start',
+                        'dominant-baseline': 'hanging'
+                    },
+                    'elem': {
+                        'text': '1'
+                    }
+                }
+            ],
+            {
+                'svg': 'path',
+                'attr': {
+                    'stroke': 'black',
+                    'stroke-width': '1.000',
+                    'fill': 'none',
+                    'd': 'M 63.150 17.000 V 257.950 H 585.300'
+                }
+            },
+            [
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#1f77b4',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#ff7f0e',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#2ca02c',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#d62728',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#9467bd',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#8c564b',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#e377c2',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                }
+            ],
+            [],
+            [],
+            [
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '17.500',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#1f77b4'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '25.500',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'd'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '39.100',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#ff7f0e'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '47.100',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'b'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '60.700',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#2ca02c'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '68.700',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'f'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '82.300',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#d62728'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '90.300',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'a'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '103.900',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#9467bd'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '111.900',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'c'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '125.500',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#8c564b'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '133.500',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'e'
+                        }
+                    }
+                ],
+                [
+                    {
+                        'svg': 'rect',
+                        'attr': {
+                            'x': '592.800',
+                            'y': '147.100',
+                            'width': '16.000',
+                            'height': '16.000',
+                            'stroke': 'none',
+                            'fill': '#e377c2'
+                        }
+                    },
+                    {
+                        'svg': 'text',
+                        'attr': {
+                            'font-family': 'Arial, Helvetica, sans-serif',
+                            'font-size': '16.000px',
+                            'fill': 'black',
+                            'x': '614.400',
+                            'y': '155.100',
+                            'text-anchor': 'start',
+                            'dominant-baseline': 'middle'
+                        },
+                        'elem': {
+                            'text': 'g'
+                        }
+                    }
+                ]
+            ]
+        ]
+    });
+});
+
+
 test('lineChartElements, lines', () => {
     const data = [
         {'A': 1, 'B': 5},
