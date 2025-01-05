@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.5 (2025-01-05)
+
+- [0a39612](https://github.com/craigahobbs/markdown-up/commit/0a39612) - add line chart model optional color order
+
 ## 3.3.4 (2024-12-29)
 
 - [a313430](https://github.com/craigahobbs/markdown-up/commit/a313430) - simplify help menu button behavior
