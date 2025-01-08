@@ -739,7 +739,7 @@ test('MarkdownUp, render timeout', async () => {
 function main():
     systemGlobalSet('count', count + 1)
     markdownPrint('Hello ' + count)
-    if(count == 2, windowSetTimeout(main, 2000))
+    if(count != 1, windowSetTimeout(main, 2000))
 endfunction
 
 count = 0
@@ -770,12 +770,21 @@ main()
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
 
-    // Call the timeout callback again
+    // Call the timeout callback again - this time skip due to a render in the middle of the callback
+    app.renderCount += 1;
     await windowTimeout.callback();
-    assert.equal(windowTimeout.delay, null);
-    assert.equal(app.runtimeTimeoutId, null);
+    assert.equal(windowTimeout.delay, 2000);
+    assert.equal(app.runtimeTimeoutId, 3);
     assert.equal(window.document.title, '');
-    assert(window.document.body.innerHTML.endsWith('<p>Hello 3</p>'));
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
+    app.renderCount -= 1;
+
+    // Call the timeout callback again - since we didn't reset the runtime the "Hello 3" is rendered as well
+    await windowTimeout.callback();
+    assert.equal(windowTimeout.delay, 2000);
+    assert.equal(app.runtimeTimeoutId, 4);
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 3\nHello 4</p>'));
 });
 
 
