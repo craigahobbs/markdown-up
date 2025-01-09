@@ -779,12 +779,12 @@ main()
     assert(window.document.body.innerHTML.endsWith('<p>Hello 2</p>'));
     app.renderCount -= 1;
 
-    // Call the timeout callback again - since we didn't reset the runtime the "Hello 3" is rendered as well
+    // Call the timeout callback again
     await windowTimeout.callback();
     assert.equal(windowTimeout.delay, 2000);
     assert.equal(app.runtimeTimeoutId, 4);
     assert.equal(window.document.title, '');
-    assert(window.document.body.innerHTML.endsWith('<p>Hello 3\nHello 4</p>'));
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 4</p>'));
 });
 
 

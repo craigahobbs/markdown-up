@@ -187,10 +187,28 @@ endfunction
 unittestRunTest('testMarkdownUp_dataTable_noFields')
 
 
+function testMarkdownUp_documentElementClick():
+    unittestEqual(documentElementClick(), null)
+endfunction
+unittestRunTest('testMarkdownUp_documentElementClick')
+
+
 function testMarkdownUp_documentFontSize():
     unittestEqual(documentFontSize(), 16)
 endfunction
 unittestRunTest('testMarkdownUp_documentFontSize')
+
+
+function testMarkdownUp_documentInputFileText():
+    unittestEqual(documentInputFileText(), null)
+endfunction
+unittestRunTest('testMarkdownUp_documentInputFileText')
+
+
+function testMarkdownUp_documentInputFileURL():
+    unittestEqual(documentInputFileURL(), null)
+endfunction
+unittestRunTest('testMarkdownUp_documentInputFileURL')
 
 
 function testMarkdownUp_documentInputValue():
