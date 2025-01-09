@@ -37,6 +37,8 @@ unittestMockState = objectCopy(unittestMockStateDefault)
 # $doc: To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
 # $arg data: Optional (default is null). The map of function name to mock function data.
 # $arg data: The following functions make use of mock data:
+# $arg data: - **documentInputFileText** - map of id to file text array
+# $arg data: - **documentInputFileURL** - map of id to file data URL array
 # $arg data: - **documentInputValue** - map of id to return value
 # $arg data: - **markdownParse** - array of return values
 # $arg data: - **markdownTitle** - array of return values
@@ -47,7 +49,10 @@ function unittestMockAll(data):
     unittestMockOneGeneric('dataTable')
 
     # Document
+    unittestMockOneGeneric('documentElementClick')
     unittestMockOne('documentFontSize', unittestMock_documentFontSize)
+    unittestMockOne('documentInputFileText', systemPartial(unittestMock_documentInputFileText, if(data != null, objectGet(data, 'documentInputFileText'))))
+    unittestMockOne('documentInputFileURL', systemPartial(unittestMock_documentInputFileURL, if(data != null, objectGet(data, 'documentInputFileURL'))))
     unittestMockOne('documentInputValue', systemPartial(unittestMock_documentInputValue, if(data != null, objectGet(data, 'documentInputValue'))))
     unittestMockOneGeneric('documentSetFocus')
     unittestMockOneGeneric('documentSetReset')
@@ -171,6 +176,28 @@ endfunction
 #
 # Document functions
 #
+
+
+function unittestMock_documentInputFileText(data, args...):
+    id = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('documentInputFileText', args))
+
+    # Return the mocked documentInputFileText response
+    return if(data != null, objectGet(data, id))
+endfunction
+
+
+function unittestMock_documentInputFileURL(data, args...):
+    id = arrayGet(args, 0)
+
+    # Record the mocked function call
+    arrayPush(unittestMockCalls, arrayNew('documentInputFileURL', args))
+
+    # Return the mocked documentInputFileURL response
+    return if(data != null, objectGet(data, id))
+endfunction
 
 
 function unittestMock_documentFontSize():

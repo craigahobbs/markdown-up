@@ -466,8 +466,9 @@ export class MarkdownUp {
         }
         scriptOptions.runtime = runtime;
         scriptOptions.runtimeUpdateFn = () => {
-            // Did a render occur in the middle of this runtime update?
+            // Did a render occur in the middle of this runtime update? If so, just reset the runtime.
             if (this.renderCount !== renderCount) {
+                runtime.reset();
                 return;
             }
 

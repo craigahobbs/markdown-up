@@ -168,8 +168,20 @@ endfunction
 #
 
 
+function documentElementClick():
+endfunction
+
+
 function documentFontSize():
     return markdownUpDefaultFontSizePx
+endfunction
+
+
+function documentInputFileText():
+endfunction
+
+
+function documentInputFileURL():
 endfunction
 
 

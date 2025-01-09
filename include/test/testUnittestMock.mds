@@ -17,6 +17,8 @@ unittestRunTestAsync('testUnittestMockSentinel')
 function testUnittestMockAll():
     # Setup mocks
     unittestMockAll(objectNew( \
+        'documentInputFileText', objectNew('id1', arrayNew('text1')), \
+        'documentInputFileURL', objectNew('id1', arrayNew('url1')), \
         'documentInputValue', objectNew('id1', 'value1'), \
         'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
         'markdownTitle', arrayNew('Title'), \
@@ -28,7 +30,10 @@ function testUnittestMockAll():
     dataTable(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))
 
     # Document
+    documentElementClick('id1')
     unittestEqual(documentFontSize(), 16)
+    unittestEqual(documentInputFileText('id1'), arrayNew('text1'))
+    unittestEqual(documentInputFileURL('id1'), arrayNew('url1'))
     unittestEqual(documentInputValue('id1'), 'value1')
     documentSetFocus('id1')
     documentSetReset('id1')
@@ -139,6 +144,9 @@ function testUnittestMockAll():
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('dataLineChart', arrayNew(arrayNew(objectNew('A', 1)), objectNew('title', 'Title'))), \
         arrayNew('dataTable', arrayNew(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))), \
+        arrayNew('documentElementClick', arrayNew('id1')), \
+        arrayNew('documentInputFileText', arrayNew('id1')), \
+        arrayNew('documentInputFileURL', arrayNew('id1')), \
         arrayNew('documentInputValue', arrayNew('id1')), \
         arrayNew('documentSetFocus', arrayNew('id1')), \
         arrayNew('documentSetReset', arrayNew('id1')), \
