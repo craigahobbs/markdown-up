@@ -136,7 +136,6 @@ export class MarkdownUp {
         this.url = (options !== null ? options.url : null) ?? 'README.md';
         this.runtimeWindowResize = null;
         this.runtimeTimeoutId = null;
-        this.renderCount = 0;
     }
 
 
@@ -150,9 +149,6 @@ export class MarkdownUp {
 
 
     async render(forceRender = false) {
-        // Increase the render count enable so we can detect a render the middle of a runtime update
-        this.renderCount += 1;
-
         // Parse the hash parameters and render the application element model
         let result;
         let isError = false;
@@ -459,19 +455,12 @@ export class MarkdownUp {
 
         // Create the markdown-script runtime
         const runtime = new MarkdownScriptRuntime(scriptOptions);
-        const {renderCount} = this;
         scriptOptions.globals = {...markdownScriptFunctions};
         if (this.globals !== null) {
             Object.assign(scriptOptions.globals, this.globals);
         }
         scriptOptions.runtime = runtime;
         scriptOptions.runtimeUpdateFn = () => {
-            // Did a render occur in the middle of this runtime update? If so, just reset the runtime.
-            if (this.renderCount !== renderCount) {
-                runtime.reset();
-                return;
-            }
-
             // Did script set the document title?
             if (runtime.documentTitle !== null) {
                 this.window.document.title = runtime.documentTitle;
