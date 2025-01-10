@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.7 (2025-01-10)
+
+- [0959a18](https://github.com/craigahobbs/markdown-up/commit/0959a18) - remove documentElementClick, documentInputFileText, and documentInputFileURL functions - not immediately needed and possibly incomplete
+
+- [1f16c6f](https://github.com/craigahobbs/markdown-up/commit/1f16c6f) - properly handle renders in the middle of a timeout callback \(again\)
+
+- [e28c160](https://github.com/craigahobbs/markdown-up/commit/e28c160) - Revert "properly handle renders in the middle of a timeout callback"
+
 ## 3.3.6 (2025-01-08)
 
 - [c2f17ee](https://github.com/craigahobbs/markdown-up/commit/c2f17ee) - properly handle renders in the middle of a timeout callback
