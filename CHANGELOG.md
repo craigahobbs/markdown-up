@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.8 (2025-01-26)
+
+- [177a20b](https://github.com/craigahobbs/markdown-up/commit/177a20b) - add dataTable field format header
+
 ## 3.3.7 (2025-01-10)
 
 - [0959a18](https://github.com/craigahobbs/markdown-up/commit/0959a18) - remove documentElementClick, documentInputFileText, and documentInputFileURL functions - not immediately needed and possibly incomplete
