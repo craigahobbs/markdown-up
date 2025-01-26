@@ -490,3 +490,41 @@ test('dataTableElements, format nowrap', () => {
         ]
     });
 });
+
+
+test('dataTableElements, format header', () => {
+    const data = [
+        {'A': 'a', 'B': 'b'}
+    ];
+    const dataTable = validateDataTable({'categories': ['A'], 'formats': {'A': {'nowrap': true}, 'B': {'header': 'BB'}}});
+    validateDataTable(dataTable);
+    assert.deepEqual(dataTableElements(data, dataTable), {
+        'html': 'table',
+        'elem': [
+            {
+                'html': 'tr',
+                'elem': [
+                    [
+                        {'html': 'th', 'attr': {'style': 'white-space: nowrap'}, 'elem': {'text': 'A'}}
+                    ],
+                    [
+                        {'html': 'th', 'attr': null, 'elem': {'text': 'BB'}}
+                    ]
+                ]
+            },
+            [
+                {
+                    'html': 'tr',
+                    'elem': [
+                        [
+                            {'html': 'td', 'attr': {'style': 'white-space: nowrap'}, 'elem': {'text': 'a'}}
+                        ],
+                        [
+                            {'html': 'td', 'attr': null, 'elem': {'text': 'b'}}
+                        ]
+                    ]
+                }
+            ]
+        ]
+    });
+});

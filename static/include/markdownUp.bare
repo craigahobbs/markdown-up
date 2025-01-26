@@ -122,7 +122,8 @@ function dataTable(data, model):
         width = objectGet(widths, field)
         format = if(formats != null, objectGet(formats, field))
         align = if(format != null, objectGet(format, 'align'))
-        headerFields = headerFields + '| ' + markdownUpValueField(field, width, align, ' ') + ' '
+        header = if(format != null, objectGet(format, 'header', field), field)
+        headerFields = headerFields + '| ' + markdownUpValueField(header, width, align, ' ') + ' '
     endfor
     headerFields = headerFields + '|'
 
