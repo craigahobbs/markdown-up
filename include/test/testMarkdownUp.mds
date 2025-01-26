@@ -147,7 +147,7 @@ function testMarkdownUp_dataTable_formats():
     model = objectNew( \
         'formats', objectNew( \
             'A', objectNew('align', 'center'), \
-            'B', objectNew('align', 'right'), \
+            'B', objectNew('align', 'right', 'header', 'BB'), \
             'CCCCCCCCCC', objectNew('align', 'right') \
         ) \
     )
@@ -155,7 +155,7 @@ function testMarkdownUp_dataTable_formats():
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('systemLog', arrayNew('')), \
         arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
-        arrayNew('systemLog', arrayNew("|    A     |        B | CCCCCCCCCC |")), \
+        arrayNew('systemLog', arrayNew("|    A     |       BB | CCCCCCCCCC |")), \
         arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
         arrayNew('systemLog', arrayNew("|   asdf   |     asdf |       asdf |")), \
         arrayNew('systemLog', arrayNew("| asdfasdf | asdfasdf |   asdfasdf |")), \

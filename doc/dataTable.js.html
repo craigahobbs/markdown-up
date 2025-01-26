@@ -78,6 +78,9 @@ struct DataTableFieldFormat
     # If true, format the field as Markdown
     optional bool markdown
 
+    # The field header (default is the field name)
+    optional string header
+
 
 # A field alignment
 enum DataTableFieldAlignment
@@ -168,18 +171,20 @@ export function dataTableElements(data, dataTable = null, options = null) {
                 'elem': [
                     categories.map((field) => {
                         const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
+                        const formatHeader = (fieldFormat !== null ? (fieldFormat.header ?? null) : null);
                         return {
                             'html': 'th',
                             'attr': createFieldAttr(fieldFormat),
-                            'elem': {'text': field}
+                            'elem': {'text': formatHeader ?? field}
                         };
                     }),
                     tableFields.map((field) => {
                         const fieldFormat = (fieldFormats !== null ? (fieldFormats[field] ?? null) : null);
+                        const formatHeader = (fieldFormat !== null ? (fieldFormat.header ?? null) : null);
                         return {
                             'html': 'th',
                             'attr': createFieldAttr(fieldFormat),
-                            'elem': {'text': field}
+                            'elem': {'text': formatHeader ?? field}
                         };
                     })
                 ]
