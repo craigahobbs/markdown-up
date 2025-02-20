@@ -29,7 +29,7 @@ clean:
 
 
 help:
-	@echo '            [app|run|test-include]'
+	@echo '            [app|run|tarball|test-include]'
 
 
 .PHONY: test-include
@@ -40,13 +40,13 @@ test-include: build/npm.build
 	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
 
 
-.PHONY: app run
+.PHONY: app run tarball
 run: app
 	python3 -m http.server --directory build/app
 
 
 commit: app
-app: doc
+app: doc tarball
 	rm -rf build/app/
 	mkdir -p build/app/
 
@@ -61,6 +61,7 @@ app: doc
 		node_modules/schema-markdown \
 		node_modules/schema-markdown-doc \
 		build/doc \
+		build/markdown-up.tar.gz \
 		build/app/
 
     # Fix imports
@@ -84,6 +85,56 @@ app: doc
 
     # Generate the include library model documentation
 	$(NODE_DOCKER) node --input-type=module -e "$$INCLUDE_LIBRARY_MODEL_JS" build/app/library/includeModel.json
+
+
+tarball: build/npm.build
+	rm -rf build/markdown-up
+	mkdir -p build/markdown-up
+
+    # Statics
+	date -I > build/markdown-up/VERSION.txt
+	cp static/app.css build/markdown-up
+	cp -R static/include build/markdown-up
+	rm -rf build/markdown-up/include/test
+
+    # Application
+	cp -R lib build/markdown-up
+
+    # bare-script
+	mkdir -p build/markdown-up/bare-script
+	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
+
+    # element-model
+	mkdir -p build/markdown-up/element-model
+	cp -R node_modules/element-model/lib build/markdown-up/element-model
+
+    # markdown-model
+	mkdir -p build/markdown-up/markdown-model
+	cp -R node_modules/markdown-model/lib build/markdown-up/markdown-model
+	mkdir -p build/markdown-up/markdown-model/static
+	cp node_modules/markdown-model/static/markdown-model.css build/markdown-up/markdown-model/static
+
+    # schema-markdown-doc
+	mkdir -p build/markdown-up/schema-markdown
+	cp -R node_modules/schema-markdown/lib build/markdown-up/schema-markdown
+
+    # schema-markdown-doc
+	mkdir -p build/markdown-up/schema-markdown-doc
+	cp -R node_modules/schema-markdown-doc/lib build/markdown-up/schema-markdown-doc
+
+    # Fix imports
+	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \
+		sed -E "s/from '([^\.])/from '..\/..\/\1/g" $$FILE > $$FILE.tmp && \
+		mv $$FILE.tmp $$FILE; \
+	done
+	for FILE in `find build/markdown-up/* -name '*.js'`; do \
+		sed -E "s/from '([^\.])/from '..\/\1/g" $$FILE > $$FILE.tmp && \
+		mv $$FILE.tmp $$FILE; \
+	done
+
+    # Create the tarball
+	rm -f build/markdown-up.tar.gz
+	cd build && tar --sort=name --mtime='1970-01-01 00:00:00 UTC' --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz markdown-up
 
 
 # JavaScript to generate the library model documentation
