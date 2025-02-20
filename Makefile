@@ -35,9 +35,9 @@ help:
 .PHONY: test-include
 commit: test-include
 test-include: build/npm.build
-	$(NODE_DOCKER) npx bare -s static/include/*.bare static/include/*.mds static/include/test/*.mds
-	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
-	$(NODE_DOCKER) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
+	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/*.mds static/include/test/*.mds
+	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
+	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
 
 
 .PHONY: app run tarball
@@ -75,16 +75,16 @@ app: doc tarball
 	done
 
     # Generate the library documentation
-	$(NODE_DOCKER) npx baredoc lib/scriptLibrary.js -o build/app/library/library.json
+	$(NODE_SHELL) npx baredoc lib/scriptLibrary.js -o build/app/library/library.json
 
     # Generate the include library documentation
-	$(NODE_DOCKER) npx baredoc static/include/*.mds -o build/app/library/include.json
+	$(NODE_SHELL) npx baredoc static/include/*.mds -o build/app/library/include.json
 
     # Generate the library model documentation
-	$(NODE_DOCKER) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
+	$(NODE_SHELL) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
 
     # Generate the include library model documentation
-	$(NODE_DOCKER) node --input-type=module -e "$$INCLUDE_LIBRARY_MODEL_JS" build/app/library/includeModel.json
+	$(NODE_SHELL) node --input-type=module -e "$$INCLUDE_LIBRARY_MODEL_JS" build/app/library/includeModel.json
 
 
 tarball: build/npm.build
