@@ -134,7 +134,7 @@ tarball: build/npm.build
 
     # Create the tarball
 	rm -f build/markdown-up.tar.gz
-	cd build && tar --sort=name --mtime='1970-01-01 00:00:00 UTC' --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz markdown-up
+	cd build && tar -czvf markdown-up.tar.gz markdown-up
 
 
 # JavaScript to generate the library model documentation
