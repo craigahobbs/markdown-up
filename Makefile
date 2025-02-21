@@ -77,8 +77,27 @@ app: doc tarball
     # Generate the library documentation
 	$(NODE_SHELL) npx baredoc lib/scriptLibrary.js -o build/app/library/library.json
 
+    # Generate the single-page library documentation
+	cd build/app/library/ && \
+	$(NODE_SHELL) npx bare -c 'include <markdownUp.bare>' 'https://craigahobbs.github.io/bare-script/library/app.mds' \
+		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'https://craigahobbs.github.io/bare-script/library/library.json'" \
+		-c "baredocMain(arrayNew('library.json', vBareScriptURL), 'The MarkdownUp Library')" \
+		> markdownup-library.md
+
     # Generate the include library documentation
 	$(NODE_SHELL) npx baredoc static/include/*.mds -o build/app/library/include.json
+
+    # Generate the single-page include library documentation
+	cd build/app/library/ && \
+	$(NODE_SHELL) npx bare -c 'include <markdownUp.bare>' 'https://craigahobbs.github.io/bare-script/library/app.mds' \
+		-v vSingle true -v vPublish true \
+		-v vS1 "'args.mds'" -v vC1 "'content/args.md'" \
+		-v vS2 "'markdownUp.bare'" -v vC2 "'content/markdownUp.md'" \
+		-v vS3 "'pager.mds'" -v vC3 "'content/pager.md'" \
+		-v vS4 "'unittest.mds'" -v vC4 "'content/unittest.md'" \
+		-v vS5 "'unittestMock.mds'" -v vC5 "'content/unittestMock.md'" \
+		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, objectNew(vS1, vC1, vS2, vC2, vS3, vC3, vS4, vC4, vS5, vC5))" \
+		> markdownup-include-library.md
 
     # Generate the library model documentation
 	$(NODE_SHELL) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
