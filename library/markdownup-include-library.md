@@ -312,11 +312,11 @@ app.mds:
 Undefined function "markdownPrint"
 ~~~
 
-However, if we first include "markdownUp.bare", the application works and outputs the generated
-Markdown to the terminal:
+However, if we first include "markdownUp.bare" using the "-m" argument, the application works and
+outputs the generated Markdown to the terminal:
 
 ~~~ sh
-$ npx bare -c 'include <markdownUp.bare>' app.mds
+$ npx bare -m app.mds
 # Hello!
 
 - 1
@@ -524,7 +524,7 @@ Unit tests may be run on the command line using the
 and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
 
 ~~~
-npx bare -c 'include <markdownUp.bare>' test/runTests.mds
+npx bare -m test/runTests.mds
 ~~~
 
 The "runTests.mds" application returns an error status if there are any failures.
