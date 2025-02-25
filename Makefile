@@ -122,6 +122,10 @@ tarball: build/npm.build
     # bare-script
 	mkdir -p build/markdown-up/bare-script
 	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
+	rm -rf \
+		build/markdown-up/bare-script/lib/bare.js \
+		build/markdown-up/bare-script/lib/baredoc.js \
+		build/markdown-up/bare-script/lib/include/
 
     # element-model
 	mkdir -p build/markdown-up/element-model
