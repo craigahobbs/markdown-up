@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.0 (2025-02-25)
+
+- [dc469a6](https://github.com/craigahobbs/markdown-up/commit/dc469a6) - bare-script 3.1
+
 ## 3.3.8 (2025-01-26)
 
 - [177a20b](https://github.com/craigahobbs/markdown-up/commit/177a20b) - add dataTable field format header
