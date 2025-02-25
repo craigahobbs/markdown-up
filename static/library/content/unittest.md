@@ -70,7 +70,7 @@ Unit tests may be run on the command line using the
 and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
 
 ~~~
-npx bare -c 'include <markdownUp.bare>' test/runTests.mds
+npx bare -m test/runTests.mds
 ~~~
 
 The "runTests.mds" application returns an error status if there are any failures.

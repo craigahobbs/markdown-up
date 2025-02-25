@@ -79,7 +79,7 @@ app: doc tarball
 
     # Generate the single-page library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -c 'include <markdownUp.bare>' 'https://craigahobbs.github.io/bare-script/library/app.mds' \
+	$(NODE_SHELL) npx bare -m 'https://craigahobbs.github.io/bare-script/library/app.mds' \
 		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'https://craigahobbs.github.io/bare-script/library/library.json'" \
 		-c "baredocMain(arrayNew('library.json', vBareScriptURL), 'The MarkdownUp Library')" \
 		> markdownup-library.md
@@ -89,7 +89,7 @@ app: doc tarball
 
     # Generate the single-page include library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -c 'include <markdownUp.bare>' 'https://craigahobbs.github.io/bare-script/library/app.mds' \
+	$(NODE_SHELL) npx bare -m 'https://craigahobbs.github.io/bare-script/library/app.mds' \
 		-v vSingle true -v vPublish true \
 		-v vS1 "'args.mds'" -v vC1 "'content/args.md'" \
 		-v vS2 "'markdownUp.bare'" -v vC2 "'content/markdownUp.md'" \
