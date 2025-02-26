@@ -91,12 +91,7 @@ app: doc tarball
 	cd build/app/library/ && \
 	$(NODE_SHELL) npx bare -m 'https://craigahobbs.github.io/bare-script/library/app.mds' \
 		-v vSingle true -v vPublish true \
-		-v vS1 "'args.mds'" -v vC1 "'content/args.md'" \
-		-v vS2 "'markdownUp.bare'" -v vC2 "'content/markdownUp.md'" \
-		-v vS3 "'pager.mds'" -v vC3 "'content/pager.md'" \
-		-v vS4 "'unittest.mds'" -v vC4 "'content/unittest.md'" \
-		-v vS5 "'unittestMock.mds'" -v vC5 "'content/unittestMock.md'" \
-		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, objectNew(vS1, vC1, vS2, vC2, vS3, vC3, vS4, vC4, vS5, vC5))" \
+		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, 'includeContent.json')" \
 		> markdownup-include-library.md
 
     # Generate the library model documentation
