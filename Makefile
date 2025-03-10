@@ -46,6 +46,18 @@ run: app
 	python3 -m http.server --directory build/app
 
 
+build/npm.build: build/bare-script-library-app.mds
+build/bare-script-library-app.mds:
+	mkdir -p build/bare-script-library
+	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/app.mds) && mv app.mds $(notdir $@)
+
+
+build/npm.build: build/bare-script-library.json
+build/bare-script-library.json:
+	mkdir -p build
+	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/library.json) && mv library.json $(notdir $@)
+
+
 commit: app
 app: doc tarball
 	rm -rf build/app/
@@ -80,8 +92,8 @@ app: doc tarball
 
     # Generate the single-page library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m 'https://craigahobbs.github.io/bare-script/library/app.mds' \
-		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'https://craigahobbs.github.io/bare-script/library/library.json'" \
+	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.mds \
+		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'../../bare-script-library.json'" \
 		-c "baredocMain(arrayNew('library.json', vBareScriptURL), 'The MarkdownUp Library')" \
 		> markdownup-library.md
 
@@ -90,7 +102,7 @@ app: doc tarball
 
     # Generate the single-page include library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m 'https://craigahobbs.github.io/bare-script/library/app.mds' \
+	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.mds \
 		-v vSingle true -v vPublish true \
 		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, 'includeContent.json')" \
 		> markdownup-include-library.md
