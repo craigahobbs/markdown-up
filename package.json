@@ -22,7 +22,7 @@
         "test": "node --test test/"
     },
     "dependencies": {
-        "bare-script": "~3.1",
+        "bare-script": "~3.2",
         "element-model": "~1.1",
         "markdown-model": "~2.2",
         "schema-markdown": "~1.2",
