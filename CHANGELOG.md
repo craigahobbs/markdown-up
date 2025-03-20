@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.5.0 (2025-03-20)
+
+- [c416041](https://github.com/craigahobbs/markdown-up/commit/c416041) - bare-script 3.2
+
 ## 3.4.0 (2025-02-25)
 
 - [dc469a6](https://github.com/craigahobbs/markdown-up/commit/dc469a6) - bare-script 3.1
