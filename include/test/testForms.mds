@@ -53,7 +53,7 @@ async function testFormsTextElements_onEnter():
                 'type', 'text', \
                 'value', 'Hello' \
             ), \
-            'callback', objectNew('keyup', null), \
+            'callback', objectNew('keyup', '<function>'), \
             'html', 'input' \
         ) \
     )
@@ -87,7 +87,7 @@ async function testFormsTextElements_onEnterAsync():
                 'type', 'text', \
                 'value', 'Hello' \
             ), \
-            'callback', objectNew('keyup', null), \
+            'callback', objectNew('keyup', '<function>'), \
             'html', 'input' \
         ) \
     )
@@ -116,7 +116,7 @@ function testFormsLinkButtonElements():
             'html', 'a', \
             'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
             'elem', objectNew('text', 'Hello'), \
-            'callback', objectNew('click', null) \
+            'callback', objectNew('click', '<function>') \
         ) \
     )
     unittestEqual(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)
