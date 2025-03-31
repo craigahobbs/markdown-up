@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [args.mds](#var.vPublish=true&var.vSingle=true&args-mds)
+- [diff.bare](#var.vPublish=true&var.vSingle=true&diff-bare)
 - [forms.mds](#var.vPublish=true&var.vSingle=true&forms-mds)
 - [pager.mds](#var.vPublish=true&var.vSingle=true&pager-mds)
 - [unittest.mds](#var.vPublish=true&var.vSingle=true&unittest-mds)
@@ -186,6 +187,34 @@ The [arguments model](includeModel.html#var.vName='ArgsArguments')
 #### Returns
 
 The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails
+
+---
+
+## diff.bare
+
+[Back to top](#var.vPublish=true&var.vSingle=true&_top)
+
+### Function Index
+
+- [diffLines](#var.vPublish=true&var.vSingle=true&difflines)
+
+---
+
+### diffLines
+
+Compute the line-differences of two strings or arrays of strings
+
+#### Arguments
+
+**left -**
+The "left" string or array of strings
+
+**right -**
+The "right" string or array of strings
+
+#### Returns
+
+The array of [difference models](includeModel.html#var.vName='Differences')
 
 ---
 

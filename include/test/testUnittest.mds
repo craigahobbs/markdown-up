@@ -35,6 +35,8 @@ endfunction
 function testUnittest_testFail():
     unittestEqual(1 + 1, 3)
     unittestDeepEqual(arrayPush(arrayNew(1), 2), arrayNew(1, 2, 3))
+    newline = stringFromCharCode(10)
+    unittestDeepEqual('1' + newline + '2' + newline + '3', '1' + newline + '2')
 endfunction
 
 async function testUnittest_testPassAsync():
@@ -116,25 +118,29 @@ function testUnittestRunTest_failure():
                 '', \
                 "[testUnittest\\_testFail](#var.vTest='testUnittest_testFail') - FAIL", \
                 '', \
-                '- ~~~', \
-                '  2', \
-                '  ~~~', \
-                '  ', \
-                '  !=', \
-                '  ', \
-                '  ~~~', \
-                '  3', \
-                '  ~~~', \
+                '- Equal:', \
                 '', \
-                '- ~~~', \
-                '  [1,2]', \
-                '  ~~~', \
-                '  ', \
-                '  !=', \
-                '  ', \
-                '  ~~~', \
-                '  [1,2,3]', \
-                '  ~~~' \
+                '  ```', \
+                '  2', \
+                '  ```', \
+                '', \
+                '  ```', \
+                '  3', \
+                '  ```', \
+                '', \
+                '- Deep-equal:', \
+                '', \
+                '  ```', \
+                '  ---     2', \
+                '  +++     2,', \
+                '  +++     3', \
+                '  ```', \
+                '', \
+                '- Deep-equal:', \
+                '', \
+                '  ```', \
+                '  --- 3', \
+                '  ```' \
             ) \
         )), \
         arrayNew('markdownPrint', arrayNew( \
@@ -145,7 +151,7 @@ function testUnittestRunTest_failure():
             '', \
             "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
         )) \
-    ))
+      ))
 endfunction
 unittestRunTest('testUnittestRunTest_failure')
 
@@ -284,25 +290,29 @@ async function testUnittestRunTestAsync_failure():
                 '', \
                 "[testUnittest\\_testFailAsync](#var.vTest='testUnittest_testFailAsync') - FAIL", \
                 '', \
-                '- ~~~', \
-                '  2', \
-                '  ~~~', \
-                '  ', \
-                '  !=', \
-                '  ', \
-                '  ~~~', \
-                '  3', \
-                '  ~~~', \
+                '- Equal:', \
                 '', \
-                '- ~~~', \
-                '  [1,2]', \
-                '  ~~~', \
-                '  ', \
-                '  !=', \
-                '  ', \
-                '  ~~~', \
-                '  [1,2,3]', \
-                '  ~~~' \
+                '  ```', \
+                '  2', \
+                '  ```', \
+                '', \
+                '  ```', \
+                '  3', \
+                '  ```', \
+                '', \
+                '- Deep-equal:', \
+                '', \
+                '  ```', \
+                '  ---     2', \
+                '  +++     2,', \
+                '  +++     3', \
+                '  ```', \
+                '', \
+                '- Deep-equal:', \
+                '', \
+                '  ```', \
+                '  --- 3', \
+                '  ```' \
             ) \
         )), \
         arrayNew('markdownPrint', arrayNew( \
