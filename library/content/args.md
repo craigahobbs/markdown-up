@@ -1,12 +1,12 @@
-The "args.mds" include library contains functions for parsing/validating a MarkdownUp application's
+The "args.bare" include library contains functions for parsing/validating a MarkdownUp application's
 URL arguments, and functions for creating MarkdownUp application URLs and links.
 
-Consider the following example of an application that sums numbers. First, include the "args.mds"
+Consider the following example of an application that sums numbers. First, include the "args.bare"
 library and define an [arguments model] with three floating point number URL arguments: "value1",
 "value2" and "value3".
 
 ~~~ bare-script
-include <args.mds>
+include <args.bare>
 
 arguments = arrayNew( \
     objectNew('name', 'value1', 'type', 'float', 'default', 0), \
@@ -53,6 +53,6 @@ markdownPrint('', argsLink(arguments, 'Reset', null, true))
 ~~~
 
 
-[argsLink]: include.html#var.vGroup='args.mds'&argslink
-[argsParse]: include.html#var.vGroup='args.mds'&argsparse
+[argsLink]: include.html#var.vGroup='args.bare'&argslink
+[argsParse]: include.html#var.vGroup='args.bare'&argsparse
 [arguments model]: includeModel.html#var.vName='ArgsArguments'

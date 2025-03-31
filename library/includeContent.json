@@ -1,7 +1,7 @@
 {
-    "args.mds": "content/args.md",
+    "args.bare": "content/args.md",
     "markdownUp.bare": "content/markdownUp.md",
-    "pager.mds": "content/pager.md",
-    "unittest.mds": "content/unittest.md",
-    "unittestMock.mds": "content/unittestMock.md"
+    "pager.bare": "content/pager.md",
+    "unittest.bare": "content/unittest.md",
+    "unittestMock.bare": "content/unittestMock.md"
 }

@@ -42,7 +42,7 @@
         const app = new MarkdownUp(window, {
             'markdownText': `\
 ~~~ markdown-script
-include 'https://craigahobbs.github.io/bare-script/library/app.mds'
+include 'https://craigahobbs.github.io/bare-script/library/app.bare'
 
 baredocMain( \\
     'include.json', \\
@@ -51,13 +51,7 @@ baredocMain( \\
         arrayNew('BareScript', 'https://craigahobbs.github.io/bare-script/language/'), \\
         arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
     ), \\
-    objectNew( \\
-        'args.mds', 'content/args.md', \\
-        'markdownUp.bare', 'content/markdownUp.md', \\
-        'pager.mds', 'content/pager.md', \\
-        'unittest.mds', 'content/unittest.md', \\
-        'unittestMock.mds', 'content/unittestMock.md' \\
-    ) \\
+    'includeContent.json' \\
 )
 ~~~
 `});

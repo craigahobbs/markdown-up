@@ -1,7 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../unittest.mds'
+include '../unittest.bare'
 
 
 # Helper to begin mocking the unittest global state
@@ -51,7 +51,7 @@ endfunction
 async function testUnittestSentinel():
     unittestEqual(systemGlobalGet('unittestSentinel'), true)
     systemGlobalSet('unittestSentinel', 1)
-    include '../unittest.mds'
+    include '../unittest.bare'
     unittestEqual(systemGlobalGet('unittestSentinel'), 1)
 endfunction
 unittestRunTestAsync('testUnittestSentinel')

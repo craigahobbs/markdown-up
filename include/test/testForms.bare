@@ -1,13 +1,13 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../forms.mds'
+include '../forms.bare'
 
 
 async function testFormsSentinel():
     unittestEqual(systemGlobalGet('formsSentinel'), true)
     systemGlobalSet('formsSentinel', 1)
-    include '../forms.mds'
+    include '../forms.bare'
     unittestEqual(systemGlobalGet('formsSentinel'), 1)
 endfunction
 unittestRunTestAsync('testFormsSentinel')

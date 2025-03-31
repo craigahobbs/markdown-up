@@ -1,11 +1,11 @@
-The "pager.mds" include library is a simple, configurable, paged MarkdownUp application. The pager
+The "pager.bare" include library is a simple, configurable, paged MarkdownUp application. The pager
 renders a menu of links to your pages and navigation links (start, next, previous). The pager
 supports three page types: function pages, Markdown pages, and external links.
 
 You execute the pager by defining a [pager model] and calling the [pagerMain] function.
 
 ~~~ bare-script
-include <pager.mds>
+include <pager.bare>
 
 function funcPage(args):
     markdownPrint('This is page "' + objectGet(args, 'page') + '"')
@@ -60,4 +60,4 @@ pagerMain(pagerModel, objectNew('start', 'Markdown Page'))
 
 [arguments model]: includeModel.html#var.vName='ArgsArguments'
 [pager model]: includeModel.html#var.vName='Pager'
-[pagerMain]: include.html#var.vGroup='pager.mds'&pagermain
+[pagerMain]: include.html#var.vGroup='pager.bare'&pagermain

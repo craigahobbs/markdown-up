@@ -2,28 +2,28 @@
 
 ## Table of Contents
 
-- [args.mds](#var.vPublish=true&var.vSingle=true&args-mds)
+- [args.bare](#var.vPublish=true&var.vSingle=true&args-bare)
 - [diff.bare](#var.vPublish=true&var.vSingle=true&diff-bare)
-- [forms.mds](#var.vPublish=true&var.vSingle=true&forms-mds)
-- [pager.mds](#var.vPublish=true&var.vSingle=true&pager-mds)
-- [unittest.mds](#var.vPublish=true&var.vSingle=true&unittest-mds)
-- [unittestMock.mds](#var.vPublish=true&var.vSingle=true&unittestmock-mds)
+- [forms.bare](#var.vPublish=true&var.vSingle=true&forms-bare)
+- [pager.bare](#var.vPublish=true&var.vSingle=true&pager-bare)
+- [unittest.bare](#var.vPublish=true&var.vSingle=true&unittest-bare)
+- [unittestMock.bare](#var.vPublish=true&var.vSingle=true&unittestmock-bare)
 
 ---
 
-## args.mds
+## args.bare
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
-The "args.mds" include library contains functions for parsing/validating a MarkdownUp application's
+The "args.bare" include library contains functions for parsing/validating a MarkdownUp application's
 URL arguments, and functions for creating MarkdownUp application URLs and links.
 
-Consider the following example of an application that sums numbers. First, include the "args.mds"
+Consider the following example of an application that sums numbers. First, include the "args.bare"
 library and define an [arguments model] with three floating point number URL arguments: "value1",
 "value2" and "value3".
 
 ~~~ bare-script
-include <args.mds>
+include <args.bare>
 
 arguments = arrayNew( \
     objectNew('name', 'value1', 'type', 'float', 'default', 0), \
@@ -70,8 +70,8 @@ markdownPrint('', argsLink(arguments, 'Reset', null, true))
 ~~~
 
 
-[argsLink]: include.html#var.vGroup='args.mds'&argslink
-[argsParse]: include.html#var.vGroup='args.mds'&argsparse
+[argsLink]: include.html#var.vGroup='args.bare'&argslink
+[argsParse]: include.html#var.vGroup='args.bare'&argsparse
 [arguments model]: includeModel.html#var.vName='ArgsArguments'
 
 
@@ -218,7 +218,7 @@ The array of [difference models](includeModel.html#var.vName='Differences')
 
 ---
 
-## forms.mds
+## forms.bare
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
@@ -294,7 +294,7 @@ The text input [element model](https://github.com/craigahobbs/element-model#read
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
-"markdownUp.mds" contains minimalist implementations of the
+"markdownUp.bare" contains minimalist implementations of the
 [MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
 functions, which allows some
 [MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)
@@ -307,11 +307,11 @@ Consider the following MarkdownUp application:
 
 ``` markdown
 ~~~ markdown-script
-include 'app.mds'
+include 'app.bare'
 ~~~
 ```
 
-**app.mds:**
+**app.bare:**
 
 ~~~ bare-script
 function appMain():
@@ -326,18 +326,14 @@ endfunction
 appMain()
 ~~~
 
-**Note:** BareScript files that use functions from the
-[MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
-use the ".mds" file extension.
-
 The application runs as expected within
 [MarkdownUp](https://github.com/craigahobbs/markdown-up#readme).
 However, when running in plain BareScript, the `markdownPrint` function is not defined, and the
 application fails:
 
 ~~~ sh
-$ npx bare app.mds
-app.mds:
+$ npx bare app.bare
+app.bare:
 Undefined function "markdownPrint"
 ~~~
 
@@ -345,7 +341,7 @@ However, if we first include "markdownUp.bare" using the "-m" argument, the appl
 outputs the generated Markdown to the terminal:
 
 ~~~ sh
-$ npx bare -m app.mds
+$ npx bare -m app.bare
 # Hello!
 
 - 1
@@ -363,18 +359,18 @@ $ npx bare -m app.mds
 
 ---
 
-## pager.mds
+## pager.bare
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
-The "pager.mds" include library is a simple, configurable, paged MarkdownUp application. The pager
+The "pager.bare" include library is a simple, configurable, paged MarkdownUp application. The pager
 renders a menu of links to your pages and navigation links (start, next, previous). The pager
 supports three page types: function pages, Markdown pages, and external links.
 
 You execute the pager by defining a [pager model] and calling the [pagerMain] function.
 
 ~~~ bare-script
-include <pager.mds>
+include <pager.bare>
 
 function funcPage(args):
     markdownPrint('This is page "' + objectGet(args, 'page') + '"')
@@ -429,7 +425,7 @@ pagerMain(pagerModel, objectNew('start', 'Markdown Page'))
 
 [arguments model]: includeModel.html#var.vName='ArgsArguments'
 [pager model]: includeModel.html#var.vName='Pager'
-[pagerMain]: include.html#var.vGroup='pager.mds'&pagermain
+[pagerMain]: include.html#var.vGroup='pager.bare'&pagermain
 
 
 ### Function Index
@@ -477,52 +473,52 @@ The validated [pager model](includeModel.html#var.vName='Pager') or null if vali
 
 ---
 
-## unittest.mds
+## unittest.bare
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
-The "unittest.mds" include library contains functions for unit testing code. The typical project
+The "unittest.bare" include library contains functions for unit testing code. The typical project
 layout is as follows:
 
 ~~~
-|-- code1.mds
+|-- code1.bare
 `-- test
     |-- runTests.md
-    |-- runTests.mds
-    |-- testCode1.mds
+    |-- runTests.bare
+    |-- testCode1.bare
 ~~~
 
 **runTests.md**
 
-The "runTests.md" file is a Markdown document that includes (and executes) the "runTests.mds" unit
+The "runTests.md" file is a Markdown document that includes (and executes) the "runTests.bare" unit
 test application.
 
 ``` bare-script
 # Code Tests
 
 ~~~ markdown-script
-include 'runTests.mds'
+include 'runTests.bare'
 ~~~
 ```
 
-**runTests.mds**
+**runTests.bare**
 
-The "runTests.mds" is the unit test application. It first includes the "unittest.mds" include
+The "runTests.bare" is the unit test application. It first includes the "unittest.bare" include
 library and then includes (and executes) the unit test include files. There can be any number of
 test include files. It then renders the unit test report using the [unittestReport](#unittestreport)
 function and returns the number of unit test failures.
 
 ~~~ bare-script
-include <unittest.mds>
+include <unittest.bare>
 
 # Test includes
-include 'testCode1.mds'
+include 'testCode1.bare'
 
 # Test report
 return unittestReport()
 ~~~
 
-**testCode1.mds**
+**testCode1.bare**
 
 The test include files contain unit tests for each code include. The test include files execute
 tests using the [unittestRunTest](#unittestruntest) and
@@ -530,7 +526,7 @@ tests using the [unittestRunTest](#unittestruntest) and
 using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal) functions.
 
 ~~~ bare-script
-include '../code1.mds'
+include '../code1.bare'
 
 function testCode1SumNumbers():
     unittestEqual(sumNumbers(1, 2, 3), 6)
@@ -553,10 +549,10 @@ Unit tests may be run on the command line using the
 and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
 
 ~~~
-npx bare -m test/runTests.mds
+npx bare -m test/runTests.bare
 ~~~
 
-The "runTests.mds" application returns an error status if there are any failures.
+The "runTests.bare" application returns an error status if there are any failures.
 
 
 ### Function Index
@@ -655,14 +651,14 @@ Nothing
 
 ---
 
-## unittestMock.mds
+## unittestMock.bare
 
 [Back to top](#var.vPublish=true&var.vSingle=true&_top)
 
-The "unittestMock.mds" include library contains functions for mocking functions for unit testing.
+The "unittestMock.bare" include library contains functions for mocking functions for unit testing.
 Consider the following MarkdownUp application:
 
-**app.mds**
+**app.bare**
 
 ~~~ bare-script
 function appMain(count):
@@ -688,24 +684,24 @@ your test function to mock all
 [MarkdownUp library](https://craigahobbs.github.io/markdown-up/library/)
 functions. At the end of the test function, we stop mocking by calling the
 [unittestMockEnd](#unittestmockend) function and check the mocked function calls using the
-[unittestDeepEqual](#var.vGroup='unittest.mds'&unittestdeepequal) function.
+[unittestDeepEqual](#var.vGroup='unittest.bare'&unittestdeepequal) function.
 
-**runTests.mds**
+**runTests.bare**
 
 ~~~ bare-script
-include <unittest.mds>
-include <unittestMock.mds>
+include <unittest.bare>
+include <unittestMock.bare>
 
 # Test includes
-include 'testApp.mds'
+include 'testApp.bare'
 
 return unittestReport()
 ~~~
 
-**testApp.mds**
+**testApp.bare**
 
 ~~~ bare-script
-include 'app.mds'
+include 'app.bare'
 
 function testApp():
     unittestMockAll()
@@ -740,7 +736,7 @@ unittestRunTest('testApp')
 ### unittestMockAll
 
 Start mocking all BareScript and MarkdownUp library functions with externalities.
-To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.bare'&unittestmockend) function.
 
 #### Arguments
 
@@ -775,7 +771,7 @@ The array of mock function call tuples of the form (function name, function argu
 ### unittestMockOne
 
 Start a function mock.
-To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.bare'&unittestmockend) function.
 
 #### Arguments
 
@@ -794,7 +790,7 @@ Nothing
 ### unittestMockOneGeneric
 
 Start a generic function mock.
-To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.mds'&unittestmockend) function.
+To stop mocking, call the [unittestMockEnd](#var.vGroup='unittestMock.bare'&unittestmockend) function.
 
 #### Arguments
 
