@@ -1,7 +1,7 @@
-The "unittestMock.mds" include library contains functions for mocking functions for unit testing.
+The "unittestMock.bare" include library contains functions for mocking functions for unit testing.
 Consider the following MarkdownUp application:
 
-**app.mds**
+**app.bare**
 
 ~~~ bare-script
 function appMain(count):
@@ -27,24 +27,24 @@ your test function to mock all
 [MarkdownUp library](https://craigahobbs.github.io/markdown-up/library/)
 functions. At the end of the test function, we stop mocking by calling the
 [unittestMockEnd](#unittestmockend) function and check the mocked function calls using the
-[unittestDeepEqual](#var.vGroup='unittest.mds'&unittestdeepequal) function.
+[unittestDeepEqual](#var.vGroup='unittest.bare'&unittestdeepequal) function.
 
-**runTests.mds**
+**runTests.bare**
 
 ~~~ bare-script
-include <unittest.mds>
-include <unittestMock.mds>
+include <unittest.bare>
+include <unittestMock.bare>
 
 # Test includes
-include 'testApp.mds'
+include 'testApp.bare'
 
 return unittestReport()
 ~~~
 
-**testApp.mds**
+**testApp.bare**
 
 ~~~ bare-script
-include 'app.mds'
+include 'app.bare'
 
 function testApp():
     unittestMockAll()

@@ -1,45 +1,45 @@
-The "unittest.mds" include library contains functions for unit testing code. The typical project
+The "unittest.bare" include library contains functions for unit testing code. The typical project
 layout is as follows:
 
 ~~~
-|-- code1.mds
+|-- code1.bare
 `-- test
     |-- runTests.md
-    |-- runTests.mds
-    |-- testCode1.mds
+    |-- runTests.bare
+    |-- testCode1.bare
 ~~~
 
 **runTests.md**
 
-The "runTests.md" file is a Markdown document that includes (and executes) the "runTests.mds" unit
+The "runTests.md" file is a Markdown document that includes (and executes) the "runTests.bare" unit
 test application.
 
 ``` bare-script
 # Code Tests
 
 ~~~ markdown-script
-include 'runTests.mds'
+include 'runTests.bare'
 ~~~
 ```
 
-**runTests.mds**
+**runTests.bare**
 
-The "runTests.mds" is the unit test application. It first includes the "unittest.mds" include
+The "runTests.bare" is the unit test application. It first includes the "unittest.bare" include
 library and then includes (and executes) the unit test include files. There can be any number of
 test include files. It then renders the unit test report using the [unittestReport](#unittestreport)
 function and returns the number of unit test failures.
 
 ~~~ bare-script
-include <unittest.mds>
+include <unittest.bare>
 
 # Test includes
-include 'testCode1.mds'
+include 'testCode1.bare'
 
 # Test report
 return unittestReport()
 ~~~
 
-**testCode1.mds**
+**testCode1.bare**
 
 The test include files contain unit tests for each code include. The test include files execute
 tests using the [unittestRunTest](#unittestruntest) and
@@ -47,7 +47,7 @@ tests using the [unittestRunTest](#unittestruntest) and
 using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal) functions.
 
 ~~~ bare-script
-include '../code1.mds'
+include '../code1.bare'
 
 function testCode1SumNumbers():
     unittestEqual(sumNumbers(1, 2, 3), 6)
@@ -70,7 +70,7 @@ Unit tests may be run on the command line using the
 and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
 
 ~~~
-npx bare -m test/runTests.mds
+npx bare -m test/runTests.bare
 ~~~
 
-The "runTests.mds" application returns an error status if there are any failures.
+The "runTests.bare" application returns an error status if there are any failures.

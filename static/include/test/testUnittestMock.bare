@@ -2,13 +2,13 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
-include '../unittestMock.mds'
+include '../unittestMock.bare'
 
 
 async function testUnittestMockSentinel():
     unittestEqual(systemGlobalGet('unittestMockSentinel'), true)
     systemGlobalSet('unittestMockSentinel', 1)
-    include '../unittestMock.mds'
+    include '../unittestMock.bare'
     unittestEqual(systemGlobalGet('unittestMockSentinel'), 1)
 endfunction
 unittestRunTestAsync('testUnittestMockSentinel')

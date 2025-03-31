@@ -112,11 +112,11 @@ Click here to [see the example in action](https://craigahobbs.github.io/markdown
 
 MarkdownUp provides some additional functionality that can be included at runtime. Consider the
 following example that uses the
-[unittest.mds](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='unittest.mds')
+[unittest.bare](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='unittest.bare')
 system library:
 
 ~~~ barescript
-include <unittest.mds>
+include <unittest.bare>
 
 function testSanity():
     unittestEqual(1 + 1, 2)

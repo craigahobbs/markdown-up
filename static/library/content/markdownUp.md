@@ -1,4 +1,4 @@
-"markdownUp.mds" contains minimalist implementations of the
+"markdownUp.bare" contains minimalist implementations of the
 [MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
 functions, which allows some
 [MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)
@@ -11,11 +11,11 @@ Consider the following MarkdownUp application:
 
 ``` markdown
 ~~~ markdown-script
-include 'app.mds'
+include 'app.bare'
 ~~~
 ```
 
-**app.mds:**
+**app.bare:**
 
 ~~~ bare-script
 function appMain():
@@ -30,18 +30,14 @@ endfunction
 appMain()
 ~~~
 
-**Note:** BareScript files that use functions from the
-[MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
-use the ".mds" file extension.
-
 The application runs as expected within
 [MarkdownUp](https://github.com/craigahobbs/markdown-up#readme).
 However, when running in plain BareScript, the `markdownPrint` function is not defined, and the
 application fails:
 
 ~~~ sh
-$ npx bare app.mds
-app.mds:
+$ npx bare app.bare
+app.bare:
 Undefined function "markdownPrint"
 ~~~
 
@@ -49,7 +45,7 @@ However, if we first include "markdownUp.bare" using the "-m" argument, the appl
 outputs the generated Markdown to the terminal:
 
 ~~~ sh
-$ npx bare -m app.mds
+$ npx bare -m app.bare
 # Hello!
 
 - 1

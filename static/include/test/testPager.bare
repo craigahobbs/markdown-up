@@ -1,7 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../pager.mds'
+include '../pager.bare'
 
 
 # Test page function
@@ -34,7 +34,7 @@ testPagerModel = objectNew( \
 async function testPagerSentinel():
     unittestEqual(systemGlobalGet('pagerSentinel'), true)
     systemGlobalSet('pagerSentinel', 1)
-    include '../pager.mds'
+    include '../pager.bare'
     unittestEqual(systemGlobalGet('pagerSentinel'), 1)
 endfunction
 unittestRunTestAsync('testPagerSentinel')
@@ -350,7 +350,7 @@ async function testPagerNoPages():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page')) \
         ) \
     )
 endfunction
@@ -371,7 +371,7 @@ async function testPagerNoLinks():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page')) \
         ) \
     )
 endfunction
@@ -418,7 +418,7 @@ async function testPagerInvalidStart():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.mds: Unknown start page"Unknown"')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page"Unknown"')) \
         ) \
     )
 endfunction

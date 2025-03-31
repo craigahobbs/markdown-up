@@ -1,7 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../args.mds'
+include '../args.bare'
 
 
 # Test arguments array
@@ -19,7 +19,7 @@ testArgsArguments = arrayNew( \
 async function testArgsSentinel():
     unittestEqual(systemGlobalGet('argsSentinel'), true)
     systemGlobalSet('argsSentinel', 1)
-    include '../args.mds'
+    include '../args.bare'
     unittestEqual(systemGlobalGet('argsSentinel'), 1)
 endfunction
 unittestRunTestAsync('testArgsSentinel')
@@ -50,7 +50,7 @@ function testArgsValidateDuplicate():
     unittestMockAll()
     unittestEqual(argsValidate(arguments), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Duplicate argument "name"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Duplicate argument "name"')) \
     ))
 endfunction
 unittestRunTest('testArgsValidateDuplicate')
@@ -143,13 +143,13 @@ function testArgsParseInvalid():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid1" for URL argument "vPrint"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid2" for URL argument "vBegin"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid3" for URL argument "vEnd"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid4" for URL argument "vCount"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid5" for URL argument "vNumber"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 6 for URL argument "vName"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 7 for URL argument "vURL"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid1" for URL argument "vPrint"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid2" for URL argument "vBegin"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid3" for URL argument "vEnd"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid4" for URL argument "vCount"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid5" for URL argument "vNumber"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 6 for URL argument "vName"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 7 for URL argument "vURL"')) \
     ))
 
     # Clear argument globals
@@ -174,7 +174,7 @@ function testArgsParseInvalidBool():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 2 for URL argument "vPrint"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 2 for URL argument "vPrint"')) \
     ))
 
     # Clear argument globals
@@ -193,7 +193,7 @@ function testArgsParseInvalidDate():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 1 for URL argument "vBegin"')) \
     ))
 
     # Clear argument globals
@@ -212,7 +212,7 @@ function testArgsParseInvalidDate2():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "2023-11-01T00:00:15Z" for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "2023-11-01T00:00:15Z" for URL argument "vBegin"')) \
     ))
 
     # Clear argument globals
@@ -231,7 +231,7 @@ function testArgsParseInvalidDatetime():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vEnd"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 1 for URL argument "vEnd"')) \
     ))
 
     # Clear argument globals
@@ -250,7 +250,7 @@ function testArgsParseInvalidInt():
         objectNew('count', 3) \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 5.5 for URL argument "vCount"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 5.5 for URL argument "vCount"')) \
     ))
 
     # Clear argument globals
@@ -315,7 +315,7 @@ function testArgsURLObjectUnknown():
         "#var.vURL='test.json'" \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Unknown argument "Name"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Unknown argument "Name"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectUnknown')
@@ -385,13 +385,13 @@ function testArgsURLObjectInvalid():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid1" for URL argument "vPrint"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid2" for URL argument "vBegin"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid3" for URL argument "vEnd"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid4" for URL argument "vCount"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "invalid5" for URL argument "vNumber"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 6 for URL argument "vName"')), \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 7 for URL argument "vURL"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid1" for URL argument "vPrint"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid2" for URL argument "vBegin"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid3" for URL argument "vEnd"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid4" for URL argument "vCount"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "invalid5" for URL argument "vNumber"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 6 for URL argument "vName"')), \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 7 for URL argument "vURL"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalid')
@@ -404,7 +404,7 @@ function testArgsURLObjectInvalidBool():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 2 for URL argument "vPrint"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 2 for URL argument "vPrint"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidBool')
@@ -417,7 +417,7 @@ function testArgsURLObjectInvalidDate():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 1 for URL argument "vBegin"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDate')
@@ -432,7 +432,7 @@ function testArgsURLObjectInvalidDate2():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value "' + beginStr + '" for URL argument "vBegin"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value "' + beginStr + '" for URL argument "vBegin"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDate2')
@@ -445,7 +445,7 @@ function testArgsURLObjectInvalidDatetime():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 1 for URL argument "vEnd"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 1 for URL argument "vEnd"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidDatetime')
@@ -458,7 +458,7 @@ function testArgsURLObjectInvalidInt():
         '#var=' \
     )
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.mds: Invalid value 5.5 for URL argument "vCount"')) \
+        arrayNew('systemLogDebug', arrayNew('MarkdownUp - args.bare: Invalid value 5.5 for URL argument "vCount"')) \
     ))
 endfunction
 unittestRunTest('testArgsURLObjectInvalidInt')

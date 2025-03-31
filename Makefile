@@ -36,9 +36,9 @@ help:
 .PHONY: test-include
 commit: test-include
 test-include: build/npm.build
-	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/*.mds static/include/test/*.mds
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.mds$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
+	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/test/*.bare
+	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
+	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
 
 
 .PHONY: app run tarball
@@ -46,10 +46,10 @@ run: app
 	python3 -m http.server --directory build/app
 
 
-build/npm.build: build/bare-script-library-app.mds
-build/bare-script-library-app.mds:
+build/npm.build: build/bare-script-library-app.bare
+build/bare-script-library-app.bare:
 	mkdir -p build/bare-script-library
-	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/app.mds) && mv app.mds $(notdir $@)
+	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/app.bare) && mv app.bare $(notdir $@)
 
 
 build/npm.build: build/bare-script-library.json
@@ -92,17 +92,17 @@ app: doc tarball
 
     # Generate the single-page library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.mds \
+	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.bare \
 		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'../../bare-script-library.json'" \
 		-c "baredocMain(arrayNew('library.json', vBareScriptURL), 'The MarkdownUp Library')" \
 		> markdownup-library.md
 
     # Generate the include library documentation
-	$(NODE_SHELL) npx baredoc static/include/*.bare static/include/*.mds -o build/app/library/include.json
+	$(NODE_SHELL) npx baredoc static/include/*.bare -o build/app/library/include.json
 
     # Generate the single-page include library documentation
 	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.mds \
+	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.bare \
 		-v vSingle true -v vPublish true \
 		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, 'includeContent.json')" \
 		> markdownup-include-library.md
@@ -202,9 +202,9 @@ const [, typeModelPath] = argv;
 
 // Create the include library type model
 const script = parseScript(`
-include './static/include/args.mds'
-include './static/include/diff.bare'
-include './static/include/pager.mds'
+include 'static/include/args.bare'
+include 'static/include/diff.bare'
+include 'static/include/pager.bare'
 
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)

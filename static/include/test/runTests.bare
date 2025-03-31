@@ -1,23 +1,23 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../unittest.mds'
-include '../unittestMock.mds'
+include '../unittest.bare'
+include '../unittestMock.bare'
 
 
 # Run markdownUp.bare unit tests?
 if vBare:
     markdownPrint('Running "markdownUp.bare" tests. To run default tests, [click here](#var=).')
     vTestArgs = 'var.vBare=1'
-    include 'testMarkdownUp.mds'
+    include 'testMarkdownUp.bare'
 else:
     markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
-    include 'testArgs.mds'
+    include 'testArgs.bare'
     include 'testDiff.bare'
-    include 'testForms.mds'
-    include 'testPager.mds'
-    include 'testUnittest.mds'
-    include 'testUnittestMock.mds'
+    include 'testForms.bare'
+    include 'testPager.bare'
+    include 'testUnittest.bare'
+    include 'testUnittestMock.bare'
 endif
 
 # Test report
