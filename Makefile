@@ -98,7 +98,7 @@ app: doc tarball
 		> markdownup-library.md
 
     # Generate the include library documentation
-	$(NODE_SHELL) npx baredoc static/include/*.mds -o build/app/library/include.json
+	$(NODE_SHELL) npx baredoc static/include/*.bare static/include/*.mds -o build/app/library/include.json
 
     # Generate the single-page include library documentation
 	cd build/app/library/ && \
@@ -203,10 +203,12 @@ const [, typeModelPath] = argv;
 // Create the include library type model
 const script = parseScript(`
 include './static/include/args.mds'
+include './static/include/diff.bare'
 include './static/include/pager.mds'
 
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)
+objectAssign(includeTypes, diffTypes)
 objectAssign(includeTypes, pagerTypes)
 return includeTypes
 `);
