@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.1 (2025-06-01)
+
+- [6d623c3](https://github.com/craigahobbs/markdown-up/commit/6d623c3) - eliminate include library .mds files
+
 ## 3.6.0 (2025-03-31)
 
 - [f9c7c93](https://github.com/craigahobbs/markdown-up/commit/f9c7c93) - bare-script 3.3
