@@ -163,9 +163,24 @@ tarball: build/npm.build
 		mv $$FILE.tmp $$FILE; \
 	done
 
+    # Normalize the tarball file permissions
+	find build/markdown-up -type f -exec chmod 644 {} \;
+
     # Create the tarball
 	rm -f build/markdown-up.tar.gz
-	cd build && tar -czvf markdown-up.tar.gz markdown-up
+	cd build && find markdown-up -type f -print0 | sort -z | \
+		tar --null --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz
+
+
+gh-pages:
+    # Revert the tarball unless its contents have changed
+	rm -rf build/markdown-up.orig
+	mkdir build/markdown-up.orig
+	cd ../$(notdir $(CURDIR)).gh-pages && git restore markdown-up.tar.gz
+	tar -xvf ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz -C build/markdown-up.orig
+	if ! diff -r --exclude=VERSION.txt build/markdown-up build/markdown-up.orig/markdown-up >/dev/null; then \
+		cp build/markdown-up.tar.gz ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz; \
+	fi
 
 
 # JavaScript to generate the library model documentation
