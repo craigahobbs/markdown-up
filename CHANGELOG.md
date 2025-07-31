@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.2 (2025-07-31)
+
+- [94f902e](https://github.com/craigahobbs/markdown-up/commit/94f902e) - add schemaElements actionCustom argument
+
 ## 3.6.1 (2025-06-01)
 
 - [6d623c3](https://github.com/craigahobbs/markdown-up/commit/6d623c3) - eliminate include library .mds files
