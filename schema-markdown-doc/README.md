@@ -63,7 +63,7 @@ stub, "index.html". For example:
 
 ```
 ~~~ markdown-script
-include 'https://craigahobbs.github.io/schema-markdown-doc/doc/app.mds'
+include 'https://craigahobbs.github.io/schema-markdown-doc/doc/app.bare'
 
 schemaMarkdownDoc('myModel.json', 'My Model')
 ~~~

@@ -2268,6 +2268,9 @@ The type name
 Optional (default is null). The
 [action URL overrides](https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL').
 
+**actionCustom -**
+Optional (default is false). If true, the action has a custom response.
+
 #### Returns
 
 The schema type's documentation [element model](https://github.com/craigahobbs/element-model#readme)

@@ -19,6 +19,7 @@ const nbsp = String.fromCharCode(160);
  * @property {string} [params] - The page's hash param string with tag removed
  * @property {Object[]} [actionURLs] - The
  *     [action URLs]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='ActionURL'} override
+ * @property {boolean} [actionCustom] - If true, the action has a custom response. Default is false.
  * @property {?Object} [markdownOptions] - The
  *     [markdownElements options]{@link https://craigahobbs.github.io/markdown-model/module-lib_elements.html#~MarkdownElementsOptions}
  *     object
@@ -292,8 +293,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         }
         if (!actionErrorEnum.values.some((value) => value.name === 'UnexpectedError')) {
             actionErrorEnum.values.push({
-                'name': 'UnexpectedError',
-                'doc': ['An unexpected error occurred while processing the request']
+                'name': 'UnexpectedError'
             });
         }
         actionErrorTypes[actionErrorTypeName] = {'enum': actionErrorEnum};
@@ -314,6 +314,7 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
         }
 
         // Return the action documentation element model
+        const actionCustom = (options !== null ? (options.actionCustom ?? false) : false);
         return [
             titleElements(`action ${typeName}`),
             markdownElementsNull(action.doc, options),
@@ -335,8 +336,8 @@ function userTypeElements(types, typeName, titleTag, options, title = null, intr
             'path' in action ? userTypeElements(types, action.path, 'h2', options, 'Path Parameters') : null,
             'query' in action ? userTypeElements(types, action.query, 'h2', options, 'Query Parameters') : null,
             'input' in action ? userTypeElements(types, action.input, 'h2', options, 'Input Parameters') : null,
-            'output' in action ? userTypeElements(types, action.output, 'h2', options, 'Output Parameters') : null,
-            userTypeElements(
+            'output' in action && !actionCustom ? userTypeElements(types, action.output, 'h2', options, 'Output Parameters') : null,
+            actionCustom ? null : userTypeElements(
                 actionErrorTypes,
                 actionErrorTypeName,
                 'h2',
