@@ -1638,7 +1638,7 @@ test('script library, schemaElements action URLs', () => {
                             'html': 'tr',
                             'elem': [
                                 {'html': 'th', 'elem': {'text': 'Value'}},
-                                {'html': 'th', 'elem': {'text': 'Description'}}
+                                null
                             ]
                         },
                         [
@@ -1646,18 +1646,36 @@ test('script library, schemaElements action URLs', () => {
                                 'html': 'tr',
                                 'elem': [
                                     {'html': 'td', 'elem': {'text': 'UnexpectedError'}},
-                                    {
-                                        'html': 'td',
-                                        'elem': [
-                                            {'html': 'p', 'elem': [{'text': 'An unexpected error occurred while processing the request'}]}
-                                        ]
-                                    }
+                                    null
                                 ]
                             }
                         ]
                     ]
                 }
             ]
+        ],
+        null
+    ]);
+});
+
+
+test('script library, schemaElements action custom response', () => {
+    const runtime = testRuntime();
+    runtime.options.params = '';
+    const types = parseSchemaMarkdown(['# My action', 'action MyAction', '  urls', '  GET /']);
+    const elements = markdownScriptFunctions.schemaElements([types, 'MyAction', [], true], runtime.options);
+    assert.deepEqual(elements, [
+        [
+            {'html': 'h1', 'attr': {'id': 'type_MyAction'}, 'elem': {'text': 'action MyAction'}},
+            [
+                {'html': 'p', 'elem': [{'text': 'My action'}]}
+            ],
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         ],
         null
     ]);
