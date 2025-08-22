@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.4 (2025-08-22)
+
+- [491d94a](https://github.com/craigahobbs/markdown-up/commit/491d94a) - update readme
+
 ## 3.6.3 (2025-08-22)
 
 - [a358734](https://github.com/craigahobbs/markdown-up/commit/a358734) - reverse z-order of line chart lines
