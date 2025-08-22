@@ -296,6 +296,7 @@ export function lineChartElements(data, lineChart, options = null) {
             }
         }
     }
+    const linePointsReversed = linePoints.slice().reverse();
 
     // No data?
     if (xMin === null) {
@@ -613,7 +614,7 @@ export function lineChartElements(data, lineChart, options = null) {
             },
 
             // Lines
-            linePoints.map(({color, points}) => ({
+            linePointsReversed.map(({color, points}) => ({
                 'svg': 'path',
                 'attr': {
                     'stroke': color,
