@@ -268,19 +268,19 @@ test('lineChartElements', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#1f77b4',
+                        'stroke': '#ff7f0e',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 112.880 L 324.975 65.190 L 584.800 160.570'
+                        'd': 'M 65.150 208.260 L 324.975 17.500 L 584.800 255.950'
                     }
                 },
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#ff7f0e',
+                        'stroke': '#1f77b4',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 208.260 L 324.975 17.500 L 584.800 255.950'
+                        'd': 'M 65.150 112.880 L 324.975 65.190 L 584.800 160.570'
                     }
                 }
             ],
@@ -608,10 +608,10 @@ test('lineChartElements, color field', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#1f77b4',
+                        'stroke': '#2ca02c',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 255.950 L 556.000 136.725'
+                        'd': 'M 554.500 17.500 L 557.500 17.500'
                     }
                 },
                 {
@@ -626,10 +626,10 @@ test('lineChartElements, color field', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#2ca02c',
+                        'stroke': '#1f77b4',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 554.500 17.500 L 557.500 17.500'
+                        'd': 'M 65.150 255.950 L 556.000 136.725'
                     }
                 }
             ],
@@ -967,19 +967,10 @@ test('lineChartElements, color field multiple fields', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#1f77b4',
+                        'stroke': '#d62728',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 65.190 L 536.800 255.950'
-                    }
-                },
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': '#ff7f0e',
-                        'stroke-width': '3.000',
-                        'fill': 'none',
-                        'd': 'M 65.150 112.880 L 536.800 208.260'
+                        'd': 'M 65.150 17.500 L 536.800 160.570'
                     }
                 },
                 {
@@ -994,10 +985,19 @@ test('lineChartElements, color field multiple fields', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#d62728',
+                        'stroke': '#ff7f0e',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 17.500 L 536.800 160.570'
+                        'd': 'M 65.150 112.880 L 536.800 208.260'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#1f77b4',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 65.150 65.190 L 536.800 255.950'
                     }
                 }
             ],
@@ -1366,43 +1366,7 @@ test('lineChartElements, color field multiple fields order', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#1f77b4',
-                        'stroke-width': '3.000',
-                        'fill': 'none',
-                        'd': 'M 63.650 255.950 L 66.650 255.950'
-                    }
-                },
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': '#ff7f0e',
-                        'stroke-width': '3.000',
-                        'fill': 'none',
-                        'd': 'M 63.650 255.950 L 66.650 255.950'
-                    }
-                },
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': '#2ca02c',
-                        'stroke-width': '3.000',
-                        'fill': 'none',
-                        'd': 'M 63.650 255.950 L 66.650 255.950'
-                    }
-                },
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': '#d62728',
-                        'stroke-width': '3.000',
-                        'fill': 'none',
-                        'd': 'M 63.650 255.950 L 66.650 255.950'
-                    }
-                },
-                {
-                    'svg': 'path',
-                    'attr': {
-                        'stroke': '#9467bd',
+                        'stroke': '#e377c2',
                         'stroke-width': '3.000',
                         'fill': 'none',
                         'd': 'M 63.650 255.950 L 66.650 255.950'
@@ -1420,7 +1384,43 @@ test('lineChartElements, color field multiple fields order', () => {
                 {
                     'svg': 'path',
                     'attr': {
-                        'stroke': '#e377c2',
+                        'stroke': '#9467bd',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#d62728',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#2ca02c',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#ff7f0e',
+                        'stroke-width': '3.000',
+                        'fill': 'none',
+                        'd': 'M 63.650 255.950 L 66.650 255.950'
+                    }
+                },
+                {
+                    'svg': 'path',
+                    'attr': {
+                        'stroke': '#1f77b4',
                         'stroke-width': '3.000',
                         'fill': 'none',
                         'd': 'M 63.650 255.950 L 66.650 255.950'
