@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.3 (2025-08-22)
+
+- [a358734](https://github.com/craigahobbs/markdown-up/commit/a358734) - reverse z-order of line chart lines
+
 ## 3.6.2 (2025-07-31)
 
 - [94f902e](https://github.com/craigahobbs/markdown-up/commit/94f902e) - add schemaElements actionCustom argument
