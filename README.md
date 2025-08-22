@@ -64,7 +64,7 @@ These applications are called *MarkdownUp Applications*. You can learn more from
 [MarkdownUp backend application's README](https://craigahobbs.github.io/markdown-up-py/#markdownup-applications).
 
 
-### Debug Mode
+## Debug Mode
 
 Debug mode logs the script runtime duration and runs the BareScript linter, which performs static
 code analysis on your code and reports warnings for any issues found.
