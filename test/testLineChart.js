@@ -28,8 +28,8 @@ test('validateLineChart, error', () => {
 
 test('lineChartElements', () => {
     const data = [
-        {'A': 0, 'B': 5, 'C': 3},
-        {'A': 1, 'C': 7},
+        {'A': 0, 'C': 3},
+        {'A': 1, 'B': 5, 'C': 7},
         {'A': 1, 'B': 6},
         {'B': 6, 'C': 7},
         {'A': 2, 'B': 4, 'C': 2}
@@ -280,7 +280,7 @@ test('lineChartElements', () => {
                         'stroke': '#1f77b4',
                         'stroke-width': '3.000',
                         'fill': 'none',
-                        'd': 'M 65.150 112.880 L 324.975 65.190 L 584.800 160.570'
+                        'd': 'M 324.975 112.880 L 324.975 65.190 L 584.800 160.570'
                     }
                 }
             ],
