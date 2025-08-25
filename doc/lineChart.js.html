@@ -288,7 +288,7 @@ export function lineChartElements(data, lineChart, options = null) {
                 const yRow = row[yField] ?? null;
                 if (xRow !== null &amp;&amp; yRow !== null) {
                     points.push([xRow, yRow]);
-                    xMin = (xMin === null ? xRow : xMin);
+                    xMin = (xMin === null ? xRow : (xRow &lt; xMin ? xRow : xMin));
                     yMin = (yMin === null ? yRow : (yRow &lt; yMin ? yRow : yMin));
                     xMax = xRow;
                     yMax = (yMax === null ? yRow : (yRow > yMax ? yRow : yMax));
