@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.6.5 (2025-08-25)
+
+- [386616e](https://github.com/craigahobbs/markdown-up/commit/386616e) - fix lineChart xMin computation
+
 ## 3.6.4 (2025-08-22)
 
 - [491d94a](https://github.com/craigahobbs/markdown-up/commit/491d94a) - update readme
