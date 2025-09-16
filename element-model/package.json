@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "element-model",
-    "version": "1.1.5",
+    "version": "1.2.0",
     "description": "HTML and SVG element object model and renderer for the browser",
     "keywords": [
         "html",
@@ -24,9 +24,9 @@
         "test": "node --test test/"
     },
     "devDependencies": {
-        "c8": "~7.13",
-        "eslint": "~8.40",
+        "c8": "~10.1",
+        "eslint": "~9.35",
         "jsdoc": "~4.0",
-        "jsdom": "~22.0"
+        "jsdom": "~27.0"
     }
 }

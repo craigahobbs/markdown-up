@@ -4,6 +4,21 @@
 /** @module lib/elementModel */
 
 
+/**
+ * Custom error class for element model validation errors.
+ */
+class ElementModelValidationError extends Error {
+    /**
+     * Creates a new ElementModelValidationError instance.
+     * @param {string} message - The error message describing the validation failure.
+     */
+    constructor(message) {
+        super(message);
+        this.name = 'ElementModelValidationError';
+    }
+}
+
+
 // Set of valid element members
 const elementTagMembers = new Set(['html', 'svg', 'text']);
 const elementMembers = new Set([...elementTagMembers, 'attr', 'elem', 'callback']);
@@ -12,7 +27,7 @@ const elementMembers = new Set([...elementTagMembers, 'attr', 'elem', 'callback'
 // Helper function for throwing validation value exceptions
 function throwValueError(message, value) {
     const valueStr = `${JSON.stringify(value)}`;
-    throw new Error(`${message} ${valueStr.slice(0, 100)} (type '${typeof value}')`);
+    throw new ElementModelValidationError(`${message} ${valueStr.slice(0, 100)} (type '${typeof value}')`);
 }
 
 
@@ -22,7 +37,7 @@ function throwValueError(message, value) {
  * @param {?(Object|Array)} elements - The element model.
  *     An element model is either null, an element object, or an array of any of these.
  * @returns {?(Object|Array)} The element model (unchanged)
- * @throws {Error} Validation error string
+ * @throws {ElementModelValidationError} Validation error string
  */
 export function validateElements(elements) {
     // Array of elements?
@@ -55,7 +70,7 @@ export function validateElements(elements) {
         } else if (tagMembers.length !== 1) {
             throwValueError(`Multiple element members ${tagMembers}`, elements);
         } else if (unknownMembers.length !== 0) {
-            throw new Error(`Unknown element member '${unknownMembers[0]}'`, elements);
+            throw new ElementModelValidationError(`Unknown element member '${unknownMembers[0]}'`);
         }
 
         // Validate the tag
@@ -106,6 +121,7 @@ export function validateElements(elements) {
  * @param {?(Object|Array)} [elements=null] - The element model.
  *     An element model is either null, an element object, or an array of any of these.
  * @param {boolean} [clear=true] - If true, empty parent before rendering
+ * @throws {ElementModelValidationError} Validation error string
  */
 export function renderElements(parent, elements = null, clear = true) {
     validateElements(elements);
@@ -159,4 +175,81 @@ function renderElementsHelper(parent, elements) {
             element.callback(browserElement);
         }
     }
+}
+
+
+/**
+ * Render an element model to an HTML or SVG string. Note that 'callback' members are ignored.
+ *
+ * @param {?(Object|Array)} [elements=null] - The element model.
+ *     An element model is either null, an element object, or an array of any of these.
+ * @param {?(number|string)} [indent=null] - Indentation string or number of spaces (like JSON.stringify)
+ * @returns {string} The HTML or SVG string
+ * @throws {ElementModelValidationError} Validation error string
+ */
+export function renderElementsToString(elements = null, indent = null) {
+    validateElements(elements);
+
+    // Compute the indent string
+    let indentStr = '';
+    if (typeof indent === 'string') {
+        indentStr = indent;
+    } else if (typeof indent === 'number') {
+        indentStr = ' '.repeat(Math.max(0, indent));
+    }
+
+    return renderElementsToStringHelper(elements, indentStr, indent, 0);
+}
+
+
+// Helper function to render elements to string
+function renderElementsToStringHelper(elements, indentStr, indent, level) {
+    const newline = indentStr ? '\n' : '';
+    if (elements === null) {
+        return '';
+    } else if (Array.isArray(elements)) {
+        return elements.map(element => renderElementsToStringHelper(element, indentStr, indent, level)).join('');
+    }
+
+    // Text node
+    if ('text' in elements) {
+        return `${indentStr.repeat(level)}${escapeHtml(elements.text)}${newline}`;
+    }
+
+    // Determine tag and type
+    const isSVG = 'svg' in elements;
+    const tag = (isSVG ? elements.svg : elements.html).toLowerCase();
+    const indentPrefix = indentStr.repeat(level);
+
+    // Attributes
+    let attrStr = '';
+    if ('attr' in elements && elements.attr !== null) {
+        for (const [attr, value] of Object.entries(elements.attr)) {
+            if (value !== null) {
+                attrStr += ` ${attr}="${escapeHtml(`${value}`)}"`;
+            }
+        }
+    }
+
+    // HTML void element?
+    const isVoid = !isSVG && voidTags.has(tag);
+    if (isVoid) {
+        return `${indentPrefix}<${tag}${attrStr} />${newline}`;
+    }
+
+    // Render the element and its children
+    const childrenStr = 'elem' in elements ? renderElementsToStringHelper(elements.elem, indentStr, indent, level + 1) : '';
+    return `${indentPrefix}<${tag}${attrStr}>${newline}${childrenStr}${indentPrefix}</${tag}>${newline}`;
+}
+
+
+// The set of void (single-line) HTML tags
+const voidTags = new Set(
+    ['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']
+);
+
+
+// Helper function to escape HTML special characters
+function escapeHtml(str) {
+    return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 }

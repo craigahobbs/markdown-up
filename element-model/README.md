@@ -36,17 +36,20 @@ const elements = [
     },
     {
         'html': 'p',
-        'elem': {
-            'html': 'a',
-            'attr': {'href': 'link.html'},
-            'elem': [
-                {'text': 'a '},
-                {
-                    'html': 'strong',
-                    'elem': {'text': 'link'}
-                }
-            ]
-        }
+        'elem': [
+            {'text': 'This is '},
+            {
+                'html': 'a',
+                'attr': {'href': 'link.html'},
+                'elem': [
+                    {'text': 'a '},
+                    {
+                        'html': 'strong',
+                        'elem': {'text': 'link'}
+                    }
+                ]
+            }
+        ]
     }
 ];
 ~~~
