@@ -23,10 +23,10 @@
     },
     "dependencies": {
         "bare-script": "~3.3",
-        "element-model": "~1.1",
+        "element-model": "~1.2",
         "markdown-model": "~2.2",
         "schema-markdown": "~1.2",
-        "schema-markdown-doc": "~2.0"
+        "schema-markdown-doc": "~2.1"
     },
     "devDependencies": {
         "c8": "~10.1",
