@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.7.0 (2025-09-16)
+
+- [f154d34](https://github.com/craigahobbs/markdown-up/commit/f154d34) - element-model 1.2, schema-markdown-doc 2.1
+
 ## 3.6.5 (2025-08-25)
 
 - [386616e](https://github.com/craigahobbs/markdown-up/commit/386616e) - fix lineChart xMin computation
