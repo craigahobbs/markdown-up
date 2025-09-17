@@ -198,7 +198,12 @@ export function renderElementsToString(elements = null, indent = null) {
         indentStr = ' '.repeat(Math.max(0, indent));
     }
 
-    return renderElementsToStringHelper(elements, indentStr, 0);
+    // Render the element model as an HTML/SVG string
+    const elementStr = renderElementsToStringHelper(elements, indentStr, 0);
+    if (elementStr.startsWith('<html')) {
+        return `<!DOCTYPE html>\n${elementStr}`;
+    }
+    return elementStr;
 }
 
 
@@ -211,20 +216,29 @@ function renderElementsToStringHelper(elements, indentStr, level) {
     }
 
     // Text node
+    const indentPrefix = indentStr.repeat(level);
     const newline = indentStr ? '\n' : '';
     if ('text' in elements) {
-        return `${indentStr.repeat(level)}${escapeHtml(elements.text)}${newline}`;
+        const elementsText = (newline ? elements.text.trim() : elements.text);
+        return `${indentPrefix}${escapeHtml(elementsText)}${newline}`;
     }
 
     // Determine tag and type
     const isSVG = 'svg' in elements;
     const tag = (isSVG ? elements.svg : elements.html).toLowerCase();
-    const indentPrefix = indentStr.repeat(level);
+    const isVoid = !isSVG && voidTags.has(tag);
 
     // Attributes
     let attrStr = '';
-    if ('attr' in elements && elements.attr !== null) {
-        for (const [attr, value] of Object.entries(elements.attr)) {
+    let elementsAttr = elements.attr ?? null;
+    if (level === 0 && isSVG) {
+        if (elementsAttr === null) {
+            elementsAttr = {};
+        }
+        elementsAttr.xmlns = 'http://www.w3.org/2000/svg';
+    }
+    if (elementsAttr !== null) {
+        for (const [attr, value] of Object.entries(elementsAttr).sort((a1, a2) => a1[0] < a2[0] ? -1 : 1)) {
             if (value !== null) {
                 attrStr += ` ${attr}="${escapeHtml(`${value}`)}"`;
             }
@@ -232,7 +246,6 @@ function renderElementsToStringHelper(elements, indentStr, level) {
     }
 
     // HTML void element?
-    const isVoid = !isSVG && voidTags.has(tag);
     if (isVoid) {
         return `${indentPrefix}<${tag}${attrStr} />${newline}`;
     }
