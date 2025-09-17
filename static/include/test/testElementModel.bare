@@ -1,0 +1,369 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include '../elementModel.bare'
+include '../unittest.bare'
+
+
+function testElementModelValidate():
+    unittestDeepEqual( \
+        elementModelValidate(objectNew( \
+            'html', 'html', \
+            'elem', arrayNew( \
+                objectNew('html', 'h1', 'elem', objectNew('text', 'Title')), \
+                objectNew( \
+                    'html', 'p', \
+                    'attr', null, \
+                    'elem', arrayNew( \
+                        objectNew('text', 'This is some '), \
+                        objectNew('text', ''), \
+                        objectNew('html', 'span', 'attr', objectNew('style', 'font-weight: bold;'), 'elem', objectNew('text', 'bolded text!')) \
+                    ) \
+                ), \
+                objectNew('html', 'hr', 'elem', null) \
+            ) \
+        )), \
+        objectNew( \
+            'html', 'html', \
+            'elem', arrayNew( \
+                objectNew('html', 'h1', 'elem', objectNew('text', 'Title')), \
+                objectNew( \
+                    'html', 'p', \
+                    'attr', null, \
+                    'elem', arrayNew( \
+                        objectNew('text', 'This is some '), \
+                        objectNew('text', ''), \
+                        objectNew('html', 'span', 'attr', objectNew('style', 'font-weight: bold;'), 'elem', objectNew('text', 'bolded text!')) \
+                    ) \
+                ), \
+                objectNew('html', 'hr', 'elem', null) \
+            ) \
+        ) \
+    )
+endfunction
+unittestRunTest('testElementModelValidate')
+
+
+function testElementModelValidate_callbackNull():
+    unittestDeepEqual( \
+        elementModelValidate(objectNew('html', 'html', 'callback', null)), \
+        objectNew('html', 'html', 'callback', null) \
+    )
+endfunction
+unittestRunTest('testElementModelValidate_callbackNull')
+
+
+function testElementModelValidate_errorMissingElementMember():
+    unittestEqual(elementModelValidate(objectNew()), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorMissingElementMember')
+
+
+function testElementModelValidate_errorMultipleElementMembers():
+    unittestEqual(elementModelValidate(objectNew('html', 'html', 'svg', 'svg')), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorMultipleElementMembers')
+
+
+function testElementModelValidate_errorUnknownMember():
+    unittestEqual(elementModelValidate(objectNew('html', 'html', 'unknown', 'abc')), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorUnknownMember')
+
+
+function testElementModelValidate_errorHtmlLength():
+    unittestEqual(elementModelValidate(objectNew('html', '')), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorHtmlLength')
+
+
+function testElementModelValidate_errorHtmlType():
+    unittestEqual(elementModelValidate(objectNew('html', 0)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorHtmlType')
+
+
+function testElementModelValidate_errorSvgLength():
+    unittestEqual(elementModelValidate(objectNew('svg', '')), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorSvgLength')
+
+
+function testElementModelValidate_errorSvgType():
+    unittestEqual(elementModelValidate(objectNew('svg', 0)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorSvgType')
+
+
+function testElementModelValidate_errorTextType():
+    unittestEqual(elementModelValidate(objectNew('text', 0)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorTextType')
+
+
+function testElementModelValidate_errorAttrType():
+    unittestEqual(elementModelValidate(objectNew('html', 'html', 'attr', 0)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorAttrType')
+
+
+function testElementModelValidate_errorAttrTextElement():
+    unittestEqual(elementModelValidate(objectNew('text', 'abc', 'attr', null)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorAttrTextElement')
+
+
+function testElementModelValidate_errorElemType():
+    unittestEqual(elementModelValidate(objectNew('html', 'html', 'elem', arrayNew(0))), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorElemType')
+
+
+function testElementModelValidate_errorElemTextElement():
+    unittestEqual(elementModelValidate(objectNew('text', 'abc', 'elem', null)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorElemTextElement')
+
+
+function testElementModelValidate_errorCallbackInvalidValue():
+    unittestEqual(elementModelValidate(objectNew('html', 'html', 'callback', 0)), null)
+endfunction
+unittestRunTest('testElementModelValidate_errorCallbackInvalidValue')
+
+
+function testElementModelStringify_null():
+    unittestEqual(elementModelStringify(null), '')
+endfunction
+unittestRunTest('testElementModelStringify_null')
+
+
+function testElementModelStringify_emptyArray():
+    unittestEqual(elementModelStringify(arrayNew()), '')
+endfunction
+unittestRunTest('testElementModelStringify_emptyArray')
+
+
+function testElementModelStringify_text():
+    unittestEqual(elementModelStringify(objectNew('text', 'Hello')), 'Hello')
+endfunction
+unittestRunTest('testElementModelStringify_text')
+
+
+function testElementModelStringify_textEscape():
+    unittestEqual(elementModelStringify(objectNew('text', '<&>"\'')), '&lt;&amp;&gt;&quot;&#039;')
+endfunction
+unittestRunTest('testElementModelStringify_textEscape')
+
+
+function testElementModelStringify_simpleHtml():
+    unittestEqual(elementModelStringify(objectNew('html', 'div')), '<div></div>')
+endfunction
+unittestRunTest('testElementModelStringify_simpleHtml')
+
+
+function testElementModelStringify_htmlWithAttr():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'attr', objectNew('id', 'foo', 'class', 'bar'))), '<div class="bar" id="foo"></div>')
+endfunction
+unittestRunTest('testElementModelStringify_htmlWithAttr')
+
+
+function testElementModelStringify_attrEscape():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'attr', objectNew('title', '"&"'))), '<div title="&quot;&amp;&quot;"></div>')
+endfunction
+unittestRunTest('testElementModelStringify_attrEscape')
+
+
+function testElementModelStringify_attrNullValue():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'attr', objectNew('id', null))), '<div></div>')
+endfunction
+unittestRunTest('testElementModelStringify_attrNullValue')
+
+
+function testElementModelStringify_attrNull():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'attr', null)), '<div></div>')
+endfunction
+unittestRunTest('testElementModelStringify_attrNull')
+
+
+function testElementModelStringify_htmlWithChildren():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello'))), '<div>Hello</div>')
+endfunction
+unittestRunTest('testElementModelStringify_htmlWithChildren')
+
+
+function testElementModelStringify_array():
+    unittestEqual( \
+        elementModelStringify(arrayNew( \
+            objectNew('html', 'p', 'elem', objectNew('text', 'One')), \
+            objectNew('html', 'p', 'elem', objectNew('text', 'Two')) \
+        )), \
+        '<p>One</p><p>Two</p>' \
+    )
+endfunction
+unittestRunTest('testElementModelStringify_array')
+
+
+function testElementModelStringify_svg():
+    unittestEqual(elementModelStringify(objectNew('svg', 'svg')), '<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+endfunction
+unittestRunTest('testElementModelStringify_svg')
+
+
+function testElementModelStringify_void():
+    unittestEqual(elementModelStringify(objectNew('html', 'br')), '<br />')
+endfunction
+unittestRunTest('testElementModelStringify_void')
+
+
+function testElementModelStringify_voidWithChildren():
+    unittestEqual(elementModelStringify(objectNew('html', 'br', 'elem', objectNew('text', 'no'))), '<br />')
+endfunction
+unittestRunTest('testElementModelStringify_voidWithChildren')
+
+
+function testElementModelStringify_ignoreCallback():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'callback', null)), '<div></div>')
+endfunction
+unittestRunTest('testElementModelStringify_ignoreCallback')
+
+
+function testElementModelStringify_nonStringAttrValue():
+    unittestEqual(elementModelStringify(objectNew('html', 'span', 'attr', objectNew('style', 0))), '<span style="0"></span>')
+endfunction
+unittestRunTest('testElementModelStringify_nonStringAttrValue')
+
+
+function testElementModelStringify_basic():
+    unittestEqual( \
+        elementModelStringify(arrayNew( \
+            objectNew('html', 'h1', 'elem', objectNew('text', 'Hello, World!')), \
+            arrayNew( \
+                objectNew('html', 'p', 'elem', objectNew('text', 'Word')), \
+                objectNew('html', 'p', 'elem', arrayNew(objectNew('text', 'Two'), objectNew('text', 'Words'))), \
+                objectNew('html', 'p', 'elem', arrayNew()), \
+                objectNew('html', 'p', 'elem', null) \
+            ), \
+            objectNew('html', 'div', 'attr', objectNew('id', 'Id', 'class', null)) \
+        )), \
+        '<h1>Hello, World!</h1><p>Word</p><p>TwoWords</p><p></p><p></p><div id="Id"></div>' \
+    )
+endfunction
+unittestRunTest('testElementModelStringify_basic')
+
+
+function testElementModelStringify_complex():
+    unittestEqual( \
+        elementModelStringify(objectNew( \
+            'html', 'html', \
+            'elem', arrayNew( \
+                objectNew('html', 'h1', 'elem', objectNew('text', 'Title')), \
+                objectNew( \
+                    'html', 'p', \
+                    'elem', arrayNew( \
+                        objectNew('text', 'This is some '), \
+                        objectNew('text', ''), \
+                        objectNew('html', 'span', 'attr', objectNew('style', 'font-weight: bold;'), 'elem', objectNew('text', 'bolded text!')) \
+                    ) \
+                ), \
+                objectNew('html', 'hr', 'elem', null) \
+            ) \
+        )), \
+        '<!DOCTYPE html>\n<html><h1>Title</h1><p>This is some <span style="font-weight: bold;">bolded text!</span></p><hr /></html>' \
+    )
+endfunction
+unittestRunTest('testElementModelStringify_complex')
+
+
+function testElementModelStringify_svgComplex():
+    unittestEqual( \
+        elementModelStringify(arrayNew( \
+            objectNew('svg', 'svg', 'attr', objectNew('width', '600', 'height', '400'), 'elem', arrayNew( \
+                objectNew( \
+                    'svg', 'rect', \
+                    'attr', objectNew('x', '10', 'y', '10', 'width', '20', 'height', '20', 'style', 'fill: #ff0000;') \
+                ), \
+                objectNew( \
+                    'svg', 'rect', \
+                    'attr', objectNew('x', '10', 'y', '10', 'width', '20', 'height', '20', 'style', 'fill: #00ff00;') \
+                ) \
+            )) \
+        )), \
+        '<svg height="400" width="600" xmlns="http://www.w3.org/2000/svg"><rect height="20" style="fill: #ff0000;" width="20" x="10" y="10"></rect><rect height="20" style="fill: #00ff00;" width="20" x="10" y="10"></rect></svg>' \
+    )
+endfunction
+unittestRunTest('testElementModelStringify_svgComplex')
+
+
+function testElementModelStringify_indentNumber():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), 2), '<div>\n  Hello\n</div>\n')
+endfunction
+unittestRunTest('testElementModelStringify_indentNumber')
+
+
+function testElementModelStringify_indentString():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), '\t'), '<div>\n\tHello\n</div>\n')
+endfunction
+unittestRunTest('testElementModelStringify_indentString')
+
+
+function testElementModelStringify_indentNull():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), null), '<div>Hello</div>')
+endfunction
+unittestRunTest('testElementModelStringify_indentNull')
+
+
+function testElementModelStringify_indentUndefined():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), undefined), '<div>Hello</div>')
+endfunction
+unittestRunTest('testElementModelStringify_indentUndefined')
+
+
+function testElementModelStringify_indentComplex():
+    unittestEqual( \
+        elementModelStringify(objectNew( \
+            'html', 'html', \
+            'elem', arrayNew( \
+                objectNew('html', 'h1', 'elem', objectNew('text', 'Title')), \
+                objectNew( \
+                    'html', 'p', \
+                    'elem', arrayNew( \
+                        objectNew('text', 'This is some '), \
+                        objectNew('html', 'span', 'attr', objectNew('style', 'font-weight: bold;'), 'elem', objectNew('text', 'bolded text!')) \
+                    ) \
+                ) \
+            ) \
+        ), 2), \
+        '<!DOCTYPE html>\n<html>\n  <h1>\n    Title\n  </h1>\n  <p>\n    This is some \n    <span style="font-weight: bold;">\n      bolded text!\n    </span>\n  </p>\n</html>\n' \
+    )
+endfunction
+unittestRunTest('testElementModelStringify_indentComplex')
+
+
+function testElementModelStringify_indentVoid():
+    unittestEqual(elementModelStringify(objectNew('html', 'br'), 2), '<br />\n')
+endfunction
+unittestRunTest('testElementModelStringify_indentVoid')
+
+
+function testElementModelStringify_indentInvalid():
+    unittestEqual(elementModelStringify(objectNew('html', 'div'), objectNew()), '<div></div>')
+endfunction
+unittestRunTest('testElementModelStringify_indentInvalid')
+
+
+function testElementModelStringify_indentNegativeNumber():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), -1), '<div>Hello</div>')
+endfunction
+unittestRunTest('testElementModelStringify_indentNegativeNumber')
+
+
+function testElementModelStringify_indentZero():
+    unittestEqual(elementModelStringify(objectNew('html', 'div', 'elem', objectNew('text', 'Hello')), 0), '<div>Hello</div>')
+endfunction
+unittestRunTest('testElementModelStringify_indentZero')
+
+
+function testElementModelStringify_textNoSpecialChars():
+    unittestEqual(elementModelStringify(objectNew('text', 'hello world 123')), 'hello world 123')
+endfunction
+unittestRunTest('testElementModelStringify_textNoSpecialChars')

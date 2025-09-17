@@ -1,0 +1,216 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/bare-script/blob/main/LICENSE
+
+
+# Include sentinel
+if systemGlobalGet('elementModelSentinel'):
+    return
+endif
+elementModelSentinel = true
+
+
+# $function: elementModelValidate
+# $group: elementModel.bare
+# $doc: Validate an element model
+# $arg elements: The element model.
+# $arg elements: An element model is either null, an element object, or an array of any of these.
+# $return: The element model if valid, null otherwise
+function elementModelValidate(elements):
+    # Null?
+    if elements == null:
+        return elements
+    endif
+
+    # Array?
+    if systemType(elements) == 'array':
+        validatedElements = arrayNew()
+        for subElements in elements:
+            validatedSub = elementModelValidate(subElements)
+            if validatedSub == null:
+                return null
+            endif
+            arrayPush(validatedElements, validatedSub)
+        endfor
+        return validatedElements
+    endif
+
+    # Non-object?
+    if systemType(elements) != 'object':
+        return null
+    endif
+
+    # Check for element tag members and unknown members
+    tagMembers = arrayNew()
+    unknownMembers = arrayNew()
+    for elementMember in objectKeys(elements):
+        if elementMember == 'html' || elementMember == 'svg' || elementMember == 'text':
+            arrayPush(tagMembers, elementMember)
+        endif
+        if elementMember != 'html' && elementMember != 'svg' && elementMember != 'text' && \
+            elementMember != 'attr' && elementMember != 'elem' && elementMember != 'callback':
+            arrayPush(unknownMembers, elementMember)
+        endif
+    endfor
+    if arrayLength(tagMembers) == 0:
+        return null
+    endif
+    if arrayLength(tagMembers) != 1:
+        return null
+    endif
+    if arrayLength(unknownMembers) != 0:
+        return null
+    endif
+
+    # Validate the tag
+    tagMember = arrayGet(tagMembers, 0)
+    tag = objectGet(elements, tagMember)
+    if systemType(tag) != 'string' || (tagMember != 'text' && stringLength(tag) == 0):
+        return null
+    endif
+
+    # Validate attributes
+    attr = objectGet(elements, 'attr')
+    if objectHas(elements, 'attr') && tagMember == 'text':
+        return null
+    endif
+    if attr != null:
+        # Text element?
+        if tagMember == 'text':
+            return null
+        endif
+
+        # Validate the attributes
+        if systemType(attr) != 'object':
+            return null
+        endif
+    endif
+
+    # Validate child elements
+    elem = objectGet(elements, 'elem')
+    if objectHas(elements, 'elem') && tagMember == 'text':
+        return null
+    endif
+    if elem != null:
+        # Text element?
+        if tagMember == 'text':
+            return null
+        endif
+
+        # Validate the sub-elements
+        if elementModelValidate(elem) == null:
+            return null
+        endif
+    endif
+
+    # Validate creation callback
+    callback = objectGet(elements, 'callback')
+    if callback != null && systemType(callback) != 'function':
+        return null
+    endif
+
+    return elements
+endfunction
+
+
+# $function: elementModelStringify
+# $group: elementModel.bare
+# $doc: Render an element model to an HTML or SVG string
+# $arg elements: The element model.
+# $arg elements: An element model is either null, an element object, or an array of any of these.
+# $arg indent: Optional (default is null). The indentation string or number of spaces (like JSON.stringify)
+# $return: The HTML or SVG string
+function elementModelStringify(elements, indent):
+    # Compute the indent string
+    indentStr = ''
+    if systemType(indent) == 'string':
+        indentStr = indent
+    elif systemType(indent) == 'number':
+        indentStr = stringRepeat(' ', mathMax(0, indent))
+    endif
+
+    # Render the element model as an HTML/SVG string
+    elementStr = elementModelStringifyHelper(elements, indentStr, 0)
+    if stringIndexOf(elementStr, '<html') == 0:
+        elementStr = '<!DOCTYPE html>' + stringFromCharCode(10) + elementStr
+    endif
+    return elementStr
+endfunction
+
+
+# Helper function to render elements to string
+function elementModelStringifyHelper(elements, indentStr, level):
+    if elements == null:
+        return ''
+    endif
+    if systemType(elements) == 'array':
+        result = ''
+        for element in elements:
+            result = result + elementModelStringifyHelper(element, indentStr, level)
+        endfor
+        return result
+    endif
+
+    # Text node
+    indentPrefix = stringRepeat(indentStr, level)
+    newline = if(indentStr, stringFromCharCode(10), '')
+    if objectGet(elements, 'text') != null:
+        text = objectGet(elements, 'text')
+        text = stringReplace(text, '&', '&amp;')
+        text = stringReplace(text, '<', '&lt;')
+        text = stringReplace(text, '>', '&gt;')
+        text = stringReplace(text, '"', '&quot;')
+        text = stringReplace(text, "'", '&#039;')
+        return indentPrefix + text + newline
+    endif
+
+    # Determine tag and type
+    tag = objectGet(elements, 'html')
+    if tag == null:
+        tag = objectGet(elements, 'svg')
+    endif
+    if tag == null:
+        return ''
+    endif
+    tag = stringLower(tag)
+
+    # Attributes
+    attrStr = ''
+    attr = objectGet(elements, 'attr')
+    if tag == 'svg':
+        if attr == null:
+            attr = objectNew()
+        endif
+        objectSet(attr, 'xmlns', 'http://www.w3.org/2000/svg')
+    endif
+    if attr != null:
+        attrNames = arraySort(objectKeys(attr))
+        for attrName in attrNames:
+            value = objectGet(attr, attrName)
+            if value != null:
+                attrStr = attrStr + ' ' + attrName + '="' + stringReplace(stringReplace(stringNew(value), '&', '&amp;'), '"', '&quot;') + '"'
+            endif
+        endfor
+    endif
+
+    # Children
+    elem = objectGet(elements, 'elem')
+    childrenStr = if(elem != null, elementModelStringifyHelper(elem, indentStr, level + 1), '')
+
+    # Void elements (simplified list)
+    voidTags = arrayNew('area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr')
+    isVoid = false
+    for voidTag in voidTags:
+        if tag == voidTag:
+            isVoid = true
+            break
+        endif
+    endfor
+
+    # HTML void element?
+    if isVoid:
+        return indentPrefix + '<' + tag + attrStr + ' />' + newline
+    endif
+
+    # Render the element
+    return indentPrefix + '<' + tag + attrStr + '>' + newline + childrenStr + indentPrefix + '</' + tag + '>' + newline
+endfunction

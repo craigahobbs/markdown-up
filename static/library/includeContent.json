@@ -1,5 +1,6 @@
 {
     "args.bare": "content/args.md",
+    "elementModel.bare": "content/elementModel.md",
     "markdownUp.bare": "content/markdownUp.md",
     "pager.bare": "content/pager.md",
     "unittest.bare": "content/unittest.md",
