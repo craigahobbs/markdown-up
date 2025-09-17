@@ -25,9 +25,12 @@ function elementModelValidate(elements):
     if systemType(elements) == 'array':
         validatedElements = arrayNew()
         for subElements in elements:
-            validatedSub = elementModelValidate(subElements)
-            if validatedSub == null:
-                return null
+            validatedSub = subElements
+            if subElements != null:
+                validatedSub = elementModelValidate(subElements)
+                if validatedSub == null:
+                    return null
+                endif
             endif
             arrayPush(validatedElements, validatedSub)
         endfor
