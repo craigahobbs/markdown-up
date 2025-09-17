@@ -198,20 +198,20 @@ export function renderElementsToString(elements = null, indent = null) {
         indentStr = ' '.repeat(Math.max(0, indent));
     }
 
-    return renderElementsToStringHelper(elements, indentStr, indent, 0);
+    return renderElementsToStringHelper(elements, indentStr, 0);
 }
 
 
 // Helper function to render elements to string
-function renderElementsToStringHelper(elements, indentStr, indent, level) {
-    const newline = indentStr ? '\n' : '';
+function renderElementsToStringHelper(elements, indentStr, level) {
     if (elements === null) {
         return '';
     } else if (Array.isArray(elements)) {
-        return elements.map(element => renderElementsToStringHelper(element, indentStr, indent, level)).join('');
+        return elements.map(element => renderElementsToStringHelper(element, indentStr, level)).join('');
     }
 
     // Text node
+    const newline = indentStr ? '\n' : '';
     if ('text' in elements) {
         return `${indentStr.repeat(level)}${escapeHtml(elements.text)}${newline}`;
     }
@@ -238,7 +238,7 @@ function renderElementsToStringHelper(elements, indentStr, indent, level) {
     }
 
     // Render the element and its children
-    const childrenStr = 'elem' in elements ? renderElementsToStringHelper(elements.elem, indentStr, indent, level + 1) : '';
+    const childrenStr = 'elem' in elements ? renderElementsToStringHelper(elements.elem, indentStr, level + 1) : '';
     return `${indentPrefix}<${tag}${attrStr}>${newline}${childrenStr}${indentPrefix}</${tag}>${newline}`;
 }
 
