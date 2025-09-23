@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.8.0 (2025-09-23)
+
+- [6eb7fff](https://github.com/craigahobbs/markdown-up/commit/6eb7fff) - add documentSetKeyDown library function
+
 ## 3.7.0 (2025-09-16)
 
 - [f154d34](https://github.com/craigahobbs/markdown-up/commit/f154d34) - element-model 1.2, schema-markdown-doc 2.1
