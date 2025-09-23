@@ -784,6 +784,7 @@ The full year
 - [documentFontSize](#var.vPublish=true&var.vSingle=true&documentfontsize)
 - [documentInputValue](#var.vPublish=true&var.vSingle=true&documentinputvalue)
 - [documentSetFocus](#var.vPublish=true&var.vSingle=true&documentsetfocus)
+- [documentSetKeyDown](#var.vPublish=true&var.vSingle=true&documentsetkeydown)
 - [documentSetReset](#var.vPublish=true&var.vSingle=true&documentsetreset)
 - [documentSetTitle](#var.vPublish=true&var.vSingle=true&documentsettitle)
 - [documentURL](#var.vPublish=true&var.vSingle=true&documenturl)
@@ -827,6 +828,44 @@ Set focus to an element
 
 **id -**
 The element ID
+
+#### Returns
+
+Nothing
+
+---
+
+### documentSetKeyDown
+
+Set the document keydown event handler. For example:
+
+```barescript
+function myAppMain():
+    myAppRender()
+    documentSetKeyDown(myAppKeyDown)
+endfunction
+
+function myAppRender(key):
+    markdownPrint( \
+        '# KeyDown Test', \
+        '', \
+        if(key, '**Key pressed:** "' + key + '"', '*No key pressed yet.*') \
+    )
+endfunction
+
+function myAppKeyDown(event):
+    key = objectGet(event, 'key')
+    myAppRender(key)
+endfunction
+
+myAppMain()
+```
+
+#### Arguments
+
+**callback -**
+The keydown event callback function that takes a single
+[key event object](model.html#var.vName='DocumentKeyEvent') argument, `event`.
 
 #### Returns
 
