@@ -187,6 +187,7 @@ gh-pages:
 define LIBRARY_MODEL_JS
 import {argv} from 'node:process';
 import {dataTableTypes} from "./lib/dataTable.js";
+import {documentKeyEventTypes} from "./lib/scriptLibrary.js";
 import {lineChartTypes} from "./lib/lineChart.js";
 import {valueJSON} from 'bare-script/lib/value.js';
 import {writeFileSync} from 'node:fs';
@@ -195,7 +196,7 @@ import {writeFileSync} from 'node:fs';
 const [, typeModelPath] = argv;
 
 // Create the library type model
-const types = {...dataTableTypes, ...lineChartTypes};
+const types = {...dataTableTypes, ...documentKeyEventTypes, ...lineChartTypes};
 
 // Write the library type model
 writeFileSync(typeModelPath, valueJSON(types));

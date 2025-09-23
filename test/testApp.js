@@ -840,6 +840,59 @@ main()
 });
 
 
+test('MarkdownUp, render keydown', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.document.addEventListener and window.document.removeEventListener
+    const eventListener = {'keydown': null};
+    window.document.addEventListener = (type, callback) => {
+        eventListener[type] = callback;
+    };
+    window.document.removeEventListener = (type, callback) => {
+        assert.equal(type, 'keydown');
+        assert.equal(callback, eventListener[type]);
+        eventListener[type] = null;
+    };
+
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function main(event):
+    systemGlobalSet('count', count + 1)
+    markdownPrint('Hello ' + count + ' (key: ' + objectGet(event, 'key') + ')')
+endfunction
+
+count = 0
+documentSetKeyDown(main)
+main(objectNew('key', 'A'))
+~~~
+`
+    });
+    window.location.hash = '#';
+    await app.render();
+    assert.equal(typeof eventListener.keydown, 'function');
+    assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1 (key: A)</p>'));
+
+    // Render again to test clearing the runtime keydown event handler
+    window.location.hash = '#';
+    await app.render(true);
+    assert.equal(typeof eventListener.keydown, 'function');
+    assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 1 (key: A)</p>'));
+
+    // Call the keydown callback
+    const keyEvent = {'key': 'B'};
+    await eventListener.keydown(keyEvent);
+    assert.equal(typeof eventListener.keydown, 'function');
+    assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 2 (key: B)</p>'));
+});
+
+
 test('MarkdownUp, render focus', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {

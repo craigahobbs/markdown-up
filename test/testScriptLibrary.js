@@ -365,6 +365,151 @@ test('script library, documentSetFocus', () => {
 });
 
 
+test('script library, documentSetKeyDown', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Test keydown handler function
+    const keyEvents = [];
+    const keyHandler = ([event], options) => {
+        assert.notEqual(options, null);
+        keyEvents.push(event);
+    };
+
+    // Set the keydown handler
+    assert.equal(runtime.documentKeyDown, null);
+    markdownScriptFunctions.documentSetKeyDown([keyHandler], runtime.options);
+    assert.equal(typeof runtime.documentKeyDown, 'function');
+    assert.equal(runtime.documentKeyDown.constructor.name, 'AsyncFunction');
+
+    // Create a mock event
+    const mockEvent = {
+        'key': 'a',
+        'code': 'KeyA',
+        'keyCode': 65,
+        'ctrlKey': false,
+        'altKey': false,
+        'shiftKey': false,
+        'metaKey': false,
+        'repeat': false,
+        'location': 0
+    };
+
+    // Trigger the keydown handler
+    await runtime.documentKeyDown(mockEvent);
+    assert.deepEqual(keyEvents, [
+        {
+            'key': 'a',
+            'code': 'KeyA',
+            'keyCode': 65,
+            'ctrlKey': false,
+            'altKey': false,
+            'shiftKey': false,
+            'metaKey': false,
+            'repeat': false,
+            'location': 0
+        }
+    ]);
+    assert.equal(runtimeUpdateCount, 1);
+});
+
+
+test('script library, documentSetKeyDown async', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+
+    // Test keydown handler function
+    const keyEvents = [];
+    // eslint-disable-next-line require-await
+    const keyHandler = async ([event], options) => {
+        assert.notEqual(options, null);
+        keyEvents.push(event);
+    };
+
+    // Set the keydown handler
+    assert.equal(runtime.documentKeyDown, null);
+    markdownScriptFunctions.documentSetKeyDown([keyHandler], runtime.options);
+    assert.equal(typeof runtime.documentKeyDown, 'function');
+    assert.equal(runtime.documentKeyDown.constructor.name, 'AsyncFunction');
+
+    // Create a mock event with different properties
+    const mockEvent = {
+        'key': 'Enter',
+        'code': 'Enter',
+        'keyCode': 13,
+        'ctrlKey': true,
+        'altKey': false,
+        'shiftKey': true,
+        'metaKey': false,
+        'repeat': true,
+        'location': 0
+    };
+
+    // Trigger the keydown handler
+    await runtime.documentKeyDown(mockEvent);
+    assert.deepEqual(keyEvents, [
+        {
+            'key': 'Enter',
+            'code': 'Enter',
+            'keyCode': 13,
+            'ctrlKey': true,
+            'altKey': false,
+            'shiftKey': true,
+            'metaKey': false,
+            'repeat': true,
+            'location': 0
+        }
+    ]);
+    assert.equal(runtimeUpdateCount, 1);
+});
+
+
+test('script library, documentSetKeyDown callback error', async () => {
+    const runtime = testRuntime();
+    let runtimeUpdateCount = 0;
+    runtime.options.runtimeUpdateFn = () => ++runtimeUpdateCount;
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    // Test keydown handler function that throws
+    let keydownCount = 0;
+    const keyHandler = ([_event], options) => {
+        assert.notEqual(options, null);
+        keydownCount += 1;
+        throw new Error('BOOM!');
+    };
+
+    // Set the keydown handler
+    assert.equal(runtime.documentKeyDown, null);
+    markdownScriptFunctions.documentSetKeyDown([keyHandler], runtime.options);
+    assert.equal(typeof runtime.documentKeyDown, 'function');
+    assert.equal(runtime.documentKeyDown.constructor.name, 'AsyncFunction');
+
+    // Create a mock event
+    const mockEvent = {
+        'key': 'a',
+        'code': 'KeyA',
+        'keyCode': 65,
+        'ctrlKey': false,
+        'altKey': false,
+        'shiftKey': false,
+        'metaKey': false,
+        'repeat': false,
+        'location': 0
+    };
+
+    // Trigger the keydown handler
+    assert.equal(keydownCount, 0);
+    assert.deepEqual(logs, []);
+    await runtime.documentKeyDown(mockEvent);
+    assert.equal(keydownCount, 1);
+    assert.deepEqual(logs, ['MarkdownUp: Error executing documentSetKeyDown callback: BOOM!']);
+    assert.equal(runtimeUpdateCount, 1);
+});
+
+
 test('script library, documentSetReset', () => {
     const runtime = testRuntime();
     assert.equal(runtime.documentReset, null);
@@ -1590,6 +1735,7 @@ test('script library, schemaElements action URLs', () => {
     runtime.options.params = '';
     const types = parseSchemaMarkdown(['# My action', 'action MyAction', '  urls', '  GET /']);
     const elements = markdownScriptFunctions.schemaElements([types, 'MyAction', [{'method': 'POST', 'path': '/foo'}]], runtime.options);
+    const nbsp = String.fromCharCode(160, 160);
     assert.deepEqual(elements, [
         [
             {'html': 'h1', 'attr': {'id': 'type_MyAction'}, 'elem': {'text': 'action MyAction'}},
@@ -1605,7 +1751,7 @@ test('script library, schemaElements action URLs', () => {
                     ]
                 },
                 [
-                    {'html': 'p', 'elem': [{'text': '  '}, {'html': 'a', 'attr': {'href': '/foo'}, 'elem': {'text': 'POST /foo'}}]}
+                    {'html': 'p', 'elem': [{'text': nbsp}, {'html': 'a', 'attr': {'href': '/foo'}, 'elem': {'text': 'POST /foo'}}]}
                 ]
             ],
             null,
