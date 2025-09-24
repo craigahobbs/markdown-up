@@ -26,7 +26,7 @@ const elementMembers = new Set([...elementTagMembers, 'attr', 'elem', 'callback'
 
 // Helper function for throwing validation value exceptions
 function throwValueError(message, value) {
-    const valueStr = `${JSON.stringify(value)}`;
+    const valueStr = JSON.stringify(value);
     throw new ElementModelValidationError(`${message} ${valueStr.slice(0, 100)} (type '${typeof value}')`);
 }
 
@@ -76,7 +76,7 @@ export function validateElements(elements) {
         // Validate the tag
         const [tagMember] = tagMembers;
         const tag = elements[tagMember];
-        if (typeof tag !== 'string' || (tagMember !== 'text' && tag.length === 0)) {
+        if (tagMember !== 'text' && (typeof tag !== 'string' || tag.length === 0)) {
             throwValueError(`Invalid ${tagMember} tag`, tag);
         }
 
@@ -145,7 +145,8 @@ function renderElementsHelper(parent, elements) {
         // Create an element of the appropriate type
         const document = parent.ownerDocument;
         if ('text' in element) {
-            browserElement = document.createTextNode(element.text);
+            const elementText = (typeof element.text === 'string' ? element.text : String(element.text));
+            browserElement = document.createTextNode(elementText);
         } else if ('svg' in element) {
             browserElement = document.createElementNS('http://www.w3.org/2000/svg', element.svg);
         } else {
@@ -157,7 +158,8 @@ function renderElementsHelper(parent, elements) {
             for (const [attr, value] of Object.entries(element.attr)) {
                 // Skip null values
                 if (value !== null) {
-                    browserElement.setAttribute(attr, `${value}`);
+                    const valueStr = (typeof value === 'string' ? value : String(value));
+                    browserElement.setAttribute(attr, valueStr);
                 }
             }
         }
@@ -219,7 +221,8 @@ function renderElementsToStringHelper(elements, indentStr, level) {
     const indentPrefix = indentStr.repeat(level);
     const newline = indentStr ? '\n' : '';
     if ('text' in elements) {
-        const elementsText = (newline ? elements.text.trim() : elements.text);
+        const elementText = (typeof elements.text === 'string' ? elements.text : String(elements.text));
+        const elementsText = (newline ? elementText.trim() : elementText);
         return `${indentPrefix}${escapeHtml(elementsText)}${newline}`;
     }
 
@@ -240,7 +243,8 @@ function renderElementsToStringHelper(elements, indentStr, level) {
     if (elementsAttr !== null) {
         for (const [attr, value] of Object.entries(elementsAttr).sort((a1, a2) => a1[0] < a2[0] ? -1 : 1)) {
             if (value !== null) {
-                attrStr += ` ${attr}="${escapeHtml(`${value}`)}"`;
+                const valueStr = (typeof value === 'string' ? value : String(value));
+                attrStr += ` ${attr}="${escapeHtml(valueStr)}"`;
             }
         }
     }
