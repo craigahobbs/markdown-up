@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.9.0 (2025-09-24)
+
+- [04800cd](https://github.com/craigahobbs/markdown-up/commit/04800cd) - bare-script 3.5
+
 ## 3.8.0 (2025-09-23)
 
 - [6eb7fff](https://github.com/craigahobbs/markdown-up/commit/6eb7fff) - add documentSetKeyDown library function
