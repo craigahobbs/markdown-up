@@ -205,6 +205,12 @@ endfunction
 unittestRunTest('testMarkdownUp_documentSetFocus')
 
 
+function testMarkdownUp_documentSetKeyDown():
+    unittestEqual(documentSetKeyDown(), null)
+endfunction
+unittestRunTest('testMarkdownUp_documentSetKeyDown')
+
+
 function testMarkdownUp_documentSetReset():
     unittestEqual(documentSetReset(), null)
 endfunction

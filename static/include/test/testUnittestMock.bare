@@ -31,6 +31,7 @@ function testUnittestMockAll():
     unittestEqual(documentFontSize(), 16)
     unittestEqual(documentInputValue('id1'), 'value1')
     documentSetFocus('id1')
+    documentSetKeyDown(null)
     documentSetReset('id1')
     documentSetTitle('Hello')
     unittestEqual(documentURL('test.json'), 'test.json')
@@ -141,6 +142,7 @@ function testUnittestMockAll():
         arrayNew('dataTable', arrayNew(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))), \
         arrayNew('documentInputValue', arrayNew('id1')), \
         arrayNew('documentSetFocus', arrayNew('id1')), \
+        arrayNew('documentSetKeyDown', arrayNew(null)), \
         arrayNew('documentSetReset', arrayNew('id1')), \
         arrayNew('documentSetTitle', arrayNew('Hello')), \
         arrayNew('drawNew', arrayNew(800, 600)), \
