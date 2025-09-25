@@ -54,16 +54,8 @@ async function testPagerMarkdown():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('Page&nbsp;1&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
-            arrayNew('markdownPrint', arrayNew( \
-                '(&nbsp;Start&nbsp;|', \
-                'Previous&nbsp;|', \
-                "[Next](#var.vPage='Page2')&nbsp;)", \
-                '' \
-            )), \
+            arrayNew('markdownPrint', arrayNew("Page 1&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('markdownPrint', arrayNew("(&nbsp;Start&nbsp;|&nbsp;Previous&nbsp;|&nbsp;[Next](#var.vPage='Page2')&nbsp;)", '')), \
             arrayNew('systemFetch', arrayNew('README.md')), \
             arrayNew('markdownParse', arrayNew('Hello!')), \
             arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
@@ -83,16 +75,8 @@ async function testPagerMarkdownNotFound():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('Page&nbsp;1&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
-            arrayNew('markdownPrint', arrayNew( \
-                '(&nbsp;Start&nbsp;|', \
-                'Previous&nbsp;|', \
-                "[Next](#var.vPage='Page2')&nbsp;)", \
-                '' \
-            )), \
+            arrayNew('markdownPrint', arrayNew("Page 1&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('markdownPrint', arrayNew("(&nbsp;Start&nbsp;|&nbsp;Previous&nbsp;|&nbsp;[Next](#var.vPage='Page2')&nbsp;)", '')), \
             arrayNew('systemFetch', arrayNew('README.md')), \
             arrayNew('markdownPrint', arrayNew('**Error:** Failed to load "README.md"')) \
         ) \
@@ -109,14 +93,12 @@ async function testPagerFunction():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
             arrayNew('markdownPrint', arrayNew( \
-                "(&nbsp;Start&nbsp;|", \
-                "[Previous](#var.vPage='Page%201')&nbsp;|", \
-                'Next&nbsp;)', \
+                "[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|&nbsp;[Previous](#var.vPage='Page%201')&nbsp;|&nbsp;Next&nbsp;)", \
                 '' \
             )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
@@ -136,10 +118,14 @@ async function testPagerLink():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')) \
+            arrayNew('markdownPrint', arrayNew( \
+                "[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|&nbsp;[Previous](#var.vPage='Page2')&nbsp;|&nbsp;Next&nbsp;)", \
+                '' \
+            )) \
         ) \
     )
 endfunction
@@ -154,10 +140,14 @@ async function testPagerHidden():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew("[Page2](#var.vPage='Page2')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                "[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|&nbsp;[Previous](#var.vPage='Page2')&nbsp;|&nbsp;Next&nbsp;)", \
+                '' \
+            )), \
             arrayNew('markdownPrint', arrayNew('This is page 4')) \
         ) \
     )
@@ -176,16 +166,8 @@ async function testPagerArg():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var=)&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
-            arrayNew('markdownPrint', arrayNew( \
-                "(&nbsp;[Start](#var=)&nbsp;|", \
-                "[Previous](#var=)&nbsp;|", \
-                'Next&nbsp;)', \
-                '' \
-            )), \
+            arrayNew('markdownPrint', arrayNew('[Page 1](#var=)&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)', '')), \
+            arrayNew('markdownPrint', arrayNew('(&nbsp;[Start](#var=)&nbsp;|&nbsp;[Previous](#var=)&nbsp;|&nbsp;Next&nbsp;)', '')), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
             arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
             arrayNew('markdownPrint', arrayNew('This is page 2')) \
@@ -209,14 +191,12 @@ async function testPagerArgUnknown():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
             arrayNew('markdownPrint', arrayNew( \
-                "(&nbsp;Start&nbsp;|", \
-                "[Previous](#var.vPage='Page%201')&nbsp;|", \
-                'Next&nbsp;)', \
+                "[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;Start&nbsp;|&nbsp;[Previous](#var.vPage='Page%201')&nbsp;|&nbsp;Next&nbsp;)", \
                 '' \
             )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
@@ -247,14 +227,12 @@ async function testPagerArguments():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vName='testName')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
             arrayNew('markdownPrint', arrayNew( \
-                "(&nbsp;[Start](#var.vName='testName')&nbsp;|", \
-                "[Previous](#var.vName='testName')&nbsp;|", \
-                'Next&nbsp;)', \
+                "[Page 1](#var.vName='testName')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
+            arrayNew('markdownPrint', arrayNew( \
+                "(&nbsp;[Start](#var.vName='testName')&nbsp;|&nbsp;[Previous](#var.vName='testName')&nbsp;|&nbsp;Next&nbsp;)", \
                 '' \
             )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
@@ -279,9 +257,7 @@ async function testPagerHideMenu():
         unittestMockEnd(), \
         arrayNew( \
             arrayNew('markdownPrint', arrayNew( \
-                "(&nbsp;Start&nbsp;|", \
-                "[Previous](#var.vPage='Page%201')&nbsp;|", \
-                'Next&nbsp;)', \
+                "(&nbsp;Start&nbsp;|&nbsp;[Previous](#var.vPage='Page%201')&nbsp;|&nbsp;Next&nbsp;)", \
                 '' \
             )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
@@ -301,10 +277,10 @@ async function testPagerHideNav():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page&nbsp;1](#var.vPage='Page%201')&nbsp;|")), \
-            arrayNew('markdownPrint', arrayNew('Page2&nbsp;|')), \
-            arrayNew('markdownPrint', arrayNew('[Page3](#url=other.md)')), \
-            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew( \
+                "[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", \
+                '' \
+            )), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
             arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
             arrayNew('markdownPrint', arrayNew('This is page 2')) \
@@ -312,6 +288,100 @@ async function testPagerHideNav():
     )
 endfunction
 unittestRunTestAsync('testPagerHideNav')
+
+
+async function testPagerKeyboard():
+    unittestMockAll(objectNew( \
+        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
+        'markdownTitle', arrayNew('The Title'), \
+        'systemFetch', objectNew( \
+            'README.md', 'Hello!' \
+        ) \
+    ))
+
+    pagerMain(testPagerModel, objectNew('hideNav', true, 'keyboard', true))
+
+    mockCalls = unittestMockEnd()
+    unittestDeepEqual( \
+        mockCalls, \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("Page 1&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('systemFetch', arrayNew('README.md')), \
+            arrayNew('markdownParse', arrayNew('Hello!')), \
+            arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
+            arrayNew('documentSetTitle', arrayNew('The Title')), \
+            arrayNew('markdownPrint', arrayNew('', 'Hello!')), \
+            arrayNew('documentSetKeyDown', arrayNew('<function>')) \
+        ) \
+    )
+    keyDown = arrayGet(arrayGet(arrayGet(mockCalls, arrayLength(mockCalls) - 1), 1), 0)
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'p'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'n'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('windowSetLocation', arrayNew("#var.vPage='Page2'")) \
+    ))
+
+    unittestMockAll()
+    keyDown(objectNew('key', 's'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'e'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('windowSetLocation', arrayNew("#var.vPage='Page2'")) \
+    ))
+endfunction
+unittestRunTestAsync('testPagerKeyboard')
+
+
+async function testPagerKeyboardNonStart():
+    unittestMockAll(objectNew( \
+        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
+        'markdownTitle', arrayNew('The Title'), \
+        'systemFetch', objectNew( \
+            'README.md', 'Hello!' \
+        ) \
+    ))
+
+    pagerMain(testPagerModel, objectNew('start', 'Page2', 'hideNav', true, 'keyboard', true))
+
+    mockCalls = unittestMockEnd()
+    unittestDeepEqual( \
+        mockCalls, \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('documentSetTitle', arrayNew('Page 2')), \
+            arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
+            arrayNew('markdownPrint', arrayNew('This is page 2')), \
+            arrayNew('documentSetKeyDown', arrayNew('<function>')) \
+        ) \
+    )
+    keyDown = arrayGet(arrayGet(arrayGet(mockCalls, arrayLength(mockCalls) - 1), 1), 0)
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'p'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('windowSetLocation', arrayNew("#var.vPage='Page%201'")) \
+    ))
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'n'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    unittestMockAll()
+    keyDown(objectNew('key', 's'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+
+    unittestMockAll()
+    keyDown(objectNew('key', 'e'))
+    unittestDeepEqual(unittestMockEnd(), arrayNew())
+endfunction
+unittestRunTestAsync('testPagerKeyboardNonStart')
 
 
 async function testPagerSinglePage():
@@ -327,8 +397,7 @@ async function testPagerSinglePage():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew('Page2')), \
-            arrayNew('markdownPrint', arrayNew('')), \
+            arrayNew('markdownPrint', arrayNew('Page2', '')), \
             arrayNew('markdownPrint', arrayNew('This is page 2')) \
         ) \
     )
@@ -350,7 +419,7 @@ async function testPagerNoPages():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: No visible and navigable pages')) \
         ) \
     )
 endfunction
@@ -371,7 +440,7 @@ async function testPagerNoLinks():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: No visible and navigable pages')) \
         ) \
     )
 endfunction
@@ -418,7 +487,7 @@ async function testPagerInvalidStart():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page"Unknown"')) \
+            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page "Unknown"')) \
         ) \
     )
 endfunction
