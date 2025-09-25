@@ -451,6 +451,7 @@ The pager application options. The following options are available:
 - **hideMenu** - Hide the menu links
 - **hideNav** - Hide the navigation links
 - **start** - The start page name
+- **keyboard** - Enable keyboard commands ('n' for next, 'p' for previous, 's' for start, 'e' for end)
 
 #### Returns
 
