@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.9.1 (2025-09-26)
+
+- [045a4e8](https://github.com/craigahobbs/markdown-up/commit/045a4e8) - update help link
+
+- [b72a8af](https://github.com/craigahobbs/markdown-up/commit/b72a8af) - add pager.bare keyboard commands
+
 ## 3.9.0 (2025-09-24)
 
 - [04800cd](https://github.com/craigahobbs/markdown-up/commit/04800cd) - bare-script 3.5
