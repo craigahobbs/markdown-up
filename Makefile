@@ -177,7 +177,7 @@ gh-pages:
 	rm -rf build/markdown-up.orig
 	mkdir build/markdown-up.orig
 	cd ../$(notdir $(CURDIR)).gh-pages && git restore markdown-up.tar.gz
-	tar -xvf ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz -C build/markdown-up.orig
+	tar --exclude='._*' -xvf ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz -C build/markdown-up.orig
 	if ! diff -r --exclude=VERSION.txt build/markdown-up build/markdown-up.orig/markdown-up >/dev/null; then \
 		cp build/markdown-up.tar.gz ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz; \
 	fi
