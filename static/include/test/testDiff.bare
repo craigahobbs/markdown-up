@@ -16,7 +16,7 @@ function testDiffLines():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines')
+unittestRunTest('testDiffLines')
 
 
 function testDiffLines_array():
@@ -31,7 +31,7 @@ function testDiffLines_array():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_array')
+unittestRunTest('testDiffLines_array')
 
 
 function testDiffLines_identical():
@@ -43,7 +43,7 @@ function testDiffLines_identical():
         arrayNew() \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_identical')
+unittestRunTest('testDiffLines_identical')
 
 
 function testDiffLines_removeStart():
@@ -57,7 +57,7 @@ function testDiffLines_removeStart():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_removeStart')
+unittestRunTest('testDiffLines_removeStart')
 
 
 function testDiffLines_addStart():
@@ -71,7 +71,7 @@ function testDiffLines_addStart():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_addStart')
+unittestRunTest('testDiffLines_addStart')
 
 
 function testDiffLines_removeEnd():
@@ -85,7 +85,7 @@ function testDiffLines_removeEnd():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_removeEnd')
+unittestRunTest('testDiffLines_removeEnd')
 
 
 function testDiffLines_addEnd():
@@ -99,4 +99,4 @@ function testDiffLines_addEnd():
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_addEnd')
+unittestRunTest('testDiffLines_addEnd')

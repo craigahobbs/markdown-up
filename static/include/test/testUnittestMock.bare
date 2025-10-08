@@ -11,7 +11,7 @@ async function testUnittestMockSentinel():
     include '../unittestMock.bare'
     unittestEqual(systemGlobalGet('unittestMockSentinel'), 1)
 endfunction
-unittestRunTestAsync('testUnittestMockSentinel')
+unittestRunTest('testUnittestMockSentinel')
 
 
 function testUnittestMockAll():

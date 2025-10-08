@@ -22,7 +22,7 @@ async function testArgsSentinel():
     include '../args.bare'
     unittestEqual(systemGlobalGet('argsSentinel'), 1)
 endfunction
-unittestRunTestAsync('testArgsSentinel')
+unittestRunTest('testArgsSentinel')
 
 
 function testArgsValidate():

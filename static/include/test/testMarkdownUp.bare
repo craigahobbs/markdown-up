@@ -20,7 +20,7 @@ async function testMarkdownUpSentinel():
     include '../markdownUp.bare'
     unittestEqual(systemGlobalGet('markdownUpSentinel'), 1)
 endfunction
-unittestRunTestAsync('testMarkdownUpSentinel')
+unittestRunTest('testMarkdownUpSentinel')
 
 
 function testMarkdownUp_dataLineChart():

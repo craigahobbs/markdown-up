@@ -42,9 +42,9 @@ return unittestReport()
 **testCode1.bare**
 
 The test include files contain unit tests for each code include. The test include files execute
-tests using the [unittestRunTest](#unittestruntest) and
-[unittestRunTestAsync](#unittestruntestasync) functions. Individual tests assert success and failure
-using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal) functions.
+tests using the [unittestRunTest](#unittestruntest) function. Individual tests assert success and
+failure using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal)
+functions.
 
 ~~~ bare-script
 include '../code1.bare'

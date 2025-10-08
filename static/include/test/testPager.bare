@@ -37,7 +37,7 @@ async function testPagerSentinel():
     include '../pager.bare'
     unittestEqual(systemGlobalGet('pagerSentinel'), 1)
 endfunction
-unittestRunTestAsync('testPagerSentinel')
+unittestRunTest('testPagerSentinel')
 
 
 async function testPagerMarkdown():
@@ -64,7 +64,7 @@ async function testPagerMarkdown():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerMarkdown')
+unittestRunTest('testPagerMarkdown')
 
 
 async function testPagerMarkdownNotFound():
@@ -82,7 +82,7 @@ async function testPagerMarkdownNotFound():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerMarkdownNotFound')
+unittestRunTest('testPagerMarkdownNotFound')
 
 
 async function testPagerFunction():
@@ -107,7 +107,7 @@ async function testPagerFunction():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerFunction')
+unittestRunTest('testPagerFunction')
 
 
 async function testPagerLink():
@@ -129,7 +129,7 @@ async function testPagerLink():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerLink')
+unittestRunTest('testPagerLink')
 
 
 async function testPagerHidden():
@@ -152,7 +152,7 @@ async function testPagerHidden():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHidden')
+unittestRunTest('testPagerHidden')
 
 
 async function testPagerArg():
@@ -177,7 +177,7 @@ async function testPagerArg():
     # Clear argument globals
     systemGlobalSet('vPage', null)
 endfunction
-unittestRunTestAsync('testPagerArg')
+unittestRunTest('testPagerArg')
 
 
 async function testPagerArgUnknown():
@@ -208,7 +208,7 @@ async function testPagerArgUnknown():
     # Clear argument globals
     systemGlobalSet('vPage', null)
 endfunction
-unittestRunTestAsync('testPagerArgUnknown')
+unittestRunTest('testPagerArgUnknown')
 
 
 async function testPagerArguments():
@@ -245,7 +245,7 @@ async function testPagerArguments():
     systemGlobalSet('vPage', null)
     systemGlobalSet('vName', null)
 endfunction
-unittestRunTestAsync('testPagerArguments')
+unittestRunTest('testPagerArguments')
 
 
 async function testPagerHideMenu():
@@ -266,7 +266,7 @@ async function testPagerHideMenu():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHideMenu')
+unittestRunTest('testPagerHideMenu')
 
 
 async function testPagerHideNav():
@@ -287,7 +287,7 @@ async function testPagerHideNav():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHideNav')
+unittestRunTest('testPagerHideNav')
 
 
 async function testPagerKeyboard():
@@ -336,7 +336,7 @@ async function testPagerKeyboard():
         arrayNew('windowSetLocation', arrayNew("#var.vPage='Page2'")) \
     ))
 endfunction
-unittestRunTestAsync('testPagerKeyboard')
+unittestRunTest('testPagerKeyboard')
 
 
 async function testPagerKeyboardNonStart():
@@ -381,7 +381,7 @@ async function testPagerKeyboardNonStart():
     keyDown(objectNew('key', 'e'))
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
-unittestRunTestAsync('testPagerKeyboardNonStart')
+unittestRunTest('testPagerKeyboardNonStart')
 
 
 async function testPagerSinglePage():
@@ -402,7 +402,7 @@ async function testPagerSinglePage():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerSinglePage')
+unittestRunTest('testPagerSinglePage')
 
 
 async function testPagerNoPages():
@@ -423,7 +423,7 @@ async function testPagerNoPages():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerNoPages')
+unittestRunTest('testPagerNoPages')
 
 
 async function testPagerNoLinks():
@@ -444,7 +444,7 @@ async function testPagerNoLinks():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerNoLinks')
+unittestRunTest('testPagerNoLinks')
 
 
 async function testPagerInvalidPagerModel():
@@ -462,7 +462,7 @@ async function testPagerInvalidPagerModel():
         arrayNew() \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidPagerModel')
+unittestRunTest('testPagerInvalidPagerModel')
 
 
 async function testPagerInvalidArgumentsModel():
@@ -476,7 +476,7 @@ async function testPagerInvalidArgumentsModel():
         arrayNew() \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidArgumentsModel')
+unittestRunTest('testPagerInvalidArgumentsModel')
 
 
 async function testPagerInvalidStart():
@@ -491,4 +491,4 @@ async function testPagerInvalidStart():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidStart')
+unittestRunTest('testPagerInvalidStart')

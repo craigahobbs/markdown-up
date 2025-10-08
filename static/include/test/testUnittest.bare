@@ -54,17 +54,17 @@ async function testUnittestSentinel():
     include '../unittest.bare'
     unittestEqual(systemGlobalGet('unittestSentinel'), 1)
 endfunction
-unittestRunTestAsync('testUnittestSentinel')
+unittestRunTest('testUnittestSentinel')
 
 
-function testUnittestRunTest():
+async function testUnittestRunTest():
     # Setup mocks
     unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
     unittestRunTest('testUnittest_testPass')
-    result = unittestReport()
+    result = unittestReport(objectNew('noCover', true))
     testUnittestMockEnd(mockBegin)
 
     # Verify report result
@@ -89,7 +89,7 @@ endfunction
 unittestRunTest('testUnittestRunTest')
 
 
-function testUnittestRunTest_failure():
+async function testUnittestRunTest_failure():
     # Setup mocks
     unittestMockAll()
 
@@ -97,7 +97,7 @@ function testUnittestRunTest_failure():
     mockBegin = testUnittestMockBegin()
     unittestRunTest('testUnittest_testPass')
     unittestRunTest('testUnittest_testFail')
-    result = unittestReport()
+    result = unittestReport(objectNew('noCover', true))
     testUnittestMockEnd(mockBegin)
 
     # Verify report result
@@ -156,7 +156,7 @@ endfunction
 unittestRunTest('testUnittestRunTest_failure')
 
 
-function testUnittestRunTest_multiple():
+async function testUnittestRunTest_multiple():
     # Setup mocks
     unittestMockAll()
 
@@ -164,7 +164,7 @@ function testUnittestRunTest_multiple():
     mockBegin = testUnittestMockBegin()
     unittestRunTest('testUnittest_testPass')
     unittestRunTest('testUnittest_testPass')
-    result = unittestReport()
+    result = unittestReport(objectNew('noCover', true))
     testUnittestMockEnd(mockBegin)
 
     # Verify report result
@@ -197,14 +197,14 @@ endfunction
 unittestRunTest('testUnittestRunTest_multiple')
 
 
-function testUnittestRunTest_unknown():
+async function testUnittestRunTest_unknown():
     # Setup mocks
     unittestMockAll()
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
     unittestRunTest('testUnittest_testUnknown')
-    result = unittestReport()
+    result = unittestReport(objectNew('noCover', true))
     testUnittestMockEnd(mockBegin)
 
     # Verify report result
@@ -227,176 +227,3 @@ function testUnittestRunTest_unknown():
     ))
 endfunction
 unittestRunTest('testUnittestRunTest_unknown')
-
-
-async function testUnittestRunTestAsync():
-    # Setup mocks
-    unittestMockAll()
-
-    # Run unit tests and report
-    mockBegin = testUnittestMockBegin()
-    unittestRunTestAsync('testUnittest_testPassAsync')
-    result = unittestReport()
-    testUnittestMockEnd(mockBegin)
-
-    # Verify report result
-    unittestEqual(result, 0)
-
-    # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            'Ran 1 tests - 1 passed, 0 failed' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Passing Tests' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        )) \
-    ))
-endfunction
-unittestRunTestAsync('testUnittestRunTestAsync')
-
-
-async function testUnittestRunTestAsync_failure():
-    # Setup mocks
-    unittestMockAll()
-
-    # Run unit tests and report
-    mockBegin = testUnittestMockBegin()
-    unittestRunTestAsync('testUnittest_testPassAsync')
-    unittestRunTestAsync('testUnittest_testFailAsync')
-    result = unittestReport()
-    testUnittestMockEnd(mockBegin)
-
-    # Verify report result
-    unittestEqual(result, 1)
-
-    # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            'Ran 2 tests - 1 passed, 1 failed' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Failing Tests' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            arrayNew( \
-                '', \
-                "[testUnittest\\_testFailAsync](#var.vTest='testUnittest_testFailAsync') - FAIL", \
-                '', \
-                '- Equal:', \
-                '', \
-                '  ```', \
-                '  2', \
-                '  ```', \
-                '', \
-                '  ```', \
-                '  3', \
-                '  ```', \
-                '', \
-                '- Deep-equal:', \
-                '', \
-                '  ```', \
-                '  ---     2', \
-                '  +++     2,', \
-                '  +++     3', \
-                '  ```', \
-                '', \
-                '- Deep-equal:', \
-                '', \
-                '  ```', \
-                '  --- 3', \
-                '  ```' \
-            ) \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Passing Tests' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        )) \
-    ))
-
-endfunction
-unittestRunTestAsync('testUnittestRunTestAsync_failure')
-
-
-async function testUnittestRunTestAsync_multiple():
-    # Setup mocks
-    unittestMockAll()
-
-    # Run unit tests and report
-    mockBegin = testUnittestMockBegin()
-    unittestRunTestAsync('testUnittest_testPassAsync')
-    unittestRunTestAsync('testUnittest_testPassAsync')
-    result = unittestReport()
-    testUnittestMockEnd(mockBegin)
-
-    # Verify report result
-    unittestEqual(result, 1)
-
-    # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            'Ran 1 tests - 1 passed, 0 failed' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Warnings' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '- Test \\"testUnittest\\_testPassAsync\\" run multiple times' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Passing Tests' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            "[testUnittest\\_testPassAsync](#var.vTest='testUnittest_testPassAsync') - OK" \
-        )) \
-    ))
-endfunction
-unittestRunTestAsync('testUnittestRunTestAsync_multiple')
-
-
-async function testUnittestRunTestAsync_unknown():
-    # Setup mocks
-    unittestMockAll()
-
-    # Run unit tests and report
-    mockBegin = testUnittestMockBegin()
-    unittestRunTest('testUnittest_testUnknownAsync')
-    result = unittestReport()
-    testUnittestMockEnd(mockBegin)
-
-    # Verify report result
-    unittestEqual(result, 1)
-
-    # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            'Ran 0 tests - 0 passed, 0 failed' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '## Warnings' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
-            '', \
-            '- Test \\"testUnittest\\_testUnknownAsync\\" not found' \
-        )) \
-    ))
-endfunction
-unittestRunTestAsync('testUnittestRunTestAsync_unknown')
