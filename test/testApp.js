@@ -2084,7 +2084,7 @@ markdownPrint('varName = ' + varName)
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
     assert.deepEqual(cleanedLogs, [
         `\
-MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error:
+MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error
 foo bar
    ^
 `,

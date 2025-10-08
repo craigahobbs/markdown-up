@@ -5,6 +5,9 @@ include '../unittest.bare'
 include '../unittestMock.bare'
 
 
+# Start coverage
+unittestCoverageStart()
+
 # Run markdownUp.bare unit tests?
 if vBare:
     markdownPrint('Running "markdownUp.bare" tests. To run default tests, [click here](#var=).')
@@ -19,6 +22,9 @@ else:
     include 'testUnittest.bare'
     include 'testUnittestMock.bare'
 endif
+
+# Stop coverage
+unittestCoverageStop()
 
 # Test report
 return unittestReport()
