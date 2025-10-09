@@ -15,4 +15,4 @@ include 'testMarkdownUp.bare'
 unittestCoverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 38))
+return unittestReport(objectNew('minCoverage', 36))

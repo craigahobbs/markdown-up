@@ -300,7 +300,58 @@ unittestReportArguments = arrayNew( \
 
 # Render the script coverage details page
 function unittestReportScript(scriptName):
-    markdownPrint(argsLink(unittestReportArguments, 'Back', null, true), '', '**' + markdownEscape(scriptName) + '**')
+    # Render the script coverage page title
+    title = scriptName + ' Coverage'
+    markdownPrint( \
+        argsLink(unittestReportArguments, 'Back', null, true), \
+        '', \
+        '## ' + markdownEscape(title) \
+    )
+
+    # Get the (line, coverageColor) tuples
+    lineTuples = arrayNew()
+    coverage = systemGlobalGet(unittestCoverageGlobal)
+    if coverage:
+        scripts = objectGet(coverage, 'scripts')
+        coverageScript = objectGet(scripts, scriptName)
+        script = objectGet(coverageScript, 'script')
+        covered = objectGet(coverageScript, 'covered')
+
+        # Fill the line tuples
+        for scriptLine in objectGet(script, 'scriptLines'):
+            arrayPush(lineTuples, arrayNew(scriptLine, null))
+        endfor
+
+        # Mark the statements covered or not-covered
+        statements = unittestScriptStatements(script)
+        for statement in statements:
+            statementKey = arrayGet(objectKeys(statement), 0)
+            lineNumber = objectGet(objectGet(statement, statementKey), 'lineNumber')
+            lineCount = objectGet(objectGet(statement, statementKey), 'lineCount', 1)
+            lineStr = stringNew(lineNumber)
+            lineColor = if(objectHas(covered, lineStr), 'gray', 'red')
+            lineno = lineNumber
+            while lineno < lineNumber + lineCount:
+                arraySet(arrayGet(lineTuples, lineno - 1), 1, lineColor)
+                lineno = lineno + 1
+            endwhile
+        endfor
+    endif
+
+    # Generate the code coverage details
+    codeLineElements = arrayNew()
+    codeElements = objectNew('html', 'pre', 'elem', codeLineElements)
+    for lineTuple in lineTuples:
+        line = arrayGet(lineTuple, 0)
+        color = arrayGet(lineTuple, 1)
+        arrayPush(codeLineElements, objectNew( \
+            'html', 'span', \
+            'attr', objectNew('style', 'background-color: ' + color), \
+            'elem', objectNew('text', line) \
+        ))
+        arrayPush(codeLineElements, objectNew('text', stringFromCharCode(10)))
+    endfor
+    elementModelRender(codeElements)
 endfunction
 
 
