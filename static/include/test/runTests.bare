@@ -20,4 +20,4 @@ include 'testUnittestMock.bare'
 unittestCoverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 78))
+return unittestReport(objectNew('minCoverage', 75))

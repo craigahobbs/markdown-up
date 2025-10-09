@@ -1,4 +1,4 @@
-[markdownUp.bare Tests](#url=runTestsMarkdownUp.md)
+[markdownUp.bare Tests](#url=runTestsMarkdownUp.md&var=)
 
 # MarkdownUp Include Library Tests
 

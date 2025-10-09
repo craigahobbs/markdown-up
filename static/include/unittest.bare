@@ -9,12 +9,140 @@ endif
 unittestSentinel = true
 
 
-include 'diff.bare'
+include <args.bare>
+include <diff.bare>
 
 
 # Test statistics
 unittestTests = objectNew()
 unittestWarnings = arrayNew()
+
+
+# $function: unittestRunTest
+# $group: unittest.bare
+# $doc: Run a unit test
+# $arg testName: The test function name
+async function unittestRunTest(testName):
+    testFn = unittestRunTestHelper(testName)
+    if testFn:
+        testFn()
+        systemGlobalSet('unittestTestName', null)
+    endif
+endfunction
+
+
+# unittestRunTest helper function
+function unittestRunTestHelper(testName):
+    # Single test argument?
+    if vTest && vTest != testName:
+        return null
+    endif
+
+    # Test run multiple times?
+    if objectHas(unittestTests, testName):
+        arrayPush(unittestWarnings, 'Test "' + testName + '" run multiple times')
+        return null
+    endif
+
+    # Get the test func
+    testFn = systemGlobalGet(testName)
+    if !testFn:
+        arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
+        return null
+    endif
+
+    # Add the unit test result array
+    testFailures = arrayNew()
+    objectSet(unittestTests, testName, testFailures)
+    systemGlobalSet('unittestTestName', testName)
+
+    return testFn
+endfunction
+
+
+# $function: unittestEqual
+# $group: unittest.bare
+# $doc: Assert an actual value is equal to the expected value
+# $arg actual: The actual value
+# $arg expected: The expected value
+# $arg description: The description of the assertion
+function unittestEqual(actual, expected, description):
+    if actual == expected:
+        return
+    endif
+
+    # Add the test failure error lines
+    testFailures = objectGet(unittestTests, unittestTestName)
+    errorLines = arrayNew( \
+        'Equal:', \
+        '', \
+        '```', \
+        jsonStringify(actual), \
+        '```', \
+        '', \
+        '```', \
+        jsonStringify(expected), \
+        '```' \
+    )
+    if description:
+        arrayPush(testFailures, arrayExtend(arrayNew(markdownEscape(description), errorLines)))
+    else:
+        arrayPush(testFailures, errorLines)
+    endif
+endfunction
+
+
+# $function: unittestDeepEqual
+# $group: unittest.bare
+# $doc: Assert an actual value is *deeply* equal to the expected value
+# $arg actual: The actual value
+# $arg expected: The expected value
+# $arg description: The description of the assertion
+function unittestDeepEqual(actual, expected, description):
+    # Serialize as JSON
+    actualJSON = if(systemType(actual) == 'string', actual, jsonStringify(actual, 4))
+    expectedJSON = if(systemType(expected) == 'string', expected, jsonStringify(expected, 4))
+    if actualJSON == expectedJSON:
+        return
+    endif
+
+    # Compute the difference lines
+    errorLines = arrayNew()
+    diffErrorLines = arrayNew()
+    for diff in diffLines(actualJSON, expectedJSON):
+        diffType = objectGet(diff, 'type')
+        if diffType == 'Remove':
+            for diffLine in objectGet(diff, 'lines'):
+                arrayPush(diffErrorLines, '--- ' + diffLine)
+            endfor
+        elif diffType == 'Add':
+            for diffLine in objectGet(diff, 'lines'):
+                arrayPush(diffErrorLines, '+++ ' + diffLine)
+            endfor
+        else:
+            # diffType == 'Identical'
+            if diffErrorLines:
+                arrayExtend(errorLines, arrayNew('Deep-equal:', '', '```'))
+                arrayExtend(errorLines, diffErrorLines)
+                arrayPush(errorLines, '```')
+                diffErrorLines = arrayNew()
+            endif
+        endif
+    endfor
+    if diffErrorLines:
+        arrayExtend(errorLines, arrayNew('Deep-equal:', '', '```'))
+        arrayExtend(errorLines, diffErrorLines)
+        arrayPush(errorLines, '```')
+    endif
+
+    # Add the test failure error lines
+    testFailures = objectGet(unittestTests, unittestTestName)
+    if description:
+        arrayPush(testFailures, arrayExtend(arrayNew(markdownEscape(description), errorLines)))
+    else:
+        arrayPush(testFailures, errorLines)
+    endif
+endfunction
 
 
 # $function: unittestCoverageStart
@@ -37,48 +165,6 @@ endfunction
 unittestCoverageGlobal = '__bareScriptCoverage'
 
 
-# $function: unittestRunTest
-# $group: unittest.bare
-# $doc: Run a unit test
-# $arg testName: The test function name
-async function unittestRunTest(testName):
-    testFn = unittestRunTestHelper(testName)
-    if testFn:
-        testFn()
-        systemGlobalSet('unittestTestName', null)
-    endif
-endfunction
-
-
-# unittestRunTest helper function
-function unittestRunTestHelper(testName):
-    # Single test argument?
-    if vTest != null && vTest != testName:
-        return null
-    endif
-
-    # Test run multiple times?
-    if objectHas(unittestTests, testName):
-        arrayPush(unittestWarnings, 'Test "' + testName + '" run multiple times')
-        return null
-    endif
-
-    # Get the test func
-    testFn = systemGlobalGet(testName)
-    if testFn == null:
-        arrayPush(unittestWarnings, 'Test "' + testName + '" not found')
-        return null
-    endif
-
-    # Add the unit test result array
-    testFailures = arrayNew()
-    objectSet(unittestTests, testName, testFailures)
-    systemGlobalSet('unittestTestName', testName)
-
-    return testFn
-endfunction
-
-
 # $function: unittestReport
 # $group: unittest.bare
 # $doc: Render the unit test report
@@ -89,6 +175,17 @@ endfunction
 function unittestReport(options):
     minCoverage = if(options, objectGet(options, 'minCoverage', 0), 0)
     noCover = if(options, objectGet(options, 'noCover', false), false)
+
+    # Parse arguments
+    args = argsParse(unittestReportArguments)
+    testNameArg = objectGet(args, 'test')
+    scriptName = objectGet(args, 'script')
+
+    # Script coverage details page?
+    if scriptName:
+        unittestReportScript(scriptName)
+        return
+    endif
 
     # Compute test statistics
     testNames = arraySort(objectKeys(unittestTests))
@@ -104,9 +201,8 @@ function unittestReport(options):
 
     # Report statistics
     markdownPrint('', 'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed')
-    if vTest != null:
-        testURL = if(vTestArgs != null, '#' + vTestArgs, '#var=')
-        markdownPrint('([all tests](' + testURL + '))')
+    if testNameArg:
+        markdownPrint('', argsLink(unittestReportArguments, 'All tests', null, true))
     endif
 
     # Report any warnings
@@ -124,8 +220,7 @@ function unittestReport(options):
         for testName in testNames:
             testFailures = objectGet(unittestTests, testName)
             if arrayLength(testFailures):
-                testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
-                failureLines = arrayNew('', '[' + markdownEscape(testName) + '](' + testURL + ") - FAIL")
+                failureLines = arrayNew('', argsLink(unittestReportArguments, testName, objectNew('test', testName), true) + ' - FAIL')
                 for errorLines in testFailures:
                     for errorLine, ixErrorLine in errorLines:
                         if ixErrorLine == 0:
@@ -147,8 +242,7 @@ function unittestReport(options):
         for testName in testNames:
             testFailures = objectGet(unittestTests, testName)
             if !arrayLength(testFailures):
-                testURL = '#' + if(vTestArgs != null, vTestArgs + '&', '') + "var.vTest='" + urlEncodeComponent(testName) + "'"
-                markdownPrint('', '[' + markdownEscape(testName) + '](' + testURL + ") - OK")
+                markdownPrint('', argsLink(unittestReportArguments, testName, objectNew('test', testName), true) + ' - OK')
             endif
         endfor
     endif
@@ -156,7 +250,7 @@ function unittestReport(options):
     # Coverage report
     coverage = systemGlobalGet(unittestCoverageGlobal)
     coverageFailCount = 0
-    if coverage != null && !noCover:
+    if !testNameArg && coverage && !noCover:
         markdownPrint('', '## Coverage Report')
         coverageData = unittestCoverageData()
         if coverageData:
@@ -172,6 +266,11 @@ function unittestReport(options):
             endif
 
             # Render the coverage data table
+            dataCalculatedField( \
+                coverageData, \
+                'Script', \
+                'if(stringStartsWith(Script, "**"), Script, argsLink(unittestReportArguments, Script, objectNew("script", Script), true))' \
+            )
             dataTable(coverageData, objectNew( \
                 'fields', arrayNew('Script', 'Covered', 'Statement', 'Percent'), \
                 'formats', objectNew( \
@@ -192,16 +291,29 @@ function unittestReport(options):
 endfunction
 
 
+# unittestReport application arguments
+unittestReportArguments = arrayNew( \
+    objectNew('name', 'test'), \
+    objectNew('name', 'script') \
+)
+
+
+# Render the script coverage details page
+function unittestReportScript(scriptName):
+    markdownPrint(argsLink(unittestReportArguments, 'Back', null, true), '', '**' + markdownEscape(scriptName) + '**')
+endfunction
+
+
 # Get the coverage data table - columns are "Script", "Statement", "Covered", and "Percent"
 function unittestCoverageData():
     data = arrayNew()
 
     # Get the global coverage object
     coverage = systemGlobalGet(unittestCoverageGlobal)
-    if coverage != null:
+    if coverage:
         # Get the script names with coverage data
         scripts = objectGet(coverage, 'scripts')
-        scriptNames = if(scripts != null, arraySort(objectKeys(scripts)), arrayNew())
+        scriptNames = if(scripts, arraySort(objectKeys(scripts)), arrayNew())
 
         # Compute script statement coverage
         totalStatement = 0
@@ -268,89 +380,4 @@ function unittestScriptStatements(script):
     endfor
 
     return statements
-endfunction
-
-
-# $function: unittestEqual
-# $group: unittest.bare
-# $doc: Assert an actual value is equal to the expected value
-# $arg actual: The actual value
-# $arg expected: The expected value
-# $arg description: The description of the assertion
-function unittestEqual(actual, expected, description):
-    if actual == expected:
-        return
-    endif
-
-    # Add the test failure error lines
-    testFailures = objectGet(unittestTests, unittestTestName)
-    errorLines = arrayNew( \
-        'Equal:', \
-        '', \
-        '```', \
-        jsonStringify(actual), \
-        '```', \
-        '', \
-        '```', \
-        jsonStringify(expected), \
-        '```' \
-    )
-    if description != null:
-        arrayPush(testFailures, arrayExtend(arrayNew(markdownEscape(description), errorLines)))
-    else:
-        arrayPush(testFailures, errorLines)
-    endif
-endfunction
-
-
-# $function: unittestDeepEqual
-# $group: unittest.bare
-# $doc: Assert an actual value is *deeply* equal to the expected value
-# $arg actual: The actual value
-# $arg expected: The expected value
-# $arg description: The description of the assertion
-function unittestDeepEqual(actual, expected, description):
-    # Serialize as JSON
-    actualJSON = if(systemType(actual) == 'string', actual, jsonStringify(actual, 4))
-    expectedJSON = if(systemType(expected) == 'string', expected, jsonStringify(expected, 4))
-    if actualJSON == expectedJSON:
-        return
-    endif
-
-    # Compute the difference lines
-    errorLines = arrayNew()
-    diffErrorLines = arrayNew()
-    for diff in diffLines(actualJSON, expectedJSON):
-        diffType = objectGet(diff, 'type')
-        if diffType == 'Remove':
-            for diffLine in objectGet(diff, 'lines'):
-                arrayPush(diffErrorLines, '--- ' + diffLine)
-            endfor
-        elif diffType == 'Add':
-            for diffLine in objectGet(diff, 'lines'):
-                arrayPush(diffErrorLines, '+++ ' + diffLine)
-            endfor
-        else:
-            # diffType == 'Identical'
-            if diffErrorLines:
-                arrayExtend(errorLines, arrayNew('Deep-equal:', '', '```'))
-                arrayExtend(errorLines, diffErrorLines)
-                arrayPush(errorLines, '```')
-                diffErrorLines = arrayNew()
-            endif
-        endif
-    endfor
-    if diffErrorLines:
-        arrayExtend(errorLines, arrayNew('Deep-equal:', '', '```'))
-        arrayExtend(errorLines, diffErrorLines)
-        arrayPush(errorLines, '```')
-    endif
-
-    # Add the test failure error lines
-    testFailures = objectGet(unittestTests, unittestTestName)
-    if description != null:
-        arrayPush(testFailures, arrayExtend(arrayNew(markdownEscape(description), errorLines)))
-    else:
-        arrayPush(testFailures, errorLines)
-    endif
 endfunction
