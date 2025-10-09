@@ -6,11 +6,13 @@ include '../unittest.bare'
 
 # Helper to begin mocking the unittest global state
 function testUnittestMockBegin():
-    result = arrayNew(unittestTests, unittestWarnings, unittestTestName, vTest)
+    result = arrayNew(unittestTests, unittestWarnings, unittestTestName, vTest, vSection, vHidePass)
     systemGlobalSet('unittestTests', objectNew())
     systemGlobalSet('unittestWarnings', arrayNew())
     systemGlobalSet('unittestTestName', null)
     systemGlobalSet('vTest', null)
+    systemGlobalSet('vSection', null)
+    systemGlobalSet('vHidePass', false)
     return result
 endfunction
 
@@ -22,6 +24,8 @@ function testUnittestMockEnd(beginResult):
     systemGlobalSet('unittestWarnings', arrayGet(beginResult, 1))
     systemGlobalSet('unittestTestName', arrayGet(beginResult, 2))
     systemGlobalSet('vTest', arrayGet(beginResult, 3))
+    systemGlobalSet('vSection', arrayGet(beginResult, 4))
+    systemGlobalSet('vHidePass', arrayGet(beginResult, 5))
     return result
 endfunction
 
@@ -78,11 +82,13 @@ async function testUnittestRunTest():
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests' \
+            '## Passing Tests', \
+            '', \
+            '[Hide](#var.vHidePass=true)' \
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
+            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass'&_top) - OK" \
         )) \
     ))
 endfunction
@@ -116,7 +122,7 @@ async function testUnittestRunTest_failure():
         arrayNew('markdownPrint', arrayNew( \
             arrayNew( \
                 '', \
-                "[testUnittest\\_testFail](#var.vTest='testUnittest_testFail') - FAIL", \
+                "[testUnittest\\_testFail](#var.vTest='testUnittest_testFail'&_top) - FAIL", \
                 '', \
                 '- Equal:', \
                 '', \
@@ -145,11 +151,13 @@ async function testUnittestRunTest_failure():
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests' \
+            '## Passing Tests', \
+            '', \
+            '[Hide](#var.vHidePass=true)' \
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
+            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass'&_top) - OK" \
         )) \
       ))
 endfunction
@@ -186,11 +194,13 @@ async function testUnittestRunTest_multiple():
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            '## Passing Tests' \
+            '## Passing Tests', \
+            '', \
+            '[Hide](#var.vHidePass=true)' \
         )), \
         arrayNew('markdownPrint', arrayNew( \
             '', \
-            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass') - OK" \
+            "[testUnittest\\_testPass](#var.vTest='testUnittest_testPass'&_top) - OK" \
         )) \
     ))
 endfunction

@@ -180,6 +180,7 @@ function unittestReport(options):
     args = argsParse(unittestReportArguments)
     testNameArg = objectGet(args, 'test')
     scriptName = objectGet(args, 'script')
+    hidePass = objectGet(args, 'hidePass')
 
     # Script coverage details page?
     if scriptName:
@@ -202,7 +203,7 @@ function unittestReport(options):
     # Report statistics
     markdownPrint('', 'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed')
     if testNameArg:
-        markdownPrint('', argsLink(unittestReportArguments, 'All tests', null, true))
+        markdownPrint('', argsLink(unittestReportArguments, 'All tests', null, true, '_top'))
     endif
 
     # Report any warnings
@@ -220,7 +221,7 @@ function unittestReport(options):
         for testName in testNames:
             testFailures = objectGet(unittestTests, testName)
             if arrayLength(testFailures):
-                failureLines = arrayNew('', argsLink(unittestReportArguments, testName, objectNew('test', testName), true) + ' - FAIL')
+                failureLines = arrayNew('', argsLink(unittestReportArguments, testName, objectNew('test', testName), false, '_top') + ' - FAIL')
                 for errorLines in testFailures:
                     for errorLine, ixErrorLine in errorLines:
                         if ixErrorLine == 0:
@@ -238,13 +239,20 @@ function unittestReport(options):
 
     # Report the passing tests
     if testPassCount:
-        markdownPrint('', '## Passing Tests')
-        for testName in testNames:
-            testFailures = objectGet(unittestTests, testName)
-            if !arrayLength(testFailures):
-                markdownPrint('', argsLink(unittestReportArguments, testName, objectNew('test', testName), true) + ' - OK')
-            endif
-        endfor
+        markdownPrint( \
+            '', \
+            '## Passing Tests', \
+            '', \
+            argsLink(unittestReportArguments, if(hidePass, 'Show', 'Hide'), objectNew('hidePass', !hidePass)) \
+        )
+        if !hidePass:
+            for testName in testNames:
+                testFailures = objectGet(unittestTests, testName)
+                if !arrayLength(testFailures):
+                    markdownPrint('', argsLink(unittestReportArguments, testName, objectNew('test', testName), false, '_top') + ' - OK')
+                endif
+            endfor
+        endif
     endif
 
     # Coverage report
@@ -269,7 +277,8 @@ function unittestReport(options):
             dataCalculatedField( \
                 coverageData, \
                 'Script', \
-                'if(stringStartsWith(Script, "**"), Script, argsLink(unittestReportArguments, Script, objectNew("script", Script), true))' \
+                'if(stringStartsWith(Script, "**"), Script, ' + \
+                    'argsLink(unittestReportArguments, Script, objectNew("script", Script), false, "_top"))' \
             )
             dataTable(coverageData, objectNew( \
                 'fields', arrayNew('Script', 'Covered', 'Statement', 'Percent'), \
@@ -292,10 +301,11 @@ endfunction
 
 
 # unittestReport application arguments
-unittestReportArguments = arrayNew( \
+unittestReportArguments = argsValidate(arrayNew( \
     objectNew('name', 'test'), \
-    objectNew('name', 'script') \
-)
+    objectNew('name', 'script'), \
+    objectNew('name', 'hidePass', 'type', 'bool', 'default', false) \
+))
 
 
 # Render the script coverage details page
@@ -303,7 +313,7 @@ function unittestReportScript(scriptName):
     # Render the script coverage page title
     title = scriptName + ' Coverage'
     markdownPrint( \
-        argsLink(unittestReportArguments, 'Back', null, true), \
+        argsLink(unittestReportArguments, 'Back', objectNew('script', null), false, '_top'), \
         '', \
         '## ' + markdownEscape(title) \
     )
