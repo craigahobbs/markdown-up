@@ -8,16 +8,11 @@ include '../unittestMock.bare'
 # Start coverage
 unittestCoverageStart()
 
-# Run markdownUp include library unit tests
-include 'testArgs.bare'
-include 'testDiff.bare'
-include 'testForms.bare'
-include 'testPager.bare'
-include 'testUnittest.bare'
-include 'testUnittestMock.bare'
+# Run markdownUp.bare unit tests
+include 'testMarkdownUp.bare'
 
 # Stop coverage
 unittestCoverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 78))
+return unittestReport(objectNew('minCoverage', 38))

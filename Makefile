@@ -37,8 +37,8 @@ help:
 commit: test-include
 test-include: build/npm.build
 	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/test/*.bare
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
+	$(NODE_SHELL) npx bare -m static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
+	$(NODE_SHELL) npx bare -m static/include/test/runTestsMarkdownUp.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
 
 
 .PHONY: app run tarball
