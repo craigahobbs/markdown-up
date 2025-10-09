@@ -20,4 +20,8 @@ include 'testUnittestMock.bare'
 unittestCoverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 65))
+return unittestReport(objectNew( \
+    'title', 'MarkdownUp Include Library Tests', \
+    'links', arrayNew('[markdownUp.bare Tests](#url=runTestsMarkdownUp.md&var=)'), \
+    'minCoverage', 65 \
+))

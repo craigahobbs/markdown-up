@@ -169,12 +169,17 @@ unittestCoverageGlobal = '__bareScriptCoverage'
 # $group: unittest.bare
 # $doc: Render the unit test report
 # $arg options: Optional unittest report options object. The following options are available:
+# $arg options: - **title** - the page title
+# $arg options: - **links** - the array of page links
 # $arg options: - **minCoverage** - verify minimum coverage percent (0 - 100)
 # $arg options: - **noCover** - if true, hide the coverage report
 # $return: The number of unit test failures
 function unittestReport(options):
     minCoverage = if(options, objectGet(options, 'minCoverage', 0), 0)
     noCover = if(options, objectGet(options, 'noCover', false), false)
+    defaultTitle = 'unittestReport'
+    title = if(options, objectGet(options, 'title', defaultTitle), defaultTitle)
+    links = if(options, objectGet(options, 'links'))
 
     # Parse arguments
     args = argsParse(unittestReportArguments)
@@ -200,8 +205,18 @@ function unittestReport(options):
     endfor
     testPassCount = testCount - testFailCount
 
-    # Report statistics
-    markdownPrint('', 'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed')
+    # Render the links
+    if links:
+        markdownPrint(arrayJoin(links, ' | '))
+    endif
+
+    # Render the page title
+    documentSetTitle(title)
+    markdownPrint( \
+        '# ' + markdownEscape(title), \
+        '', \
+        'Ran ' + testCount + ' tests - ' + testPassCount + ' passed, ' + testFailCount + ' failed' \
+    )
     if testNameArg:
         markdownPrint('', argsLink(unittestReportArguments, 'All tests', null, true, '_top'))
     endif
@@ -312,10 +327,11 @@ unittestReportArguments = argsValidate(arrayNew( \
 function unittestReportScript(scriptName):
     # Render the script coverage page title
     title = scriptName + ' Coverage'
+    documentSetTitle(title)
     markdownPrint( \
         argsLink(unittestReportArguments, 'Back', objectNew('script', null), false, '_top'), \
         '', \
-        '## ' + markdownEscape(title) \
+        '# ' + markdownEscape(title) \
     )
 
     # Get the (line, coverageColor) tuples
