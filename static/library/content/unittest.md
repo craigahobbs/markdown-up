@@ -32,11 +32,17 @@ function and returns the number of unit test failures.
 ~~~ bare-script
 include <unittest.bare>
 
+# Start coverage
+unittestCoverageStart()
+
 # Test includes
 include 'testCode1.bare'
 
+# Stop coverage
+unittestCoverageStop()
+
 # Test report
-return unittestReport()
+return unittestReport(objectNew('minCoverage', 100))
 ~~~
 
 **testCode1.bare**

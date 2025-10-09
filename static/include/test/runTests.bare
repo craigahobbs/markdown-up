@@ -27,4 +27,4 @@ endif
 unittestCoverageStop()
 
 # Test report
-return unittestReport()
+return unittestReport(objectNew('minCoverage', 48))

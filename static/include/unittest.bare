@@ -19,7 +19,7 @@ unittestWarnings = arrayNew()
 
 # $function: unittestCoverageStart
 # $group: unittest.bare
-# $doc: Enable coverage data collection
+# $doc: Start coverage data collection
 function unittestCoverageStart():
     systemGlobalSet(unittestCoverageGlobal, objectNew('enabled', true))
 endfunction
@@ -27,7 +27,7 @@ endfunction
 
 # $function: unittestCoverageStop
 # $group: unittest.bare
-# $doc: Enable coverage data collection
+# $doc: Stop coverage data collection
 function unittestCoverageStop():
     objectSet(systemGlobalGet(unittestCoverageGlobal), 'enabled', false)
 endfunction
@@ -82,9 +82,13 @@ endfunction
 # $function: unittestReport
 # $group: unittest.bare
 # $doc: Render the unit test report
+# $arg options: Optional unittest report options object. The following options are available:
+# $arg options: - **minCoverage** - verify minimum coverage percent (0 - 100)
+# $arg options: - **noCover** - if true, hide the coverage report
 # $return: The number of unit test failures
 function unittestReport(options):
-    noCover = options && objectGet(options, 'noCover', false)
+    minCoverage = if(options, objectGet(options, 'minCoverage', 0), 0)
+    noCover = if(options, objectGet(options, 'noCover', false), false)
 
     # Compute test statistics
     testNames = arraySort(objectKeys(unittestTests))
@@ -151,10 +155,23 @@ function unittestReport(options):
 
     # Coverage report
     coverage = systemGlobalGet(unittestCoverageGlobal)
+    coverageFailCount = 0
     if coverage != null && !noCover:
         markdownPrint('', '## Coverage Report')
         coverageData = unittestCoverageData()
         if coverageData:
+            # Verify the coverage percent
+            coveragePercent = objectGet(arrayGet(coverageData, arrayLength(coverageData) - 1), 'Percent')
+            if coveragePercent < minCoverage:
+                markdownPrint( \
+                    '', \
+                    '**Error**: Coverage percentage, ' + numberToFixed(coveragePercent, 1, true) + \
+                        '%, is below the minimum coverage percentage of ' + numberToFixed(minCoverage, 1, true) + '%.' \
+                )
+                coverageFailCount = coverageFailCount + 1
+            endif
+
+            # Render the coverage data table
             dataTable(coverageData, objectNew( \
                 'fields', arrayNew('Script', 'Covered', 'Statement', 'Percent'), \
                 'formats', objectNew( \
@@ -162,23 +179,31 @@ function unittestReport(options):
                     'Covered', objectNew('align', 'right'), \
                     'Statement', objectNew('align', 'right'), \
                     'Percent', objectNew('align', 'right') \
-                ) \
+                ), \
+                'precision', 1 \
             ))
         else:
             markdownPrint('', '*No data.*')
         endif
     endif
 
-    return testWarningCount + testFailCount
+    # Return status code
+    return testWarningCount + testFailCount + coverageFailCount
 endfunction
 
 
+# Get the coverage data table - columns are "Script", "Statement", "Covered", and "Percent"
 function unittestCoverageData():
     data = arrayNew()
+
+    # Get the global coverage object
     coverage = systemGlobalGet(unittestCoverageGlobal)
     if coverage != null:
+        # Get the script names with coverage data
         scripts = objectGet(coverage, 'scripts')
         scriptNames = if(scripts != null, arraySort(objectKeys(scripts)), arrayNew())
+
+        # Compute script statement coverage
         totalStatement = 0
         totalCovered = 0
         for scriptName in scriptNames:
@@ -187,6 +212,8 @@ function unittestCoverageData():
             covered = objectGet(coverageScript, 'covered')
             statements = unittestScriptStatements(script)
             statementCount = arrayLength(statements)
+
+            # Count statements with coverage
             coveredCount = 0
             for statement in statements:
                 statementKey = arrayGet(objectKeys(statement), 0)
@@ -198,38 +225,48 @@ function unittestCoverageData():
                 endif
                 totalStatement = totalStatement + 1
             endfor
+
+            # Add the script coverage data row
             arrayPush(data, objectNew( \
                 'Script', scriptName, \
                 'Statement', statementCount, \
                 'Covered', coveredCount, \
-                'Percent', if(statementCount, numberToFixed(100 * coveredCount / statementCount, 1) + '%', '') \
+                'Percent', if(statementCount, 100 * coveredCount / statementCount, 100) \
             ))
         endfor
-        if totalStatement:
+
+        # Add the coverage totals data row
+        if scriptNames:
             arrayPush(data, objectNew( \
                 'Script', '**Total**', \
                 'Statement', totalStatement, \
                 'Covered', totalCovered, \
-                'Percent', numberToFixed(100 * totalCovered / totalStatement, 1) + '%' \
+                'Percent', if(totalStatement, 100 * totalCovered / totalStatement, 100) \
             ))
         endif
     endif
+
     return data
 endfunction
 
 
-
+# Get a script's array of statements
 function unittestScriptStatements(script):
     statements = arrayNew()
+
+    # Add the top-level script statements
     for statement in objectGet(script, 'statements'):
-        statementKey = arrayGet(objectKeys(statement), 0)
         arrayPush(statements, statement)
+
+        # Add function statements
+        statementKey = arrayGet(objectKeys(statement), 0)
         if statementKey == 'function':
             for funcStatement in objectGet(objectGet(statement, statementKey), 'statements'):
                 arrayPush(statements, funcStatement)
             endfor
         endif
     endfor
+
     return statements
 endfunction
 
