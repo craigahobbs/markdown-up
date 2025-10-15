@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.0 (2025-10-15)
+
+- [4f5bb35](https://github.com/craigahobbs/markdown-up/commit/4f5bb35) - add unittest.bare coverage report
+
 ## 3.9.1 (2025-09-26)
 
 - [045a4e8](https://github.com/craigahobbs/markdown-up/commit/045a4e8) - update help link
