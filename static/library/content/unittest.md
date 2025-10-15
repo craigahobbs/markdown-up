@@ -15,8 +15,6 @@ The "runTests.md" file is a Markdown document that includes (and executes) the "
 test application.
 
 ``` bare-script
-# Code Tests
-
 ~~~ markdown-script
 include 'runTests.bare'
 ~~~
@@ -32,19 +30,25 @@ function and returns the number of unit test failures.
 ~~~ bare-script
 include <unittest.bare>
 
+# Start coverage
+coverageStart()
+
 # Test includes
 include 'testCode1.bare'
 
+# Stop coverage
+coverageStop()
+
 # Test report
-return unittestReport()
+return unittestReport(objectNew('minCoverage', 100))
 ~~~
 
 **testCode1.bare**
 
 The test include files contain unit tests for each code include. The test include files execute
-tests using the [unittestRunTest](#unittestruntest) and
-[unittestRunTestAsync](#unittestruntestasync) functions. Individual tests assert success and failure
-using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal) functions.
+tests using the [unittestRunTest](#unittestruntest) function. Individual tests assert success and
+failure using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal)
+functions.
 
 ~~~ bare-script
 include '../code1.bare'
@@ -67,7 +71,7 @@ unittestRunTest('testCode1SumNumberArrays')
 
 Unit tests may be run on the command line using the
 [BareScript CLI](https://github.com/craigahobbs/bare-script#the-barescript-command-line-interface-cli)
-and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
+and its `-m` argument.
 
 ~~~
 npx bare -m test/runTests.bare

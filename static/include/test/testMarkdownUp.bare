@@ -2,25 +2,13 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
-# Save the original markdownPrint
-testMarkdownUp_markdownPrintOriginal = systemGlobalGet('markdownPrint')
-
-
-include '../markdownUp.bare'
-
-
-# Save the markdownPrint stub and restore the original markdownPrint
-testMarkdownUp_markdownPrintStub = systemGlobalGet('markdownPrint')
-markdownPrint = testMarkdownUp_markdownPrintOriginal
-
-
 async function testMarkdownUpSentinel():
     unittestEqual(systemGlobalGet('markdownUpSentinel'), true)
     systemGlobalSet('markdownUpSentinel', 1)
     include '../markdownUp.bare'
     unittestEqual(systemGlobalGet('markdownUpSentinel'), 1)
 endfunction
-unittestRunTestAsync('testMarkdownUpSentinel')
+unittestRunTest('testMarkdownUpSentinel')
 
 
 function testMarkdownUp_dataLineChart():
@@ -52,121 +40,16 @@ function testMarkdownUp_dataTable():
     data = arrayNew(objectNew('A', 1.495, 'B', 2))
     unittestEqual(dataTable(data), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+======+===+')), \
         arrayNew('systemLog', arrayNew('| A    | B |')), \
-        arrayNew('systemLog', arrayNew('+======+===+')), \
-        arrayNew('systemLog', arrayNew('| 1.50 | 2 |')), \
-        arrayNew('systemLog', arrayNew('+======+===+')) \
+        arrayNew('systemLog', arrayNew('|------|---|')), \
+        arrayNew('systemLog', arrayNew('| 1.50 | 2 |')) \
     ))
 endfunction
 unittestRunTest('testMarkdownUp_dataTable')
 
 
-function testMarkdownUp_dataTable_fields():
-    unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', 1, 'B', 2, 'C', 3))
-    model = objectNew( \
-        'fields', arrayNew('C'), \
-        'categories', arrayNew('A') \
-    )
-    unittestEqual(dataTable(data, model), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+===+===+')), \
-        arrayNew('systemLog', arrayNew('| A | C |')), \
-        arrayNew('systemLog', arrayNew('+===+===+')), \
-        arrayNew('systemLog', arrayNew('| 1 | 3 |')), \
-        arrayNew('systemLog', arrayNew('+===+===+')) \
-    ))
-endfunction
-unittestRunTest('testMarkdownUp_dataTable_fields')
-
-
-function testMarkdownUp_dataTable_precision():
-    unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', 1.495, 'B', 2))
-    model = objectNew( \
-        'precision', 1, \
-        'trim', false \
-    )
-    unittestEqual(dataTable(data, model), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+=====+=====+')), \
-        arrayNew('systemLog', arrayNew('| A   | B   |')), \
-        arrayNew('systemLog', arrayNew('+=====+=====+')), \
-        arrayNew('systemLog', arrayNew('| 1.5 | 2.0 |')), \
-        arrayNew('systemLog', arrayNew('+=====+=====+')) \
-    ))
-endfunction
-unittestRunTest('testMarkdownUp_dataTable_precision')
-
-
-function testMarkdownUp_dataTable_datetime():
-    unittestMockOneGeneric('systemLog')
-    dt = datetimeNew(2023, 9, 25)
-    data = arrayNew(objectNew('A', dt))
-    unittestEqual(dataTable(data), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+===========================+')), \
-        arrayNew('systemLog', arrayNew('| A                         |')), \
-        arrayNew('systemLog', arrayNew('+===========================+')), \
-        arrayNew('systemLog', arrayNew('| ' + datetimeISOFormat(dt) + ' |')), \
-        arrayNew('systemLog', arrayNew('+===========================+')) \
-    ))
-endfunction
-unittestRunTest('testMarkdownUp_dataTable_datetime')
-
-
-function testMarkdownUp_dataTable_datetime_precision():
-    unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', datetimeNew(2023, 9, 25)))
-    model = objectNew('datetime', 'day')
-    unittestEqual(dataTable(data, model), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('+============+')), \
-        arrayNew('systemLog', arrayNew('| A          |')), \
-        arrayNew('systemLog', arrayNew('+============+')), \
-        arrayNew('systemLog', arrayNew('| 2023-09-25 |')), \
-        arrayNew('systemLog', arrayNew('+============+')) \
-    ))
-endfunction
-unittestRunTest('testMarkdownUp_dataTable_datetime_precision')
-
-
-function testMarkdownUp_dataTable_formats():
-    unittestMockOneGeneric('systemLog')
-    data = arrayNew( \
-        objectNew('A', 'asdf', 'B', 'asdf', 'CCCCCCCCCC', 'asdf'), \
-        objectNew('A', 'asdfasdf', 'B', 'asdfasdf', 'CCCCCCCCCC', 'asdfasdf'), \
-        objectNew('A', 'asdfa', 'B', 'asdfas', 'CCCCCCCCCC', 'asdfas') \
-    )
-    model = objectNew( \
-        'formats', objectNew( \
-            'A', objectNew('align', 'center'), \
-            'B', objectNew('align', 'right', 'header', 'BB'), \
-            'CCCCCCCCCC', objectNew('align', 'right') \
-        ) \
-    )
-    unittestEqual(dataTable(data, model), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
-        arrayNew('systemLog', arrayNew("|    A     |       BB | CCCCCCCCCC |")), \
-        arrayNew('systemLog', arrayNew("+==========+==========+============+")), \
-        arrayNew('systemLog', arrayNew("|   asdf   |     asdf |       asdf |")), \
-        arrayNew('systemLog', arrayNew("| asdfasdf | asdfasdf |   asdfasdf |")), \
-        arrayNew('systemLog', arrayNew("|  asdfa   |   asdfas |     asdfas |")), \
-        arrayNew('systemLog', arrayNew("+==========+==========+============+")) \
-    ))
-endfunction
-unittestRunTest('testMarkdownUp_dataTable_formats')
-
-
 function testMarkdownUp_dataTable_invalidData():
+    systemLogDebug('NOTICE: The following "dataValidate" error is expected:')
     unittestMockOneGeneric('systemLog')
     data = arrayNew( \
         objectNew('A', 1), \
@@ -412,7 +295,7 @@ unittestRunTest('testMarkdownUp_markdownParse')
 
 function testMarkdownUp_markdownPrint():
     unittestMockOneGeneric('systemLog')
-    unittestEqual(testMarkdownUp_markdownPrintStub('Hello', arrayNew('1', '2'), 'Goodbye'), null)
+    unittestEqual(markdownPrintStub('Hello', arrayNew('1', '2'), null, 'Goodbye'), null)
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
         arrayNew('systemLog', arrayNew('Hello')), \
         arrayNew('systemLog', arrayNew('1')), \
@@ -440,6 +323,19 @@ function testMarkdownUp_schemaElements():
     ))
 endfunction
 unittestRunTest('testMarkdownUp_schemaElements')
+
+
+function testMarkdownUp_schemaElements_union():
+    types = objectNew( \
+        'TestStruct', objectNew('struct', objectNew('name', 'TestStruct', 'union', true)) \
+    )
+    unittestDeepEqual(schemaElements(types, 'TestStruct'), arrayNew( \
+        arrayNew( \
+            objectNew('html', 'h1', 'elem', objectNew('text', 'union TestStruct')) \
+        ) \
+    ))
+endfunction
+unittestRunTest('testMarkdownUp_schemaElements_union')
 
 
 function testMarkdownUp_sessionStorage():

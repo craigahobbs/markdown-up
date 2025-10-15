@@ -1,8 +1,6 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../pager.bare'
-
 
 # Test page function
 function testPagerModel_page2():
@@ -37,7 +35,7 @@ async function testPagerSentinel():
     include '../pager.bare'
     unittestEqual(systemGlobalGet('pagerSentinel'), 1)
 endfunction
-unittestRunTestAsync('testPagerSentinel')
+unittestRunTest('testPagerSentinel')
 
 
 async function testPagerMarkdown():
@@ -64,7 +62,34 @@ async function testPagerMarkdown():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerMarkdown')
+unittestRunTest('testPagerMarkdown')
+
+
+async function testPagerMarkdown_noTitle():
+    unittestMockAll(objectNew( \
+        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
+        'markdownTitle', arrayNew(null), \
+        'systemFetch', objectNew( \
+            'README.md', 'Hello!' \
+        ) \
+    ))
+
+    pagerMain(testPagerModel)
+
+    unittestDeepEqual( \
+        unittestMockEnd(), \
+        arrayNew( \
+            arrayNew('markdownPrint', arrayNew("Page 1&nbsp;|&nbsp;[Page2](#var.vPage='Page2')&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('markdownPrint', arrayNew("(&nbsp;Start&nbsp;|&nbsp;Previous&nbsp;|&nbsp;[Next](#var.vPage='Page2')&nbsp;)", '')), \
+            arrayNew('systemFetch', arrayNew('README.md')), \
+            arrayNew('markdownParse', arrayNew('Hello!')), \
+            arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
+            arrayNew('documentSetTitle', arrayNew('No Title')), \
+            arrayNew('markdownPrint', arrayNew('', 'Hello!')) \
+        ) \
+    )
+endfunction
+unittestRunTest('testPagerMarkdown_noTitle')
 
 
 async function testPagerMarkdownNotFound():
@@ -82,7 +107,7 @@ async function testPagerMarkdownNotFound():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerMarkdownNotFound')
+unittestRunTest('testPagerMarkdownNotFound')
 
 
 async function testPagerFunction():
@@ -107,7 +132,7 @@ async function testPagerFunction():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerFunction')
+unittestRunTest('testPagerFunction')
 
 
 async function testPagerLink():
@@ -129,7 +154,7 @@ async function testPagerLink():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerLink')
+unittestRunTest('testPagerLink')
 
 
 async function testPagerHidden():
@@ -152,7 +177,7 @@ async function testPagerHidden():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHidden')
+unittestRunTest('testPagerHidden')
 
 
 async function testPagerArg():
@@ -177,7 +202,7 @@ async function testPagerArg():
     # Clear argument globals
     systemGlobalSet('vPage', null)
 endfunction
-unittestRunTestAsync('testPagerArg')
+unittestRunTest('testPagerArg')
 
 
 async function testPagerArgUnknown():
@@ -208,7 +233,7 @@ async function testPagerArgUnknown():
     # Clear argument globals
     systemGlobalSet('vPage', null)
 endfunction
-unittestRunTestAsync('testPagerArgUnknown')
+unittestRunTest('testPagerArgUnknown')
 
 
 async function testPagerArguments():
@@ -245,7 +270,7 @@ async function testPagerArguments():
     systemGlobalSet('vPage', null)
     systemGlobalSet('vName', null)
 endfunction
-unittestRunTestAsync('testPagerArguments')
+unittestRunTest('testPagerArguments')
 
 
 async function testPagerHideMenu():
@@ -266,7 +291,7 @@ async function testPagerHideMenu():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHideMenu')
+unittestRunTest('testPagerHideMenu')
 
 
 async function testPagerHideNav():
@@ -287,7 +312,7 @@ async function testPagerHideNav():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerHideNav')
+unittestRunTest('testPagerHideNav')
 
 
 async function testPagerKeyboard():
@@ -336,7 +361,7 @@ async function testPagerKeyboard():
         arrayNew('windowSetLocation', arrayNew("#var.vPage='Page2'")) \
     ))
 endfunction
-unittestRunTestAsync('testPagerKeyboard')
+unittestRunTest('testPagerKeyboard')
 
 
 async function testPagerKeyboardNonStart():
@@ -348,13 +373,19 @@ async function testPagerKeyboardNonStart():
         ) \
     ))
 
-    pagerMain(testPagerModel, objectNew('start', 'Page2', 'hideNav', true, 'keyboard', true))
+    # Set argument globals
+    systemGlobalSet('vPage', 'Page2')
+
+    pagerMain(testPagerModel, objectNew('hideNav', true, 'keyboard', true))
+
+    # Clear argument globals
+    systemGlobalSet('vPage', null)
 
     mockCalls = unittestMockEnd()
     unittestDeepEqual( \
         mockCalls, \
         arrayNew( \
-            arrayNew('markdownPrint', arrayNew("[Page 1](#var.vPage='Page%201')&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
+            arrayNew('markdownPrint', arrayNew("[Page 1](#var=)&nbsp;|&nbsp;Page2&nbsp;|&nbsp;[Page3](#url=other.md)", '')), \
             arrayNew('documentSetTitle', arrayNew('Page 2')), \
             arrayNew('markdownPrint', arrayNew('# Page 2', '')), \
             arrayNew('markdownPrint', arrayNew('This is page 2')), \
@@ -366,7 +397,7 @@ async function testPagerKeyboardNonStart():
     unittestMockAll()
     keyDown(objectNew('key', 'p'))
     unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('windowSetLocation', arrayNew("#var.vPage='Page%201'")) \
+        arrayNew('windowSetLocation', arrayNew('#var=')) \
     ))
 
     unittestMockAll()
@@ -375,13 +406,15 @@ async function testPagerKeyboardNonStart():
 
     unittestMockAll()
     keyDown(objectNew('key', 's'))
-    unittestDeepEqual(unittestMockEnd(), arrayNew())
+    unittestDeepEqual(unittestMockEnd(), arrayNew( \
+        arrayNew('windowSetLocation', arrayNew('#var=')) \
+    ))
 
     unittestMockAll()
     keyDown(objectNew('key', 'e'))
     unittestDeepEqual(unittestMockEnd(), arrayNew())
 endfunction
-unittestRunTestAsync('testPagerKeyboardNonStart')
+unittestRunTest('testPagerKeyboardNonStart')
 
 
 async function testPagerSinglePage():
@@ -402,7 +435,7 @@ async function testPagerSinglePage():
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerSinglePage')
+unittestRunTest('testPagerSinglePage')
 
 
 async function testPagerNoPages():
@@ -419,11 +452,11 @@ async function testPagerNoPages():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: No visible and navigable pages')) \
+            arrayNew('systemLogDebug', arrayNew('pager.bare: No visible and navigable pages')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerNoPages')
+unittestRunTest('testPagerNoPages')
 
 
 async function testPagerNoLinks():
@@ -440,14 +473,15 @@ async function testPagerNoLinks():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: No visible and navigable pages')) \
+            arrayNew('systemLogDebug', arrayNew('pager.bare: No visible and navigable pages')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerNoLinks')
+unittestRunTest('testPagerNoLinks')
 
 
 async function testPagerInvalidPagerModel():
+    systemLogDebug('NOTICE: The following "schemaValidate" error is expected:')
     unittestMockAll()
 
     pagerModel = objectNew( \
@@ -462,10 +496,11 @@ async function testPagerInvalidPagerModel():
         arrayNew() \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidPagerModel')
+unittestRunTest('testPagerInvalidPagerModel')
 
 
 async function testPagerInvalidArgumentsModel():
+    systemLogDebug('NOTICE: The following "schemaValidate" error is expected:')
     unittestMockAll()
 
     arguments = arrayNew(objectNew())
@@ -476,7 +511,7 @@ async function testPagerInvalidArgumentsModel():
         arrayNew() \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidArgumentsModel')
+unittestRunTest('testPagerInvalidArgumentsModel')
 
 
 async function testPagerInvalidStart():
@@ -487,8 +522,8 @@ async function testPagerInvalidStart():
     unittestDeepEqual( \
         unittestMockEnd(), \
         arrayNew( \
-            arrayNew('systemLogDebug', arrayNew('MarkdownUp - pager.bare: Unknown start page "Unknown"')) \
+            arrayNew('systemLogDebug', arrayNew('pager.bare: Unknown start page "Unknown"')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testPagerInvalidStart')
+unittestRunTest('testPagerInvalidStart')

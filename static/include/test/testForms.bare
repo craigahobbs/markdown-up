@@ -1,8 +1,6 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../forms.bare'
-
 
 async function testFormsSentinel():
     unittestEqual(systemGlobalGet('formsSentinel'), true)
@@ -10,7 +8,7 @@ async function testFormsSentinel():
     include '../forms.bare'
     unittestEqual(systemGlobalGet('formsSentinel'), 1)
 endfunction
-unittestRunTestAsync('testFormsSentinel')
+unittestRunTest('testFormsSentinel')
 
 
 function testFormsTextElements():
@@ -64,7 +62,7 @@ async function testFormsTextElements_onEnter():
     onKeyup(13)
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
-unittestRunTestAsync('testFormsTextElements_onEnter')
+unittestRunTest('testFormsTextElements_onEnter')
 
 
 async function testFormsTextElements_onEnterCallbackAsync():
@@ -98,7 +96,7 @@ async function testFormsTextElements_onEnterAsync():
     onKeyup(13)
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 1)
 endfunction
-unittestRunTestAsync('testFormsTextElements_onEnterAsync')
+unittestRunTest('testFormsTextElements_onEnterAsync')
 
 
 function testFormsLinkButtonElementsCallback():

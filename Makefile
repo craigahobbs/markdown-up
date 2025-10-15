@@ -37,8 +37,8 @@ help:
 commit: test-include
 test-include: build/npm.build
 	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/test/*.bare
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
-	$(NODE_SHELL) npx bare -c "include 'static/include/markdownUp.bare'" static/include/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'") -v vBare 1
+	$(NODE_SHELL) npx bare -d -v vUnittestReport true -m static/include/test/runTests.bare$(if $(TEST), -v vTest "'$(TEST)'")
+	$(NODE_SHELL) npx bare -d -v vUnittestReport true static/include/test/runTestsMarkdownUp.bare$(if $(TEST), -v vTest "'$(TEST)'")
 
 
 .PHONY: app run tarball
@@ -219,11 +219,13 @@ const [, typeModelPath] = argv;
 // Create the include library type model
 const script = parseScript(`
 include 'static/include/args.bare'
+include 'static/include/dataTable.bare'
 include 'static/include/diff.bare'
 include 'static/include/pager.bare'
 
 includeTypes = objectNew()
 objectAssign(includeTypes, argsTypes)
+objectAssign(includeTypes, dataTableTypes)
 objectAssign(includeTypes, diffTypes)
 objectAssign(includeTypes, pagerTypes)
 return includeTypes

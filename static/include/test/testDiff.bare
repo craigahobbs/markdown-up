@@ -1,7 +1,14 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-include '../diff.bare'
+
+async function testDiffSentinel():
+    unittestEqual(systemGlobalGet('diffSentinel'), true)
+    systemGlobalSet('diffSentinel', 1)
+    include '../diff.bare'
+    unittestEqual(systemGlobalGet('diffSentinel'), 1)
+endfunction
+unittestRunTest('testDiffSentinel')
 
 
 function testDiffLines():
@@ -11,12 +18,14 @@ function testDiffLines():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
+            objectNew('type', 'Identical', 'lines', arrayNew('1')), \
             objectNew('type', 'Remove', 'lines', arrayNew('2')), \
+            objectNew('type', 'Identical', 'lines', arrayNew('3')), \
             objectNew('type', 'Add', 'lines', arrayNew('4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines')
+unittestRunTest('testDiffLines')
 
 
 function testDiffLines_array():
@@ -26,12 +35,14 @@ function testDiffLines_array():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
+            objectNew('type', 'Identical', 'lines', arrayNew('1')), \
             objectNew('type', 'Remove', 'lines', arrayNew('2')), \
+            objectNew('type', 'Identical', 'lines', arrayNew('3')), \
             objectNew('type', 'Add', 'lines', arrayNew('4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_array')
+unittestRunTest('testDiffLines_array')
 
 
 function testDiffLines_identical():
@@ -40,10 +51,27 @@ function testDiffLines_identical():
     right = left
     unittestDeepEqual( \
         diffLines(left, right), \
-        arrayNew() \
+        arrayNew( \
+            objectNew('type', 'Identical', 'lines', arrayNew('1', '2', '3')) \
+        ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_identical')
+unittestRunTest('testDiffLines_identical')
+
+
+function testDiffLines_total():
+    newline = stringFromCharCode(10)
+    left = '1' + newline + '2' + newline + '3'
+    right = '4' + newline + '5' + newline + '6'
+    unittestDeepEqual( \
+        diffLines(left, right), \
+        arrayNew( \
+            objectNew('type', 'Remove', 'lines', arrayNew('1', '2', '3')), \
+            objectNew('type', 'Add', 'lines', arrayNew('4', '5', '6')) \
+        ) \
+    )
+endfunction
+unittestRunTest('testDiffLines_total')
 
 
 function testDiffLines_removeStart():
@@ -53,11 +81,12 @@ function testDiffLines_removeStart():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
-            objectNew('type', 'Remove', 'lines', arrayNew('1', '2')) \
+            objectNew('type', 'Remove', 'lines', arrayNew('1', '2')), \
+            objectNew('type', 'Identical', 'lines', arrayNew('3', '4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_removeStart')
+unittestRunTest('testDiffLines_removeStart')
 
 
 function testDiffLines_addStart():
@@ -67,11 +96,12 @@ function testDiffLines_addStart():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
-            objectNew('type', 'Add', 'lines', arrayNew('1', '2')) \
+            objectNew('type', 'Add', 'lines', arrayNew('1', '2')), \
+            objectNew('type', 'Identical', 'lines', arrayNew('3', '4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_addStart')
+unittestRunTest('testDiffLines_addStart')
 
 
 function testDiffLines_removeEnd():
@@ -81,11 +111,12 @@ function testDiffLines_removeEnd():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
+            objectNew('type', 'Identical', 'lines', arrayNew('1', '2')), \
             objectNew('type', 'Remove', 'lines', arrayNew('3', '4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_removeEnd')
+unittestRunTest('testDiffLines_removeEnd')
 
 
 function testDiffLines_addEnd():
@@ -95,8 +126,9 @@ function testDiffLines_addEnd():
     unittestDeepEqual( \
         diffLines(left, right), \
         arrayNew( \
+            objectNew('type', 'Identical', 'lines', arrayNew('1', '2')), \
             objectNew('type', 'Add', 'lines', arrayNew('3', '4')) \
         ) \
     )
 endfunction
-unittestRunTestAsync('testDiffLines_addEnd')
+unittestRunTest('testDiffLines_addEnd')

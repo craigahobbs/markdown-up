@@ -850,7 +850,7 @@ test('MarkdownUp, render keydown', async () => {
     };
     window.document.removeEventListener = (type, callback) => {
         assert.equal(type, 'keydown');
-        assert.equal(callback, eventListener[type]);
+        assert.equal(typeof callback, 'function');
         eventListener[type] = null;
     };
 
@@ -859,6 +859,7 @@ test('MarkdownUp, render keydown', async () => {
 ~~~ markdown-script
 function main(event):
     systemGlobalSet('count', count + 1)
+    elementModelRender(objectNew('html', 'input', 'attr', objectNew('id', 'input1', 'type', 'text')))
     markdownPrint('Hello ' + count + ' (key: ' + objectGet(event, 'key') + ')')
 endfunction
 
@@ -884,7 +885,19 @@ main(objectNew('key', 'A'))
     assert(window.document.body.innerHTML.endsWith('<p>Hello 1 (key: A)</p>'));
 
     // Call the keydown callback
-    const keyEvent = {'key': 'B'};
+    let keyEvent = {'key': 'B'};
+    await eventListener.keydown(keyEvent);
+    assert.equal(typeof eventListener.keydown, 'function');
+    assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
+    assert.equal(window.document.title, '');
+    assert(window.document.body.innerHTML.endsWith('<p>Hello 2 (key: B)</p>'));
+
+    // Set focus to an input element
+    const inputElement = window.document.getElementById('input1');
+    inputElement.focus();
+
+    // Call the keydown callback again - verify its not called this time
+    keyEvent = {'key': 'C'};
     await eventListener.keydown(keyEvent);
     assert.equal(typeof eventListener.keydown, 'function');
     assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
@@ -2084,7 +2097,7 @@ markdownPrint('varName = ' + varName)
     const cleanedLogs = logs.map((log) => log.replace(/\d+(\.\d+)? milliseconds/, 'X milliseconds'));
     assert.deepEqual(cleanedLogs, [
         `\
-MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error:
+MarkdownUp: Error evaluating variable "varName" expression "foo bar": Syntax error
 foo bar
    ^
 `,
