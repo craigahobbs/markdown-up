@@ -1,24 +1,36 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+
+# Start coverage
+coverageStart()
+
+# Include all include scripts (except markdownUp.bare) to prevent use of system includes
+include '../args.bare'
+systemGlobalSet('dataTableSentinel', null)
+include '../dataTable.bare'
+include '../diff.bare'
+include '../forms.bare'
+include '../pager.bare'
 include '../unittest.bare'
 include '../unittestMock.bare'
 
+# Run markdownUp include library unit tests
+include 'testArgs.bare'
+include 'testDataTable.bare'
+include 'testDiff.bare'
+include 'testForms.bare'
+include 'testPager.bare'
+include 'testUnittest.bare'
+include 'testUnittestMock.bare'
 
-# Run markdownUp.bare unit tests?
-if vBare:
-    markdownPrint('Running "markdownUp.bare" tests. To run default tests, [click here](#var=).')
-    vTestArgs = 'var.vBare=1'
-    include 'testMarkdownUp.bare'
-else:
-    markdownPrint('Running default tests. To run "markdownUp.bare" tests, [click here](#var.vBare=1).')
-    include 'testArgs.bare'
-    include 'testDiff.bare'
-    include 'testForms.bare'
-    include 'testPager.bare'
-    include 'testUnittest.bare'
-    include 'testUnittestMock.bare'
-endif
+# Stop coverage
+coverageStop()
 
 # Test report
-return unittestReport()
+return unittestReport(objectNew( \
+    'title', 'MarkdownUp Include Library Tests', \
+    'links', arrayNew('[markdownUp.bare Tests](#url=runTestsMarkdownUp.md&var=)'), \
+    'coverageExclude', arrayNew('runTests.bare'), \
+    'coverageMin', 100 \
+))

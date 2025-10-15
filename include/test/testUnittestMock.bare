@@ -2,16 +2,13 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
-include '../unittestMock.bare'
-
-
 async function testUnittestMockSentinel():
     unittestEqual(systemGlobalGet('unittestMockSentinel'), true)
     systemGlobalSet('unittestMockSentinel', 1)
     include '../unittestMock.bare'
     unittestEqual(systemGlobalGet('unittestMockSentinel'), 1)
 endfunction
-unittestRunTestAsync('testUnittestMockSentinel')
+unittestRunTest('testUnittestMockSentinel')
 
 
 function testUnittestMockAll():
@@ -101,6 +98,10 @@ function testUnittestMockAll():
     unittestDeepEqual( \
         schemaElements(objectNew('TestStruct', objectNew('struct', objectNew('name', 'TestStruct'))), 'TestStruct'), \
         arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'struct TestStruct')))) \
+    )
+    unittestDeepEqual( \
+        schemaElements(objectNew('TestStruct', objectNew('struct', objectNew('name', 'TestStruct', 'union', true))), 'TestStruct'), \
+        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'union TestStruct')))) \
     )
 
     # Session Storage

@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [args.bare](#var.vPublish=true&var.vSingle=true&args-bare)
+- [dataTable.bare](#var.vPublish=true&var.vSingle=true&datatable-bare)
 - [diff.bare](#var.vPublish=true&var.vSingle=true&diff-bare)
 - [forms.bare](#var.vPublish=true&var.vSingle=true&forms-bare)
 - [pager.bare](#var.vPublish=true&var.vSingle=true&pager-bare)
@@ -187,6 +188,34 @@ The [arguments model](includeModel.html#var.vName='ArgsArguments')
 #### Returns
 
 The validated [arguments model](includeModel.html#var.vName='ArgsArguments') or null if validation fails
+
+---
+
+## dataTable.bare
+
+[Back to top](#var.vPublish=true&var.vSingle=true&_top)
+
+### Function Index
+
+- [dataTableMarkdown](#var.vPublish=true&var.vSingle=true&datatablemarkdown)
+
+---
+
+### dataTableMarkdown
+
+Create the array of Markdown table line strings
+
+#### Arguments
+
+**data -**
+The array of row objects
+
+**model -**
+The [data table model](includeModel.html#var.vName='DataTable')
+
+#### Returns
+
+The array of Markdown table line strings
 
 ---
 
@@ -495,8 +524,6 @@ The "runTests.md" file is a Markdown document that includes (and executes) the "
 test application.
 
 ``` bare-script
-# Code Tests
-
 ~~~ markdown-script
 include 'runTests.bare'
 ~~~
@@ -512,19 +539,25 @@ function and returns the number of unit test failures.
 ~~~ bare-script
 include <unittest.bare>
 
+# Start coverage
+coverageStart()
+
 # Test includes
 include 'testCode1.bare'
 
+# Stop coverage
+coverageStop()
+
 # Test report
-return unittestReport()
+return unittestReport(objectNew('minCoverage', 100))
 ~~~
 
 **testCode1.bare**
 
 The test include files contain unit tests for each code include. The test include files execute
-tests using the [unittestRunTest](#unittestruntest) and
-[unittestRunTestAsync](#unittestruntestasync) functions. Individual tests assert success and failure
-using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal) functions.
+tests using the [unittestRunTest](#unittestruntest) function. Individual tests assert success and
+failure using the [unittestEqual](#unittestequal) and [unittestDeepEqual](#unittestdeepequal)
+functions.
 
 ~~~ bare-script
 include '../code1.bare'
@@ -547,7 +580,7 @@ unittestRunTest('testCode1SumNumberArrays')
 
 Unit tests may be run on the command line using the
 [BareScript CLI](https://github.com/craigahobbs/bare-script#the-barescript-command-line-interface-cli)
-and the [markdownUp.bare](#var.vGroup='markdownUp.bare') include library:
+and its `-m` argument.
 
 ~~~
 npx bare -m test/runTests.bare
@@ -562,7 +595,6 @@ The "runTests.bare" application returns an error status if there are any failure
 - [unittestEqual](#var.vPublish=true&var.vSingle=true&unittestequal)
 - [unittestReport](#var.vPublish=true&var.vSingle=true&unittestreport)
 - [unittestRunTest](#var.vPublish=true&var.vSingle=true&unittestruntest)
-- [unittestRunTestAsync](#var.vPublish=true&var.vSingle=true&unittestruntestasync)
 
 ---
 
@@ -614,7 +646,12 @@ Render the unit test report
 
 #### Arguments
 
-None
+**options -**
+Optional unittest report options object. The following options are available:
+- **coverageExclude** - array of script names to exclude from coverage
+- **coverageMin** - verify minimum coverage percent (0 - 100)
+- **links** - the array of page links
+- **title** - the page title
 
 #### Returns
 
@@ -625,21 +662,6 @@ The number of unit test failures
 ### unittestRunTest
 
 Run a unit test
-
-#### Arguments
-
-**testName -**
-The test function name
-
-#### Returns
-
-Nothing
-
----
-
-### unittestRunTestAsync
-
-Run an asyncronous unit test
 
 #### Arguments
 
