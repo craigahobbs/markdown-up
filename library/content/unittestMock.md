@@ -35,10 +35,16 @@ functions. At the end of the test function, we stop mocking by calling the
 include <unittest.bare>
 include <unittestMock.bare>
 
+# Start coverage
+coverageStart()
+
 # Test includes
 include 'testApp.bare'
 
-return unittestReport()
+# Stop coverage
+coverageStop()
+
+return unittestReport(objectNew('coverageMin', 100))
 ~~~
 
 **testApp.bare**
