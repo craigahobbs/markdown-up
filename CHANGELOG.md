@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.10.1 (2025-10-16)
+
+- [060c1ac](https://github.com/craigahobbs/markdown-up/commit/060c1ac) - add font size and line spacing text to menu
+
 ## 3.10.0 (2025-10-15)
 
 - [4f5bb35](https://github.com/craigahobbs/markdown-up/commit/4f5bb35) - add unittest.bare coverage report
