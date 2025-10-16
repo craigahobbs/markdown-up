@@ -65,10 +65,10 @@ struct MarkdownUpLocal
     optional bool darkMode
 
     # The font size
-    optional int(>= 8, &lt;= 18) fontSize
+    optional int(>= 2, &lt;= 100) fontSize
 
     # The line height
-    optional float(>= 1, &lt;= 2) lineHeight
+    optional float(>= 1, &lt;= 10) lineHeight
 
 
 # The MarkdownUp session storage JSON schema
@@ -601,11 +601,11 @@ export class MarkdownUp {
                         this.menuDarkModeToggle({
                             'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
                         }),
-                        this.menuValueCycle('fontSize', this.fontSize, 2, {
-                            'path': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14',
+                        this.menuValueCycle('fontSize', 12, [8, 10, 12, 14, 18, 24], (value) => `${value}pt`, {
+                            'path': 'M4,22 L10,2 L14,2 L20,22 M6,12.5 L18,12.5',
                             'strokeWidth': 4
                         }),
-                        this.menuValueCycle('lineHeight', this.lineHeight, 0.2, {
+                        this.menuValueCycle('lineHeight', 1.2, [1.2, 1.4, 1.6, 1.8, 2.0], null, {
                             'path2': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
                         }),
                         this.menuValueToggle('debug', {
@@ -687,14 +687,16 @@ export class MarkdownUp {
     }
 
 
-    menuValueCycle(valueName, valueDefault, valueDelta, icon) {
+    menuValueCycle(valueName, valueDefault, values, textFn, icon) {
+        const valueCurrent = this.paramsLocal[valueName] ?? valueDefault;
+        let ixNew = values.indexOf(valueCurrent) + 1;
+        if (ixNew >= values.length) {
+            ixNew = 0;
+        }
+        const valueNew = values[ixNew];
+        icon.text = (textFn !== null ? textFn(valueCurrent) : valueCurrent);
         return this.menuButton(
             () => {
-                const {attr} = markdownUpTypes.MarkdownUpLocal.struct.members.find((member) => member.name === valueName);
-                let valueNew = (this.paramsLocal[valueName] ?? valueDefault) + valueDelta;
-                if (valueNew > attr.lte) {
-                    valueNew = attr.gte;
-                }
                 this.paramsLocal[valueName] = valueNew;
                 this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
                 this.render(true);
@@ -704,11 +706,23 @@ export class MarkdownUp {
     }
 
 
-    menuButton(onClick, {checked = false, noCheck = false, path = null, path2 = null, strokeWidth = 3, size = 48}) {
+    menuButton(onClick, {checked = false, noCheck = false, path = null, path2 = null, strokeWidth = 3, size = 48, text = null}) {
         const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
         const stroke = (isDarkMode ? (checked &amp;&amp; !noCheck ? 'black' : 'white') : (checked &amp;&amp; !noCheck ? 'white' : 'black'));
+        const background = (stroke === 'black' ? 'white' : 'black');
         const borderSize = (0.125 * size).toFixed(3);
         const innerSize = (0.75 * size).toFixed(3);
+
+        // Compute the text block geometry
+        const textStrokeWidth = Math.round(1000 * 0.05 * size) / 1000;
+        const textLeft = 0.5 * textStrokeWidth;
+        const textRight = 12.5 * textStrokeWidth;
+        const textTop = size - 6.5 * textStrokeWidth;
+        const textBottom = size - 0.5 * textStrokeWidth;
+        const textBoxX = 0.5 * (textLeft + textRight);
+        const textBoxY = 0.5 * (textTop + textBottom);
+        const textBoxSize = (textBottom - textTop) - 1.75 * textStrokeWidth;
+
         return {
             'html': 'div',
             'attr': {'style': 'cursor: pointer; user-select: none;'},
@@ -737,7 +751,32 @@ export class MarkdownUp {
                                 }
                             ]
                         }
-                    }
+                    },
+                    (text === null ? null : {
+                        'svg': 'rect',
+                        'attr': {
+                            'fill': background,
+                            'stroke': stroke,
+                            'stroke-width': textStrokeWidth,
+                            'x': textLeft.toFixed(3),
+                            'y': textTop.toFixed(3),
+                            'width': (textRight - textLeft).toFixed(3),
+                            'height': (textBottom - textTop).toFixed(3)
+                        }
+                    }),
+                    (text === null ? null : {
+                        'svg': 'text',
+                        'attr': {
+                            'fill': stroke,
+                            'x': textBoxX.toFixed(3),
+                            'y': textBoxY.toFixed(3),
+                            'text-anchor': 'middle',
+                            'dominant-baseline': 'middle',
+                            'font-size': `${textBoxSize.toFixed(3)}px`,
+                            'font-weight': 'bold'
+                        },
+                        'elem': {'text': text}
+                    })
                 ]
             },
             'callback': (element) => {
