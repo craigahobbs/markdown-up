@@ -43,7 +43,9 @@ function menuBurgerElements({darkMode = false} = {}) {
                                 null
                             ]
                         }
-                    }
+                    },
+                    null,
+                    null
                 ]
             }
         }
@@ -52,7 +54,7 @@ function menuBurgerElements({darkMode = false} = {}) {
 
 
 // Helper function to create the menu elements
-function menuElements({darkMode = false, viewMarkdown = false} = {}) {
+function menuElements({darkMode = false, fontSizeText = null, viewMarkdown = false} = {}) {
     return {
         'html': 'div',
         'attr': {'class': 'menu'},
@@ -95,7 +97,9 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                     }
                                 ]
                             }
-                        }
+                        },
+                        null,
+                        null
                     ]
                 }
             },
@@ -129,7 +133,9 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                     null
                                 ]
                             }
-                        }
+                        },
+                        null,
+                        null
                     ]
                 }
             },
@@ -154,12 +160,37 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                             'fill': 'none',
                                             'stroke': (darkMode ? 'white' : 'black'),
                                             'stroke-width': 4,
-                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,14 L18,14'
+                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,12.5 L18,12.5'
                                         }
                                     },
                                     null
                                 ]
                             }
+                        },
+                        {
+                            'attr': {
+                                'stroke-width': 2.4,
+                                'fill': (darkMode ? 'black' : 'white'),
+                                'height': '14.400',
+                                'stroke': (darkMode ? 'white' : 'black'),
+                                'width': '28.800',
+                                'x': '1.200',
+                                'y': '32.400'
+                            },
+                            'svg': 'rect'
+                        },
+                        {
+                            'attr': {
+                                'dominant-baseline': 'middle',
+                                'font-size': '10.200px',
+                                'font-weight': 'bold',
+                                'text-anchor': 'middle',
+                                'fill': (darkMode ? 'white' : 'black'),
+                                'x': '15.600',
+                                'y': '39.600'
+                            },
+                            'elem': {'text': (fontSizeText !== null ? fontSizeText : '12pt')},
+                            'svg': 'text'
                         }
                     ]
                 }
@@ -191,6 +222,31 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                     }
                                 ]
                             }
+                        },
+                        {
+                            'attr': {
+                                'stroke-width': 2.4,
+                                'fill': (darkMode ? 'black' : 'white'),
+                                'height': '14.400',
+                                'stroke': (darkMode ? 'white' : 'black'),
+                                'width': '28.800',
+                                'x': '1.200',
+                                'y': '32.400'
+                            },
+                            'svg': 'rect'
+                        },
+                        {
+                            'attr': {
+                                'dominant-baseline': 'middle',
+                                'font-size': '10.200px',
+                                'font-weight': 'bold',
+                                'text-anchor': 'middle',
+                                'fill': (darkMode ? 'white' : 'black'),
+                                'x': '15.600',
+                                'y': '39.600'
+                            },
+                            'elem': {'text': 1.2},
+                            'svg': 'text'
                         }
                     ]
                 }
@@ -223,7 +279,9 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                     null
                                 ]
                             }
-                        }
+                        },
+                        null,
+                        null
                     ]
                 }
             },
@@ -254,7 +312,9 @@ function menuElements({darkMode = false, viewMarkdown = false} = {}) {
                                     null
                                 ]
                             }
-                        }
+                        },
+                        null,
+                        null
                     ]
                 }
             }
@@ -637,7 +697,7 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the font-size menu button again to cycle-over
+    // Click the font-size menu button again
     [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
@@ -646,10 +706,10 @@ test('MarkdownUp, render menu cycle', async () => {
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '16pt'],
+        ['--markdown-model-font-size', '18pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":16}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 });
 
@@ -661,7 +721,7 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
     window.location.hash = '#';
-    window.localStorage.setItem('MarkdownUp', '{"fontSize": 18}');
+    window.localStorage.setItem('MarkdownUp', '{"fontSize": 24}');
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
     const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
@@ -669,10 +729,10 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '18pt'],
+        ['--markdown-model-font-size', '24pt'],
         ['--markdown-model-line-height', `1.2em`]
     ]);
-    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 18}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 24}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the font-size menu button and wait for the render
@@ -1644,7 +1704,7 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
                 [
                     [
                         menuBurgerElements(),
-                        menuElements({'viewMarkdown': true})
+                        menuElements({'fontSizeText': '18pt', 'viewMarkdown': true})
                     ],
                     {'html': 'div', 'attr': {'id': 'view=markdown&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
