@@ -78,6 +78,21 @@ const arrayExtendArgs = valueArgsModel([
 ]);
 
 
+// $function: arrayFlat
+// $group: Array
+// $doc: Flat an array hierarchy
+// $arg array: The array to flat
+// $return: The flated array
+function arrayFlat(args) {
+    const [array] = valueArgsValidate(arrayFlatArgs, args);
+    return array.flat(Infinity);
+}
+
+const arrayFlatArgs = valueArgsModel([
+    {'name': 'array', 'type': 'array'}
+]);
+
+
 // $function: arrayGet
 // $group: Array
 // $doc: Get an array element
@@ -365,7 +380,7 @@ export const coverageGlobalName = '__bareScriptCoverage';
 // $function: coverageGlobalGet
 // $group: Coverage
 // $doc: Get the coverage global object
-// $return: The [coverage global object](https://craigahobbs.github.io/bare-script/model/#var.vName='BareScript')
+// $return: The [coverage global object](https://craigahobbs.github.io/bare-script/model/#var.vName='CoverageGlobal')
 function coverageGlobalGet(unusedArgs, options) {
     const globals = (options !== null ? (options.globals ?? null) : null);
     return globals !== null ? (globals[coverageGlobalName] ?? null) : null;
@@ -2133,6 +2148,7 @@ export const scriptFunctions = {
     arrayCopy,
     arrayDelete,
     arrayExtend,
+    arrayFlat,
     arrayGet,
     arrayIndexOf,
     arrayJoin,
@@ -2247,6 +2263,7 @@ export const scriptFunctions = {
 export const expressionFunctionMap = {
     'abs': 'mathAbs',
     'acos': 'mathAcos',
+    'arrayNew': 'arrayNew',
     'asin': 'mathAsin',
     'atan': 'mathAtan',
     'atan2': 'mathAtan2',
@@ -2271,6 +2288,7 @@ export const expressionFunctionMap = {
     'minute': 'datetimeMinute',
     'month': 'datetimeMonth',
     'now': 'datetimeNow',
+    'objectNew': 'objectNew',
     'parseInt': 'numberParseInt',
     'parseFloat': 'numberParseFloat',
     'pi': 'mathPi',
