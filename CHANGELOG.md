@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.0 (2025-10-18)
+
+- [be0de0c](https://github.com/craigahobbs/markdown-up/commit/be0de0c) - bare-script 3.7
+
 ## 3.10.1 (2025-10-16)
 
 - [060c1ac](https://github.com/craigahobbs/markdown-up/commit/060c1ac) - add font size and line spacing text to menu
