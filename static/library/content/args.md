@@ -8,11 +8,11 @@ library and define an [arguments model] with three floating point number URL arg
 ~~~ bare-script
 include <args.bare>
 
-arguments = arrayNew( \
-    objectNew('name', 'value1', 'type', 'float', 'default', 0), \
-    objectNew('name', 'value2', 'type', 'float', 'default', 0), \
-    objectNew('name', 'value3', 'type', 'float', 'default', 0) \
-)
+arguments = [ \
+    {'name': 'value1', 'type': 'float', 'default': 0}, \
+    {'name': 'value2', 'type': 'float', 'default': 0}, \
+    {'name': 'value3', 'type': 'float', 'default': 0} \
+]
 ~~~
 
 Next, parse the arguments with the [argsParse] function.
@@ -35,12 +35,12 @@ You can create links to the application using the [argsLink] function.
 
 ~~~ bare-script
 markdownPrint( \
-    '', argsLink(arguments, 'Value1 Less', objectNew('value1', value1 - 1)), \
-    '', argsLink(arguments, 'Value1 More', objectNew('value1', value1 + 1)), \
-    '', argsLink(arguments, 'Value2 Less', objectNew('value2', value2 - 1)), \
-    '', argsLink(arguments, 'Value2 More', objectNew('value2', value2 + 1)), \
-    '', argsLink(arguments, 'Value3 Less', objectNew('value3', value3 - 1)), \
-    '', argsLink(arguments, 'Value3 More', objectNew('value3', value3 + 1)) \
+    '', argsLink(arguments, 'Value1 Less', {'value1': value1 - 1}), \
+    '', argsLink(arguments, 'Value1 More', {'value1': value1 + 1}), \
+    '', argsLink(arguments, 'Value2 Less', {'value2': value2 - 1}), \
+    '', argsLink(arguments, 'Value2 More', {'value2': value2 + 1}), \
+    '', argsLink(arguments, 'Value3 Less', {'value3': value3 - 1}), \
+    '', argsLink(arguments, 'Value3 More', {'value3': value3 + 1}) \
 )
 ~~~
 

@@ -37,9 +37,9 @@ if elementModelRenderOriginal:
 endif
 
 # Test report
-return unittestReport(objectNew( \
-    'title', 'markdownUp.bare Tests', \
-    'links', arrayNew('[MarkdownUp Include Library Tests](#url=&var=)'), \
-    'coverageExclude', arrayNew('runTestsMarkdownUp.bare'), \
-    'coverageMin', 100 \
-))
+return unittestReport({ \
+    'title': 'markdownUp.bare Tests', \
+    'links': ['[MarkdownUp Include Library Tests](#url=&var=)'], \
+    'coverageExclude': ['runTestsMarkdownUp.bare'], \
+    'coverageMin': 100 \
+})

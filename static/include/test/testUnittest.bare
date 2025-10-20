@@ -4,11 +4,11 @@
 
 # Helper to begin mocking the unittest global state
 function testUnittestMockBegin():
-    result = arrayNew( \
+    result = [ \
         unittestTests, unittestWarnings, unittestTestName, vUnittestTest, vUnittestScript, vUnittestHideTests, vUnittestReport \
-    )
-    systemGlobalSet('unittestTests', objectNew())
-    systemGlobalSet('unittestWarnings', arrayNew())
+    ]
+    systemGlobalSet('unittestTests', {})
+    systemGlobalSet('unittestWarnings', [])
     systemGlobalSet('unittestTestName', null)
     systemGlobalSet('vUnittestTest', null)
     systemGlobalSet('vUnittestScript', null)
@@ -20,7 +20,7 @@ endfunction
 
 # Helper to end mocking the unittest global state
 function testUnittestMockEnd(beginResult):
-    result = arrayNew(unittestTests, unittestWarnings)
+    result = [unittestTests, unittestWarnings]
     systemGlobalSet('unittestTests', arrayGet(beginResult, 0))
     systemGlobalSet('unittestWarnings', arrayGet(beginResult, 1))
     systemGlobalSet('unittestTestName', arrayGet(beginResult, 2))
@@ -35,75 +35,75 @@ endfunction
 # Helper unittest functions
 function testUnittest_testPass():
     unittestEqual(1 + 1, 2)
-    unittestDeepEqual(arrayPush(arrayNew(1), 2), arrayNew(1, 2))
+    unittestDeepEqual(arrayPush([1], 2), [1, 2])
 
     # With a description
     unittestEqual(1 + 1, 2, 'Add ones')
-    unittestDeepEqual(arrayPush(arrayNew(1), 2), arrayNew(1, 2), 'Push 2')
+    unittestDeepEqual(arrayPush([1], 2), [1, 2], 'Push 2')
 endfunction
 
 function testUnittest_testFail():
     unittestEqual(1 + 1, 3)
-    unittestDeepEqual(arrayPush(arrayNew(1), 2), arrayNew(1, 2, 3))
+    unittestDeepEqual(arrayPush([1], 2), [1, 2, 3])
     newline = stringFromCharCode(10)
     unittestDeepEqual('1' + newline + '2' + newline + '3', '1' + newline + '2')
 
     # With a description
     unittestEqual(1 + 1, 3, 'Fail ones')
-    unittestDeepEqual(arrayPush(arrayNew(1), 2), arrayNew(1, 2, 3), 'Fail push')
+    unittestDeepEqual(arrayPush([1], 2), [1, 2, 3], 'Fail push')
 endfunction
 
 
 # Test coverage global object
 function testUnittestCoverageGlobalGet():
-    return objectNew( \
-        'enabled', true, \
-        'scripts', objectNew( \
-            'test.bare', objectNew( \
-                'covered', objectNew( \
-                    '1', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'function', objectNew( \
-                                'args', arrayNew('test'), \
-                                'lineNumber', 1, \
-                                'name', 'testMain', \
-                                'statements', arrayNew( \
-                                    objectNew( \
-                                        'jump', objectNew( \
-                                            'expr', objectNew('unary', objectNew('expr', objectNew('variable', 'test'), 'op', '!')), \
-                                            'label', '__bareScriptDone0', \
-                                            'lineNumber', 2 \
-                                        ) \
-                                    ), \
-                                    objectNew('return', objectNew('expr', objectNew('string', 'Test'), 'lineNumber', 3)), \
-                                    objectNew('label', objectNew('lineNumber', 4, 'name', '__bareScriptDone0')), \
-                                    objectNew('return', objectNew('expr', objectNew('string', 'No Test'), 'lineNumber', 6, 'lineCount', 2)) \
-                                ) \
-                            ) \
-                        ) \
-                    ), \
-                    '2', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'jump', objectNew( \
-                                'expr', objectNew('unary', objectNew('expr', objectNew('variable', 'test'), 'op', '!')), \
-                                'label', '__bareScriptDone0', \
-                                'lineNumber', 2 \
-                            ) \
-                        ) \
-                    ), \
-                    '4', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew('label', objectNew('lineNumber', 4, 'name', '__bareScriptDone0')) \
-                    ), \
-                    '6', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew('return', objectNew('expr', objectNew('string', 'No Test'), 'lineNumber', 6, 'lineCount', 2)) \
-                    ) \
-                ), \
-                'script', objectNew( \
-                    'scriptLines', arrayNew( \
+    return { \
+        'enabled': true, \
+        'scripts': { \
+            'test.bare': { \
+                'covered': { \
+                    '1': { \
+                        'count': 1, \
+                        'statement': { \
+                            'function': { \
+                                'args': ['test'], \
+                                'lineNumber': 1, \
+                                'name': 'testMain', \
+                                'statements': [ \
+                                    { \
+                                        'jump': { \
+                                            'expr': {'unary': {'expr': {'variable': 'test'}, 'op': '!'}}, \
+                                            'label': '__bareScriptDone0', \
+                                            'lineNumber': 2 \
+                                        } \
+                                    }, \
+                                    {'return': {'expr': {'string': 'Test'}, 'lineNumber': 3}}, \
+                                    {'label': {'lineNumber': 4, 'name': '__bareScriptDone0'}}, \
+                                    {'return': {'expr': {'string': 'No Test'}, 'lineNumber': 6, 'lineCount': 2}} \
+                                ] \
+                            } \
+                        } \
+                    }, \
+                    '2': { \
+                        'count': 1, \
+                        'statement': { \
+                            'jump': { \
+                                'expr': {'unary': {'expr': {'variable': 'test'}, 'op': '!'}}, \
+                                'label': '__bareScriptDone0', \
+                                'lineNumber': 2 \
+                            } \
+                        } \
+                    }, \
+                    '4': { \
+                        'count': 1, \
+                        'statement': {'label': {'lineNumber': 4, 'name': '__bareScriptDone0'}} \
+                    }, \
+                    '6': { \
+                        'count': 1, \
+                        'statement': {'return': {'expr': {'string': 'No Test'}, 'lineNumber': 6, 'lineCount': 2}} \
+                    } \
+                }, \
+                'script': { \
+                    'scriptLines': [ \
                         'function testMain(test):', \
                         '    if test:', \
                         "        return 'Test'", \
@@ -113,109 +113,109 @@ function testUnittestCoverageGlobalGet():
                         "        'No Test'", \
                         'endfunction', \
                         '' \
-                    ), \
-                    'scriptName', 'test.bare', \
-                    'statements', arrayNew( \
-                        objectNew( \
-                            'function', objectNew( \
-                                'args', arrayNew('test'), \
-                                'lineNumber', 1, \
-                                'name', 'testMain', \
-                                'statements', arrayNew( \
-                                    objectNew( \
-                                        'jump', objectNew( \
-                                            'expr', objectNew('unary', objectNew('expr', objectNew('variable', 'test'), 'op', '!')), \
-                                            'label', '__bareScriptDone0', \
-                                            'lineNumber', 2 \
-                                        ) \
-                                    ), \
-                                    objectNew( \
-                                        'return', objectNew('expr', objectNew('string', 'Test'), 'lineNumber', 3) \
-                                    ), \
-                                    objectNew( \
-                                        'label', objectNew('lineNumber', 4, 'name', '__bareScriptDone0') \
-                                    ), \
-                                    objectNew( \
-                                        'return', objectNew('expr', objectNew('string', 'No Test'), 'lineNumber', 6, 'lineCount', 2) \
-                                    ) \
-                                ) \
-                            ) \
-                        ) \
-                    ) \
-                ) \
-            ), \
-            'testTest.bare', objectNew( \
-                'covered', objectNew( \
-                    '1', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'include', objectNew( \
-                                'includes', arrayNew(objectNew('url', 'test.bare')), \
-                                'lineNumber', 1 \
-                            ) \
-                        ) \
-                    ), \
-                    '4', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'function', objectNew( \
-                                'lineNumber', 4, \
-                                'name', 'testTestNoTest', \
-                                'statements', arrayNew( \
-                                    objectNew( \
-                                        'expr', objectNew( \
-                                            'expr', objectNew( \
-                                                'function', objectNew( \
-                                                    'args', arrayNew( \
-                                                        objectNew('function', objectNew( \
-                                                            'args', arrayNew(objectNew('variable', 'false')), \
-                                                            'name', 'testMain' \
-                                                        )), \
-                                                        objectNew('string', 'No Test') \
-                                                    ), \
-                                                    'name', 'unittestEqual' \
-                                                ) \
-                                            ), \
-                                            'lineNumber', 5 \
-                                        ) \
-                                    ) \
-                                ) \
-                            ) \
-                        ) \
-                    ), \
-                    '5', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'expr', objectNew( \
-                                'expr', objectNew( \
-                                    'function', objectNew( \
-                                        'args', arrayNew( \
-                                            objectNew( \
-                                                'function', objectNew('args', arrayNew(objectNew('variable', 'false')), 'name', 'testMain') \
-                                            ), \
-                                            objectNew('string', 'No Test') \
-                                        ), \
-                                        'name', 'unittestEqual' \
-                                    ) \
-                                ), \
-                                'lineNumber', 5 \
-                            ) \
-                        ) \
-                    ), \
-                    '7', objectNew( \
-                        'count', 1, \
-                        'statement', objectNew( \
-                            'expr', objectNew( \
-                                'expr', objectNew( \
-                                    'function', objectNew('args', arrayNew(objectNew('string', 'testTestNoTest')), 'name', 'unittestRunTest') \
-                                ), \
-                                'lineNumber', 7 \
-                            ) \
-                        ) \
-                    ) \
-                ), \
-                'script', objectNew( \
-                    'scriptLines', arrayNew( \
+                    ], \
+                    'scriptName': 'test.bare', \
+                    'statements': [ \
+                        { \
+                            'function': { \
+                                'args': ['test'], \
+                                'lineNumber': 1, \
+                                'name': 'testMain', \
+                                'statements': [ \
+                                    { \
+                                        'jump': { \
+                                            'expr': {'unary': {'expr': {'variable': 'test'}, 'op': '!'}}, \
+                                            'label': '__bareScriptDone0', \
+                                            'lineNumber': 2 \
+                                        } \
+                                    }, \
+                                    { \
+                                        'return': {'expr': {'string': 'Test'}, 'lineNumber': 3} \
+                                    }, \
+                                    { \
+                                        'label': {'lineNumber': 4, 'name': '__bareScriptDone0'} \
+                                    }, \
+                                    { \
+                                        'return': {'expr': {'string': 'No Test'}, 'lineNumber': 6, 'lineCount': 2} \
+                                    } \
+                                ] \
+                            } \
+                        } \
+                    ] \
+                } \
+            }, \
+            'testTest.bare': { \
+                'covered': { \
+                    '1': { \
+                        'count': 1, \
+                        'statement': { \
+                            'include': { \
+                                'includes': [{'url': 'test.bare'}], \
+                                'lineNumber': 1 \
+                            } \
+                        } \
+                    }, \
+                    '4': { \
+                        'count': 1, \
+                        'statement': { \
+                            'function': { \
+                                'lineNumber': 4, \
+                                'name': 'testTestNoTest', \
+                                'statements': [ \
+                                    { \
+                                        'expr': { \
+                                            'expr': { \
+                                                'function': { \
+                                                    'args': [ \
+                                                        {'function': { \
+                                                            'args': [{'variable': 'false'}], \
+                                                            'name': 'testMain' \
+                                                        }}, \
+                                                        {'string': 'No Test'} \
+                                                    ], \
+                                                    'name': 'unittestEqual' \
+                                                } \
+                                            }, \
+                                            'lineNumber': 5 \
+                                        } \
+                                    } \
+                                ] \
+                            } \
+                        } \
+                    }, \
+                    '5': { \
+                        'count': 1, \
+                        'statement': { \
+                            'expr': { \
+                                'expr': { \
+                                    'function': { \
+                                        'args': [ \
+                                            { \
+                                                'function': {'args': [{'variable': 'false'}], 'name': 'testMain'} \
+                                            }, \
+                                            {'string': 'No Test'} \
+                                        ], \
+                                        'name': 'unittestEqual' \
+                                    } \
+                                }, \
+                                'lineNumber': 5 \
+                            } \
+                        } \
+                    }, \
+                    '7': { \
+                        'count': 1, \
+                        'statement': { \
+                            'expr': { \
+                                'expr': { \
+                                    'function': {'args': [{'string': 'testTestNoTest'}], 'name': 'unittestRunTest'} \
+                                }, \
+                                'lineNumber': 7 \
+                            } \
+                        } \
+                    } \
+                }, \
+                'script': { \
+                    'scriptLines': [ \
                         "include 'test.bare'", \
                         '', \
                         '', \
@@ -224,64 +224,64 @@ function testUnittestCoverageGlobalGet():
                         'endfunction', \
                         "unittestRunTest('testTestNoTest')", \
                         '' \
-                    ), \
-                    'scriptName', 'testTest.bare', \
-                    'statements', arrayNew( \
-                        objectNew( \
-                            'include', objectNew( \
-                                'includes', arrayNew(objectNew('url', 'test.bare')), \
-                                'lineNumber', 1 \
-                            ) \
-                        ), \
-                        objectNew( \
-                            'function', objectNew( \
-                                'lineNumber', 4, \
-                                'name', 'testTestNoTest', \
-                                'statements', arrayNew( \
-                                    objectNew( \
-                                        'expr', objectNew( \
-                                            'expr', objectNew( \
-                                                'function', objectNew( \
-                                                    'args', arrayNew( \
-                                                        objectNew( \
-                                                            'function', objectNew( \
-                                                                'args', arrayNew(objectNew('variable', 'false')), \
-                                                                'name', 'testMain' \
-                                                            ) \
-                                                        ), \
-                                                        objectNew('string', 'No Test') \
-                                                    ), \
-                                                    'name', 'unittestEqual' \
-                                                ) \
-                                            ), \
-                                            'lineNumber', 5 \
-                                        ) \
-                                    ) \
-                                ) \
-                            ) \
-                        ), \
-                        objectNew( \
-                            'expr', objectNew( \
-                                'expr', objectNew( \
-                                    'function', objectNew( \
-                                        'args', arrayNew(objectNew('string', 'testTestNoTest')), \
-                                        'name', 'unittestRunTest' \
-                                    ) \
-                                ), \
-                                'lineNumber', 7 \
-                            ) \
-                        ) \
-                    ) \
-                ) \
-            ) \
-        ) \
-    )
+                    ], \
+                    'scriptName': 'testTest.bare', \
+                    'statements': [ \
+                        { \
+                            'include': { \
+                                'includes': [{'url': 'test.bare'}], \
+                                'lineNumber': 1 \
+                            } \
+                        }, \
+                        { \
+                            'function': { \
+                                'lineNumber': 4, \
+                                'name': 'testTestNoTest', \
+                                'statements': [ \
+                                    { \
+                                        'expr': { \
+                                            'expr': { \
+                                                'function': { \
+                                                    'args': [ \
+                                                        { \
+                                                            'function': { \
+                                                                'args': [{'variable': 'false'}], \
+                                                                'name': 'testMain' \
+                                                            } \
+                                                        }, \
+                                                        {'string': 'No Test'} \
+                                                    ], \
+                                                    'name': 'unittestEqual' \
+                                                } \
+                                            }, \
+                                            'lineNumber': 5 \
+                                        } \
+                                    } \
+                                ] \
+                            } \
+                        }, \
+                        { \
+                            'expr': { \
+                                'expr': { \
+                                    'function': { \
+                                        'args': [{'string': 'testTestNoTest'}], \
+                                        'name': 'unittestRunTest' \
+                                    } \
+                                }, \
+                                'lineNumber': 7 \
+                            } \
+                        } \
+                    ] \
+                } \
+            } \
+        } \
+    }
 endfunction
 
 
 # Test coverage global object with no data
 function testUnittestCoverageGlobalGet_noData():
-    return objectNew('enabled', false)
+    return {'enabled': false}
 endfunction
 
 
@@ -315,15 +315,15 @@ async function testUnittestRunTest():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK")), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest')
 
@@ -349,16 +349,16 @@ async function testUnittestRunTestAsync():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLogDebug', arrayNew('unittest.bare: unittestRunTestAsync is deprecated - use unittestRunTest')), \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK")), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLogDebug', ['unittest.bare: unittestRunTestAsync is deprecated - use unittestRunTest']], \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTestAsync')
 
@@ -385,13 +385,13 @@ async function testUnittestRunTest_failure():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 2 tests - 1 passed, 1 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Failing Tests')), \
-        arrayNew('markdownPrint', arrayNew( \
-            arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 2 tests - 1 passed, 1 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Failing Tests']], \
+        ['markdownPrint', [ \
+            [ \
                 '', \
                 "[testUnittest\\_testFail](#var.vUnittestTest='testUnittest_testFail'&_top) - FAIL", \
                 '', \
@@ -440,13 +440,13 @@ async function testUnittestRunTest_failure():
                 '  +++     2,', \
                 '  +++     3', \
                 '  ```' \
-            ) \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK")), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-      ))
+            ] \
+        ]], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+      ])
 endfunction
 unittestRunTest('testUnittestRunTest_failure')
 
@@ -474,17 +474,17 @@ async function testUnittestRunTest_hideTests():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 2 tests - 1 passed, 1 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Show tests](#var=)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Failing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', '[Show](#var=)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', '[Show](#var=)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-      ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 2 tests - 1 passed, 1 failed']], \
+        ['markdownPrint', ['', '[Show tests](#var=)']], \
+        ['markdownPrint', ['', '## Failing Tests']], \
+        ['markdownPrint', ['', '[Show](#var=)']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', '[Show](#var=)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+      ])
 endfunction
 unittestRunTest('testUnittestRunTest_hideTests')
 
@@ -512,13 +512,13 @@ async function testUnittestRunTest_testName():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[All tests](#var=)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK")) \
-      ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed']], \
+        ['markdownPrint', ['', '[All tests](#var=)']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]] \
+      ])
 endfunction
 unittestRunTest('testUnittestRunTest_testName')
 
@@ -545,17 +545,17 @@ async function testUnittestRunTest_multiple():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Warnings')), \
-        arrayNew('markdownPrint', arrayNew('', '- Test \\"testUnittest\\_testPass\\" run multiple times')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK")), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Warnings']], \
+        ['markdownPrint', ['', '- Test \\"testUnittest\\_testPass\\" run multiple times']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_multiple')
 
@@ -581,15 +581,15 @@ async function testUnittestRunTest_unknown():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Warnings')), \
-        arrayNew('markdownPrint', arrayNew('', '- Test \\"testUnittest\\_testUnknown\\" not found')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Warnings']], \
+        ['markdownPrint', ['', '- Test \\"testUnittest\\_testUnknown\\" not found']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_unknown')
 
@@ -616,23 +616,23 @@ async function testUnittestRunTest_noLinks():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '## Passing Tests')), \
-        arrayNew('markdownPrint', arrayNew('', 'testUnittest_testPass - OK')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 1 tests - 1 passed, 0 failed']], \
+        ['markdownPrint', ['', '## Passing Tests']], \
+        ['markdownPrint', ['', 'testUnittest_testPass - OK']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', [ \
             '', \
-            arrayNew( \
+            [ \
                 '| Script        | Statements | Missing | Coverage |', \
                 '|---------------|-----------:|--------:|---------:|', \
                 '| test.bare     |          5 |       1 |    80.0% |', \
                 '| testTest.bare |          4 |       0 |   100.0% |', \
                 '| **Total**     |          9 |       1 |    88.9% |' \
-            ) \
-        )) \
-    ))
+            ] \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_noLinks')
 
@@ -657,22 +657,22 @@ async function testUnittestRunTest_coverage():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', [ \
             '', \
-            arrayNew( \
+            [ \
                 '| Script                                                     | Statements | Missing | Coverage |', \
                 '|------------------------------------------------------------|-----------:|--------:|---------:|', \
                 "| [test.bare](#var.vUnittestScript='test.bare'&_top)         |          5 |       1 |    80.0% |", \
                 "| [testTest.bare](#var.vUnittestScript='testTest.bare'&_top) |          4 |       0 |   100.0% |", \
                 '| **Total**                                                  |          9 |       1 |    88.9% |' \
-            ) \
-        )) \
-    ))
+            ] \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage')
 
@@ -687,7 +687,7 @@ async function testUnittestRunTest_coverage_links():
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
-    result = unittestReport(objectNew('title', 'My Title', 'links', arrayNew('[a](a.html)', '[b](b.html)')))
+    result = unittestReport({'title': 'My Title', 'links': ['[a](a.html)', '[b](b.html)']})
     testUnittestMockEnd(mockBegin)
 
     # Restore the original coverageGlobalGet
@@ -697,23 +697,23 @@ async function testUnittestRunTest_coverage_links():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('markdownPrint', arrayNew('[a](a.html) | [b](b.html)')), \
-        arrayNew('documentSetTitle', arrayNew('My Title')), \
-        arrayNew('markdownPrint', arrayNew('# My Title', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['markdownPrint', ['[a](a.html) | [b](b.html)']], \
+        ['documentSetTitle', ['My Title']], \
+        ['markdownPrint', ['# My Title', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', [ \
             '', \
-            arrayNew( \
+            [ \
                 '| Script                                                     | Statements | Missing | Coverage |', \
                 '|------------------------------------------------------------|-----------:|--------:|---------:|', \
                 "| [test.bare](#var.vUnittestScript='test.bare'&_top)         |          5 |       1 |    80.0% |", \
                 "| [testTest.bare](#var.vUnittestScript='testTest.bare'&_top) |          4 |       0 |   100.0% |", \
                 '| **Total**                                                  |          9 |       1 |    88.9% |' \
-            ) \
-        )) \
-    ))
+            ] \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_links')
 
@@ -728,7 +728,7 @@ async function testUnittestRunTest_coverage_exclude():
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
-    result = unittestReport(objectNew('coverageExclude', arrayNew('testTest.bare')))
+    result = unittestReport({'coverageExclude': ['testTest.bare']})
     testUnittestMockEnd(mockBegin)
 
     # Restore the original coverageGlobalGet
@@ -738,21 +738,21 @@ async function testUnittestRunTest_coverage_exclude():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', [ \
             '', \
-            arrayNew( \
+            [ \
                 '| Script                                             | Statements | Missing | Coverage |', \
                 '|----------------------------------------------------|-----------:|--------:|---------:|', \
                 "| [test.bare](#var.vUnittestScript='test.bare'&_top) |          5 |       1 |    80.0% |", \
                 '| **Total**                                          |          5 |       1 |    80.0% |' \
-            ) \
-        )) \
-    ))
+            ] \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_exclude')
 
@@ -767,7 +767,7 @@ async function testUnittestRunTest_coverage_min():
 
     # Run unit tests and report
     mockBegin = testUnittestMockBegin()
-    result = unittestReport(objectNew('coverageMin', 100))
+    result = unittestReport({'coverageMin': 100})
     testUnittestMockEnd(mockBegin)
 
     # Restore the original coverageGlobalGet
@@ -777,26 +777,26 @@ async function testUnittestRunTest_coverage_min():
     unittestEqual(result, 1)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', [ \
             '', \
             '**Error**: Coverage percentage, 88.9%, is below the minimum coverage percentage of 100%.' \
-        )), \
-        arrayNew('markdownPrint', arrayNew( \
+        ]], \
+        ['markdownPrint', [ \
             '', \
-            arrayNew( \
+            [ \
                 '| Script                                                     | Statements | Missing | Coverage |', \
                 '|------------------------------------------------------------|-----------:|--------:|---------:|', \
                 "| [test.bare](#var.vUnittestScript='test.bare'&_top)         |          5 |       1 |    80.0% |", \
                 "| [testTest.bare](#var.vUnittestScript='testTest.bare'&_top) |          4 |       0 |   100.0% |", \
                 '| **Total**                                                  |          9 |       1 |    88.9% |' \
-            ) \
-        )) \
-    ))
+            ] \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_min')
 
@@ -821,13 +821,13 @@ async function testUnittestRunTest_coverage_noData():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unittestReport')), \
-        arrayNew('markdownPrint', arrayNew('# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed')), \
-        arrayNew('markdownPrint', arrayNew('', '[Hide tests](#var.vUnittestHideTests=true)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Coverage Report')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unittestReport']], \
+        ['markdownPrint', ['# unittestReport', '', 'Ran 0 tests - 0 passed, 0 failed']], \
+        ['markdownPrint', ['', '[Hide tests](#var.vUnittestHideTests=true)']], \
+        ['markdownPrint', ['', '## Coverage Report']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_noData')
 
@@ -854,39 +854,39 @@ async function testUnittestRunTest_coverage_script():
 
     # Reset mocks
     newline = stringFromCharCode(10)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('test.bare Coverage')), \
-        arrayNew('markdownPrint', arrayNew('[Back](#var=&_top)', '', '# test.bare Coverage')), \
-        arrayNew('elementModelRender', arrayNew( \
-            objectNew( \
-                'html', 'pre', \
-                'elem', arrayNew( \
-                    objectNew( \
-                        'attr', objectNew('style', 'display: block; background-color: #a0a0a030'), \
-                        'elem', objectNew('text', 'function testMain(test):' + newline + '    if test:' + newline), \
-                        'html', 'span' \
-                    ), \
-                    objectNew( \
-                        'attr', objectNew('style', 'display: block; background-color: #f0808080'), \
-                        'elem', objectNew('text', "        return 'Test'" + newline), \
-                        'html', 'span' \
-                    ), \
-                    objectNew( \
-                        'attr', objectNew('style', 'display: block; background-color: #a0a0a030'), \
-                        'elem', objectNew('text', '    endif' + newline), \
-                        'html', 'span' \
-                    ), \
-                    objectNew('text', newline), \
-                    objectNew( \
-                        'attr', objectNew('style', 'display: block; background-color: #a0a0a030'), \
-                        'elem', objectNew('text', "    return \\" + newline + "        'No Test'" + newline), \
-                        'html', 'span' \
-                    ), \
-                    objectNew('text', 'endfunction' + newline) \
-                ) \
-            ) \
-        )) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['test.bare Coverage']], \
+        ['markdownPrint', ['[Back](#var=&_top)', '', '# test.bare Coverage']], \
+        ['elementModelRender', [ \
+            { \
+                'html': 'pre', \
+                'elem': [ \
+                    { \
+                        'attr': {'style': 'display: block; background-color: #a0a0a030'}, \
+                        'elem': {'text': 'function testMain(test):' + newline + '    if test:' + newline}, \
+                        'html': 'span' \
+                    }, \
+                    { \
+                        'attr': {'style': 'display: block; background-color: #f0808080'}, \
+                        'elem': {'text': "        return 'Test'" + newline}, \
+                        'html': 'span' \
+                    }, \
+                    { \
+                        'attr': {'style': 'display: block; background-color: #a0a0a030'}, \
+                        'elem': {'text': '    endif' + newline}, \
+                        'html': 'span' \
+                    }, \
+                    {'text': newline}, \
+                    { \
+                        'attr': {'style': 'display: block; background-color: #a0a0a030'}, \
+                        'elem': {'text': "    return \\" + newline + "        'No Test'" + newline}, \
+                        'html': 'span' \
+                    }, \
+                    {'text': 'endfunction' + newline} \
+                ] \
+            } \
+        ]] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_script')
 
@@ -912,10 +912,10 @@ async function testUnittestRunTest_coverage_script_noData():
     unittestEqual(result, 0)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('documentSetTitle', arrayNew('unknown.bare Coverage')), \
-        arrayNew('markdownPrint', arrayNew('[Back](#var=&_top)', '', '# unknown.bare Coverage')), \
-        arrayNew('markdownPrint', arrayNew('', '*No data.*')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['documentSetTitle', ['unknown.bare Coverage']], \
+        ['markdownPrint', ['[Back](#var=&_top)', '', '# unknown.bare Coverage']], \
+        ['markdownPrint', ['', '*No data.*']] \
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_coverage_script_noData')

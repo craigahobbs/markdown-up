@@ -40,7 +40,7 @@ include 'testCode1.bare'
 coverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 100))
+return unittestReport({'minCoverage': 100})
 ~~~
 
 **testCode1.bare**
@@ -60,8 +60,8 @@ unittestRunTest('testCode1SumNumbers')
 
 function testCode1SumNumberArrays():
     unittestDeepEqual( \
-        sumNumberArrays(arrayNew(1, 2, 3), arrayNew(4, 5, 6)), \
-        arrayNew(6, 15) \
+        sumNumberArrays([1, 2, 3], [4, 5, 6]), \
+        [6, 15] \
     )
 endfunction
 unittestRunTest('testCode1SumNumberArrays')

@@ -94,7 +94,7 @@ app: doc tarball
 	cd build/app/library/ && \
 	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.bare \
 		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'../../bare-script-library.json'" \
-		-c "baredocMain(arrayNew('library.json', vBareScriptURL), 'The MarkdownUp Library')" \
+		-c "baredocMain(['library.json', vBareScriptURL], 'The MarkdownUp Library')" \
 		> markdownup-library.md
 
     # Generate the include library documentation
@@ -223,7 +223,7 @@ include 'static/include/dataTable.bare'
 include 'static/include/diff.bare'
 include 'static/include/pager.bare'
 
-includeTypes = objectNew()
+includeTypes = {}
 objectAssign(includeTypes, argsTypes)
 objectAssign(includeTypes, dataTableTypes)
 objectAssign(includeTypes, diffTypes)

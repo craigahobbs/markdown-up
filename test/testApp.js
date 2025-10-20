@@ -919,13 +919,13 @@ test('MarkdownUp, render keydown', async () => {
 ~~~ markdown-script
 function main(event):
     systemGlobalSet('count', count + 1)
-    elementModelRender(objectNew('html', 'input', 'attr', objectNew('id', 'input1', 'type', 'text')))
+    elementModelRender({'html': 'input', 'attr': {'id': 'input1', 'type': 'text'}})
     markdownPrint('Hello ' + count + ' (key: ' + objectGet(event, 'key') + ')')
 endfunction
 
 count = 0
 documentSetKeyDown(main)
-main(objectNew('key', 'A'))
+main({'key': 'A'})
 ~~~
 `
     });
@@ -973,15 +973,15 @@ test('MarkdownUp, render focus', async () => {
 ~~~ markdown-script
 function main():
     systemGlobalSet('count', count + 1)
-    elementModelRender(objectNew( \
-        'html', 'input', \
-        'attr', objectNew( \
-            'id', 'test-input', \
-            'type', 'text', \
-            'value', 'Text ' + count \
-        ), \
-        'callback', objectNew('click', main) \
-    ))
+    elementModelRender({ \
+        'html': 'input', \
+        'attr': { \
+            'id': 'test-input', \
+            'type': 'text', \
+            'value': 'Text ' + count \
+        }, \
+        'callback': {'click': main} \
+    })
     documentSetFocus('test-input')
 endfunction
 
@@ -1044,7 +1044,7 @@ function main():
 endfunction
 
 markdownPrint('# Title')
-elementModelRender(objectNew('html', 'div', 'attr', objectNew('id', 'resetID', 'style', 'display=none')))
+elementModelRender({'html': 'div', 'attr': {'id': 'resetID', 'style': 'display=none'}})
 
 count = 0
 windowSetTimeout(main, 1000)
@@ -1114,12 +1114,12 @@ function onClick():
     windowSetLocation('#url=other')
 endfunction
 
-elementModelRender(objectNew( \
-    'html', 'span', \
-    'attr', objectNew('id', 'test-span'), \
-    'elem', objectNew('text', 'Click Here'), \
-    'callback', objectNew('click', onClick) \
-))
+elementModelRender({ \
+    'html': 'span', \
+    'attr': {'id': 'test-span'}, \
+    'elem': {'text': 'Click Here'}, \
+    'callback': {'click': onClick} \
+})
 ~~~
 `
     });
@@ -1175,12 +1175,12 @@ function onClick():
     markdownPrint('Hello')
 endfunction
 
-elementModelRender(objectNew( \
-    'html', 'span', \
-    'attr', objectNew('id', 'test-span'), \
-    'elem', objectNew('text', 'Click Here'), \
-    'callback', objectNew('click', onClick) \
-))
+elementModelRender({ \
+    'html': 'span', \
+    'attr': {'id': 'test-span'}, \
+    'elem': {'text': 'Click Here'}, \
+    'callback': {'click': onClick} \
+})
 ~~~
 `
     });
@@ -1844,7 +1844,7 @@ markdownPrint(null)
 ~~~
 
 ~~~ markdown-script
-markdownPrint(objectNew())
+markdownPrint({})
 ~~~
 
 ~~~ markdown-script
