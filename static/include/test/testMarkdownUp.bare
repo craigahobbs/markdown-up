@@ -16,6 +16,7 @@ function testMarkdownUp_dataLineChart():
     data = [{'A': 1, 'B': 2}]
     unittestEqual(dataLineChart(data, {}), null)
     unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['']], \
         ['systemLog', ['<LineChart 640x320, 1 rows>']] \
     ])
 endfunction
