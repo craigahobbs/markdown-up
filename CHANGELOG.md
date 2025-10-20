@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.1 (2025-10-20)
+
+- [9904b74](https://github.com/craigahobbs/markdown-up/commit/9904b74) - use barescript object syntax
+
 ## 3.11.0 (2025-10-18)
 
 - [be0de0c](https://github.com/craigahobbs/markdown-up/commit/be0de0c) - bare-script 3.7
