@@ -14,18 +14,18 @@ unittestRunTest('testFormsSentinel')
 function testFormsTextElements():
     unittestDeepEqual( \
         formsTextElements('testId', 'Hello', 30), \
-        objectNew( \
-            'attr', objectNew( \
-                'autocomplete', 'off', \
-                'id', 'testId', \
-                'size', 30, \
-                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
-                'type', 'text', \
-                'value', 'Hello' \
-            ), \
-            'callback', null, \
-            'html', 'input' \
-        ) \
+        { \
+            'attr': { \
+                'autocomplete': 'off', \
+                'id': 'testId', \
+                'size': 30, \
+                'style': 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type': 'text', \
+                'value': 'Hello' \
+            }, \
+            'callback': null, \
+            'html': 'input' \
+        } \
     )
 endfunction
 unittestRunTest('testFormsTextElements')
@@ -42,18 +42,18 @@ async function testFormsTextElements_onEnter():
     elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallback)
     unittestDeepEqual( \
         elements, \
-        objectNew( \
-            'attr', objectNew( \
-                'autocomplete', 'off', \
-                'id', 'testId', \
-                'size', 30, \
-                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
-                'type', 'text', \
-                'value', 'Hello' \
-            ), \
-            'callback', objectNew('keyup', '<function>'), \
-            'html', 'input' \
-        ) \
+        { \
+            'attr': { \
+                'autocomplete': 'off', \
+                'id': 'testId', \
+                'size': 30, \
+                'style': 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type': 'text', \
+                'value': 'Hello' \
+            }, \
+            'callback': {'keyup': '<function>'}, \
+            'html': 'input' \
+        } \
     )
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
     onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
@@ -76,18 +76,18 @@ async function testFormsTextElements_onEnterAsync():
     elements = formsTextElements('testId', 'Hello', 30, testFormsTextElements_onEnterCallbackAsync)
     unittestDeepEqual( \
         elements, \
-        objectNew( \
-            'attr', objectNew( \
-                'autocomplete', 'off', \
-                'id', 'testId', \
-                'size', 30, \
-                'style', 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
-                'type', 'text', \
-                'value', 'Hello' \
-            ), \
-            'callback', objectNew('keyup', '<function>'), \
-            'html', 'input' \
-        ) \
+        { \
+            'attr': { \
+                'autocomplete': 'off', \
+                'id': 'testId', \
+                'size': 30, \
+                'style': 'font-size: inherit; border: thin solid black; padding: 0.4em;', \
+                'type': 'text', \
+                'value': 'Hello' \
+            }, \
+            'callback': {'keyup': '<function>'}, \
+            'html': 'input' \
+        } \
     )
     unittestEqual(systemGlobalGet('testFormsTextElements_onEnterCount'), 0)
     onKeyup = objectGet(objectGet(elements, 'callback'), 'keyup')
@@ -110,12 +110,12 @@ function testFormsLinkButtonElements():
     elements = formsLinkButtonElements('Hello', testFormsLinkButtonElementsCallback)
     unittestDeepEqual( \
         elements, \
-        objectNew( \
-            'html', 'a', \
-            'attr', objectNew('style', 'cursor: pointer; user-select: none;'), \
-            'elem', objectNew('text', 'Hello'), \
-            'callback', objectNew('click', '<function>') \
-        ) \
+        { \
+            'html': 'a', \
+            'attr': {'style': 'cursor: pointer; user-select: none;'}, \
+            'elem': {'text': 'Hello'}, \
+            'callback': {'click': '<function>'} \
+        } \
     )
     unittestEqual(systemGlobalGet('testFormsLinkButtonElementsCount'), 0)
     onClick = objectGet(objectGet(elements, 'callback'), 'click')
@@ -129,11 +129,11 @@ function testFormsLinkElements():
     elements = formsLinkElements('Hello', '#var=')
     unittestDeepEqual( \
         elements, \
-        objectNew( \
-            'html', 'a', \
-            'attr', objectNew('href', '#var='), \
-            'elem', objectNew('text', 'Hello') \
-        ) \
+        { \
+            'html': 'a', \
+            'attr': {'href': '#var='}, \
+            'elem': {'text': 'Hello'} \
+        } \
     )
 endfunction
 unittestRunTest('testFormsLinkElements')
@@ -143,11 +143,11 @@ function testFormsLinkElements_nullUrl():
     elements = formsLinkElements('Hello', null)
     unittestDeepEqual( \
         elements, \
-        objectNew( \
-            'html', 'span', \
-            'attr', objectNew('style', 'user-select: none;'), \
-            'elem', objectNew('text', 'Hello') \
-        ) \
+        { \
+            'html': 'span', \
+            'attr': {'style': 'user-select: none;'}, \
+            'elem': {'text': 'Hello'} \
+        } \
     )
 endfunction
 unittestRunTest('testFormsLinkElements_nullUrl')

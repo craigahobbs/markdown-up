@@ -13,16 +13,16 @@ unittestRunTest('testUnittestMockSentinel')
 
 function testUnittestMockAll():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'documentInputValue', objectNew('id1', 'value1'), \
-        'markdownParse', arrayNew(objectNew('parts', arrayNew())), \
-        'markdownTitle', arrayNew('Title'), \
-        'systemFetch', objectNew('test.json', '{"key": "value"}') \
-    ))
+    unittestMockAll({ \
+        'documentInputValue': {'id1': 'value1'}, \
+        'markdownParse': [{'parts': []}], \
+        'markdownTitle': ['Title'], \
+        'systemFetch': {'test.json': '{"key": "value"}'} \
+    })
 
     # Data
-    dataLineChart(arrayNew(objectNew('A', 1)), objectNew('title', 'Title'))
-    dataTable(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))
+    dataLineChart([{'A': 1}], {'title': 'Title'})
+    dataTable([{'A': 1}], {'fields': ['A']})
 
     # Document
     unittestEqual(documentFontSize(), 16)
@@ -68,7 +68,7 @@ function testUnittestMockAll():
     unittestEqual(drawTextWidth('Hello', 20), 60)
 
     # Element Model
-    elementModelRender(objectNew('html', 'h1', 'elem', objectNew('text', 'Hello')))
+    elementModelRender({'html': 'h1', 'elem': {'text': 'Hello'}})
 
     # Local Storage
     unittestEqual(localStorageGet('key1'), null)
@@ -90,18 +90,18 @@ function testUnittestMockAll():
         'Escape me: \\\\ \\[ \\] \\( \\) \\< \\> \\" \\\' \\* \\_ \\~ \\` \\# \\| \\-' \
     )
     unittestEqual(markdownHeaderId('**This is a  "Test"**'), 'this-is-a-test')
-    unittestDeepEqual(markdownParse('# Title'), objectNew('parts', arrayNew()))
+    unittestDeepEqual(markdownParse('# Title'), {'parts': []})
     markdownPrint('# Title')
-    unittestDeepEqual(markdownTitle(objectNew('parts', arrayNew())), 'Title')
+    unittestDeepEqual(markdownTitle({'parts': []}), 'Title')
 
     # Schema
     unittestDeepEqual( \
-        schemaElements(objectNew('TestStruct', objectNew('struct', objectNew('name', 'TestStruct'))), 'TestStruct'), \
-        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'struct TestStruct')))) \
+        schemaElements({'TestStruct': {'struct': {'name': 'TestStruct'}}}, 'TestStruct'), \
+        [[{'html': 'h1', 'elem': {'text': 'struct TestStruct'}}]] \
     )
     unittestDeepEqual( \
-        schemaElements(objectNew('TestStruct', objectNew('struct', objectNew('name', 'TestStruct', 'union', true))), 'TestStruct'), \
-        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'union TestStruct')))) \
+        schemaElements({'TestStruct': {'struct': {'name': 'TestStruct', 'union': true}}}, 'TestStruct'), \
+        [[{'html': 'h1', 'elem': {'text': 'union TestStruct'}}]] \
     )
 
     # Session Storage
@@ -138,98 +138,98 @@ function testUnittestMockAll():
     unittestEqual(windowWidth(), 1024)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('dataLineChart', arrayNew(arrayNew(objectNew('A', 1)), objectNew('title', 'Title'))), \
-        arrayNew('dataTable', arrayNew(arrayNew(objectNew('A', 1)), objectNew('fields', arrayNew('A')))), \
-        arrayNew('documentInputValue', arrayNew('id1')), \
-        arrayNew('documentSetFocus', arrayNew('id1')), \
-        arrayNew('documentSetKeyDown', arrayNew(null)), \
-        arrayNew('documentSetReset', arrayNew('id1')), \
-        arrayNew('documentSetTitle', arrayNew('Hello')), \
-        arrayNew('drawNew', arrayNew(800, 600)), \
-        arrayNew('drawStyle', arrayNew('red')), \
-        arrayNew('drawTextStyle', arrayNew(20)), \
-        arrayNew('drawMove', arrayNew(10, 10)), \
-        arrayNew('drawArc', arrayNew(10, 10, 0, 0, 0, 20, 20)), \
-        arrayNew('drawHLine', arrayNew(25)), \
-        arrayNew('drawLine', arrayNew(30, 30)), \
-        arrayNew('drawPathRect', arrayNew(35, 35)), \
-        arrayNew('drawVLine', arrayNew(40)), \
-        arrayNew('drawClose', arrayNew()), \
-        arrayNew('drawCircle', arrayNew(20, 20, 10)), \
-        arrayNew('drawEllipse', arrayNew(20, 20, 10, 15)), \
-        arrayNew('drawImage', arrayNew(10, 10, 20, 20, 'test.jpg')), \
-        arrayNew('drawOnClick', arrayNew(null)), \
-        arrayNew('drawRect', arrayNew(10, 10, 20, 20)), \
-        arrayNew('drawText', arrayNew('Hello', 10, 10)), \
-        arrayNew('elementModelRender', arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'Hello')))), \
-        arrayNew('localStorageSet', arrayNew('key1', 'value1')), \
-        arrayNew('localStorageSet', arrayNew('key2', 'value2')), \
-        arrayNew('localStorageRemove', arrayNew('key2')), \
-        arrayNew('localStorageClear', arrayNew()), \
-        arrayNew('markdownParse', arrayNew('# Title')), \
-        arrayNew('markdownPrint', arrayNew('# Title')), \
-        arrayNew('markdownTitle', arrayNew(objectNew('parts', arrayNew()))), \
-        arrayNew('sessionStorageSet', arrayNew('key1', 'value1')), \
-        arrayNew('sessionStorageSet', arrayNew('key2', 'value2')), \
-        arrayNew('sessionStorageRemove', arrayNew('key2')), \
-        arrayNew('sessionStorageClear', arrayNew()), \
-        arrayNew('systemFetch', arrayNew('test.json')), \
-        arrayNew('systemLog', arrayNew('Hello')), \
-        arrayNew('systemLogDebug', arrayNew('Hello Debug')), \
-        arrayNew('windowClipboardWrite', arrayNew('Hello!')), \
-        arrayNew('windowSetLocation', arrayNew('test.html')), \
-        arrayNew('windowSetResize', arrayNew(null)), \
-        arrayNew('windowSetTimeout', arrayNew(null, 1000)) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['dataLineChart', [[{'A': 1}], {'title': 'Title'}]], \
+        ['dataTable', [[{'A': 1}], {'fields': ['A']}]], \
+        ['documentInputValue', ['id1']], \
+        ['documentSetFocus', ['id1']], \
+        ['documentSetKeyDown', [null]], \
+        ['documentSetReset', ['id1']], \
+        ['documentSetTitle', ['Hello']], \
+        ['drawNew', [800, 600]], \
+        ['drawStyle', ['red']], \
+        ['drawTextStyle', [20]], \
+        ['drawMove', [10, 10]], \
+        ['drawArc', [10, 10, 0, 0, 0, 20, 20]], \
+        ['drawHLine', [25]], \
+        ['drawLine', [30, 30]], \
+        ['drawPathRect', [35, 35]], \
+        ['drawVLine', [40]], \
+        ['drawClose', []], \
+        ['drawCircle', [20, 20, 10]], \
+        ['drawEllipse', [20, 20, 10, 15]], \
+        ['drawImage', [10, 10, 20, 20, 'test.jpg']], \
+        ['drawOnClick', [null]], \
+        ['drawRect', [10, 10, 20, 20]], \
+        ['drawText', ['Hello', 10, 10]], \
+        ['elementModelRender', [{'html': 'h1', 'elem': {'text': 'Hello'}}]], \
+        ['localStorageSet', ['key1', 'value1']], \
+        ['localStorageSet', ['key2', 'value2']], \
+        ['localStorageRemove', ['key2']], \
+        ['localStorageClear', []], \
+        ['markdownParse', ['# Title']], \
+        ['markdownPrint', ['# Title']], \
+        ['markdownTitle', [{'parts': []}]], \
+        ['sessionStorageSet', ['key1', 'value1']], \
+        ['sessionStorageSet', ['key2', 'value2']], \
+        ['sessionStorageRemove', ['key2']], \
+        ['sessionStorageClear', []], \
+        ['systemFetch', ['test.json']], \
+        ['systemLog', ['Hello']], \
+        ['systemLogDebug', ['Hello Debug']], \
+        ['windowClipboardWrite', ['Hello!']], \
+        ['windowSetLocation', ['test.html']], \
+        ['windowSetResize', [null]], \
+        ['windowSetTimeout', [null, 1000]] \
+    ])
 endfunction
 unittestRunTest('testUnittestMockAll')
 
 
 function testUnittestMockAll_systemFetch_array():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'test.json', '{"key": "value"}', \
-            'test2.json', '{"key2": "value2"}' \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'test.json': '{"key": "value"}', \
+            'test2.json': '{"key2": "value2"}' \
+        } \
+    })
 
     # Call systemFetch with array of URLs
     unittestDeepEqual( \
-        systemFetch(arrayNew('test.json', objectNew('url', 'test2.json'))), \
-        arrayNew( \
+        systemFetch(['test.json', {'url': 'test2.json'}]), \
+        [ \
             '{"key": "value"}', \
             '{"key2": "value2"}' \
-        ) \
+        ] \
     )
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew(arrayNew('test.json', objectNew('url', 'test2.json')))) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', [['test.json', {'url': 'test2.json'}]]] \
+    ])
 endfunction
 unittestRunTest('testUnittestMockAll_systemFetch_array')
 
 
 function testUnittestMockAll_systemFetch_request_model():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'test.json', '{"key": "value"}' \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'test.json': '{"key": "value"}' \
+        } \
+    })
 
     # Call systemFetch with a request model
     unittestDeepEqual( \
-        systemFetch(objectNew('url', 'test.json')), \
+        systemFetch({'url': 'test.json'}), \
         '{"key": "value"}' \
     )
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew(objectNew('url', 'test.json'))) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', [{'url': 'test.json'}]] \
+    ])
 endfunction
 unittestRunTest('testUnittestMockAll_systemFetch_request_model')
 
@@ -240,11 +240,11 @@ function testUnittestMockAll_schemaElements_union():
 
     # Call schemaElements with a union type
     unittestDeepEqual( \
-        schemaElements(objectNew('TestUnion', objectNew('union', objectNew('name', 'TestUnion'))), 'TestUnion'), \
-        arrayNew(arrayNew(objectNew('html', 'h1', 'elem', objectNew('text', 'union TestUnion')))) \
+        schemaElements({'TestUnion': {'union': {'name': 'TestUnion'}}}, 'TestUnion'), \
+        [[{'html': 'h1', 'elem': {'text': 'union TestUnion'}}]] \
     )
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew())
+    unittestDeepEqual(unittestMockEnd(), [])
 endfunction
 unittestRunTest('testUnittestMockAll_schemaElements_union')

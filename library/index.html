@@ -45,15 +45,15 @@
 include 'https://craigahobbs.github.io/bare-script/library/app.bare'
 
 baredocMain( \\
-    arrayNew( \\
+    [ \\
         'library.json', \\
         'https://craigahobbs.github.io/bare-script/library/library.json' \\
-    ), \\
+    ], \\
     'The MarkdownUp Library', \\
-    arrayNew( \\
-        arrayNew('BareScript', 'https://craigahobbs.github.io/bare-script/language/'), \\
-        arrayNew('MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme') \\
-    ) \\
+    [ \\
+        ['BareScript', 'https://craigahobbs.github.io/bare-script/language/'], \\
+        ['MarkdownUp', 'https://github.com/craigahobbs/markdown-up#readme'] \\
+    ] \\
 )
 ~~~
 `});

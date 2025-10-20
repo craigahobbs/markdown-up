@@ -13,37 +13,37 @@ unittestRunTest('testMarkdownUpSentinel')
 
 function testMarkdownUp_dataLineChart():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', 1, 'B', 2))
-    unittestEqual(dataLineChart(data, objectNew()), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('<LineChart 640x320, 1 rows>')) \
-    ))
+    data = [{'A': 1, 'B': 2}]
+    unittestEqual(dataLineChart(data, {}), null)
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['']], \
+        ['systemLog', ['<LineChart 640x320, 1 rows>']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_dataLineChart')
 
 
 function testMarkdownUp_dataLineChart_noDefaults():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', 1, 'B', 2))
-    unittestEqual(dataLineChart(data, objectNew('width', 800, 'height', 400, 'title', 'Hello')), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('<LineChart 800x400, 1 rows - Hello>')) \
-    ))
+    data = [{'A': 1, 'B': 2}]
+    unittestEqual(dataLineChart(data, {'width': 800, 'height': 400, 'title': 'Hello'}), null)
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['']], \
+        ['systemLog', ['<LineChart 800x400, 1 rows - Hello>']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_dataLineChart_noDefaults')
 
 
 function testMarkdownUp_dataTable():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew(objectNew('A', 1.495, 'B', 2))
+    data = [{'A': 1.495, 'B': 2}]
     unittestEqual(dataTable(data), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('| A    | B |')), \
-        arrayNew('systemLog', arrayNew('|------|---|')), \
-        arrayNew('systemLog', arrayNew('| 1.50 | 2 |')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['| A    | B |']], \
+        ['systemLog', ['|------|---|']], \
+        ['systemLog', ['| 1.50 | 2 |']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_dataTable')
 
@@ -51,21 +51,21 @@ unittestRunTest('testMarkdownUp_dataTable')
 function testMarkdownUp_dataTable_invalidData():
     systemLogDebug('NOTICE: The following "dataValidate" error is expected:')
     unittestMockOneGeneric('systemLog')
-    data = arrayNew( \
-        objectNew('A', 1), \
-        objectNew('A', 'asdfasdf') \
-    )
+    data = [ \
+        {'A': 1}, \
+        {'A': 'asdfasdf'} \
+    ]
     unittestEqual(dataTable(data), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew())
+    unittestDeepEqual(unittestMockEnd(), [])
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_invalidData')
 
 
 function testMarkdownUp_dataTable_noFields():
     unittestMockOneGeneric('systemLog')
-    data = arrayNew()
+    data = []
     unittestEqual(dataTable(data), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew())
+    unittestDeepEqual(unittestMockEnd(), [])
 endfunction
 unittestRunTest('testMarkdownUp_dataTable_noFields')
 
@@ -170,10 +170,10 @@ unittestRunTest('testMarkdownUp_drawMove')
 function testMarkdownUp_drawNew():
     unittestMockOneGeneric('systemLog')
     unittestEqual(drawNew(800, 600), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('')), \
-        arrayNew('systemLog', arrayNew('<Drawing 800x600>')) \
-    ))
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['']], \
+        ['systemLog', ['<Drawing 800x600>']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_drawNew')
 
@@ -295,13 +295,13 @@ unittestRunTest('testMarkdownUp_markdownParse')
 
 function testMarkdownUp_markdownPrint():
     unittestMockOneGeneric('systemLog')
-    unittestEqual(markdownPrintStub('Hello', arrayNew('1', '2'), null, 'Goodbye'), null)
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemLog', arrayNew('Hello')), \
-        arrayNew('systemLog', arrayNew('1')), \
-        arrayNew('systemLog', arrayNew('2')), \
-        arrayNew('systemLog', arrayNew('Goodbye')) \
-    ))
+    unittestEqual(markdownPrintStub('Hello', ['1', '2'], null, 'Goodbye'), null)
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemLog', ['Hello']], \
+        ['systemLog', ['1']], \
+        ['systemLog', ['2']], \
+        ['systemLog', ['Goodbye']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_markdownPrint')
 
@@ -313,27 +313,27 @@ unittestRunTest('testMarkdownUp_markdownTitle')
 
 
 function testMarkdownUp_schemaElements():
-    types = objectNew( \
-        'TestStruct', objectNew('struct', objectNew('name', 'TestStruct')) \
-    )
-    unittestDeepEqual(schemaElements(types, 'TestStruct'), arrayNew( \
-        arrayNew( \
-            objectNew('html', 'h1', 'elem', objectNew('text', 'struct TestStruct')) \
-        ) \
-    ))
+    types = { \
+        'TestStruct': {'struct': {'name': 'TestStruct'}} \
+    }
+    unittestDeepEqual(schemaElements(types, 'TestStruct'), [ \
+        [ \
+            {'html': 'h1', 'elem': {'text': 'struct TestStruct'}} \
+        ] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_schemaElements')
 
 
 function testMarkdownUp_schemaElements_union():
-    types = objectNew( \
-        'TestStruct', objectNew('struct', objectNew('name', 'TestStruct', 'union', true)) \
-    )
-    unittestDeepEqual(schemaElements(types, 'TestStruct'), arrayNew( \
-        arrayNew( \
-            objectNew('html', 'h1', 'elem', objectNew('text', 'union TestStruct')) \
-        ) \
-    ))
+    types = { \
+        'TestStruct': {'struct': {'name': 'TestStruct', 'union': true}} \
+    }
+    unittestDeepEqual(schemaElements(types, 'TestStruct'), [ \
+        [ \
+            {'html': 'h1', 'elem': {'text': 'union TestStruct'}} \
+        ] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUp_schemaElements_union')
 

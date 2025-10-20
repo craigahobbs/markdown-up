@@ -26,11 +26,11 @@ library and define an [arguments model] with three floating point number URL arg
 ~~~ bare-script
 include <args.bare>
 
-arguments = arrayNew( \
-    objectNew('name', 'value1', 'type', 'float', 'default', 0), \
-    objectNew('name', 'value2', 'type', 'float', 'default', 0), \
-    objectNew('name', 'value3', 'type', 'float', 'default', 0) \
-)
+arguments = [ \
+    {'name': 'value1', 'type': 'float', 'default': 0}, \
+    {'name': 'value2', 'type': 'float', 'default': 0}, \
+    {'name': 'value3', 'type': 'float', 'default': 0} \
+]
 ~~~
 
 Next, parse the arguments with the [argsParse] function.
@@ -53,12 +53,12 @@ You can create links to the application using the [argsLink] function.
 
 ~~~ bare-script
 markdownPrint( \
-    '', argsLink(arguments, 'Value1 Less', objectNew('value1', value1 - 1)), \
-    '', argsLink(arguments, 'Value1 More', objectNew('value1', value1 + 1)), \
-    '', argsLink(arguments, 'Value2 Less', objectNew('value2', value2 - 1)), \
-    '', argsLink(arguments, 'Value2 More', objectNew('value2', value2 + 1)), \
-    '', argsLink(arguments, 'Value3 Less', objectNew('value3', value3 - 1)), \
-    '', argsLink(arguments, 'Value3 More', objectNew('value3', value3 + 1)) \
+    '', argsLink(arguments, 'Value1 Less', {'value1': value1 - 1}), \
+    '', argsLink(arguments, 'Value1 More', {'value1': value1 + 1}), \
+    '', argsLink(arguments, 'Value2 Less', {'value2': value2 - 1}), \
+    '', argsLink(arguments, 'Value2 More', {'value2': value2 + 1}), \
+    '', argsLink(arguments, 'Value3 Less', {'value3': value3 - 1}), \
+    '', argsLink(arguments, 'Value3 More', {'value3': value3 + 1}) \
 )
 ~~~
 
@@ -405,16 +405,16 @@ function funcPage(args):
     markdownPrint('This is page "' + objectGet(args, 'page') + '"')
 endfunction
 
-pagerModel = objectNew( \
-    'pages', arrayNew( \
-        objectNew('name', 'Function Page', 'type', objectNew('function', objectNew( \
-            'function', funcPage, 'title', 'The Function Page'))), \
-        objectNew('name', 'Markdown Page', 'type', objectNew('markdown', objectNew( \
-            'url', 'README.md'))), \
-        objectNew('name', 'Link Page', 'type', objectNew('link', objectNew( \
-            'url', 'external.html'))) \
-    ) \
-)
+pagerModel = { \
+    'pages': [ \
+        {'name': 'Function Page', 'type': {'function': { \
+            'function': funcPage, 'title': 'The Function Page'}}}, \
+        {'name': 'Markdown Page', 'type': {'markdown': { \
+            'url': 'README.md'}}}, \
+        {'name': 'Link Page', 'type': {'link': { \
+            'url': 'external.html'}}} \
+    ] \
+}
 pagerMain(pagerModel)
 ~~~
 
@@ -424,23 +424,23 @@ additional URL arguments for your application. Note that you must define a strin
 "page".
 
 ~~~ bare-script
-arguments = arrayNew( \
-    objectNew('name', 'page', 'default', 'Function Page'), \
-    objectNew('name', 'value', 'type', 'float', 'default', 0) \
-)
-pagerMain(pagerModel, objectNew('arguments', arguments))
+arguments = [ \
+    {'name': 'page', 'default': 'Function Page'}, \
+    {'name': 'value', 'type': 'float', 'default': 0} \
+]
+pagerMain(pagerModel, {'arguments': arguments})
 ~~~
 
 You can hide the navigation links using the "hideNav" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('hideNav', true))
+pagerMain(pagerModel, {'hideNav': true})
 ~~~
 
 You can hide the menu links using the "hideMenu" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('hideMenu', true))
+pagerMain(pagerModel, {'hideMenu': true})
 ~~~
 
 The default page is the first non-hidden page. To show a different page by default, use the "start"
@@ -448,7 +448,7 @@ option. If you provide the "arguments" option, be sure to set the "page" argumen
 the same as the "start" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('start', 'Markdown Page'))
+pagerMain(pagerModel, {'start': 'Markdown Page'})
 ~~~
 
 
@@ -549,7 +549,7 @@ include 'testCode1.bare'
 coverageStop()
 
 # Test report
-return unittestReport(objectNew('minCoverage', 100))
+return unittestReport({'minCoverage': 100})
 ~~~
 
 **testCode1.bare**
@@ -569,8 +569,8 @@ unittestRunTest('testCode1SumNumbers')
 
 function testCode1SumNumberArrays():
     unittestDeepEqual( \
-        sumNumberArrays(arrayNew(1, 2, 3), arrayNew(4, 5, 6)), \
-        arrayNew(6, 15) \
+        sumNumberArrays([1, 2, 3], [4, 5, 6]), \
+        [6, 15] \
     )
 endfunction
 unittestRunTest('testCode1SumNumberArrays')
@@ -724,7 +724,7 @@ include 'testApp.bare'
 # Stop coverage
 coverageStop()
 
-return unittestReport(objectNew('coverageMin', 100))
+return unittestReport({'coverageMin': 100})
 ~~~
 
 **testApp.bare**
@@ -740,13 +740,13 @@ function testApp():
 
     unittestDeepEqual( \
         unittestMockEnd(), \
-        arrayNew( \
-            arrayNew('documentSetTitle', arrayNew('My Application')), \
-            arrayNew('markdownPrint', arrayNew('# My Application')), \
-            arrayNew('markdownPrint', arrayNew('','- 0')), \
-            arrayNew('markdownPrint', arrayNew('','- 1')), \
-            arrayNew('markdownPrint', arrayNew('','- 2')) \
-        ) \
+        [ \
+            ['documentSetTitle', ['My Application']], \
+            ['markdownPrint', ['# My Application']], \
+            ['markdownPrint', ['','- 0']], \
+            ['markdownPrint', ['','- 1']], \
+            ['markdownPrint', ['','- 2']] \
+        ] \
     )
 endfunction
 unittestRunTest('testApp')

@@ -44,7 +44,7 @@ include 'testApp.bare'
 # Stop coverage
 coverageStop()
 
-return unittestReport(objectNew('coverageMin', 100))
+return unittestReport({'coverageMin': 100})
 ~~~
 
 **testApp.bare**
@@ -60,13 +60,13 @@ function testApp():
 
     unittestDeepEqual( \
         unittestMockEnd(), \
-        arrayNew( \
-            arrayNew('documentSetTitle', arrayNew('My Application')), \
-            arrayNew('markdownPrint', arrayNew('# My Application')), \
-            arrayNew('markdownPrint', arrayNew('','- 0')), \
-            arrayNew('markdownPrint', arrayNew('','- 1')), \
-            arrayNew('markdownPrint', arrayNew('','- 2')) \
-        ) \
+        [ \
+            ['documentSetTitle', ['My Application']], \
+            ['markdownPrint', ['# My Application']], \
+            ['markdownPrint', ['','- 0']], \
+            ['markdownPrint', ['','- 1']], \
+            ['markdownPrint', ['','- 2']] \
+        ] \
     )
 endfunction
 unittestRunTest('testApp')

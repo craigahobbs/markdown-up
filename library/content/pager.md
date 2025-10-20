@@ -11,16 +11,16 @@ function funcPage(args):
     markdownPrint('This is page "' + objectGet(args, 'page') + '"')
 endfunction
 
-pagerModel = objectNew( \
-    'pages', arrayNew( \
-        objectNew('name', 'Function Page', 'type', objectNew('function', objectNew( \
-            'function', funcPage, 'title', 'The Function Page'))), \
-        objectNew('name', 'Markdown Page', 'type', objectNew('markdown', objectNew( \
-            'url', 'README.md'))), \
-        objectNew('name', 'Link Page', 'type', objectNew('link', objectNew( \
-            'url', 'external.html'))) \
-    ) \
-)
+pagerModel = { \
+    'pages': [ \
+        {'name': 'Function Page', 'type': {'function': { \
+            'function': funcPage, 'title': 'The Function Page'}}}, \
+        {'name': 'Markdown Page', 'type': {'markdown': { \
+            'url': 'README.md'}}}, \
+        {'name': 'Link Page', 'type': {'link': { \
+            'url': 'external.html'}}} \
+    ] \
+}
 pagerMain(pagerModel)
 ~~~
 
@@ -30,23 +30,23 @@ additional URL arguments for your application. Note that you must define a strin
 "page".
 
 ~~~ bare-script
-arguments = arrayNew( \
-    objectNew('name', 'page', 'default', 'Function Page'), \
-    objectNew('name', 'value', 'type', 'float', 'default', 0) \
-)
-pagerMain(pagerModel, objectNew('arguments', arguments))
+arguments = [ \
+    {'name': 'page', 'default': 'Function Page'}, \
+    {'name': 'value', 'type': 'float', 'default': 0} \
+]
+pagerMain(pagerModel, {'arguments': arguments})
 ~~~
 
 You can hide the navigation links using the "hideNav" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('hideNav', true))
+pagerMain(pagerModel, {'hideNav': true})
 ~~~
 
 You can hide the menu links using the "hideMenu" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('hideMenu', true))
+pagerMain(pagerModel, {'hideMenu': true})
 ~~~
 
 The default page is the first non-hidden page. To show a different page by default, use the "start"
@@ -54,7 +54,7 @@ option. If you provide the "arguments" option, be sure to set the "page" argumen
 the same as the "start" option.
 
 ~~~ bare-script
-pagerMain(pagerModel, objectNew('start', 'Markdown Page'))
+pagerMain(pagerModel, {'start': 'Markdown Page'})
 ~~~
 
 
