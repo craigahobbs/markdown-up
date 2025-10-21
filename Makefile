@@ -122,7 +122,7 @@ tarball: build/npm.build
 	date -I > build/markdown-up/VERSION.txt
 	cp static/app.css build/markdown-up
 	cp -R static/include build/markdown-up
-	rm -rf build/markdown-up/include/test build/markdown-up/include/._*
+	rm -rf build/markdown-up/include/test
 
     # Application
 	cp -R lib build/markdown-up
@@ -169,7 +169,7 @@ tarball: build/npm.build
     # Create the tarball
 	rm -f build/markdown-up.tar.gz
 	cd build && find markdown-up -type f -print0 | sort -z | \
-		tar --null --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz
+		tar --null --no-xattrs --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz
 
 
 gh-pages:
