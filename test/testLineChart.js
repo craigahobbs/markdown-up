@@ -32,6 +32,7 @@ test('lineChartElements', () => {
         {'A': 1, 'B': 5, 'C': 7},
         {'A': 1, 'B': 6},
         {'B': 6, 'C': 7},
+        {'B': 4, 'C': 4},
         {'A': 2, 'B': 4, 'C': 2}
     ];
     const lineChart = {'x': 'A', 'y': ['B', 'C']};
@@ -1124,8 +1125,8 @@ test('lineChartElements, color field multiple fields', () => {
 
 test('lineChartElements, color field multiple fields order', () => {
     const data = [
-        {'A': 1, 'B': 1, 'C': 'a'},
         {'A': 1, 'B': 1, 'C': 'b'},
+        {'A': 1, 'B': 1, 'C': 'a'},
         {'A': 1, 'B': 1, 'C': 'c'},
         {'A': 1, 'B': 1, 'C': 'd'},
         {'A': 1, 'B': 1, 'C': 'g'},
