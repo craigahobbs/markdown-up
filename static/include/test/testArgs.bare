@@ -817,21 +817,16 @@ unittestRunTest('testArgsLinkMarkdownUpURL_noVars')
 
 
 function testArgsHelp():
-    unittestMockAll()
-    argsHelp(testArgsArguments)
-    unittestDeepEqual(unittestMockEnd(), [ \
-        ['dataTable', [ \
-            [ \
-                {'Default': '',  'Description': '',         'Explicit': 'Yes', 'Type': 'bool',     'Variable': 'vPrint'}, \
-                {'Default': '',  'Description': '',         'Explicit': '',    'Type': 'date',     'Variable': 'vBegin'}, \
-                {'Default': '',  'Description': '',         'Explicit': '',    'Type': 'datetime', 'Variable': 'vEnd'}, \
-                {'Default': '3', 'Description': '',         'Explicit': '',    'Type': 'int',      'Variable': 'vCount'}, \
-                {'Default': '',  'Description': '',         'Explicit': '',    'Type': 'float',    'Variable': 'vNumber'}, \
-                {'Default': '',  'Description': 'The name', 'Explicit': '',    'Type': 'string',   'Variable': 'vName'}, \
-                {'Default': '',  'Description': '',         'Explicit': '',    'Type': 'string',   'Variable': 'vURL'} \
-            ], \
-            {'fields': ['Variable', 'Type', 'Default', 'Explicit', 'Description']} \
-        ]] \
+    unittestDeepEqual(argsHelp(testArgsArguments), [ \
+        '| Variable | Type     | Default | Explicit | Description |', \
+        '|----------|----------|---------|----------|-------------|', \
+        '| vPrint   | bool     |         | Yes      |             |', \
+        '| vBegin   | date     |         |          |             |', \
+        '| vEnd     | datetime |         |          |             |', \
+        '| vCount   | int      | 3       |          |             |', \
+        '| vNumber  | float    |         |          |             |', \
+        '| vName    | string   |         |          | The name    |', \
+        '| vURL     | string   |         |          |             |' \
     ])
 endfunction
 unittestRunTest('testArgsHelp')
@@ -839,9 +834,7 @@ unittestRunTest('testArgsHelp')
 
 function testArgsHelpDefault():
     endDefault = datetimeNew(2023, 11, 1, 12)
-    endDefaultStr = "'" + stringNew(endDefault) + "'"
-    unittestMockAll()
-    argsHelp([ \
+    argsHelpResult = argsHelp([ \
         {'name': 'print', 'type': 'bool', 'default': true}, \
         {'name': 'begin', 'type': 'date', 'default': datetimeNew(2023, 11, 1)}, \
         {'name': 'end', 'type': 'datetime', 'default': endDefault}, \
@@ -850,76 +843,61 @@ function testArgsHelpDefault():
         {'name': 'name', 'default': 'test'}, \
         {'name': 'url', 'global': 'vURL', 'default': 'test.json'} \
     ])
-    unittestDeepEqual(unittestMockEnd(), [ \
-        ['dataTable', [ \
-            [ \
-                {'Default': 'true',         'Description': '', 'Explicit': '', 'Type': 'bool',     'Variable': 'vPrint'}, \
-                {'Default': "'2023-11-01'", 'Description': '', 'Explicit': '', 'Type': 'date',     'Variable': 'vBegin'}, \
-                {'Default': endDefaultStr,  'Description': '', 'Explicit': '', 'Type': 'datetime', 'Variable': 'vEnd'}, \
-                {'Default': '3',            'Description': '', 'Explicit': '', 'Type': 'int',      'Variable': 'vCount'}, \
-                {'Default': '2.72',         'Description': '', 'Explicit': '', 'Type': 'float',    'Variable': 'vNumber'}, \
-                {'Default': "'test'",       'Description': '', 'Explicit': '', 'Type': 'string',   'Variable': 'vName'}, \
-                {'Default': "'test.json'",  'Description': '', 'Explicit': '', 'Type': 'string',   'Variable': 'vURL'} \
-            ], \
-            {'fields': ['Variable', 'Type', 'Default']} \
-        ]] \
+    unittestDeepEqual(argsHelpResult, [ \
+        '| Variable | Type     | Default                     |', \
+        '|----------|----------|-----------------------------|', \
+        '| vPrint   | bool     | true                        |', \
+        "| vBegin   | date     | '2023-11-01'                |", \
+        "| vEnd     | datetime | '2023-11-01T12:00:00-07:00' |", \
+        '| vCount   | int      | 3                           |', \
+        '| vNumber  | float    | 2.72                        |', \
+        "| vName    | string   | 'test'                      |", \
+        "| vURL     | string   | 'test.json'                 |" \
     ])
 endfunction
 unittestRunTest('testArgsHelpDefault')
 
 
 function testArgsHelpExplicit():
-    unittestMockAll()
-    argsHelp([ \
+    argsHelpResult = argsHelp([ \
         {'name': 'name', 'explicit': true}, \
         {'name': 'url', 'global': 'vURL'} \
     ])
-    unittestDeepEqual(unittestMockEnd(), [ \
-        ['dataTable', [ \
-            [ \
-                {'Default': '', 'Description': '', 'Explicit': 'Yes', 'Type': 'string', 'Variable': 'vName'}, \
-                {'Default': '', 'Description': '', 'Explicit': '',    'Type': 'string', 'Variable': 'vURL'} \
-            ], \
-            {'fields': ['Variable', 'Type', 'Explicit']} \
-        ]] \
+    unittestDeepEqual(argsHelpResult, [ \
+        '| Variable | Type   | Explicit |', \
+        '|----------|--------|----------|', \
+        '| vName    | string | Yes      |', \
+        '| vURL     | string |          |' \
     ])
 endfunction
 unittestRunTest('testArgsHelpExplicit')
 
 
 function testArgsHelpDescription():
-    unittestMockAll()
-    argsHelp([ \
+    argsHelpResult = argsHelp([ \
         {'name': 'name', 'description': 'The name'}, \
         {'name': 'url', 'global': 'vURL'} \
     ])
-    unittestDeepEqual(unittestMockEnd(), [ \
-        ['dataTable', [ \
-            [ \
-                {'Default': '', 'Description': 'The name', 'Explicit': '', 'Type': 'string', 'Variable': 'vName'}, \
-                {'Default': '', 'Description': '',         'Explicit': '', 'Type': 'string', 'Variable': 'vURL'} \
-            ], \
-            {'fields': ['Variable', 'Type', 'Description']} \
-        ]] \
+    unittestDeepEqual(argsHelpResult, [ \
+        '| Variable | Type   | Description |', \
+        '|----------|--------|-------------|', \
+        '| vName    | string | The name    |', \
+        '| vURL     | string |             |' \
     ])
 endfunction
 unittestRunTest('testArgsHelpDescription')
 
 
 function testArgsHelpNoExtra():
-    unittestMockAll()
-    argsHelp([ \
+    argsHelpResult = argsHelp([ \
         {'name': 'name'}, \
         {'name': 'url', 'global': 'vURL'} \
     ])
-    unittestDeepEqual(unittestMockEnd(), [ \
-        ['dataTable', [ \
-            [ \
-                {'Default': '', 'Description': '', 'Explicit': '', 'Type': 'string', 'Variable': 'vName'}, \
-                {'Default': '', 'Description': '', 'Explicit': '', 'Type': 'string', 'Variable': 'vURL'} \
-            ], \
-            {'fields': ['Variable', 'Type']} \
-        ]] \
+    unittestDeepEqual(argsHelpResult, [ \
+        '| Variable | Type   |', \
+        '|----------|--------|', \
+        '| vName    | string |', \
+        '| vURL     | string |' \
     ])
 endfunction
 unittestRunTest('testArgsHelpNoExtra')
