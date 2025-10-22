@@ -12,9 +12,8 @@ unittestRunTest('testDiffSentinel')
 
 
 function testDiffLines():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2' + newline + '3'
-    right = '1' + newline + '3' + newline + '4'
+    left = '1\n2\n3'
+    right = '1\n3\n4'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -29,9 +28,8 @@ unittestRunTest('testDiffLines')
 
 
 function testDiffLines_array():
-    newline = stringFromCharCode(10)
-    left = ['1', '2' + newline + '3']
-    right = ['1' + newline + '3', '4']
+    left = ['1', '2\n3']
+    right = ['1\n3', '4']
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -46,8 +44,7 @@ unittestRunTest('testDiffLines_array')
 
 
 function testDiffLines_identical():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2' + newline + '3'
+    left = '1\n2\n3'
     right = left
     unittestDeepEqual( \
         diffLines(left, right), \
@@ -60,9 +57,8 @@ unittestRunTest('testDiffLines_identical')
 
 
 function testDiffLines_total():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2' + newline + '3'
-    right = '4' + newline + '5' + newline + '6'
+    left = '1\n2\n3'
+    right = '4\n5\n6'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -75,9 +71,8 @@ unittestRunTest('testDiffLines_total')
 
 
 function testDiffLines_removeStart():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2' + newline + '3' + newline + '4'
-    right = '3' + newline + '4'
+    left = '1\n2\n3\n4'
+    right = '3\n4'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -90,9 +85,8 @@ unittestRunTest('testDiffLines_removeStart')
 
 
 function testDiffLines_addStart():
-    newline = stringFromCharCode(10)
-    left = '3' + newline + '4'
-    right = '1' + newline + '2' + newline + '3' + newline + '4'
+    left = '3\n4'
+    right = '1\n2\n3\n4'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -105,9 +99,8 @@ unittestRunTest('testDiffLines_addStart')
 
 
 function testDiffLines_removeEnd():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2' + newline + '3' + newline + '4'
-    right = '1' + newline + '2'
+    left = '1\n2\n3\n4'
+    right = '1\n2'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
@@ -120,9 +113,8 @@ unittestRunTest('testDiffLines_removeEnd')
 
 
 function testDiffLines_addEnd():
-    newline = stringFromCharCode(10)
-    left = '1' + newline + '2'
-    right = '1' + newline + '2' + newline + '3' + newline + '4'
+    left = '1\n2'
+    right = '1\n2\n3\n4'
     unittestDeepEqual( \
         diffLines(left, right), \
         [ \
