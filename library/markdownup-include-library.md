@@ -88,7 +88,9 @@ markdownPrint('', argsLink(arguments, 'Reset', null, true))
 
 ### argsHelp
 
-Output the [arguments model's](includeModel.html#var.vName='ArgsArguments') help
+Generate the [arguments model's](includeModel.html#var.vName='ArgsArguments') help content
+
+**NOTE:** Calling this function requires `include <dataTable.bare>`
 
 #### Arguments
 
@@ -97,7 +99,7 @@ The [arguments model](includeModel.html#var.vName='ArgsArguments')
 
 #### Returns
 
-Nothing
+The array of help Markdown line strings
 
 ---
 
