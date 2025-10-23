@@ -168,8 +168,13 @@ tarball: build/npm.build
 
     # Create the tarball
 	rm -f build/markdown-up.tar.gz
-	cd build && find markdown-up -type f -print0 | sort -z | \
-		tar --null --no-xattrs --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz
+	if [ "`uname -s`" = 'Darwin' ]; then \
+		cd build && find markdown-up -type f -print0 | sort -z | \
+			tar --null --no-mac-metadata --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz; \
+	else \
+		cd build && find markdown-up -type f -print0 | sort -z | \
+			tar --null --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz; \
+	fi
 
 
 gh-pages:
