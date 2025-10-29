@@ -1,6 +1,9 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+include <unittest.bare>
+include <unittestMock.bare>
+
 
 # Test arguments array
 testArgsArguments = [ \
@@ -12,15 +15,6 @@ testArgsArguments = [ \
     {'name': 'name', 'type': 'string', 'description': 'The name'}, \
     {'name': 'url', 'global': 'vURL'} \
 ]
-
-
-async function testArgsSentinel():
-    unittestEqual(systemGlobalGet('argsSentinel'), true)
-    systemGlobalSet('argsSentinel', 1)
-    include '../args.bare'
-    unittestEqual(systemGlobalGet('argsSentinel'), 1)
-endfunction
-unittestRunTest('testArgsSentinel')
 
 
 function testArgsValidate():
@@ -93,7 +87,7 @@ function testArgsParseAll():
     # Set argument globals
     systemGlobalSet('vPrint', 1)
     systemGlobalSet('vBegin', '2023-10-01')
-    systemGlobalSet('vEnd', '2023-11-01T12:00:00Z')
+    vEnd = systemGlobalSet('vEnd', '2023-11-01T12:00:00Z')
     systemGlobalSet('vCount', 5)
     systemGlobalSet('vNumber', 3.14)
     systemGlobalSet('vName', 'test')
@@ -486,7 +480,7 @@ function testArgsURLGlobalAll():
     # Set argument globals
     systemGlobalSet('vPrint', 1)
     systemGlobalSet('vBegin', '2023-10-01')
-    systemGlobalSet('vEnd', '2023-11-01T12:00:00Z')
+    vEnd = systemGlobalSet('vEnd', '2023-11-01T12:00:00Z')
     systemGlobalSet('vCount', 5)
     systemGlobalSet('vNumber', 3.14)
     systemGlobalSet('vName', 'test')

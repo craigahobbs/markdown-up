@@ -36,8 +36,8 @@ help:
 .PHONY: test-include
 commit: test-include
 test-include: build/npm.build
-	$(NODE_SHELL) npx bare -s static/include/*.bare static/include/test/*.bare
-	$(NODE_SHELL) npx bare -d -v vUnittestReport true -m static/include/test/runTests.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
+	$(NODE_SHELL) npx bare -x -m static/include/*.bare static/include/test/*.bare
+	$(NODE_SHELL) npx bare -d -m static/include/test/runTests.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
 	$(NODE_SHELL) npx bare -d -v vUnittestReport true static/include/test/runTestsMarkdownUp.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
 
 

@@ -2,16 +2,16 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 include <unittest.bare>
-include <unittestMock.bare>
 
+
+# Save the originals
+markdownPrintOriginal = systemGlobalGet('markdownPrint')
+
+# Include the system markdownUp.bare
+include <markdownUp.bare>
 
 # Start coverage
 coverageStart()
-
-# Save the originals
-dataTableOriginal = systemGlobalGet('dataTable')
-markdownPrintOriginal = systemGlobalGet('markdownPrint')
-elementModelRenderOriginal = systemGlobalGet('elementModelRender')
 
 # Include the local markdownUp.bare
 include '../markdownUp.bare'
@@ -27,14 +27,6 @@ include 'testMarkdownUp.bare'
 
 # Stop coverage
 coverageStop()
-
-# Restore the remaining orignals
-if dataTableOriginal:
-    dataTable = dataTableOriginal
-endif
-if elementModelRenderOriginal:
-    elementModelRender = elementModelRenderOriginal
-endif
 
 # Test report
 return unittestReport({ \

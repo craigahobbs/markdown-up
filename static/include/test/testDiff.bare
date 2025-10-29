@@ -1,14 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-
-async function testDiffSentinel():
-    unittestEqual(systemGlobalGet('diffSentinel'), true)
-    systemGlobalSet('diffSentinel', 1)
-    include '../diff.bare'
-    unittestEqual(systemGlobalGet('diffSentinel'), 1)
-endfunction
-unittestRunTest('testDiffSentinel')
+include <unittest.bare>
 
 
 function testDiffLines():
