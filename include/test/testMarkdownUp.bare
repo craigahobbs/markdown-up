@@ -1,14 +1,8 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-
-async function testMarkdownUpSentinel():
-    unittestEqual(systemGlobalGet('markdownUpSentinel'), true)
-    systemGlobalSet('markdownUpSentinel', 1)
-    include '../markdownUp.bare'
-    unittestEqual(systemGlobalGet('markdownUpSentinel'), 1)
-endfunction
-unittestRunTest('testMarkdownUpSentinel')
+include <unittest.bare>
+include <unittestMock.bare>
 
 
 function testMarkdownUp_dataLineChart():
@@ -294,6 +288,7 @@ unittestRunTest('testMarkdownUp_markdownParse')
 
 
 function testMarkdownUp_markdownPrint():
+    markdownPrintStub = systemGlobalGet('markdownPrintStub')
     unittestMockOneGeneric('systemLog')
     unittestEqual(markdownPrintStub('Hello', ['1', '2'], null, 'Goodbye'), null)
     unittestDeepEqual(unittestMockEnd(), [ \

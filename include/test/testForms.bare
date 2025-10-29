@@ -1,14 +1,8 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-
-async function testFormsSentinel():
-    unittestEqual(systemGlobalGet('formsSentinel'), true)
-    systemGlobalSet('formsSentinel', 1)
-    include '../forms.bare'
-    unittestEqual(systemGlobalGet('formsSentinel'), 1)
-endfunction
-unittestRunTest('testFormsSentinel')
+include <forms.bare>
+include <unittest.bare>
 
 
 function testFormsTextElements():
@@ -126,12 +120,12 @@ unittestRunTest('testFormsLinkButtonElements')
 
 
 function testFormsLinkElements():
-    elements = formsLinkElements('Hello', '#var=')
+    elements = formsLinkElements('Hello', '/#var=')
     unittestDeepEqual( \
         elements, \
         { \
             'html': 'a', \
-            'attr': {'href': '#var='}, \
+            'attr': {'href': '/#var='}, \
             'elem': {'text': 'Hello'} \
         } \
     )

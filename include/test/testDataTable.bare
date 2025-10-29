@@ -1,14 +1,7 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
-
-async function testDataTableSentinel():
-    unittestEqual(systemGlobalGet('dataTableSentinel'), true)
-    systemGlobalSet('dataTableSentinel', 1)
-    include '../dataTable.bare'
-    unittestEqual(systemGlobalGet('dataTableSentinel'), 1)
-endfunction
-unittestRunTest('testDataTableSentinel')
+include <unittest.bare>
 
 
 function testDataTableMarkdown():

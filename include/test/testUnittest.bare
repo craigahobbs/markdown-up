@@ -1,15 +1,20 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+include <unittest.bare>
+include <unittestMock.bare>
+
 
 # Helper to begin mocking the unittest global state
 function testUnittestMockBegin():
     result = [ \
-        unittestTests, unittestWarnings, unittestTestName, vUnittestTest, vUnittestScript, vUnittestHideTests, vUnittestReport \
+        systemGlobalGet('unittestData'), \
+        systemGlobalGet('vUnittestTest'), \
+        systemGlobalGet('vUnittestScript'), \
+        systemGlobalGet('vUnittestHideTests'), \
+        systemGlobalGet('vUnittestReport') \
     ]
-    systemGlobalSet('unittestTests', {})
-    systemGlobalSet('unittestWarnings', [])
-    systemGlobalSet('unittestTestName', null)
+    systemGlobalSet('unittestData', {'tests': {}, 'warnings': [], 'current': null})
     systemGlobalSet('vUnittestTest', null)
     systemGlobalSet('vUnittestScript', null)
     systemGlobalSet('vUnittestHideTests', false)
@@ -20,15 +25,11 @@ endfunction
 
 # Helper to end mocking the unittest global state
 function testUnittestMockEnd(beginResult):
-    result = [unittestTests, unittestWarnings]
-    systemGlobalSet('unittestTests', arrayGet(beginResult, 0))
-    systemGlobalSet('unittestWarnings', arrayGet(beginResult, 1))
-    systemGlobalSet('unittestTestName', arrayGet(beginResult, 2))
-    systemGlobalSet('vUnittestTest', arrayGet(beginResult, 3))
-    systemGlobalSet('vUnittestScript', arrayGet(beginResult, 4))
-    systemGlobalSet('vUnittestHideTests', arrayGet(beginResult, 5))
-    systemGlobalSet('vUnittestReport', arrayGet(beginResult, 6))
-    return result
+    systemGlobalSet('unittestData', arrayGet(beginResult, 0))
+    systemGlobalSet('vUnittestTest', arrayGet(beginResult, 1))
+    systemGlobalSet('vUnittestScript', arrayGet(beginResult, 2))
+    systemGlobalSet('vUnittestHideTests', arrayGet(beginResult, 3))
+    systemGlobalSet('vUnittestReport', arrayGet(beginResult, 4))
 endfunction
 
 
@@ -284,15 +285,6 @@ function testUnittestCoverageGlobalGet_noData():
 endfunction
 
 
-async function testUnittestSentinel():
-    unittestEqual(systemGlobalGet('unittestSentinel'), true)
-    systemGlobalSet('unittestSentinel', 1)
-    include '../unittest.bare'
-    unittestEqual(systemGlobalGet('unittestSentinel'), 1)
-endfunction
-unittestRunTest('testUnittestSentinel')
-
-
 async function testUnittestRunTest():
     # Mock coverageGlobalGet
     coverageGlobalGetOriginal = systemGlobalGet('coverageGlobalGet')
@@ -445,7 +437,7 @@ async function testUnittestRunTest_failure():
         ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]], \
         ['markdownPrint', ['', '## Coverage Report']], \
         ['markdownPrint', ['', '*No data.*']] \
-      ])
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_failure')
 
@@ -483,7 +475,7 @@ async function testUnittestRunTest_hideTests():
         ['markdownPrint', ['', '[Show](#var=)']], \
         ['markdownPrint', ['', '## Coverage Report']], \
         ['markdownPrint', ['', '*No data.*']] \
-      ])
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_hideTests')
 
@@ -502,6 +494,7 @@ async function testUnittestRunTest_testName():
     unittestRunTest('testUnittest_testPass')
     unittestRunTest('testUnittest_testFail')
     result = unittestReport()
+    systemGlobalSet('vUnittestTest', null)
     testUnittestMockEnd(mockBegin)
 
     # Restore the original coverageGlobalGet
@@ -517,9 +510,38 @@ async function testUnittestRunTest_testName():
         ['markdownPrint', ['', '[All tests](#var=)']], \
         ['markdownPrint', ['', '## Passing Tests']], \
         ['markdownPrint', ['', "[testUnittest\\_testPass](#var.vUnittestTest='testUnittest_testPass'&_top) - OK"]] \
-      ])
+    ])
 endfunction
 unittestRunTest('testUnittestRunTest_testName')
+
+
+async function testUnittestRunTest_disabled():
+    # Mock coverageGlobalGet
+    coverageGlobalGetOriginal = systemGlobalGet('coverageGlobalGet')
+    systemGlobalSet('coverageGlobalGet', testUnittestCoverageGlobalGet_noData)
+
+    # Setup mocks
+    unittestMockAll()
+
+    # Run unit tests and report
+    mockBegin = testUnittestMockBegin()
+    systemGlobalSet('vUnittestDisabled', true)
+    unittestRunTest('testUnittest_testPass')
+    unittestRunTest('testUnittest_testFail')
+    result = unittestReport()
+    systemGlobalSet('vUnittestDisabled', null)
+    testUnittestMockEnd(mockBegin)
+
+    # Restore the original coverageGlobalGet
+    systemGlobalSet('coverageGlobalGet', coverageGlobalGetOriginal)
+
+    # Verify report result
+    unittestEqual(result, 0)
+
+    # Reset mocks
+    unittestDeepEqual(unittestMockEnd(), [])
+endfunction
+unittestRunTest('testUnittestRunTest_disabled')
 
 
 async function testUnittestRunTest_multiple():

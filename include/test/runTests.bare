@@ -2,12 +2,20 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 
+# Include all system includes
+include <args.bare>
+include <dataTable.bare>
+include <diff.bare>
+include <forms.bare>
+include <pager.bare>
+include <unittest.bare>
+include <unittestMock.bare>
+
 # Start coverage
 coverageStart()
 
-# Include all include scripts (except markdownUp.bare) to prevent use of system includes
+# Override all system includes
 include '../args.bare'
-systemGlobalSet('dataTableSentinel', null)
 include '../dataTable.bare'
 include '../diff.bare'
 include '../forms.bare'

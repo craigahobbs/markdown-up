@@ -1,6 +1,10 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+include <pager.bare>
+include <unittest.bare>
+include <unittestMock.bare>
+
 
 # Test page function
 function testPagerModel_page2():
@@ -27,15 +31,6 @@ testPagerModel = { \
             'function': testPagerModel_page4}}} \
     ] \
 }
-
-
-async function testPagerSentinel():
-    unittestEqual(systemGlobalGet('pagerSentinel'), true)
-    systemGlobalSet('pagerSentinel', 1)
-    include '../pager.bare'
-    unittestEqual(systemGlobalGet('pagerSentinel'), 1)
-endfunction
-unittestRunTest('testPagerSentinel')
 
 
 async function testPagerMarkdown():
