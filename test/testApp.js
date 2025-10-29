@@ -1968,8 +1968,8 @@ systemLogDebug('Hello')
         'MarkdownUp: Fetching "README.md" ...',
         'MarkdownUp: Fetch completed in X milliseconds',
         'MarkdownUp: Executing script at line number 4 ...',
-        'MarkdownUp: Script static analysis... OK',
         'Hello',
+        'MarkdownUp: Script static analysis... OK',
         'MarkdownUp: Script executed in X milliseconds',
         'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
@@ -2015,8 +2015,8 @@ systemLogDebug('Hello')
     assert.deepEqual(cleanedLogs, [
         'MarkdownUp: ===== Rendering Markdown text',
         'MarkdownUp: Executing script at line number 4 ...',
-        'MarkdownUp: Script static analysis... OK',
         'Hello',
+        'MarkdownUp: Script static analysis... OK',
         'MarkdownUp: Script executed in X milliseconds',
         'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
@@ -2163,7 +2163,8 @@ foo bar
 `,
         'MarkdownUp: ===== Rendering Markdown text',
         'MarkdownUp: Executing script at line number 2 ...',
-        'MarkdownUp: Script static analysis... OK',
+        'MarkdownUp: Script static analysis... 1 warning:',
+        'MarkdownUp: :1: Unknown global variable "varName"',
         'MarkdownUp: Script executed in X milliseconds',
         'MarkdownUp: Markdown rendered in X milliseconds'
     ]);
