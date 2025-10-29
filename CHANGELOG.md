@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.12.0 (2025-10-29)
+
+- [7c21103](https://github.com/craigahobbs/markdown-up/commit/7c21103) - update lintScript usage
+
+- [841cb45](https://github.com/craigahobbs/markdown-up/commit/841cb45) - bare-script 3.8
+
+- [1397dea](https://github.com/craigahobbs/markdown-up/commit/1397dea) - prevent mac metadata from getting in tarbell \(again\)
+
+- [8389f58](https://github.com/craigahobbs/markdown-up/commit/8389f58) - use string escapes
+
+- [e59be08](https://github.com/craigahobbs/markdown-up/commit/e59be08) - update args.bare argsHelp function
+
+- [f4eb5cb](https://github.com/craigahobbs/markdown-up/commit/f4eb5cb) - improve static analysis logging
+
 ## 3.11.1 (2025-10-20)
 
 - [9904b74](https://github.com/craigahobbs/markdown-up/commit/9904b74) - use barescript object syntax
