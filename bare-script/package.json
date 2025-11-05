@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "bare-script",
-    "version": "3.8.1",
+    "version": "3.8.2",
     "description": "BareScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -21,7 +21,8 @@
         "baredoc": "./bin/baredoc.js"
     },
     "files": [
-        "lib/**/*"
+        "lib/*.js",
+        "lib/include/*.bare"
     ],
     "scripts": {
         "test": "node --test test/"
@@ -31,7 +32,7 @@
     },
     "devDependencies": {
         "c8": "~10.1",
-        "eslint": "~9.36",
+        "eslint": "~9.39",
         "jsdoc": "~4.0"
     }
 }
