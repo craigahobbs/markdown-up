@@ -30,32 +30,12 @@ clean:
 
 
 help:
-	@echo '            [app|run|tarball|test-include]'
-
-
-.PHONY: test-include
-commit: test-include
-test-include: build/npm.build
-	$(NODE_SHELL) npx bare -x -m static/include/*.bare static/include/test/*.bare
-	$(NODE_SHELL) npx bare -d -m static/include/test/runTests.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
-	$(NODE_SHELL) npx bare -d -v vUnittestReport true static/include/test/runTestsMarkdownUp.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
+	@echo '            [app|run|tarball]'
 
 
 .PHONY: app run tarball
 run: app
 	python3 -m http.server --directory build/app
-
-
-build/npm.build: build/bare-script-library-app.bare
-build/bare-script-library-app.bare:
-	mkdir -p build/bare-script-library
-	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/app.bare) && mv app.bare $(notdir $@)
-
-
-build/npm.build: build/bare-script-library.json
-build/bare-script-library.json:
-	mkdir -p build
-	cd build && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/library/library.json) && mv library.json $(notdir $@)
 
 
 commit: app
@@ -87,32 +67,6 @@ app: doc tarball
 		mv $$FILE.tmp $$FILE; \
 	done
 
-    # Generate the library documentation
-	$(NODE_SHELL) npx baredoc lib/scriptLibrary.js -o build/app/library/library.json
-
-    # Generate the single-page library documentation
-	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.bare \
-		-v vSingle true -v vPublish true -v 'vBareScriptURL' "'../../bare-script-library.json'" \
-		-c "baredocMain(['library.json', vBareScriptURL], 'The MarkdownUp Library')" \
-		> markdownup-library.md
-
-    # Generate the include library documentation
-	$(NODE_SHELL) npx baredoc static/include/*.bare -o build/app/library/include.json
-
-    # Generate the single-page include library documentation
-	cd build/app/library/ && \
-	$(NODE_SHELL) npx bare -m ../../bare-script-library-app.bare \
-		-v vSingle true -v vPublish true \
-		-c "baredocMain('include.json', 'The MarkdownUp Include Library', null, 'includeContent.json')" \
-		> markdownup-include-library.md
-
-    # Generate the library model documentation
-	$(NODE_SHELL) node --input-type=module -e "$$LIBRARY_MODEL_JS" build/app/library/model.json
-
-    # Generate the include library model documentation
-	$(NODE_SHELL) node --input-type=module -e "$$INCLUDE_LIBRARY_MODEL_JS" build/app/library/includeModel.json
-
 
 tarball: build/npm.build
 	rm -rf build/markdown-up
@@ -121,7 +75,6 @@ tarball: build/npm.build
     # Statics
 	date -I > build/markdown-up/VERSION.txt
 	cp static/app.css build/markdown-up
-	cp -R static/include build/markdown-up
 	rm -rf build/markdown-up/include/test
 
     # Application
@@ -132,8 +85,8 @@ tarball: build/npm.build
 	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
 	rm -rf \
 		build/markdown-up/bare-script/lib/bare.js \
-		build/markdown-up/bare-script/lib/baredoc.js \
-		build/markdown-up/bare-script/lib/include/
+		build/markdown-up/bare-script/lib/baredoc.js
+	mv build/markdown-up/bare-script/lib/include/ build/markdown-up/
 
     # element-model
 	mkdir -p build/markdown-up/element-model
@@ -186,58 +139,3 @@ gh-pages:
 	if ! diff -r --exclude=VERSION.txt build/markdown-up build/markdown-up.orig/markdown-up >/dev/null; then \
 		cp build/markdown-up.tar.gz ../$(notdir $(CURDIR)).gh-pages/markdown-up.tar.gz; \
 	fi
-
-
-# JavaScript to generate the library model documentation
-define LIBRARY_MODEL_JS
-import {argv} from 'node:process';
-import {dataTableTypes} from "./lib/dataTable.js";
-import {documentKeyEventTypes} from "./lib/scriptLibrary.js";
-import {lineChartTypes} from "./lib/lineChart.js";
-import {valueJSON} from 'bare-script/lib/value.js';
-import {writeFileSync} from 'node:fs';
-
-// Command-line arguments
-const [, typeModelPath] = argv;
-
-// Create the library type model
-const types = {...dataTableTypes, ...documentKeyEventTypes, ...lineChartTypes};
-
-// Write the library type model
-writeFileSync(typeModelPath, valueJSON(types));
-endef
-export LIBRARY_MODEL_JS
-
-
-# BareScript to write the include library model documentation
-define INCLUDE_LIBRARY_MODEL_JS
-import {fetchReadWrite, logStdout} from 'bare-script/lib/optionsNode.js';
-import {argv} from 'node:process';
-import {executeScriptAsync} from 'bare-script/lib/runtimeAsync.js';
-import {parseScript} from 'bare-script/lib/parser.js';
-import {valueJSON} from 'bare-script/lib/value.js';
-import {writeFileSync} from 'node:fs';
-
-// Command-line arguments
-const [, typeModelPath] = argv;
-
-// Create the include library type model
-const script = parseScript(`
-include 'static/include/args.bare'
-include 'static/include/dataTable.bare'
-include 'static/include/diff.bare'
-include 'static/include/pager.bare'
-
-includeTypes = {}
-objectAssign(includeTypes, argsTypes)
-objectAssign(includeTypes, dataTableTypes)
-objectAssign(includeTypes, diffTypes)
-objectAssign(includeTypes, pagerTypes)
-return includeTypes
-`);
-const includeTypes = await executeScriptAsync(script, {'fetchFn': fetchReadWrite, 'logFn': logStdout});
-
-// Write the include library type model
-writeFileSync(typeModelPath, valueJSON(includeTypes));
-endef
-export INCLUDE_LIBRARY_MODEL_JS
