@@ -56,6 +56,7 @@ app: doc tarball
 		build/doc \
 		build/markdown-up.tar.gz \
 		build/app/
+	mv build/app/bare-script/lib/include/ build/app/
 
     # Fix imports
 	for FILE in `find build/app/*/lib -name '*.js'`; do \
