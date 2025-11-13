@@ -86,7 +86,7 @@ export function parseMarkdown(markdown, startLineNumber = 1) {
     return parseMarkdownInternal(markdown, startLineNumber, null);
 }
 
-export function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
+function parseMarkdownInternal(markdown, startLineNumber, linkRefsRaw) {
     const linkRefs = linkRefsRaw ?? {'defs': {}, 'links': []};
     const markdownParts = [];
     let paragraphLines = [];
@@ -430,6 +430,7 @@ const rLinkHref = '[ \\r\\n]*(?<linkHref>' +
       '))?[ \\r\\n]*';
 const rSpans = new RegExp(
     '(?<br>(?: {2,}|(?<!\\\\)\\\\)\\r?\\n)|' +
+    '(?<brHtml><br/?>)|' +
     `(?<linkImg>\\[\\s*!\\[${rLinkText.replaceAll('<link', '<linkImg')}\\]` +
         `\\(${rLinkHref.replaceAll('<link', '<linkImg')}\\)\\s*\\]` +
         `\\(${rLinkHref.replaceAll('<link', '<linkImgLink')}\\))|` +
@@ -476,6 +477,10 @@ function paragraphSpans(text, linkRefs) {
 
         // Line break?
         if (typeof matchGroups.br !== 'undefined') {
+            spans.push({'br': 1});
+
+        // <br> HTML line break?
+        } else if (typeof matchGroups.brHtml !== 'undefined') {
             spans.push({'br': 1});
 
         // Link with inline image?
