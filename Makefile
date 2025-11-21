@@ -52,7 +52,6 @@ app: doc tarball
 		node_modules/element-model \
 		node_modules/markdown-model \
 		node_modules/schema-markdown \
-		node_modules/schema-markdown-doc \
 		build/doc \
 		build/markdown-up.tar.gz \
 		build/app/
@@ -99,13 +98,9 @@ tarball: build/npm.build
 	mkdir -p build/markdown-up/markdown-model/static
 	cp node_modules/markdown-model/static/markdown-model.css build/markdown-up/markdown-model/static
 
-    # schema-markdown-doc
+    # schema-markdown
 	mkdir -p build/markdown-up/schema-markdown
 	cp -R node_modules/schema-markdown/lib build/markdown-up/schema-markdown
-
-    # schema-markdown-doc
-	mkdir -p build/markdown-up/schema-markdown-doc
-	cp -R node_modules/schema-markdown-doc/lib build/markdown-up/schema-markdown-doc
 
     # Fix imports
 	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \

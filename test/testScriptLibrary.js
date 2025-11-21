@@ -5,7 +5,6 @@ import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownScriptRuntime} from '../lib/script.js';
 import {strict as assert} from 'node:assert';
 import {markdownScriptFunctions} from '../lib/scriptLibrary.js';
-import {parseSchemaMarkdown} from 'schema-markdown/lib/parser.js';
 import test from 'node:test';
 
 
@@ -1627,6 +1626,86 @@ test('script library, localStorageRemove', () => {
 //
 
 
+test('script library, markdownElements', () => {
+    const runtime = testRuntime();
+    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n[Link](link.html)'], runtime.options);
+    assert.deepEqual(
+        markdownScriptFunctions.markdownElements([markdownModel], runtime.options),
+        [
+            {'html': 'h1', 'attr': {'id': 'foo/#title'}, 'elem': [{'text': 'Title'}]},
+            {
+                'html': 'p',
+                'elem': [
+                    {'html': 'a', 'attr': {'href': '/foo/link.html'}, 'elem': [{'text': 'Link'}]}
+               ]
+            }
+        ]
+    );
+});
+
+
+test('script library, markdownElements generic', () => {
+    const runtime = testRuntime();
+    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n[Link](link.html)'], runtime.options);
+    assert.deepEqual(
+        markdownScriptFunctions.markdownElements([markdownModel, true], runtime.options),
+        [
+            {'html': 'h1', 'attr': {'id': 'title'}, 'elem': [{'text': 'Title'}]},
+            {
+                'html': 'p',
+                'elem': [
+                    {'html': 'a', 'attr': {'href': 'link.html'}, 'elem': [{'text': 'Link'}]}
+               ]
+            }
+        ]
+    );
+});
+
+
+test('script library, markdownElements copyFn', () => {
+    const runtime = testRuntime();
+    /* c8 ignore next */
+    runtime.options.markdownOptions.copyFn = (text) => text;
+    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n```\ncode\n```'], runtime.options);
+    const elements = markdownScriptFunctions.markdownElements([markdownModel], runtime.options);
+    assert.equal(typeof elements[1][0].elem.callback, 'function');
+    elements[1][0].elem.callback = null;
+    assert.deepEqual(
+        elements,
+        [
+            {'html': 'h1', 'attr': {'id': 'foo/#title'}, 'elem': [{'text': 'Title'}]},
+            [
+                {
+                    'html': 'p',
+                    'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
+                    'elem': {'html': 'a', 'elem': {'text': 'Copy'}, 'callback': null}
+                },
+                {'html': 'pre', 'attr': {'style': 'margin-top: 0.25em'}, 'elem': {'elem': {'text': 'code\n'}, 'html': 'code'}}
+            ]
+        ]
+    );
+});
+
+
+test('script library, markdownElements generic copyFn', () => {
+    const runtime = testRuntime();
+    /* c8 ignore next */
+    runtime.options.markdownOptions.copyFn = (text) => text;
+    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n```\ncode\n```'], runtime.options);
+    const elements = markdownScriptFunctions.markdownElements([markdownModel, true], runtime.options);
+    assert.deepEqual(
+        elements,
+        [
+            {'html': 'h1', 'attr': {'id': 'title'}, 'elem': [{'text': 'Title'}]},
+            [
+                null,
+                {'html': 'pre', 'attr': null, 'elem': {'html': 'code', 'elem': {'text': 'code\n'}}}
+            ]
+        ]
+    );
+});
+
+
 test('script library, markdownEscape', () => {
     const runtime = testRuntime();
     assert.equal(markdownScriptFunctions.markdownEscape(['Hello*World!'], runtime.options), 'Hello\\*World!');
@@ -1679,152 +1758,6 @@ test('script library, markdownTitle', () => {
     const runtime = testRuntime();
     const markdownModel = markdownScriptFunctions.markdownParse(['# Title', '', 'Hello'], runtime.options);
     assert.equal(markdownScriptFunctions.markdownTitle([markdownModel], runtime.options), 'Title');
-});
-
-
-//
-// Schema functions
-//
-
-
-test('script library, schemaElements', () => {
-    const runtime = testRuntime();
-    runtime.options.params = '';
-    const types = parseSchemaMarkdown(['# My struct', 'struct MyStruct', '', '  # An integer\n  int a']);
-    const elements = markdownScriptFunctions.schemaElements([types, 'MyStruct'], runtime.options);
-    assert.deepEqual(elements, [
-        [
-            {'html': 'h1', 'attr': {'id': 'type_MyStruct'}, 'elem': {'text': 'struct MyStruct'}},
-            null,
-            [
-                {'html': 'p', 'elem': [{'text': 'My struct'}]}
-            ],
-            {
-                'html': 'table',
-                'elem': [
-                    {
-                        'html': 'tr',
-                        'elem': [
-                            {'html': 'th', 'elem': {'text': 'Name'}},
-                            {'html': 'th', 'elem': {'text': 'Type'}},
-                            null,
-                            {'html': 'th', 'elem': {'text': 'Description'}}
-                        ]
-                    },
-                    [
-                        {
-                            'html': 'tr',
-                            'elem': [
-                                {'html': 'td', 'elem': {'text': 'a'}},
-                                {'html': 'td', 'elem': {'text': 'int'}},
-                                null,
-                                {'html': 'td', 'elem': [{'html': 'p', 'elem': [{'text': 'An integer'}]}]}
-                            ]
-                        }
-                    ]
-                ]
-            }
-        ],
-        null
-    ]);
-});
-
-
-test('script library, schemaElements action URLs', () => {
-    const runtime = testRuntime();
-    runtime.options.params = '';
-    const types = parseSchemaMarkdown(['# My action', 'action MyAction', '  urls', '  GET /']);
-    const elements = markdownScriptFunctions.schemaElements([types, 'MyAction', [{'method': 'POST', 'path': '/foo'}]], runtime.options);
-    const nbsp = String.fromCharCode(160, 160);
-    assert.deepEqual(elements, [
-        [
-            {'html': 'h1', 'attr': {'id': 'type_MyAction'}, 'elem': {'text': 'action MyAction'}},
-            [
-                {'html': 'p', 'elem': [{'text': 'My action'}]}
-            ],
-            [
-                {
-                    'html': 'p',
-                    'elem': [
-                        {'html': 'b', 'elem': {'text': 'Note: '}},
-                        {'text': 'The request is exposed at the following URL:'}
-                    ]
-                },
-                [
-                    {'html': 'p', 'elem': [{'text': nbsp}, {'html': 'a', 'attr': {'href': '/foo'}, 'elem': {'text': 'POST /foo'}}]}
-                ]
-            ],
-            null,
-            null,
-            null,
-            null,
-            [
-                {'html': 'h2', 'attr': {'id': 'type_MyAction_errors'}, 'elem': {'text': 'Error Codes'}},
-                null,
-                null,
-                [
-                    {'html': 'p', 'elem': [{'text': 'If an application error occurs, the response is of the form:'}]},
-                    [
-                        null,
-                        {
-                            'html': 'pre',
-                            'attr': null,
-                            'elem': {
-                                'html': 'code',
-                                'elem': {'text': '{\n    "error": "<code>",\n    "message": "<message>"\n}\n'}
-                            }
-                        }
-                    ],
-                    {'html': 'p', 'elem': [{'text': '"message" is optional. "<code>" is one of the following values:'}]}
-                ],
-                {
-                    'html': 'table',
-                    'elem': [
-                        {
-                            'html': 'tr',
-                            'elem': [
-                                {'html': 'th', 'elem': {'text': 'Value'}},
-                                null
-                            ]
-                        },
-                        [
-                            {
-                                'html': 'tr',
-                                'elem': [
-                                    {'html': 'td', 'elem': {'text': 'UnexpectedError'}},
-                                    null
-                                ]
-                            }
-                        ]
-                    ]
-                }
-            ]
-        ],
-        null
-    ]);
-});
-
-
-test('script library, schemaElements action custom response', () => {
-    const runtime = testRuntime();
-    runtime.options.params = '';
-    const types = parseSchemaMarkdown(['# My action', 'action MyAction', '  urls', '  GET /']);
-    const elements = markdownScriptFunctions.schemaElements([types, 'MyAction', [], true], runtime.options);
-    assert.deepEqual(elements, [
-        [
-            {'html': 'h1', 'attr': {'id': 'type_MyAction'}, 'elem': {'text': 'action MyAction'}},
-            [
-                {'html': 'p', 'elem': [{'text': 'My action'}]}
-            ],
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        ],
-        null
-    ]);
 });
 
 
