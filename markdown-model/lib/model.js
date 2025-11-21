@@ -18,7 +18,7 @@ export function validateMarkdownModel(markdown) {
 }
 
 
-/** The Markdown [type model]{@link https://craigahobbs.github.io/schema-markdown-doc/doc/#var.vName='Types'} */
+/** The Markdown [type model]{@link https://craigahobbs.github.io/bare-script/model/#var.vURL=''&var.vName='Types'} */
 export const markdownModelTypes = parseSchemaMarkdown(`\
 group "Markdown"
 
