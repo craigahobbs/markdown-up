@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.12.1 (2025-11-21)
+
+- [ffc9fc3](https://github.com/craigahobbs/markdown-up/commit/ffc9fc3) - remove schemaElements, add markdownElements
+
 ## 3.12.0 (2025-10-29)
 
 - [7c21103](https://github.com/craigahobbs/markdown-up/commit/7c21103) - update lintScript usage
