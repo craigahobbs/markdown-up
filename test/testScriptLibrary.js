@@ -1844,14 +1844,43 @@ test('script library, windowClipboardRead', async () => {
 
 test('script library, windowClipboardWrite', async () => {
     const runtime = testRuntime();
-    const writeTextCalls = [];
+    const writeCalls = [];
     runtime.options.window.navigator.clipboard = {
-        'writeText': (text) => {
-            writeTextCalls.push(text);
+        'write': (clipboardItems) => {
+            writeCalls.push(clipboardItems[0].types);
         }
     };
+
+    class MockClipboardItem {
+        constructor(data) {
+            this.types = Object.keys(data);
+        }
+    };
+    runtime.options.window.ClipboardItem = MockClipboardItem;
+
     assert.equal(await markdownScriptFunctions.windowClipboardWrite(['Hello!'], runtime.options), undefined);
-    assert.deepEqual(writeTextCalls, ['Hello!']);
+    assert.deepEqual(writeCalls, [['text/plain']]);
+});
+
+
+test('script library, windowClipboardWrite SVG', async () => {
+    const runtime = testRuntime();
+    const writeCalls = [];
+    runtime.options.window.navigator.clipboard = {
+        'write': (clipboardItems) => {
+            writeCalls.push(clipboardItems[0].types);
+        }
+    };
+
+    class MockClipboardItem {
+        constructor(data) {
+            this.types = Object.keys(data);
+        }
+    };
+    runtime.options.window.ClipboardItem = MockClipboardItem;
+
+    assert.equal(await markdownScriptFunctions.windowClipboardWrite(['<svg>', 'image/svg+xml'], runtime.options), undefined);
+    assert.deepEqual(writeCalls, [['image/svg+xml']]);
 });
 
 
