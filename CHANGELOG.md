@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.12.2 (2026-01-08)
+
+- [b5ab1bf](https://github.com/craigahobbs/markdown-up/commit/b5ab1bf) - update windowClipboardWrite documentation
+
+- [41ee332](https://github.com/craigahobbs/markdown-up/commit/41ee332) - add windowClipboardWrite type argument
+
 ## 3.12.1 (2025-11-21)
 
 - [ffc9fc3](https://github.com/craigahobbs/markdown-up/commit/ffc9fc3) - remove schemaElements, add markdownElements
