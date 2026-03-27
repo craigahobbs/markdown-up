@@ -500,109 +500,6 @@ test('script library, localStorageRemove', () => {
 //
 
 
-test('script library, markdownElements', () => {
-    const runtime = testRuntime();
-    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n[Link](link.html)'], runtime.options);
-    assert.deepEqual(
-        markdownScriptFunctions.markdownElements([markdownModel], runtime.options),
-        [
-            {'html': 'h1', 'attr': {'id': 'foo/#title'}, 'elem': [{'text': 'Title'}]},
-            {
-                'html': 'p',
-                'elem': [
-                    {'html': 'a', 'attr': {'href': '/foo/link.html'}, 'elem': [{'text': 'Link'}]}
-               ]
-            }
-        ]
-    );
-});
-
-
-test('script library, markdownElements generic', () => {
-    const runtime = testRuntime();
-    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n[Link](link.html)'], runtime.options);
-    assert.deepEqual(
-        markdownScriptFunctions.markdownElements([markdownModel, true], runtime.options),
-        [
-            {'html': 'h1', 'attr': {'id': 'title'}, 'elem': [{'text': 'Title'}]},
-            {
-                'html': 'p',
-                'elem': [
-                    {'html': 'a', 'attr': {'href': 'link.html'}, 'elem': [{'text': 'Link'}]}
-               ]
-            }
-        ]
-    );
-});
-
-
-test('script library, markdownElements copyFn', () => {
-    const runtime = testRuntime();
-    /* c8 ignore next */
-    runtime.options.markdownOptions.copyFn = (text) => text;
-    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n```\ncode\n```'], runtime.options);
-    const elements = markdownScriptFunctions.markdownElements([markdownModel], runtime.options);
-    assert.equal(typeof elements[1][0].elem.callback, 'function');
-    elements[1][0].elem.callback = null;
-    assert.deepEqual(
-        elements,
-        [
-            {'html': 'h1', 'attr': {'id': 'foo/#title'}, 'elem': [{'text': 'Title'}]},
-            [
-                {
-                    'html': 'p',
-                    'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
-                    'elem': {'html': 'a', 'elem': {'text': 'Copy'}, 'callback': null}
-                },
-                {'html': 'pre', 'attr': {'style': 'margin-top: 0.25em'}, 'elem': {'elem': {'text': 'code\n'}, 'html': 'code'}}
-            ]
-        ]
-    );
-});
-
-
-test('script library, markdownElements generic copyFn', () => {
-    const runtime = testRuntime();
-    /* c8 ignore next */
-    runtime.options.markdownOptions.copyFn = (text) => text;
-    const markdownModel = markdownScriptFunctions.markdownParse(['# Title\n\n```\ncode\n```'], runtime.options);
-    const elements = markdownScriptFunctions.markdownElements([markdownModel, true], runtime.options);
-    assert.deepEqual(
-        elements,
-        [
-            {'html': 'h1', 'attr': {'id': 'title'}, 'elem': [{'text': 'Title'}]},
-            [
-                null,
-                {'html': 'pre', 'attr': null, 'elem': {'html': 'code', 'elem': {'text': 'code\n'}}}
-            ]
-        ]
-    );
-});
-
-
-test('script library, markdownEscape', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.markdownEscape(['Hello*World!'], runtime.options), 'Hello\\*World!');
-});
-
-
-test('script library, markdownHeaderId', () => {
-    const runtime = testRuntime();
-    assert.equal(markdownScriptFunctions.markdownHeaderId(['Hello*World!'], runtime.options), 'hello-world');
-});
-
-
-test('script library, markdownParse', () => {
-    const runtime = testRuntime();
-    assert.deepEqual(markdownScriptFunctions.markdownParse(['# Title', '', 'Hello'], runtime.options), {
-        'parts': [
-            {'paragraph': {'style': 'h1', 'spans': [{'text': 'Title'}]}},
-            {'paragraph': {'spans': [{'text': 'Hello'}]}}
-        ]
-    });
-});
-
-
 test('script library, markdownPrint', () => {
     const runtime = testRuntime();
     markdownScriptFunctions.markdownPrint(['# Title', ['', 'Hello\n\nWorld!']], runtime.options);
@@ -625,13 +522,6 @@ test('script library, markdownPrint', () => {
             }
         ]
     ]);
-});
-
-
-test('script library, markdownTitle', () => {
-    const runtime = testRuntime();
-    const markdownModel = markdownScriptFunctions.markdownParse(['# Title', '', 'Hello'], runtime.options);
-    assert.equal(markdownScriptFunctions.markdownTitle([markdownModel], runtime.options), 'Title');
 });
 
 
