@@ -74,6 +74,8 @@ tarball: build/npm.build
     # Statics
 	date -I > build/markdown-up/VERSION.txt
 	cp static/app.css build/markdown-up
+	mkdir -p build/markdown-up/markdown-model/static
+	cp static/markdown-model.css build/markdown-up/markdown-model/static
 	rm -rf build/markdown-up/include/test
 
     # Application
@@ -86,8 +88,6 @@ tarball: build/npm.build
 		build/markdown-up/bare-script/lib/bare.js \
 		build/markdown-up/bare-script/lib/baredoc.js
 	mv build/markdown-up/bare-script/lib/include/ build/markdown-up/
-	mkdir -p build/markdown-up/markdown-model/static
-	cp node_modules/bare-script/static/markdown-model.css build/markdown-up/markdown-model/static
 
     # element-model
 	mkdir -p build/markdown-up/element-model
