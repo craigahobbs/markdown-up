@@ -565,34 +565,6 @@ test('script library, sessionStorageRemove', () => {
 
 
 //
-// URL functions
-//
-
-
-test('script library, urlObjectCreate', async () => {
-    const runtime = testRuntime();
-
-    runtime.options.window.URL.createObjectURL = (blob) => {
-        createObjectURLCalls.unshift(blob);
-        return `<obj>`;
-    };
-    const createObjectURLCalls = [];
-
-    // Default content type
-    assert.equal(markdownScriptFunctions.urlObjectCreate(['The file text'], runtime.options), '<obj>');
-    let [blob] = createObjectURLCalls;
-    assert.equal(await blob.text(), 'The file text');
-    assert.equal(await blob.type, 'text/plain');
-
-    // With content type
-    assert.equal(markdownScriptFunctions.urlObjectCreate(['The file text', 'text/markdown'], runtime.options), '<obj>');
-    [blob] = createObjectURLCalls;
-    assert.equal(await blob.text(), 'The file text');
-    assert.equal(await blob.type, 'text/markdown');
-});
-
-
-//
 // Window functions
 //
 
@@ -830,6 +802,29 @@ test('script library, windowSetTimeout callback error', async () => {
     assert.equal(runtimeUpdateCount, 1);
     assert.deepEqual(logs, ['MarkdownUp: Error executing windowSetTimeout callback: BOOM!']);
     assert.equal(ontimeCount, 1);
+});
+
+
+test('script library, windowURLObject', async () => {
+    const runtime = testRuntime();
+
+    runtime.options.window.URL.createObjectURL = (blob) => {
+        createObjectURLCalls.unshift(blob);
+        return `<obj>`;
+    };
+    const createObjectURLCalls = [];
+
+    // Default content type
+    assert.equal(markdownScriptFunctions.windowURLObject(['The file text'], runtime.options), '<obj>');
+    let [blob] = createObjectURLCalls;
+    assert.equal(await blob.text(), 'The file text');
+    assert.equal(await blob.type, 'text/plain');
+
+    // With content type
+    assert.equal(markdownScriptFunctions.windowURLObject(['The file text', 'text/markdown'], runtime.options), '<obj>');
+    [blob] = createObjectURLCalls;
+    assert.equal(await blob.text(), 'The file text');
+    assert.equal(await blob.type, 'text/markdown');
 });
 
 
