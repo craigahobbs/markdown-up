@@ -50,6 +50,7 @@ app: doc tarball
 		lib \
 		node_modules/bare-script \
 		node_modules/element-model \
+		node_modules/markdown-model/static/markdown-model.css \
 		node_modules/schema-markdown \
 		build/doc \
 		build/markdown-up.tar.gz \
@@ -74,8 +75,6 @@ tarball: build/npm.build
     # Statics
 	date -I > build/markdown-up/VERSION.txt
 	cp static/app.css build/markdown-up
-	mkdir -p build/markdown-up/markdown-model/static
-	cp static/markdown-model.css build/markdown-up/markdown-model/static
 	rm -rf build/markdown-up/include/test
 
     # Application
@@ -92,6 +91,10 @@ tarball: build/npm.build
     # element-model
 	mkdir -p build/markdown-up/element-model
 	cp -R node_modules/element-model/lib build/markdown-up/element-model
+
+    # markdown-model
+	mkdir -p build/markdown-up/markdown-model/static
+	cp -R node_modules/markdown-model/static/markdown-model.css build/markdown-up/markdown-model/static
 
     # schema-markdown
 	mkdir -p build/markdown-up/schema-markdown

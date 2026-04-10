@@ -24,7 +24,6 @@
     "dependencies": {
         "bare-script": "~3.8",
         "element-model": "~1.2",
-        "markdown-model": "~2.2",
         "schema-markdown": "~1.2"
     },
     "devDependencies": {
@@ -33,6 +32,7 @@
         "eslint": "~10.1",
         "globals": "~17.4",
         "jsdoc": "~4.0",
-        "jsdom": "~29.0"
+        "jsdom": "~29.0",
+        "markdown-model": "~2.2"
     }
 }
