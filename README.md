@@ -26,11 +26,26 @@ markdown-up
 
 ## Host Markdown Web Pages
 
-To host a Markdown resource, download the MarkdownUp application HTML stub to the directory
-containing your Markdown files:
+To host a Markdown resource, add the MarkdownUp application HTML stub to the directory containing
+your Markdown files:
 
-~~~
-curl -O https://craigahobbs.github.io/markdown-up/extra/index.html
+~~~ html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MarkdownUp</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/bare-script/static/markdown.css" as="style">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/appImports.js" as="script">
+    </head>
+    <script type="module">
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/appImports.js';
+        const app = new MarkdownUp(window);
+        app.run();
+    </script>
+</html>
 ~~~
 
 To test your Markdown page, start a local static web server:
@@ -42,14 +57,23 @@ python3 -m http.server
 By default, MarkdownUp fetches the "README.md" resource. To change the default resource, update the
 application stub file, index.html. For example:
 
-~~~
-    ...
+~~~ html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MarkdownUp</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/bare-script/static/markdown.css" as="style">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/appImports.js" as="script">
+    </head>
     <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/appImports.js';
         const app = new MarkdownUp(window, {'url': 'other.md'});
         app.run();
     </script>
-    ...
+</html>
 ~~~
 
 To view a different Markdown resource, set the application's "url" hash parameter (i.e.,

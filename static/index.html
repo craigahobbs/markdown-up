@@ -2,42 +2,15 @@
 <html lang="en">
     <head>
         <title>MarkdownUp</title>
-        <meta charset="UTF-8">
+        <meta charset="utf-8">
         <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="app.css">
-
-        <!-- Preloads -->
-        <link rel="modulepreload" href="bare-script/lib/data.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/library.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/model.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/options.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/parser.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/runtime.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/runtimeAsync.js" as="script">
-        <link rel="modulepreload" href="bare-script/lib/value.js" as="script">
-        <link rel="modulepreload" href="element-model/lib/elementModel.js" as="script">
-        <link rel="modulepreload" href="lib/app.js" as="script">
-        <link rel="modulepreload" href="lib/dataTable.js" as="script">
-        <link rel="modulepreload" href="lib/dataUtil.js" as="script">
-        <link rel="modulepreload" href="lib/lineChart.js" as="script">
-        <link rel="modulepreload" href="lib/script.js" as="script">
-        <link rel="modulepreload" href="lib/scriptLibrary.js" as="script">
-        <link rel="modulepreload" href="markdown-model/lib/elements.js" as="script">
-        <link rel="modulepreload" href="markdown-model/lib/highlight.js" as="script">
-        <link rel="modulepreload" href="markdown-model/lib/parser.js" as="script">
-        <link rel="modulepreload" href="schema-markdown/lib/encode.js" as="script">
-        <link rel="modulepreload" href="schema-markdown/lib/parser.js" as="script">
-        <link rel="modulepreload" href="schema-markdown/lib/schema.js" as="script">
-        <link rel="modulepreload" href="schema-markdown/lib/schemaUtil.js" as="script">
-        <link rel="modulepreload" href="schema-markdown/lib/typeModel.js" as="script">
-        <link rel="preload" href="app.css" as="style">
-        <link rel="preload" href="markdown-model/static/markdown-model.css" as="style">
+        <link rel="preload" href="bare-script/static/markdown.css" as="style">
+        <link rel="modulepreload" href="lib/appImports.js" as="script">
     </head>
-    <body>
-    </body>
     <script type="module">
-        import {MarkdownUp} from './lib/app.js';
+        import {MarkdownUp} from './lib/appImports.js';
         const app = new MarkdownUp(window);
         app.run();
     </script>

@@ -50,7 +50,6 @@ app: doc tarball
 		lib \
 		node_modules/bare-script \
 		node_modules/element-model \
-		node_modules/markdown-model \
 		node_modules/schema-markdown \
 		build/doc \
 		build/markdown-up.tar.gz \
@@ -59,11 +58,11 @@ app: doc tarball
 
     # Fix imports
 	for FILE in `find build/app/*/lib -name '*.js'`; do \
-		sed -E "s/from '([^\.])/from '..\/..\/\1/g" $$FILE > $$FILE.tmp && \
+		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/..\/\2/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/app/* -name '*.js'`; do \
-		sed -E "s/from '([^\.])/from '..\/\1/g" $$FILE > $$FILE.tmp && \
+		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/\2/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 
@@ -74,7 +73,7 @@ tarball: build/npm.build
 
     # Statics
 	date -I > build/markdown-up/VERSION.txt
-	cp static/app.css build/markdown-up
+	cp static/*.css build/markdown-up
 	rm -rf build/markdown-up/include/test
 
     # Application
@@ -83,20 +82,14 @@ tarball: build/npm.build
     # bare-script
 	mkdir -p build/markdown-up/bare-script
 	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
-	rm -rf \
-		build/markdown-up/bare-script/lib/bare.js \
-		build/markdown-up/bare-script/lib/baredoc.js
+	rm -rf build/markdown-up/bare-script/lib/bare.js
+	mkdir -p build/markdown-up/bare-script/static
+	cp -R node_modules/bare-script/static/*.css build/markdown-up/bare-script/static
 	mv build/markdown-up/bare-script/lib/include/ build/markdown-up/
 
     # element-model
 	mkdir -p build/markdown-up/element-model
 	cp -R node_modules/element-model/lib build/markdown-up/element-model
-
-    # markdown-model
-	mkdir -p build/markdown-up/markdown-model
-	cp -R node_modules/markdown-model/lib build/markdown-up/markdown-model
-	mkdir -p build/markdown-up/markdown-model/static
-	cp node_modules/markdown-model/static/markdown-model.css build/markdown-up/markdown-model/static
 
     # schema-markdown
 	mkdir -p build/markdown-up/schema-markdown
@@ -104,11 +97,11 @@ tarball: build/npm.build
 
     # Fix imports
 	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \
-		sed -E "s/from '([^\.])/from '..\/..\/\1/g" $$FILE > $$FILE.tmp && \
+		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/..\/\2/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/markdown-up/* -name '*.js'`; do \
-		sed -E "s/from '([^\.])/from '..\/\1/g" $$FILE > $$FILE.tmp && \
+		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/\2/g" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 

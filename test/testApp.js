@@ -1,6 +1,13 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
+
+// Import appImports.js as a way of testing it
+import '../lib/appImports.js';
+
+
+import {} from 'bare-script/lib/options.js';
+import {fetchSystem, fetchSystemPrefix} from 'bare-script/lib/optionsNode.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {strict as assert} from 'node:assert';
@@ -345,9 +352,14 @@ function deleteElementCallbacks(elements) {
 }
 
 
-function sleep(ms) {
-    // eslint-disable-next-line no-promise-executor-return
-    return new Promise((resolve) => setTimeout(resolve, ms));
+// Drains the event loop (macrotasks + microtasks) so async click handlers have time to complete
+async function flushPromises() {
+    for (let ix = 0; ix < 3; ix++) {
+        // eslint-disable-next-line no-promise-executor-return
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await Promise.resolve();
+    }
+    await Promise.resolve();
 }
 
 
@@ -387,7 +399,8 @@ test('MarkdownUp, run and render', async () => {
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
     window.location.hash = '#';
-    const app = new MarkdownUp(window, {'markdownText': '# Title\n\nHello!', 'menu': false});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Title\n\nHello!', 'menu': false});
     await app.run();
     assert.equal(window.document.title, 'Title');
     assert.equal(
@@ -395,9 +408,9 @@ test('MarkdownUp, run and render', async () => {
         '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
     );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
 
     window.location.hash = '#';
@@ -411,10 +424,18 @@ test('MarkdownUp, run and render', async () => {
         '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
     );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '1'],
-        ['--markdown-model-font-size', '14pt'],
-        ['--markdown-model-line-height', `1.4em`]
+        ['--barescript-dark-mode', '1'],
+        ['--barescript-font-size', '14pt'],
+        ['--barescript-line-height', `1.4em`]
     ]);
+
+    // Ensure params-not-changed short-circuit is covered
+    await app.render();
+    assert.equal(window.document.title, 'Title');
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
+    );
 });
 
 
@@ -430,9 +451,9 @@ test('MarkdownUp, render bad params', async () => {
     assert.equal(window.document.title, 'MarkdownUp');
     assert.equal(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
 });
 
@@ -444,14 +465,15 @@ test('MarkdownUp, render menu toggle', async () => {
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
     window.location.hash = '#';
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
@@ -460,7 +482,7 @@ test('MarkdownUp, render menu toggle', async () => {
     let [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
@@ -469,7 +491,7 @@ test('MarkdownUp, render menu toggle', async () => {
     [, menuButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     menuButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
@@ -484,14 +506,15 @@ test('MarkdownUp, render menu view toggle', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': '# Hello\n\nHello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Hello\n\nHello!'});
     await app.render();
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -501,7 +524,7 @@ test('MarkdownUp, render menu view toggle', async () => {
     window.document.title = '';
     window.document.body.innerHTML = '';
     markdownButton.click();
-    await sleep(0);
+    await flushPromises();
     assert.equal(window.location.hash, '#view=markdown');
     assert.equal(window.document.title, '');
     assert.equal(window.document.body.innerHTML, '');
@@ -518,7 +541,7 @@ test('MarkdownUp, render menu view toggle', async () => {
     window.document.title = '';
     window.document.body.innerHTML = '';
     markdownButton.click();
-    await sleep(0);
+    await flushPromises();
     assert.equal(window.location.hash, '');
     assert.equal(window.document.title, '');
     assert.equal(window.document.body.innerHTML, '');
@@ -546,14 +569,15 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, [
         '(prefers-color-scheme: dark)'
@@ -567,12 +591,12 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
     darkModeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '1'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '1'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":true}');
@@ -584,12 +608,12 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
     darkModeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
@@ -611,14 +635,15 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '1'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '1'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, [
         '(prefers-color-scheme: dark)'
@@ -632,12 +657,12 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
     darkModeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":false}');
@@ -649,12 +674,12 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
     darkModeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '1'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '1'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
@@ -670,14 +695,15 @@ test('MarkdownUp, render menu cycle', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '12pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -687,12 +713,12 @@ test('MarkdownUp, render menu cycle', async () => {
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     fontSizeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '14pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '14pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -702,12 +728,12 @@ test('MarkdownUp, render menu cycle', async () => {
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     fontSizeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '18pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '18pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -723,14 +749,15 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"fontSize": 24}');
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '24pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '24pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 24}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -740,12 +767,12 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     fontSizeButton.click();
-    await sleep(0);
+    await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--markdown-model-dark-mode', '0'],
-        ['--markdown-model-font-size', '8pt'],
-        ['--markdown-model-line-height', `1.2em`]
+        ['--barescript-dark-mode', '0'],
+        ['--barescript-font-size', '8pt'],
+        ['--barescript-line-height', `1.2em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -757,7 +784,8 @@ test('MarkdownUp, render menu help', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    const app = new MarkdownUp(window, {'markdownText': 'Hello!', 'helpURL': '#help'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!', 'helpURL': '#help'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -766,7 +794,7 @@ test('MarkdownUp, render menu help', async () => {
     const [, , , , , , , , helpButton] = window.document.getElementsByTagName('div');
     window.document.body.innerHTML = '';
     helpButton.click();
-    await sleep(0);
+    await flushPromises();
     assert.equal(window.document.body.innerHTML, '');
     assert.equal(window.location.href, 'https://github.com/craigahobbs/markdown-up#help');
 });
@@ -793,7 +821,9 @@ test('MarkdownUp, render timeout', async () => {
         windowTimeout.delay = null;
     };
 
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -862,7 +892,9 @@ test('MarkdownUp, render resize', async () => {
         eventListener[type] = null;
     };
 
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -914,7 +946,9 @@ test('MarkdownUp, render keydown', async () => {
         eventListener[type] = null;
     };
 
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main(event):
@@ -968,7 +1002,9 @@ main({'key': 'A'})
 
 test('MarkdownUp, render focus', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -1032,8 +1068,10 @@ test('MarkdownUp, render document reset ID', async () => {
         windowTimeout.delay = null;
     };
 
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
         'menu': false,
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -1089,7 +1127,9 @@ main()
 
 test('MarkdownUp, render location', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 windowSetLocation('#url=other')
@@ -1106,7 +1146,9 @@ windowSetLocation('#url=other')
 
 test('MarkdownUp, render location callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function onClick():
@@ -1139,7 +1181,8 @@ elementModelRender({ \
 
 test('MarkdownUp, render location hash', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': ''});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': ''});
     window.location.hash = "#var.vName='test'&subtitle";
     await app.render();
     assert.equal(window.document.title, '');
@@ -1150,7 +1193,9 @@ test('MarkdownUp, render location hash', async () => {
 
 test('MarkdownUp, render title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 documentSetTitle('Hello')
@@ -1167,7 +1212,9 @@ markdownPrint('Hello')
 
 test('MarkdownUp, render title callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function onClick():
@@ -1206,9 +1253,13 @@ test('MarkdownUp.updateParams, invalid session/local storage', () => {
 });
 
 
-test('MarkdownUp.main', async () => {
+test('MarkdownUp.main, simple', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
@@ -1217,7 +1268,7 @@ test('MarkdownUp.main', async () => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1242,7 +1293,11 @@ test('MarkdownUp.main', async () => {
 
 test('MarkdownUp.main, url', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'sub/other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -1267,7 +1322,7 @@ test('MarkdownUp.main, url', async () => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('url=sub%2Fother.md');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1362,7 +1417,11 @@ test('MarkdownUp.main, url', async () => {
 
 test('MarkdownUp.main, markdownText url override', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello\n\nGoodbye');
@@ -1371,7 +1430,7 @@ test('MarkdownUp.main, markdownText url override', async () => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Goodbye\n\nHello'});
     app.updateParams('url=other.md');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1397,7 +1456,8 @@ test('MarkdownUp.main, markdownText url override', async () => {
 
 test('MarkdownUp.main, markdownText url override empty', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Goodbye\n\nHello'});
     app.updateParams('url=');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1423,7 +1483,11 @@ test('MarkdownUp.main, markdownText url override empty', async () => {
 
 test('MarkdownUp.main, code block', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -1438,16 +1502,9 @@ Code
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const copyCalls = [];
-    window.navigator.clipboard = {
-        'writeText': (text) => {
-            copyCalls.push(text);
-        }
-    };
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('');
     const mainElements = await app.main();
-    const copyCallback = mainElements.elements[1][1][0].elem.callback;
     assert.deepEqual(
         deleteElementCallbacks(mainElements),
         {
@@ -1466,11 +1523,21 @@ Code
                         {
                             'html': 'p',
                             'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
-                            'elem': {'html': 'a', 'elem': {'text': 'Copy'}}
+                            'elem': {
+                                'html': 'a',
+                                'attr': {
+                                    // eslint-disable-next-line max-len
+                                    'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
+                                },
+                                'elem': {'text': 'Copy'}
+                            }
                         },
                         {
                             'html': 'pre',
-                            'attr': {'style': 'margin-top: 0.25em'},
+                            'attr': {
+                                'id': '__markdown_copy_1',
+                                'style': 'margin-top: 0.25em'
+                            },
                             'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
                         }
                     ]
@@ -1478,26 +1545,20 @@ Code
             ]
         }
     );
-
-    // Test the copy callback
-    const element = {
-        'addEventListener': (event, eventFn) => {
-            assert.equal(event, 'click');
-            eventFn();
-        }
-    };
-    copyCallback(element);
-    assert.deepEqual(copyCalls, ['Code\n']);
 });
 
 
 test('MarkdownUp.main, fontSize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 ~~~ markdown-script
 markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
 ~~~
-`});
+`
+    });
     app.updateParams(null, '{"fontSize": 14}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1526,7 +1587,11 @@ markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
 
 test('MarkdownUp.main, fetch script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
@@ -1536,6 +1601,7 @@ test('MarkdownUp.main, fetch script', async () => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint(systemFetch('README.md'))
@@ -1574,14 +1640,18 @@ markdownPrint(systemFetch('README.md'))
 
 test('MarkdownUp.main, fetch error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': 'Not Found'};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1598,14 +1668,18 @@ test('MarkdownUp.main, fetch error', async () => {
 
 test('MarkdownUp.main, fetch error no status text', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': ''};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1622,7 +1696,8 @@ test('MarkdownUp.main, fetch error no status text', async () => {
 
 test('MarkdownUp.main, no title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1647,7 +1722,8 @@ test('MarkdownUp.main, no title', async () => {
 
 test('MarkdownUp.main, menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
     app.updateParams('', null, '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1672,7 +1748,8 @@ test('MarkdownUp.main, menu', async () => {
 
 test('MarkdownUp.main, no menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello', 'menu': false});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello', 'menu': false});
     app.updateParams('', null, '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1694,7 +1771,8 @@ test('MarkdownUp.main, no menu', async () => {
 
 test('MarkdownUp.main, menu cycle and toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
     app.updateParams('view=markdown', '{"fontSize": 18}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1717,7 +1795,8 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
 
 test('MarkdownUp.main, markdown', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
     app.updateParams('view=markdown', null, null);
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1740,7 +1819,8 @@ test('MarkdownUp.main, markdown', async () => {
 
 test('MarkdownUp.main, darkMode', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
     app.updateParams('', '{"darkMode": true}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1765,23 +1845,19 @@ test('MarkdownUp.main, darkMode', async () => {
 
 test('MarkdownUp.main, markdown-script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const copyCalls = [];
-    window.navigator.clipboard = {
-        'writeText': (text) => {
-            copyCalls.push(text);
-        }
-    };
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
 markdownPrint('Hello', '~~~', 'Code', '~~~')
 ~~~
-`});
+`
+    });
     app.updateParams('');
     const mainElements = await app.main();
-    const copyElem = mainElements.elements[1][1][0][1][0].elem;
-    const copyCallback = copyElem.callback;
     assert.deepEqual(
         deleteElementCallbacks(mainElements),
         {
@@ -1803,11 +1879,21 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                                 {
                                     'html': 'p',
                                     'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
-                                    'elem': {'html': 'a', 'elem': {'text': 'Copy'}}
+                                    'elem': {
+                                        'html': 'a',
+                                        'attr': {
+                                            // eslint-disable-next-line max-len
+                                            'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
+                                        },
+                                        'elem': {'text': 'Copy'}
+                                    }
                                 },
                                 {
                                     'html': 'pre',
-                                    'attr': {'style': 'margin-top: 0.25em'},
+                                    'attr': {
+                                        'id': '__markdown_copy_1',
+                                        'style': 'margin-top: 0.25em'
+                                    },
                                     'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
                                 }
                             ]
@@ -1817,22 +1903,15 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
             ]
         }
     );
-
-    // Test the copy callback
-    const element = {
-        'addEventListener': (event, eventFn) => {
-            assert.equal(event, 'click');
-            eventFn();
-        }
-    };
-    copyCallback(element);
-    assert.deepEqual(copyCalls, ['Code\n']);
 });
 
 
 test('MarkdownUp.main, markdown-script invalid markdown line', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
@@ -1850,7 +1929,8 @@ markdownPrint({})
 ~~~ markdown-script
 markdownPrint('2')
 ~~~
-`});
+`
+    });
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1872,7 +1952,7 @@ markdownPrint('2')
                         ]
                     ],
                     [[]],
-                    [],
+                    [[]],
                     [
                         [
                             {'html': 'p', 'elem': [{'text': '2'}]}
@@ -1887,11 +1967,16 @@ markdownPrint('2')
 
 test('MarkdownUp.main, markdown-script globals', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'globals': {'message': 'Globals'}, 'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'globals': {'message': 'Globals'},
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 ~~~ markdown-script
 markdownPrint(message)
 ~~~
-`});
+`
+    });
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1920,7 +2005,11 @@ markdownPrint(message)
 
 test('MarkdownUp.main, markdown-script debug', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url) => {
+    const fetchResolve = (url, options) => {
+        if (url.startsWith(fetchSystemPrefix)) {
+            return fetchSystem(null, url, options);
+        }
+
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -1941,7 +2030,7 @@ systemLogDebug('Hello')
             logs.push(message);
         }
     };
-    const app = new MarkdownUp(window);
+    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
     app.updateParams('', null, '{"debug": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1984,13 +2073,17 @@ test('MarkdownUp.main, markdown-script debug text', async () => {
             logs.push(message);
         }
     };
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
 systemLogDebug('Hello')
 ~~~
-`});
+`
+    });
     app.updateParams('', null, '{"debug": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -2031,7 +2124,10 @@ test('MarkdownUp.main, markdown-script debug warnings', async () => {
             logs.push(message);
         }
     };
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 # markdown-script
 
 ~~~ markdown-script
@@ -2041,7 +2137,8 @@ test('MarkdownUp.main, markdown-script debug warnings', async () => {
 function foo(a, b):
 endfunction
 ~~~
-`});
+`
+    });
     app.updateParams('', null, '{"debug": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -2082,11 +2179,15 @@ endfunction
 
 test('MarkdownUp.main, markdown-script variables', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 ~~~ markdown-script
 markdownPrint('varName = ' + varName)
 ~~~
-`});
+`
+    });
     app.updateParams('var.varName=5');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -2121,9 +2222,11 @@ test('MarkdownUp.main, markdown-script variables error', async () => {
             logs.push(message);
         }
     };
+    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(
         window,
         {
+            'systemPrefix': fetchSystemPrefix,
             'markdownText': `\
 ~~~ markdown-script
 markdownPrint('varName = ' + varName)
@@ -2173,11 +2276,15 @@ foo bar
 
 test('MarkdownUp.main, markdown-script runtime error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const app = new MarkdownUp(window, {'markdownText': `\
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
 ~~~ markdown-script
 foobar()
 ~~~
-`});
+`
+    });
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
