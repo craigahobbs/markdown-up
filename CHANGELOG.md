@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0 (2026-04-23)
+
+- [6bd78db](https://github.com/craigahobbs/markdown-up/commit/6bd78db) - bare-script 4.0
+
+- [5a1a1f5](https://github.com/craigahobbs/markdown-up/commit/5a1a1f5) - Update to BareScript 4.0 and use BareScript's markdownParser.bare and markdownElements.bare to parse and render Markdown.
+
 ## 3.12.2 (2026-01-08)
 
 - [b5ab1bf](https://github.com/craigahobbs/markdown-up/commit/b5ab1bf) - update windowClipboardWrite documentation
