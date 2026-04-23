@@ -60,22 +60,46 @@ from a terminal prompt:</p>
 markdown-up
 </code></pre>
 <h2>Host Markdown Web Pages</h2>
-<p>To host a Markdown resource, download the MarkdownUp application HTML stub to the directory
-containing your Markdown files:</p>
-<pre class="prettyprint source"><code>curl -O https://craigahobbs.github.io/markdown-up/extra/index.html
+<p>To host a Markdown resource, add the MarkdownUp application HTML stub to the directory containing
+your Markdown files:</p>
+<pre class="prettyprint source lang-html"><code>&lt;!DOCTYPE html>
+&lt;html lang=&quot;en&quot;>
+    &lt;head>
+        &lt;title>MarkdownUp&lt;/title>
+        &lt;meta charset=&quot;utf-8&quot;>
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;>
+        &lt;link rel=&quot;stylesheet&quot; href=&quot;https://craigahobbs.github.io/markdown-up/app.css&quot;>
+        &lt;link rel=&quot;preload&quot; href=&quot;https://craigahobbs.github.io/markdown-up/bare-script/static/markdown.css&quot; as=&quot;style&quot;>
+        &lt;link rel=&quot;modulepreload&quot; href=&quot;https://craigahobbs.github.io/markdown-up/lib/appImports.js&quot; as=&quot;script&quot;>
+    &lt;/head>
+    &lt;script type=&quot;module&quot;>
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/appImports.js';
+        const app = new MarkdownUp(window);
+        app.run();
+    &lt;/script>
+&lt;/html>
 </code></pre>
 <p>To test your Markdown page, start a local static web server:</p>
 <pre class="prettyprint source"><code>python3 -m http.server
 </code></pre>
 <p>By default, MarkdownUp fetches the &quot;README.md&quot; resource. To change the default resource, update the
 application stub file, index.html. For example:</p>
-<pre class="prettyprint source"><code>    ...
+<pre class="prettyprint source lang-html"><code>&lt;!DOCTYPE html>
+&lt;html lang=&quot;en&quot;>
+    &lt;head>
+        &lt;title>MarkdownUp&lt;/title>
+        &lt;meta charset=&quot;utf-8&quot;>
+        &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;>
+        &lt;link rel=&quot;stylesheet&quot; href=&quot;https://craigahobbs.github.io/markdown-up/app.css&quot;>
+        &lt;link rel=&quot;preload&quot; href=&quot;https://craigahobbs.github.io/markdown-up/bare-script/static/markdown.css&quot; as=&quot;style&quot;>
+        &lt;link rel=&quot;modulepreload&quot; href=&quot;https://craigahobbs.github.io/markdown-up/lib/appImports.js&quot; as=&quot;script&quot;>
+    &lt;/head>
     &lt;script type=&quot;module&quot;>
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/appImports.js';
         const app = new MarkdownUp(window, {'url': 'other.md'});
         app.run();
     &lt;/script>
-    ...
+&lt;/html>
 </code></pre>
 <p>To view a different Markdown resource, set the application's &quot;url&quot; hash parameter (i.e.,
 &quot;http://127.0.0.1:8000#url=other.md&quot;).</p>
@@ -108,7 +132,7 @@ It was started using <a href="https://github.com/craigahobbs/javascript-template
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li><li><a href="module-lib_dataTable.html">lib/dataTable</a></li><li><a href="module-lib_lineChart.html">lib/lineChart</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-lib_app.html">lib/app</a></li></ul><h3>Classes</h3><ul><li><a href="module-lib_app.MarkdownUp.html">MarkdownUp</a></li></ul>
 </nav>
 
 <br class="clear">

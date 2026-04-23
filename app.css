@@ -4,20 +4,20 @@
  */
 
 
-@import 'markdown-model/static/markdown-model.css';
+@import 'bare-script/static/markdown.css';
 
 
 /* Color variables */
 :root {
     --markdown-up-menu-backbround: rgb(
-        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
-        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode)),
-        calc(0 * var(--markdown-model-dark-mode) + 245 * var(--markdown-model-light-mode))
+        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode)),
+        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode)),
+        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode))
     );
     --markdown-up-menu-border: rgb(
-        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
-        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode)),
-        calc(255 * var(--markdown-model-dark-mode) + 0 * var(--markdown-model-light-mode))
+        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode)),
+        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode)),
+        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode))
     );
 }
 
