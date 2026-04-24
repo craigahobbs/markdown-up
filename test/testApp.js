@@ -354,7 +354,7 @@ function deleteElementCallbacks(elements) {
 
 // Drains the event loop (macrotasks + microtasks) so async click handlers have time to complete
 async function flushPromises() {
-    for (let ix = 0; ix < 5; ix++) {
+    for (let ix = 0; ix < 10; ix++) {
         // eslint-disable-next-line no-promise-executor-return
         await new Promise(resolve => setTimeout(resolve, 0));
         await Promise.resolve();
