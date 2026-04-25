@@ -134,22 +134,18 @@ function valueJSONSort(value) {
  */
 export function valueBoolean(value) {
     const type = typeof value;
-    if (value === null || type === 'undefined') {
-        return false;
+    if (type === 'boolean') {
+        return value;
     } else if (type === 'string') {
         return value !== '';
-    } else if (type === 'boolean') {
-        return value;
     } else if (type === 'number') {
         return value !== 0;
-    } else if (value instanceof Date) {
-        return true;
     } else if (Array.isArray(value)) {
         return value.length !== 0;
     }
 
-    // Everything else is true
-    return true;
+    // Everything else non-null is true
+    return (value ?? null) !== null;
 }
 
 
