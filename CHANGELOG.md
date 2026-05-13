@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.1 (2026-05-13)
+
+- [13d7b96](https://github.com/craigahobbs/markdown-up/commit/13d7b96) - bare-script 4.1
+
 ## 4.0.0 (2026-04-23)
 
 - [6bd78db](https://github.com/craigahobbs/markdown-up/commit/6bd78db) - bare-script 4.0
