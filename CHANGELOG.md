@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2 (2026-05-22)
+
+- [db3f88c](https://github.com/craigahobbs/markdown-up/commit/db3f88c) - update font size and line spacing cycle values
+
 ## 4.0.1 (2026-05-13)
 
 - [13d7b96](https://github.com/craigahobbs/markdown-up/commit/13d7b96) - bare-script 4.1
