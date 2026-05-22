@@ -252,7 +252,7 @@ function menuElements({darkMode = false, fontSizeText = null, viewMarkdown = fal
                                 'x': '15.600',
                                 'y': '39.600'
                             },
-                            'elem': {'text': 1.2},
+                            'elem': {'text': 1.3},
                             'svg': 'text'
                         }
                     ]
@@ -368,7 +368,7 @@ test('MarkdownUp, constructor', () => {
     assert.equal(app.window, window);
     assert.equal(app.params, null);
     assert.equal(app.fontSize, 12);
-    assert.equal(app.lineHeight, 1.2);
+    assert.equal(app.lineHeight, 1.3);
     assert.equal(app.menu, true);
     assert.equal(app.url, 'README.md');
 });
@@ -409,7 +409,7 @@ test('MarkdownUp, run and render', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
 
     window.location.hash = '#';
@@ -452,7 +452,7 @@ test('MarkdownUp, render bad params', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
 });
 
@@ -472,7 +472,7 @@ test('MarkdownUp, render menu toggle', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
@@ -513,7 +513,7 @@ test('MarkdownUp, render menu view toggle', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -576,7 +576,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, [
         '(prefers-color-scheme: dark)'
@@ -595,7 +595,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":true}');
@@ -612,7 +612,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
@@ -642,7 +642,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, [
         '(prefers-color-scheme: dark)'
@@ -661,7 +661,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"darkMode":false}');
@@ -678,7 +678,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.deepEqual(windowMatchMediaCalls, []);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
@@ -702,7 +702,7 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -717,7 +717,7 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '14pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -732,7 +732,7 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '18pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -756,7 +756,7 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '24pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 24}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -771,7 +771,7 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '8pt'],
-        ['--barescript-line-height', `1.2em`]
+        ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
@@ -1519,16 +1519,16 @@ Code
                 [
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]},
                     {
-                        'html': 'div',
-                        'attr': {'style': 'display: grid; margin-top: 1em;'},
+                        'html': 'pre',
+                        'attr': {
+                            'id': '__markdown_copy_1',
+                            'style': 'display: flex;'
+                        },
                         'elem': [
                             {
-                                'html': 'pre',
-                                'attr': {
-                                    'id': '__markdown_copy_1',
-                                    'style': 'grid-area: 1 / 1; margin-top: 0; padding-right: 2.5em;'
-                                },
-                                'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                                'html': 'code',
+                                'attr': {'style': 'flex: 1; min-width: 0; overflow-x: auto;'},
+                                'elem': {'text': 'Code\n'}
                             },
                             {
                                 'svg': 'svg',
@@ -1537,7 +1537,7 @@ Code
                                     'height': '20',
                                     'viewBox': '0 0 24 24',
                                     // eslint-disable-next-line max-len
-                                    'style': 'grid-area: 1 / 1; justify-self: end; align-self: start; margin: 0.4em; cursor: pointer; user-select: none;',
+                                    'style': 'align-self: flex-start; flex-shrink: 0; cursor: pointer; user-select: none;',
                                     // eslint-disable-next-line max-len
                                     'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
                                 },
@@ -1887,16 +1887,16 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                         [
                             {'html': 'p', 'elem': [{'text': 'Hello'}]},
                             {
-                                'html': 'div',
-                                'attr': {'style': 'display: grid; margin-top: 1em;'},
+                                'html': 'pre',
+                                'attr': {
+                                    'id': '__markdown_copy_1',
+                                    'style': 'display: flex;'
+                                },
                                 'elem': [
                                     {
-                                        'html': 'pre',
-                                        'attr': {
-                                            'id': '__markdown_copy_1',
-                                            'style': 'grid-area: 1 / 1; margin-top: 0; padding-right: 2.5em;'
-                                        },
-                                        'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                                        'html': 'code',
+                                        'attr': {'style': 'flex: 1; min-width: 0; overflow-x: auto;'},
+                                        'elem': {'text': 'Code\n'}
                                     },
                                     {
                                         'svg': 'svg',
@@ -1905,7 +1905,7 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                                             'height': '20',
                                             'viewBox': '0 0 24 24',
                                             // eslint-disable-next-line max-len
-                                            'style': 'grid-area: 1 / 1; justify-self: end; align-self: start; margin: 0.4em; cursor: pointer; user-select: none;',
+                                            'style': 'align-self: flex-start; flex-shrink: 0; cursor: pointer; user-select: none;',
                                             // eslint-disable-next-line max-len
                                             'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
                                         },
