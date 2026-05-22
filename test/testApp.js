@@ -1518,28 +1518,40 @@ Code
                 ],
                 [
                     {'html': 'h1', 'attr': {'id': 'hello'}, 'elem': [{'text': 'Hello'}]},
-                    [
-                        {
-                            'html': 'p',
-                            'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
-                            'elem': {
-                                'html': 'a',
+                    {
+                        'html': 'div',
+                        'attr': {'style': 'display: grid; margin-top: 1em;'},
+                        'elem': [
+                            {
+                                'html': 'pre',
                                 'attr': {
+                                    'id': '__markdown_copy_1',
+                                    'style': 'grid-area: 1 / 1; margin-top: 0; padding-right: 2.5em;'
+                                },
+                                'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                            },
+                            {
+                                'svg': 'svg',
+                                'attr': {
+                                    'width': '20',
+                                    'height': '20',
+                                    'viewBox': '0 0 24 24',
+                                    // eslint-disable-next-line max-len
+                                    'style': 'grid-area: 1 / 1; justify-self: end; align-self: start; margin: 0.4em; cursor: pointer; user-select: none;',
                                     // eslint-disable-next-line max-len
                                     'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
                                 },
-                                'elem': {'text': 'Copy'}
+                                'elem': {
+                                    'svg': 'path',
+                                    'attr': {
+                                        'fill': 'var(--barescript-color-border)',
+                                        // eslint-disable-next-line max-len
+                                        'd': 'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'
+                                    }
+                                }
                             }
-                        },
-                        {
-                            'html': 'pre',
-                            'attr': {
-                                'id': '__markdown_copy_1',
-                                'style': 'margin-top: 0.25em'
-                            },
-                            'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
-                        }
-                    ]
+                        ]
+                    }
                 ]
             ]
         }
@@ -1874,28 +1886,40 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                     [
                         [
                             {'html': 'p', 'elem': [{'text': 'Hello'}]},
-                            [
-                                {
-                                    'html': 'p',
-                                    'attr': {'style': 'cursor: pointer; font-size: 0.85em; text-align: right; user-select: none;'},
-                                    'elem': {
-                                        'html': 'a',
+                            {
+                                'html': 'div',
+                                'attr': {'style': 'display: grid; margin-top: 1em;'},
+                                'elem': [
+                                    {
+                                        'html': 'pre',
                                         'attr': {
+                                            'id': '__markdown_copy_1',
+                                            'style': 'grid-area: 1 / 1; margin-top: 0; padding-right: 2.5em;'
+                                        },
+                                        'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
+                                    },
+                                    {
+                                        'svg': 'svg',
+                                        'attr': {
+                                            'width': '20',
+                                            'height': '20',
+                                            'viewBox': '0 0 24 24',
+                                            // eslint-disable-next-line max-len
+                                            'style': 'grid-area: 1 / 1; justify-self: end; align-self: start; margin: 0.4em; cursor: pointer; user-select: none;',
                                             // eslint-disable-next-line max-len
                                             'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
                                         },
-                                        'elem': {'text': 'Copy'}
+                                        'elem': {
+                                            'svg': 'path',
+                                            'attr': {
+                                                'fill': 'var(--barescript-color-border)',
+                                                // eslint-disable-next-line max-len
+                                                'd': 'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z'
+                                            }
+                                        }
                                     }
-                                },
-                                {
-                                    'html': 'pre',
-                                    'attr': {
-                                        'id': '__markdown_copy_1',
-                                        'style': 'margin-top: 0.25em'
-                                    },
-                                    'elem': {'html': 'code', 'elem': {'text': 'Code\n'}}
-                                }
-                            ]
+                                ]
+                            }
                         ]
                     ]
                 ]
