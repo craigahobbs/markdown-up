@@ -181,6 +181,7 @@ export class MarkdownUp {
         // Set the colors
         const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
         this.window.document.documentElement.style.setProperty('--barescript-dark-mode', isDarkMode ? '1' : '0');
+        this.window.document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
 
         // Set the font size
         const fontSize = this.paramsLocal.fontSize ?? this.fontSize;
