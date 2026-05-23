@@ -411,6 +411,7 @@ test('MarkdownUp, run and render', async () => {
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
+    assert.equal(window.document.documentElement.style.colorScheme, 'light');
 
     window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"darkMode": true, "fontSize": 14, "lineHeight": 1.4}');
@@ -427,6 +428,7 @@ test('MarkdownUp, run and render', async () => {
         ['--barescript-font-size', '14pt'],
         ['--barescript-line-height', `1.4em`]
     ]);
+    assert.equal(window.document.documentElement.style.colorScheme, 'dark');
 
     // Ensure params-not-changed short-circuit is covered
     await app.render();
@@ -1536,7 +1538,6 @@ Code
                                     'width': '20',
                                     'height': '20',
                                     'viewBox': '0 0 24 24',
-                                    // eslint-disable-next-line max-len
                                     'style': 'align-self: flex-start; flex-shrink: 0; cursor: pointer; user-select: none;',
                                     // eslint-disable-next-line max-len
                                     'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
@@ -1904,7 +1905,6 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                                             'width': '20',
                                             'height': '20',
                                             'viewBox': '0 0 24 24',
-                                            // eslint-disable-next-line max-len
                                             'style': 'align-self: flex-start; flex-shrink: 0; cursor: pointer; user-select: none;',
                                             // eslint-disable-next-line max-len
                                             'onclick': "window.navigator.clipboard.writeText(document.getElementById('__markdown_copy_1').innerText);"
