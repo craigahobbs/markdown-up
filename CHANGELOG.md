@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.3 (2026-05-23)
+
+- [99c82ec](https://github.com/craigahobbs/markdown-up/commit/99c82ec) - explicitly set color scheme on app start
+
 ## 4.0.2 (2026-05-22)
 
 - [db3f88c](https://github.com/craigahobbs/markdown-up/commit/db3f88c) - update font size and line spacing cycle values
