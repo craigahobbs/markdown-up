@@ -9,16 +9,8 @@
 
 /* Color variables */
 :root {
-    --markdown-up-menu-backbround: rgb(
-        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode)),
-        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode)),
-        calc(0 * var(--barescript-dark-mode) + 245 * var(--barescript-light-mode))
-    );
-    --markdown-up-menu-border: rgb(
-        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode)),
-        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode)),
-        calc(255 * var(--barescript-dark-mode) + 0 * var(--barescript-light-mode))
-    );
+    --markdown-up-menu-background: light-dark(rgb(245, 245, 245), rgb(0, 0, 0));
+    --markdown-up-menu-border: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));
 }
 
 
@@ -36,7 +28,7 @@
     display: flex;
     flex-direction: column;
     max-width: max-content;
-    background: var(--markdown-up-menu-backbround);
+    background: var(--markdown-up-menu-background);
     border: 2px solid var(--markdown-up-menu-border);
 }
 .menu > div {

@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "bare-script",
-    "version": "4.1.11",
+    "version": "4.2.0",
     "description": "BareScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -22,8 +22,7 @@
     },
     "files": [
         "lib/*.js",
-        "lib/include/*.bare",
-        "static/markdown.css"
+        "lib/include/*.bare"
     ],
     "scripts": {
         "test": "node --test test/"
