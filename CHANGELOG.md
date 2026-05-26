@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.0 (2026-05-26)
+
+- [5cffc3f](https://github.com/craigahobbs/markdown-up/commit/5cffc3f) - bare-script 4.2
+
 ## 4.0.3 (2026-05-23)
 
 - [99c82ec](https://github.com/craigahobbs/markdown-up/commit/99c82ec) - explicitly set color scheme on app start
