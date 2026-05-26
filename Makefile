@@ -39,7 +39,7 @@ run: app
 
 
 commit: app
-app: doc tarball
+app: doc tarball build/markdown.css
 	rm -rf build/app/
 	mkdir -p build/app/
 
@@ -54,6 +54,8 @@ app: doc tarball
 		build/doc \
 		build/markdown-up.tar.gz \
 		build/app/
+	mkdir -p build/app/bare-script/static
+	cp build/markdown.css build/app/bare-script/static
 	mv build/app/bare-script/lib/include/ build/app/
 
     # Fix imports
@@ -67,7 +69,7 @@ app: doc tarball
 	done
 
 
-tarball: build/npm.build
+tarball: build/npm.build build/markdown.css
 	rm -rf build/markdown-up
 	mkdir -p build/markdown-up
 
@@ -84,7 +86,7 @@ tarball: build/npm.build
 	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
 	rm -rf build/markdown-up/bare-script/lib/bare.js
 	mkdir -p build/markdown-up/bare-script/static
-	cp -R node_modules/bare-script/static/*.css build/markdown-up/bare-script/static
+	cp build/markdown.css build/markdown-up/bare-script/static
 	mv build/markdown-up/bare-script/lib/include/ build/markdown-up/
 
     # element-model
@@ -117,6 +119,11 @@ tarball: build/npm.build
 		cd build && find markdown-up -type f -print0 | sort -z | \
 			tar --null --files-from=- --owner=0 --group=0 --numeric-owner -czvf markdown-up.tar.gz; \
 	fi
+
+
+build/markdown.css:
+	mkdir -p $(dir $@)
+	cd $(dir $@) && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/markdown.css)
 
 
 gh-pages:

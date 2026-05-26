@@ -407,7 +407,6 @@ test('MarkdownUp, run and render', async () => {
         '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
     );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -424,7 +423,6 @@ test('MarkdownUp, run and render', async () => {
         '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1><p>Hello!</p>'
     );
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '14pt'],
         ['--barescript-line-height', `1.4em`]
     ]);
@@ -452,7 +450,6 @@ test('MarkdownUp, render bad params', async () => {
     assert.equal(window.document.title, 'MarkdownUp');
     assert.equal(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -472,7 +469,6 @@ test('MarkdownUp, render menu toggle', async () => {
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -513,7 +509,6 @@ test('MarkdownUp, render menu view toggle', async () => {
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -576,7 +571,6 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -595,7 +589,6 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -612,7 +605,6 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -642,7 +634,6 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -661,7 +652,6 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -678,7 +668,6 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '1'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -702,7 +691,6 @@ test('MarkdownUp, render menu cycle', async () => {
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -717,7 +705,6 @@ test('MarkdownUp, render menu cycle', async () => {
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '14pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -732,7 +719,6 @@ test('MarkdownUp, render menu cycle', async () => {
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '18pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -756,7 +742,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '24pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -771,7 +756,6 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-dark-mode', '0'],
         ['--barescript-font-size', '8pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
@@ -1535,6 +1519,7 @@ Code
                             {
                                 'svg': 'svg',
                                 'attr': {
+                                    class: 'barescript-no-print',
                                     'width': '20',
                                     'height': '20',
                                     'viewBox': '0 0 24 24',
@@ -1902,6 +1887,7 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
                                     {
                                         'svg': 'svg',
                                         'attr': {
+                                            class: 'barescript-no-print',
                                             'width': '20',
                                             'height': '20',
                                             'viewBox': '0 0 24 24',
