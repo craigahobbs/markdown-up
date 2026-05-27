@@ -121,9 +121,12 @@ tarball: build/npm.build build/markdown.css
 	fi
 
 
+BARESCRIPT_STATIC_DIR := ../bare-script/static
 build/markdown.css:
 	mkdir -p $(dir $@)
-	cd $(dir $@) && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/markdown.css)
+	[ -f $(BARESCRIPT_STATIC_DIR)/$(notdir $@) ] && \
+		(cp $(BARESCRIPT_STATIC_DIR)/$(notdir $@) $(dir $@)) || \
+		(cd $(dir $@) && $(call WGET_CMD, https://craigahobbs.github.io/bare-script/markdown.css))
 
 
 gh-pages:
