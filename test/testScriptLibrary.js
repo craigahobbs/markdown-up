@@ -732,6 +732,199 @@ test('script library, windowHeight', () => {
 });
 
 
+test('script library, windowKeyState', () => {
+    const runtime = testRuntime();
+    const keyState = {};
+    runtime.options.keyStateFn = () => keyState;
+    const windowKeyState = (...args) => markdownScriptFunctions.windowKeyState(args, runtime.options);
+
+    // No key is down
+    assert.equal(windowKeyState('ArrowUp'), false);
+
+    // The key is down with no modifiers held
+    keyState.ArrowUp = true;
+    assert.equal(windowKeyState('ArrowUp'), true);
+    assert.equal(windowKeyState('ArrowDown'), false);
+
+    // A modifier is held but not requested - the exact match fails
+    keyState.ctrl = true;
+    assert.equal(windowKeyState('ArrowUp'), false);
+    assert.equal(windowKeyState('ArrowUp', true, false, false, false), true);
+
+    // A modifier is requested but not held - the exact match fails
+    keyState.ctrl = false;
+    assert.equal(windowKeyState('ArrowUp', true, false, false, false), false);
+
+    // All modifiers are requested and held
+    keyState.ctrl = true;
+    keyState.shift = true;
+    keyState.alt = true;
+    keyState.meta = true;
+    assert.equal(windowKeyState('ArrowUp', true, true, true, true), true);
+
+    // Each modifier in turn mismatches (the prior modifiers match so we reach it)
+    keyState.shift = false;
+    assert.equal(windowKeyState('ArrowUp', true, true, true, true), false);
+    keyState.shift = true;
+    keyState.alt = false;
+    assert.equal(windowKeyState('ArrowUp', true, true, true, true), false);
+    keyState.alt = true;
+    keyState.meta = false;
+    assert.equal(windowKeyState('ArrowUp', true, true, true, true), false);
+
+    // A released key is no longer down
+    keyState.meta = true;
+    keyState.ArrowUp = false;
+    assert.equal(windowKeyState('ArrowUp', true, true, true, true), false);
+});
+
+
+// Create a mock Web Audio context that records the scheduled tones and filters
+const mockAudioContext = (state = 'running') => {
+    const tones = [];
+    const filters = [];
+    const makeParam = () => {
+        const param = {'sets': [], 'ramps': []};
+        param.setValueAtTime = (value) => param.sets.push(value);
+        param.exponentialRampToValueAtTime = (value) => param.ramps.push(value);
+        return param;
+    };
+    const context = {
+        state,
+        'currentTime': 10,
+        'destination': {'destination': true},
+        'resumeCount': 0,
+        'resume': () => {
+            context.resumeCount += 1;
+        },
+        'createBufferSource': () => {
+            const source = {'connect': () => null};
+            source.start = (start) => {
+                source.startTime = start;
+            };
+            source.stop = (stop) => {
+                tones.push({'type': 'noise', 'start': source.startTime, 'stop': stop});
+            };
+            return source;
+        },
+        'createBiquadFilter': () => {
+            const filter = {'frequency': {}, 'connect': () => null};
+            filters.push(filter);
+            return filter;
+        },
+        'createGain': () => ({'gain': makeParam(), 'connect': () => null}),
+        'createOscillator': () => {
+            const oscillator = {'frequency': makeParam(), 'connect': () => null};
+            oscillator.start = (start) => {
+                oscillator.startTime = start;
+            };
+            oscillator.stop = (stop) => {
+                tones.push({
+                    'type': oscillator.type,
+                    'frequency': oscillator.frequency.sets[0],
+                    'frequencyEnd': oscillator.frequency.ramps.length === 0 ? null : oscillator.frequency.ramps[0],
+                    'start': oscillator.startTime,
+                    'stop': stop
+                });
+            };
+            return oscillator;
+        }
+    };
+    return {context, tones, filters};
+};
+
+
+test('script library, windowPlaySound', () => {
+    const runtime = testRuntime();
+    const {context, tones, filters} = mockAudioContext('suspended');
+    runtime.options.audioContextFn = () => context;
+
+    assert.equal(markdownScriptFunctions.windowPlaySound(['beep'], runtime.options), undefined);
+
+    // The suspended context was resumed and the single, unfiltered "beep" tone was scheduled
+    assert.equal(context.resumeCount, 1);
+    assert.deepEqual(tones, [
+        {'type': 'sine', 'frequency': 880, 'frequencyEnd': null, 'start': 10, 'stop': 10.18}
+    ]);
+    assert.deepEqual(filters, []);
+});
+
+
+test('script library, windowPlaySound sequence', () => {
+    const runtime = testRuntime();
+    const {context, tones} = mockAudioContext();
+    runtime.options.audioContextFn = () => context;
+
+    assert.equal(markdownScriptFunctions.windowPlaySound(['warning'], runtime.options), undefined);
+
+    // The running context was not resumed; both tones scheduled with the second offset by its gap
+    assert.equal(context.resumeCount, 0);
+    assert.deepEqual(tones, [
+        {'type': 'triangle', 'frequency': 440, 'frequencyEnd': null, 'start': 10, 'stop': 10.16},
+        {'type': 'triangle', 'frequency': 440, 'frequencyEnd': null, 'start': 10.24, 'stop': 10.4}
+    ]);
+});
+
+
+test('script library, windowPlaySound pitch sweep', () => {
+    const runtime = testRuntime();
+    const {context, tones, filters} = mockAudioContext();
+    runtime.options.audioContextFn = () => context;
+
+    assert.equal(markdownScriptFunctions.windowPlaySound(['drumKick'], runtime.options), undefined);
+
+    // The "drumKick" is a single sine tone whose pitch ramps down
+    assert.deepEqual(tones, [
+        {'type': 'sine', 'frequency': 150, 'frequencyEnd': 50, 'start': 10, 'stop': 10.18}
+    ]);
+    assert.deepEqual(filters, []);
+});
+
+
+test('script library, windowPlaySound noise', () => {
+    const runtime = testRuntime();
+    const {context, tones, filters} = mockAudioContext();
+    runtime.options.audioContextFn = () => context;
+    let noiseBufferCount = 0;
+    runtime.options.audioNoiseBufferFn = () => {
+        noiseBufferCount += 1;
+        return {'noiseBuffer': true};
+    };
+
+    assert.equal(markdownScriptFunctions.windowPlaySound(['drumHihat'], runtime.options), undefined);
+
+    // "drumHihat" is a filtered noise burst sourced from the application's shared noise buffer
+    assert.deepEqual(tones, [
+        {'type': 'noise', 'start': 10, 'stop': 10.05}
+    ]);
+    assert.deepEqual(filters.map((filter) => ({'type': filter.type, 'frequency': filter.frequency.value})), [
+        {'type': 'highpass', 'frequency': 7000}
+    ]);
+    assert.equal(noiseBufferCount, 1);
+});
+
+
+test('script library, windowPlaySound unknown', () => {
+    const runtime = testRuntime();
+    const logs = [];
+    runtime.options.logFn = (message) => logs.push(message);
+
+    // No audioContextFn is provided - reaching it would throw, proving the unknown sound was ignored
+    assert.equal(markdownScriptFunctions.windowPlaySound(['unknown'], runtime.options), undefined);
+
+    assert.deepEqual(logs, ['MarkdownUp: Unknown windowPlaySound sound "unknown"']);
+});
+
+
+test('script library, windowPlaySound unknown no debug', () => {
+    const runtime = testRuntime();
+    runtime.options.debug = false;
+
+    // No logFn is provided - reaching it would throw, proving nothing was logged when debug is off
+    assert.equal(markdownScriptFunctions.windowPlaySound(['unknown'], runtime.options), undefined);
+});
+
+
 test('script library, windowSetLocation', () => {
     const runtime = testRuntime();
     assert.equal(runtime.windowLocation, null);

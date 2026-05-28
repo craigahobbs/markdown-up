@@ -1915,6 +1915,108 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
 });
 
 
+test('MarkdownUp.main, markdown-script windowPlaySound', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+
+    // Mock the Web Audio context
+    let audioContextCount = 0;
+    let createBufferCount = 0;
+    const makeParam = () => ({'setValueAtTime': () => null, 'exponentialRampToValueAtTime': () => null});
+    window.AudioContext = class {
+        constructor() {
+            audioContextCount += 1;
+            this.state = 'running';
+            this.currentTime = 0;
+            this.sampleRate = 8;
+            this.destination = {};
+            this.createGain = () => ({'gain': makeParam(), 'connect': () => null});
+            this.createOscillator = () => (
+                {'frequency': makeParam(), 'connect': () => null, 'start': () => null, 'stop': () => null}
+            );
+            this.createBuffer = (unusedChannels, length) => {
+                createBufferCount += 1;
+                return {'getChannelData': () => new Float32Array(length)};
+            };
+            this.createBufferSource = () => ({'connect': () => null, 'start': () => null, 'stop': () => null});
+            this.createBiquadFilter = () => ({'frequency': {}, 'connect': () => null});
+        }
+    };
+
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
+~~~ markdown-script
+windowPlaySound('click')
+windowPlaySound('drumHihat')
+windowPlaySound('drumHihat')
+~~~
+`
+    });
+    app.updateParams('');
+
+    assert.equal(app.audioContext, null);
+    assert.equal(app.audioNoiseBuffer, null);
+    await app.main();
+
+    // A single, shared audio context and noise buffer were created across all windowPlaySound calls
+    assert.equal(audioContextCount, 1);
+    assert.equal(createBufferCount, 1);
+    assert(app.audioContext instanceof window.AudioContext);
+    assert.notEqual(app.audioNoiseBuffer, null);
+});
+
+
+test('MarkdownUp, key state', () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window);
+
+    // The key state starts empty
+    assert.deepEqual(app.keyState, {});
+
+    // A keydown records the key as down along with the modifier flags
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'code': 'ArrowUp', 'ctrlKey': true}));
+    assert.deepEqual(app.keyState, {'ArrowUp': true, 'ctrl': true, 'shift': false, 'alt': false, 'meta': false});
+
+    // A keyup records the key as up
+    window.dispatchEvent(new window.KeyboardEvent('keyup', {'code': 'ArrowUp'}));
+    assert.deepEqual(app.keyState, {'ArrowUp': false, 'ctrl': false, 'shift': false, 'alt': false, 'meta': false});
+
+    // A second key is pressed, then a window blur clears all key state
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'code': 'KeyW', 'shiftKey': true}));
+    assert.equal(app.keyState.KeyW, true);
+    assert.equal(app.keyState.shift, true);
+    window.dispatchEvent(new window.Event('blur'));
+    assert.deepEqual(app.keyState, {'ArrowUp': false, 'ctrl': false, 'shift': false, 'alt': false, 'meta': false, 'KeyW': false});
+});
+
+
+test('MarkdownUp.main, markdown-script windowKeyState', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url, options) => fetchSystem(null, url, options);
+
+    const app = new MarkdownUp(window, {
+        'systemPrefix': fetchSystemPrefix,
+        'markdownText': `\
+~~~ markdown-script
+markdownPrint('ArrowUp is ' + if(windowKeyState('ArrowUp'), 'down', 'up'))
+~~~
+`
+    });
+
+    // No key is down
+    window.location.hash = '#';
+    await app.render();
+    assert(window.document.body.innerHTML.endsWith('<p>ArrowUp is up</p>'));
+
+    // Press ArrowUp and re-render
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'code': 'ArrowUp'}));
+    window.location.hash = '#';
+    await app.render(true);
+    assert(window.document.body.innerHTML.endsWith('<p>ArrowUp is down</p>'));
+});
+
+
 test('MarkdownUp.main, markdown-script invalid markdown line', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     window.fetch = (url, options) => fetchSystem(null, url, options);
