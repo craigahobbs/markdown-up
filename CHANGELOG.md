@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1.1 (2026-05-27)
+
+- [093f81b](https://github.com/craigahobbs/markdown-up/commit/093f81b) - add windowKeyState and windowPlaySound functions
+
 ## 4.1.0 (2026-05-26)
 
 - [5cffc3f](https://github.com/craigahobbs/markdown-up/commit/5cffc3f) - bare-script 4.2
