@@ -26,7 +26,15 @@ const elementMembers = new Set([...elementTagMembers, 'attr', 'elem', 'callback'
 
 // Helper function for throwing validation value exceptions
 function throwValueError(message, value) {
-    const valueStr = JSON.stringify(value);
+    // JSON.stringify throws on BigInt/circular values and returns undefined for undefined/functions/symbols;
+    // ??= falls back to String(value) for both nullish cases so any invalid value yields a clean error
+    let valueStr = null;
+    try {
+        valueStr = JSON.stringify(value);
+    } catch {
+        // leave valueStr null
+    }
+    valueStr ??= String(value);
     throw new ElementModelValidationError(`${message} ${valueStr.slice(0, 100)} (type '${typeof value}')`);
 }
 
@@ -126,7 +134,7 @@ export function validateElements(elements) {
 export function renderElements(parent, elements = null, clear = true) {
     validateElements(elements);
     if (clear) {
-        parent.innerHTML = '';
+        parent.replaceChildren();
     }
     renderElementsHelper(parent, elements);
 }
@@ -235,10 +243,7 @@ function renderElementsToStringHelper(elements, indentStr, level) {
     let attrStr = '';
     let elementsAttr = elements.attr ?? null;
     if (level === 0 && isSVG) {
-        if (elementsAttr === null) {
-            elementsAttr = {};
-        }
-        elementsAttr.xmlns = 'http://www.w3.org/2000/svg';
+        elementsAttr = {...elementsAttr, 'xmlns': 'http://www.w3.org/2000/svg'};
     }
     if (elementsAttr !== null) {
         for (const [attr, value] of Object.entries(elementsAttr).sort((a1, a2) => a1[0] < a2[0] ? -1 : 1)) {
@@ -268,5 +273,9 @@ const voidTags = new Set(
 
 // Helper function to escape HTML special characters
 function escapeHtml(str) {
-    return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+    return /[&<>"']/.test(str) ? str.replace(/[&<>"']/g, (ch) => htmlEscapes[ch]) : str;
 }
+
+
+// Map of HTML special characters to their escape sequences
+const htmlEscapes = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
