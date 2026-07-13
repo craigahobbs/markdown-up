@@ -24,7 +24,7 @@
     "dependencies": {
         "bare-script": "~4.2",
         "element-model": "~1.2",
-        "schema-markdown": "~1.2"
+        "schema-markdown": "~1.3"
     },
     "devDependencies": {
         "@eslint/js": "~10.0",

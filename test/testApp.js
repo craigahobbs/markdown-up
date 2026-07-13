@@ -448,7 +448,7 @@ test('MarkdownUp, render bad params', async () => {
     const app = new MarkdownUp(window);
     await app.render();
     assert.equal(window.document.title, 'MarkdownUp');
-    assert.equal(window.document.body.innerHTML, "<p>Error: Unknown member 'unknown'</p>");
+    assert.equal(window.document.body.innerHTML, '<p>Error: Unknown member "unknown"</p>');
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
