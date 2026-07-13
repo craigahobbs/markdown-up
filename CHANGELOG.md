@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.0 (2026-07-13)
+
+- [a71529a](https://github.com/craigahobbs/markdown-up/commit/a71529a) - schema-markdown 1.3
+
 ## 4.1.1 (2026-05-27)
 
 - [093f81b](https://github.com/craigahobbs/markdown-up/commit/093f81b) - add windowKeyState and windowPlaySound functions
