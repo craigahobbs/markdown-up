@@ -50,13 +50,11 @@ app: doc tarball build/markdown.css
 		lib \
 		node_modules/bare-script \
 		node_modules/element-model \
-		node_modules/schema-markdown \
 		build/doc \
 		build/markdown-up.tar.gz \
 		build/app/
 	mkdir -p build/app/bare-script/static
 	cp build/markdown.css build/app/bare-script/static
-	mv build/app/bare-script/lib/include/ build/app/
 
     # Fix imports
 	for FILE in `find build/app/*/lib -name '*.js'`; do \
@@ -76,7 +74,6 @@ tarball: build/npm.build build/markdown.css
     # Statics
 	date -I > build/markdown-up/VERSION.txt
 	cp static/*.css build/markdown-up
-	rm -rf build/markdown-up/include/test
 
     # Application
 	cp -R lib build/markdown-up
@@ -87,15 +84,10 @@ tarball: build/npm.build build/markdown.css
 	rm -rf build/markdown-up/bare-script/lib/bare.js
 	mkdir -p build/markdown-up/bare-script/static
 	cp build/markdown.css build/markdown-up/bare-script/static
-	mv build/markdown-up/bare-script/lib/include/ build/markdown-up/
 
     # element-model
 	mkdir -p build/markdown-up/element-model
 	cp -R node_modules/element-model/lib build/markdown-up/element-model
-
-    # schema-markdown
-	mkdir -p build/markdown-up/schema-markdown
-	cp -R node_modules/schema-markdown/lib build/markdown-up/schema-markdown
 
     # Fix imports
 	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \

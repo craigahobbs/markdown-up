@@ -7,7 +7,6 @@ import '../lib/appImports.js';
 
 
 import {} from 'bare-script/lib/options.js';
-import {fetchSystem, fetchSystemPrefix} from 'bare-script/lib/optionsNode.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {strict as assert} from 'node:assert';
@@ -398,8 +397,7 @@ test('MarkdownUp, run and render', async () => {
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
     window.location.hash = '#';
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Title\n\nHello!', 'menu': false});
+    const app = new MarkdownUp(window, {'markdownText': '# Title\n\nHello!', 'menu': false});
     await app.run();
     assert.equal(window.document.title, 'Title');
     assert.equal(
@@ -463,8 +461,7 @@ test('MarkdownUp, render menu toggle', async () => {
     window.document.documentElement.style.setProperty = (prop, val) => documentElementStyleSetPropertyCalls.push([prop, val]);
 
     window.location.hash = '#';
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -503,8 +500,7 @@ test('MarkdownUp, render menu view toggle', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Hello\n\nHello!'});
+    const app = new MarkdownUp(window, {'markdownText': '# Hello\n\nHello!'});
     await app.render();
     assert.equal(window.document.title, 'Hello');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -565,8 +561,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -628,8 +623,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -685,8 +679,7 @@ test('MarkdownUp, render menu cycle', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -736,8 +729,7 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     window.location.hash = '#';
     window.localStorage.setItem('MarkdownUp', '{"fontSize": 24}');
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -769,8 +761,7 @@ test('MarkdownUp, render menu help', async () => {
 
     window.location.hash = '#';
     window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello!', 'helpURL': '#help'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!', 'helpURL': '#help'});
     await app.render();
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
@@ -806,9 +797,7 @@ test('MarkdownUp, render timeout', async () => {
         windowTimeout.delay = null;
     };
 
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -877,9 +866,7 @@ test('MarkdownUp, render resize', async () => {
         eventListener[type] = null;
     };
 
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -931,9 +918,7 @@ test('MarkdownUp, render keydown', async () => {
         eventListener[type] = null;
     };
 
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main(event):
@@ -987,9 +972,7 @@ main({'key': 'A'})
 
 test('MarkdownUp, render focus', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -1053,10 +1036,8 @@ test('MarkdownUp, render document reset ID', async () => {
         windowTimeout.delay = null;
     };
 
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
         'menu': false,
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function main():
@@ -1112,9 +1093,7 @@ main()
 
 test('MarkdownUp, render location', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 windowSetLocation('#url=other')
@@ -1131,9 +1110,7 @@ windowSetLocation('#url=other')
 
 test('MarkdownUp, render location callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function onClick():
@@ -1166,8 +1143,7 @@ elementModelRender({ \
 
 test('MarkdownUp, render location hash', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': ''});
+    const app = new MarkdownUp(window, {'markdownText': ''});
     window.location.hash = "#var.vName='test'&subtitle";
     await app.render();
     assert.equal(window.document.title, '');
@@ -1178,9 +1154,7 @@ test('MarkdownUp, render location hash', async () => {
 
 test('MarkdownUp, render title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 documentSetTitle('Hello')
@@ -1197,9 +1171,7 @@ markdownPrint('Hello')
 
 test('MarkdownUp, render title callback', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 function onClick():
@@ -1240,11 +1212,7 @@ test('MarkdownUp.updateParams, invalid session/local storage', () => {
 
 test('MarkdownUp.main, simple', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
@@ -1253,7 +1221,7 @@ test('MarkdownUp.main, simple', async () => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1278,11 +1246,7 @@ test('MarkdownUp.main, simple', async () => {
 
 test('MarkdownUp.main, url', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'sub/other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -1301,13 +1265,15 @@ test('MarkdownUp.main, url', async () => {
 [Hash link with absolute URL](#url=http://file.com)
 
 [Hash link with absolute URL and hash-id](#url=http://file.com&hash-id)
+
+[Hash link with invalid params](#invalid&url=file.md)
 `);
         })};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('url=sub%2Fother.md');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1392,6 +1358,16 @@ test('MarkdownUp.main, url', async () => {
                                 'elem': [{'text': 'Hash link with absolute URL and hash-id'}]
                             }
                         ]
+                    },
+                    {
+                        'html': 'p',
+                        'elem': [
+                            {
+                                'html': 'a',
+                                'attr': {'href': '#url=sub%2Fother.md'},
+                                'elem': [{'text': 'Hash link with invalid params'}]
+                            }
+                        ]
                     }
                 ]
             ]
@@ -1402,11 +1378,7 @@ test('MarkdownUp.main, url', async () => {
 
 test('MarkdownUp.main, markdownText url override', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'other.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello\n\nGoodbye');
@@ -1415,7 +1387,7 @@ test('MarkdownUp.main, markdownText url override', async () => {
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Goodbye\n\nHello'});
+    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
     app.updateParams('url=other.md');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1441,8 +1413,7 @@ test('MarkdownUp.main, markdownText url override', async () => {
 
 test('MarkdownUp.main, markdownText url override empty', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': '# Goodbye\n\nHello'});
+    const app = new MarkdownUp(window, {'markdownText': '# Goodbye\n\nHello'});
     app.updateParams('url=');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1468,11 +1439,7 @@ test('MarkdownUp.main, markdownText url override empty', async () => {
 
 test('MarkdownUp.main, code block', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -1487,7 +1454,7 @@ Code
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('');
     const mainElements = await app.main();
     assert.deepEqual(
@@ -1547,9 +1514,7 @@ Code
 
 test('MarkdownUp.main, fontSize', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
@@ -1584,11 +1549,7 @@ markdownPrint('fontSize = ' + numberToFixed(documentFontSize()))
 
 test('MarkdownUp.main, fetch script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve('# Hello');
@@ -1598,7 +1559,6 @@ test('MarkdownUp.main, fetch script', async () => {
         resolve(fetchResolve(url));
     });
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint(systemFetch('README.md'))
@@ -1637,18 +1597,14 @@ markdownPrint(systemFetch('README.md'))
 
 test('MarkdownUp.main, fetch error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': 'Not Found'};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1665,18 +1621,14 @@ test('MarkdownUp.main, fetch error', async () => {
 
 test('MarkdownUp.main, fetch error no status text', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': false, 'statusText': ''};
     };
     window.fetch = (url) => new Promise((resolve) => {
         resolve(fetchResolve(url));
     });
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1693,8 +1645,7 @@ test('MarkdownUp.main, fetch error no status text', async () => {
 
 test('MarkdownUp.main, no title', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1719,8 +1670,7 @@ test('MarkdownUp.main, no title', async () => {
 
 test('MarkdownUp.main, menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', null, '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1745,8 +1695,7 @@ test('MarkdownUp.main, menu', async () => {
 
 test('MarkdownUp.main, no menu', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello', 'menu': false});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello', 'menu': false});
     app.updateParams('', null, '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1768,8 +1717,7 @@ test('MarkdownUp.main, no menu', async () => {
 
 test('MarkdownUp.main, menu cycle and toggle', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('view=markdown', '{"fontSize": 18}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1792,8 +1740,7 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
 
 test('MarkdownUp.main, markdown', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('view=markdown', null, null);
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1816,8 +1763,7 @@ test('MarkdownUp.main, markdown', async () => {
 
 test('MarkdownUp.main, darkMode', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix, 'markdownText': 'Hello'});
+    const app = new MarkdownUp(window, {'markdownText': 'Hello'});
     app.updateParams('', '{"darkMode": true}', '{"menu": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -1842,9 +1788,7 @@ test('MarkdownUp.main, darkMode', async () => {
 
 test('MarkdownUp.main, markdown-script', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 # markdown-script
 
@@ -1915,9 +1859,65 @@ markdownPrint('Hello', '~~~', 'Code', '~~~')
 });
 
 
+test('MarkdownUp.main, markdown-script execution order', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchResolve = (url) => {
+        assert.equal(url, 'data.txt');
+        return {'ok': true, 'text': () => new Promise((resolve) => {
+            resolve('World');
+        })};
+    };
+    window.fetch = (url) => new Promise((resolve) => {
+        resolve(fetchResolve(url));
+    });
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+# markdown-script execution order
+
+~~~ markdown-script
+value = systemFetch('data.txt')
+~~~
+
+~~~ markdown-script
+markdownPrint('Hello, ' + value + '!')
+~~~
+`
+    });
+    app.updateParams('');
+    const mainElements = await app.main();
+    assert.deepEqual(
+        deleteElementCallbacks(mainElements),
+        {
+            'title': 'markdown-script execution order',
+            'elements': [
+                [
+                    [
+                        menuBurgerElements(),
+                        null
+                    ],
+                    {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
+                ],
+                [
+                    {
+                        'html': 'h1',
+                        'attr': {'id': 'markdown-script-execution-order'},
+                        'elem': [{'text': 'markdown-script execution order'}]
+                    },
+                    null,
+                    [
+                        [
+                            {'html': 'p', 'elem': [{'text': 'Hello, World!'}]}
+                        ]
+                    ]
+                ]
+            ]
+        }
+    );
+});
+
+
 test('MarkdownUp.main, markdown-script windowPlaySound', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
 
     // Mock the Web Audio context
     let audioContextCount = 0;
@@ -1944,7 +1944,6 @@ test('MarkdownUp.main, markdown-script windowPlaySound', async () => {
     };
 
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 windowPlaySound('click')
@@ -1993,10 +1992,8 @@ test('MarkdownUp, key state', () => {
 
 test('MarkdownUp.main, markdown-script windowKeyState', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
 
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint('ArrowUp is ' + if(windowKeyState('ArrowUp'), 'down', 'up'))
@@ -2019,9 +2016,7 @@ markdownPrint('ArrowUp is ' + if(windowKeyState('ArrowUp'), 'down', 'up'))
 
 test('MarkdownUp.main, markdown-script invalid markdown line', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 # markdown-script
 
@@ -2078,10 +2073,8 @@ markdownPrint('2')
 
 test('MarkdownUp.main, markdown-script globals', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
         'globals': {'message': 'Globals'},
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint(message)
@@ -2116,11 +2109,7 @@ markdownPrint(message)
 
 test('MarkdownUp.main, markdown-script debug', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    const fetchResolve = (url, options) => {
-        if (url.startsWith(fetchSystemPrefix)) {
-            return fetchSystem(null, url, options);
-        }
-
+    const fetchResolve = (url) => {
         assert.equal(url, 'README.md');
         return {'ok': true, 'text': () => new Promise((resolve) => {
             resolve(`\
@@ -2141,7 +2130,7 @@ systemLogDebug('Hello')
             logs.push(message);
         }
     };
-    const app = new MarkdownUp(window, {'systemPrefix': fetchSystemPrefix});
+    const app = new MarkdownUp(window);
     app.updateParams('', null, '{"debug": 1}');
     assert.deepEqual(
         deleteElementCallbacks(await app.main()),
@@ -2184,9 +2173,7 @@ test('MarkdownUp.main, markdown-script debug text', async () => {
             logs.push(message);
         }
     };
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 # markdown-script
 
@@ -2235,9 +2222,7 @@ test('MarkdownUp.main, markdown-script debug warnings', async () => {
             logs.push(message);
         }
     };
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 # markdown-script
 
@@ -2290,9 +2275,7 @@ endfunction
 
 test('MarkdownUp.main, markdown-script variables', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 markdownPrint('varName = ' + varName)
@@ -2333,11 +2316,9 @@ test('MarkdownUp.main, markdown-script variables error', async () => {
             logs.push(message);
         }
     };
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(
         window,
         {
-            'systemPrefix': fetchSystemPrefix,
             'markdownText': `\
 ~~~ markdown-script
 markdownPrint('varName = ' + varName)
@@ -2387,9 +2368,7 @@ foo bar
 
 test('MarkdownUp.main, markdown-script runtime error', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
-    window.fetch = (url, options) => fetchSystem(null, url, options);
     const app = new MarkdownUp(window, {
-        'systemPrefix': fetchSystemPrefix,
         'markdownText': `\
 ~~~ markdown-script
 foobar()

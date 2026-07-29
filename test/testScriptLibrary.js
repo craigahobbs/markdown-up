@@ -2,11 +2,9 @@
 // https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 import {} from 'bare-script/lib/bare.js';
-import {fetchSystem, fetchSystemPrefix} from 'bare-script/lib/optionsNode.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownScriptRuntime} from '../lib/script.js';
 import {strict as assert} from 'node:assert';
-import {executeScriptAsync} from 'bare-script/lib/runtimeAsync.js';
 import {markdownScriptFunctions} from '../lib/scriptLibrary.js';
 import test from 'node:test';
 
@@ -586,28 +584,9 @@ test('script library, localStorageRemove', () => {
 //
 
 
-test('script library, markdownPrint', async () => {
+test('script library, markdownPrint', () => {
     const runtime = testRuntime();
-    runtime.options.fetchFn = (url, options) => fetchSystem(null, url, options);
-    runtime.options.systemPrefix = fetchSystemPrefix;
     runtime.options.markdownOptions = {'headerIds': true};
-    runtime.options.globals = {};
-    const includeScript = {
-        'statements': [
-            {
-                'include': {
-                    'includes': [
-                        {'url': 'markdown.bare', 'system': true},
-                        {'url': 'markdownHighlight.bare', 'system': true},
-                        {'url': 'markdownElements.bare', 'system': true},
-                        {'url': 'markdownParser.bare', 'system': true}
-                    ]
-                }
-            }
-        ]
-    };
-    await executeScriptAsync(includeScript, runtime.options);
-
     markdownScriptFunctions.markdownPrint(['# Title', ['', 'Hello\n\nWorld!']], runtime.options);
     assert.deepEqual(runtime.resetElements(), [
         [
