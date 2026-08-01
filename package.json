@@ -27,10 +27,10 @@
     },
     "devDependencies": {
         "@eslint/js": "~10.0",
-        "c8": "~11.0",
-        "eslint": "~10.6",
-        "globals": "~17.7",
+        "c8": "~12.0",
+        "eslint": "~10.8",
+        "globals": "~17.8",
         "jsdoc": "~4.0",
-        "jsdom": "~29.1"
+        "jsdom": "~30.0"
     }
 }
