@@ -82,6 +82,7 @@ tarball: build/npm.build build/markdown.css
 	mkdir -p build/markdown-up/bare-script
 	cp -R node_modules/bare-script/lib build/markdown-up/bare-script
 	rm -rf build/markdown-up/bare-script/lib/bare.js
+	rm -rf build/markdown-up/bare-script/lib/optionsNode.js
 	mkdir -p build/markdown-up/bare-script/static
 	cp build/markdown.css build/markdown-up/bare-script/static
 
