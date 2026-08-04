@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.1.0 (2026-08-04)
+
+- [1162e38](https://github.com/craigahobbs/markdown-up/commit/1162e38) - bare-script 5.1
+
 ## 5.0.0 (2026-07-29)
 
 - [327cbb5](https://github.com/craigahobbs/markdown-up/commit/327cbb5) - update to bare-script 5.0 - remove the schema-markdown dependency and render using the include library stubs
