@@ -26,6 +26,21 @@ confident that BareScript will execute the same regardless of the underlying run
 - [Source code](https://github.com/craigahobbs/bare-script)
 
 
+## Installation
+
+Install the bare-script package in your project with npm:
+
+```
+npm install bare-script
+```
+
+To use the `bare` command-line interface, install the package globally:
+
+```
+npm install -g bare-script
+```
+
+
 ## Executing BareScript Scripts
 
 To execute a BareScript script, parse the script using the
@@ -36,7 +51,7 @@ function or the
 [executeScriptAsync](https://craigahobbs.github.io/bare-script/module-lib_runtimeAsync.html#.executeScriptAsync)
 function. For example:
 
-``` javascript
+```javascript
 import {barescriptParseScript, executeScript} from 'bare-script/lib/runtime.js';
 
 // Parse the script
@@ -67,12 +82,12 @@ This outputs:
 includes a set of built-in functions for mathematical operations, object manipulation, array
 manipulation, regular expressions, HTTP fetch and more. The following example demonstrates the use
 of the
-[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='System'&systemfetch),
-[objectGet](https://craigahobbs.github.io/bare-script/library/#var.vGroup='Object'&objectget), and
-[arrayLength](https://craigahobbs.github.io/bare-script/library/#var.vGroup='Array'&arraylength)
+[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='system'&systemfetch),
+[objectGet](https://craigahobbs.github.io/bare-script/library/#var.vGroup='object'&objectget), and
+[arrayLength](https://craigahobbs.github.io/bare-script/library/#var.vGroup='array'&arraylength)
 functions.
 
-``` javascript
+```javascript
 import {barescriptParseScript} from 'bare-script/lib/runtime.js';
 import {executeScriptAsync} from 'bare-script/lib/runtimeAsync.js';
 
@@ -92,7 +107,7 @@ console.log(await executeScriptAsync(script, {'fetchFn': fetch}));
 This outputs:
 
 ```
-The BareScript Library has 108 builtin functions
+The BareScript Library has 100 builtin functions
 ```
 
 
@@ -114,7 +129,7 @@ a set of built-in, spreadsheet-like functions.
 
 For example:
 
-``` javascript
+```javascript
 import {barescriptParseExpression, evaluateExpression} from 'bare-script/lib/runtime.js';
 
 // Parse the expression
@@ -146,7 +161,7 @@ exported by the
 Each stub function executes its corresponding include library function using the BareScript
 runtime. For example:
 
-``` javascript
+```javascript
 import {markdownParse, markdownTitle} from 'bare-script/lib/include.js';
 
 // Parse the Markdown text
@@ -176,13 +191,11 @@ files use the ".bare" file extension.
 bare script.bare
 ```
 
-**Note:** In the BareScript CLI, import statements and the
-[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='System'&systemfetch)
+**Note:** In the BareScript CLI, include statements and the
+[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='system'&systemfetch)
 function read non-URL paths from the local file system.
-[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='System'&systemfetch)
-calls with a non-URL path and a
-[request body](https://craigahobbs.github.io/bare-script/library/model.html#var.vName='SystemFetchRequest')
-write the body to the path.
+[systemFetch](https://craigahobbs.github.io/bare-script/library/#var.vGroup='system'&systemfetch)
+calls with a non-URL path and a request body write the body to the path.
 
 
 ## MarkdownUp, a Markdown Viewer with BareScript
@@ -196,7 +209,7 @@ dynamically rendering Markdown text, drawing SVG images, etc. For example:
 
 This is a Markdown document with embedded BareScript:
 
-``` markdown-script
+```markdown-script
 markdownPrint('Hello, Markdown!')
 ```
 ~~~
@@ -236,7 +249,7 @@ time. Tests without a native JavaScript equivalent are omitted.
 ## Using BareScript with an AI Assistant
 
 This repository ships a
-[`SKILL.md`](https://github.com/craigahobbs/bare-script-py/blob/main/SKILL.md)
+[`SKILL.md`](https://github.com/craigahobbs/bare-script/blob/main/SKILL.md)
 file that teaches an AI coding assistant how to write idiomatic BareScript — language syntax, the
 built-in and include libraries, the MarkdownUp application pattern, and the unit-test conventions.
 It is plain Markdown and applies to either BareScript implementation.
@@ -267,11 +280,17 @@ pip install markdown-up
 markdown-up ticTacToe.md
 ```
 
-The BareScript library is also documented as single-page Markdown, which can be fetched directly
+The BareScript documentation is also published as plain Markdown, which can be fetched directly
 into an assistant's context alongside `SKILL.md`:
 
+- [The BareScript Language](https://craigahobbs.github.io/bare-script/language/README.md)
 - [The BareScript Library](https://craigahobbs.github.io/bare-script/library/barescript-library.md)
 - [The BareScript Library Models](https://craigahobbs.github.io/bare-script/library/barescript-library-model.md)
+- [The BareScript Expression Library](https://craigahobbs.github.io/bare-script/library/barescript-expression-library.md)
+- [The BareScript Runtime Model](https://craigahobbs.github.io/bare-script/model/barescript-model.md)
+
+`SKILL.md` itself is published at <https://craigahobbs.github.io/bare-script/SKILL.md>, and
+<https://craigahobbs.github.io/bare-script/llms.txt> indexes all of the fetchable documentation.
 
 
 ## Development
