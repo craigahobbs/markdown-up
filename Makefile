@@ -58,11 +58,11 @@ app: doc tarball build/markdown.css
 
     # Fix imports
 	for FILE in `find build/app/*/lib -name '*.js'`; do \
-		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/..\/\2/g" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/app/* -name '*.js'`; do \
-		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/\2/g" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 
@@ -92,11 +92,11 @@ tarball: build/npm.build build/markdown.css
 
     # Fix imports
 	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \
-		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/..\/\2/g" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/markdown-up/* -name '*.js'`; do \
-		sed -E "s/^import ([^']*)'([^\.])/import \1'..\/\2/g" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 
