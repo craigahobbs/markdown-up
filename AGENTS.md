@@ -1,22 +1,22 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Notes for coding agents working in this repository.
 
-## Common commands
+## javascript-build
 
-This project uses the [javascript-build](https://github.com/craigahobbs/javascript-build) Make-based toolchain. `Makefile.base`, `jsdoc.json`, and `eslint.config.js` are downloaded on first build and are not in source control.
+This is a [javascript-build](https://github.com/craigahobbs/javascript-build#readme) package. Read the javascript-build skill before running tests, lint, coverage, or changing the Makefile: [`../javascript-build/SKILL.md`](../javascript-build/SKILL.md) if that file exists, otherwise [https://raw.githubusercontent.com/craigahobbs/javascript-build/main/SKILL.md](https://raw.githubusercontent.com/craigahobbs/javascript-build/main/SKILL.md).
 
-- `make test` — run the test suite (`node --test` against `test/`)
-- `make test TEST=<pattern>` — run a single test or subset (passed as `--test-name-pattern`)
-- `make lint` — ESLint over `lib/` and `test/`
-- `make cover` — coverage via `c8`; project requires 100% (`--100`)
-- `make doc` — jsdoc into `build/doc/`
-- `make commit` — runs `test lint doc cover` (and `app`, per the project's override)
+Local Makefile overrides:
+
+- `GHPAGES_SRC` — `build/app/`
+- `USE_JSDOM` — jsdom is a development dependency
+- `commit` also depends on `app`
+
+Package-specific targets:
+
 - `make app` — assemble the deployable static app into `build/app/` (used by gh-pages)
 - `make run` — `make app` then `python3 -m http.server --directory build/app`
-- `make clean` / `make superclean` — clean build artifacts (also removes downloaded `Makefile.base` etc.)
-
-`npm test` works too but bypasses the build-deps install step that `make` provides.
+- `make tarball` — assemble `build/markdown-up.tar.gz` with rewritten import paths
 
 ## Code architecture
 
@@ -27,7 +27,7 @@ MarkdownUp is the browser frontend for the MarkdownUp Markdown viewer. There is 
 - **`lib/scriptLibrary.js`** — The library of BareScript functions exposed to MarkdownUp Applications (e.g. `documentFontSize`, `documentInputValue`, element-model helpers). Each function is declared with `// $function:` / `$group:` / `$doc:` / `$arg:` / `$return:` doc comments — this comment format is consumed by external doc tooling, **preserve it when adding or editing functions**. Argument validation goes through `valueArgsModel` / `valueArgsValidate` from `bare-script/lib/value.js`.
 - **`lib/appImports.js`** — Single entry point the HTML stub imports. Re-exports `MarkdownUp` and side-effect-imports every dependency module so the browser only fetches one module graph.
 
-Tests in `test/` use `node --test` with `jsdom` (Makefile sets `USE_JSDOM := 1`). `testApp.js` covers `lib/app.js`; `testScriptLibrary.js` covers `lib/scriptLibrary.js`. Coverage is enforced at 100%.
+Tests in `test/` use `node --test` with `jsdom`. `testApp.js` covers `lib/app.js`; `testScriptLibrary.js` covers `lib/scriptLibrary.js`.
 
 ## Dependencies and the build
 
