@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "bare-script",
-    "version": "5.1.3",
+    "version": "5.1.4",
     "description": "BareScript; a lightweight scripting and expression language",
     "keywords": [
         "expression",
@@ -31,7 +31,7 @@
         "eslint": "~10.8",
         "globals": "~17.8",
         "jsdoc": "~4.0",
-        "markdown-model": "~2.3",
+        "markdown-model": "~2.4",
         "schema-markdown": "~1.3"
     }
 }
