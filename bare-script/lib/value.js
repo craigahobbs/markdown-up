@@ -235,21 +235,22 @@ export function valueCompare(left, right) {
  */
 export function valueArgsValidate(fnArgs, args, errorReturnValue = null) {
     const fnArgsLength = fnArgs.length;
+    const argsLength = args.length;
     for (let ix = 0; ix < fnArgsLength; ix++) {
         const fnArg = fnArgs[ix];
-        const {'type': argType = null, 'default': argDefault = null, lastArgArray = false} = fnArg;
+        const argType = fnArg.type;
 
         // Missing argument?
-        if (ix >= args.length) {
+        if (ix >= argsLength) {
             // Last argument array?
-            if (lastArgArray) {
+            if (fnArg.lastArgArray) {
                 args.push([]);
                 continue;
             }
 
             // Argument default?
-            if (argDefault !== null) {
-                args.push(argDefault);
+            if (fnArg.default !== null) {
+                args.push(fnArg.default);
                 continue;
             }
 
@@ -270,7 +271,7 @@ export function valueArgsValidate(fnArgs, args, errorReturnValue = null) {
         }
 
         // Last arg array?
-        if (lastArgArray) {
+        if (fnArg.lastArgArray) {
             args.push(args.splice(ix));
             continue;
         }
@@ -311,18 +312,17 @@ export function valueArgsValidate(fnArgs, args, errorReturnValue = null) {
 
         // Number constraints
         if (argType === 'number') {
-            const {integer = false, lt = null, lte = null, gt = null, gte = null} = fnArg;
-            if ((integer && Math.floor(argValue) !== argValue) ||
-                (lt !== null && !(argValue < lt)) ||
-                (lte !== null && !(argValue <= lte)) ||
-                (gt !== null && !(argValue > gt)) ||
-                (gte !== null && !(argValue >= gte))) {
+            if ((fnArg.integer && Math.floor(argValue) !== argValue) ||
+                (fnArg.lt !== null && !(argValue < fnArg.lt)) ||
+                (fnArg.lte !== null && !(argValue <= fnArg.lte)) ||
+                (fnArg.gt !== null && !(argValue > fnArg.gt)) ||
+                (fnArg.gte !== null && !(argValue >= fnArg.gte))) {
                 throw new ValueArgsError(fnArg.name, argValue, errorReturnValue);
             }
         }
     }
 
-    // Extra arguments?
+    // Extra arguments? (a last-argument array collapses the extra arguments, so re-read the length)
     if (args.length > fnArgsLength) {
         throw new ValueArgsError(null, args.length, errorReturnValue);
     }
@@ -365,18 +365,29 @@ export class ValueArgsError extends Error {
  * Validate a function arguments model
  *
  * @param {Object[]} fnArgs - The function arguments model
- * @returns {Object[]} The validated function arguments model
+ * @returns {Object[]} The validated function arguments model - each argument model is normalized to have every
+ *     member so that valueArgsValidate reads a single object shape
  * @ignore
  */
 export function valueArgsModel(fnArgs) {
-    // Use nullable instead of default-null
-    for (const fnArg of fnArgs) {
+    return fnArgs.map((fnArg) => {
+        // Use nullable instead of default-null
         if (fnArg.default === null) {
             throw Error(`Argument "${fnArg.name}" has default value of null - use nullable instead`);
         }
-    }
-
-    return fnArgs;
+        return {
+            'name': fnArg.name,
+            'type': fnArg.type ?? null,
+            'default': fnArg.default ?? null,
+            'nullable': fnArg.nullable ?? false,
+            'lastArgArray': fnArg.lastArgArray ?? false,
+            'integer': fnArg.integer ?? false,
+            'lt': fnArg.lt ?? null,
+            'lte': fnArg.lte ?? null,
+            'gt': fnArg.gt ?? null,
+            'gte': fnArg.gte ?? null
+        };
+    });
 }
 
 
@@ -438,43 +449,18 @@ export function valueParseInteger(text, radix = 10) {
 }
 
 
-const valueParseIntegerRegexMap = {
-    '2': /^\s*[-+]?[0-1]+\s*$/,
-    '3': /^\s*[-+]?[0-2]+\s*$/,
-    '4': /^\s*[-+]?[0-3]+\s*$/,
-    '5': /^\s*[-+]?[0-4]+\s*$/,
-    '6': /^\s*[-+]?[0-5]+\s*$/,
-    '7': /^\s*[-+]?[0-6]+\s*$/,
-    '8': /^\s*[-+]?[0-7]+\s*$/,
-    '9': /^\s*[-+]?[0-8]+\s*$/,
-    '10': /^\s*[-+]?[0-9]+\s*$/,
-    '11': /^\s*[-+]?[0-9Aa]+\s*$/,
-    '12': /^\s*[-+]?[0-9A-Ba-b]+\s*$/,
-    '13': /^\s*[-+]?[0-9A-Ca-c]+\s*$/,
-    '14': /^\s*[-+]?[0-9A-Da-d]+\s*$/,
-    '15': /^\s*[-+]?[0-9A-Ea-e]+\s*$/,
-    '16': /^\s*[-+]?[0-9A-Fa-f]+\s*$/,
-    '17': /^\s*[-+]?[0-9A-Ga-g]+\s*$/,
-    '18': /^\s*[-+]?[0-9A-Ha-h]+\s*$/,
-    '19': /^\s*[-+]?[0-9A-Ia-i]+\s*$/,
-    '20': /^\s*[-+]?[0-9A-Ja-j]+\s*$/,
-    '21': /^\s*[-+]?[0-9A-Ka-k]+\s*$/,
-    '22': /^\s*[-+]?[0-9A-La-l]+\s*$/,
-    '23': /^\s*[-+]?[0-9A-Ma-m]+\s*$/,
-    '24': /^\s*[-+]?[0-9A-Na-n]+\s*$/,
-    '25': /^\s*[-+]?[0-9A-Oa-o]+\s*$/,
-    '26': /^\s*[-+]?[0-9A-Pa-p]+\s*$/,
-    '27': /^\s*[-+]?[0-9A-Qa-q]+\s*$/,
-    '28': /^\s*[-+]?[0-9A-Ra-r]+\s*$/,
-    '29': /^\s*[-+]?[0-9A-Sa-s]+\s*$/,
-    '30': /^\s*[-+]?[0-9A-Ta-t]+\s*$/,
-    '31': /^\s*[-+]?[0-9A-Ua-u]+\s*$/,
-    '32': /^\s*[-+]?[0-9A-Va-v]+\s*$/,
-    '33': /^\s*[-+]?[0-9A-Wa-w]+\s*$/,
-    '34': /^\s*[-+]?[0-9A-Xa-x]+\s*$/,
-    '35': /^\s*[-+]?[0-9A-Ya-y]+\s*$/,
-    '36': /^\s*[-+]?[0-9A-Za-z]+\s*$/
-};
+// Helper to create the integer-string regex for a radix (2 - 36) - digits, then letters for radix > 10
+function valueParseIntegerRegex(radix) {
+    const letterMax = radix - 11;
+    const digits = (radix <= 10 ? `0-${radix - 1}`
+        : `0-9A-${String.fromCharCode('A'.charCodeAt(0) + letterMax)}a-${String.fromCharCode('a'.charCodeAt(0) + letterMax)}`);
+    return new RegExp(`^\\s*[-+]?[${digits}]+\\s*$`);
+}
+
+
+const valueParseIntegerRegexMap = Object.fromEntries(
+    Array.from({'length': 35}, (unused, ixRadix) => [String(ixRadix + 2), valueParseIntegerRegex(ixRadix + 2)])
+);
 
 
 //

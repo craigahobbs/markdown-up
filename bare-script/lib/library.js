@@ -1,11 +1,11 @@
 // Licensed under the MIT License
 // https://github.com/craigahobbs/bare-script/blob/main/LICENSE
 
+import {AsyncFunction, evaluateExpression} from './runtime.js';
 import {
     ValueArgsError, valueArgsModel, valueArgsValidate, valueBoolean, valueCompare, valueIs, valueJSON, valueObjectSet,
     valueParseDatetime, valueParseInteger, valueParseNumber, valueRoundNumber, valueString, valueType
 } from './value.js';
-import {evaluateExpression} from './runtime.js';
 
 
 /* eslint-disable id-length */
@@ -155,8 +155,13 @@ const arrayIndexOfArgs = valueArgsModel([
 // $arg separator: The separator string
 // $return: The joined string
 function arrayJoin(args) {
-    const [array , separator] = valueArgsValidate(arrayJoinArgs, args);
-    return array.map((value) => valueString(value)).join(separator);
+    const [array, separator] = valueArgsValidate(arrayJoinArgs, args);
+
+    // Strings and numbers join natively as valueString would
+    if (array.every((value) => typeof value === 'string' || typeof value === 'number')) {
+        return array.join(separator);
+    }
+    return array.map(valueString).join(separator);
 }
 
 const arrayJoinArgs = valueArgsModel([
@@ -476,15 +481,8 @@ const datetimeHourArgs = valueArgsModel([
 // $return: The formatted datetime string
 function datetimeISOFormat(args) {
     const [datetime, isDate] = valueArgsValidate(datetimeISOFormatArgs, args);
-
-    if (isDate) {
-        const year = String(datetime.getFullYear()).padStart(4, '0');
-        const month = String(datetime.getMonth() + 1).padStart(2, '0');
-        const day = String(datetime.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    return valueString(datetime);
+    const isoString = valueString(datetime);
+    return (isDate ? isoString.slice(0, isoString.indexOf('T')) : isoString);
 }
 
 const datetimeISOFormatArgs = valueArgsModel([
@@ -1185,7 +1183,7 @@ function objectNew(keyValues) {
     for (let ix = 0; ix < keyValues.length; ix += 2) {
         const key = keyValues[ix];
         const value = ix + 1 < keyValues.length ? keyValues[ix + 1] : null;
-        if (valueType(key) !== 'string') {
+        if (typeof key !== 'string') {
             throw new ValueArgsError('keyValues', key);
         }
         valueObjectSet(object, key, value);
@@ -1273,7 +1271,19 @@ const regexMatchArgs = valueArgsModel([
 function regexMatchAll(args) {
     const [regex, string] = valueArgsValidate(regexMatchAllArgs, args);
     const regexGlobal = regexEnsureGlobal(regex);
-    return Array.from(string.matchAll(regexGlobal)).map((match) => regexMatchGroups(match));
+    regexGlobal.lastIndex = 0;
+    const matches = [];
+    let match;
+    while ((match = regexGlobal.exec(string)) !== null) {
+        matches.push(regexMatchGroups(match));
+
+        // Advance past an empty match (by a code point for a unicode regex), as String.prototype.matchAll does
+        if (match[0] === '') {
+            const ixNext = regexGlobal.lastIndex;
+            regexGlobal.lastIndex = ixNext + (regexGlobal.unicode && (string.codePointAt(ixNext) ?? 0) > 0xFFFF ? 2 : 1);
+        }
+    }
+    return matches;
 }
 
 const regexMatchAllArgs = valueArgsModel([
@@ -1282,31 +1292,20 @@ const regexMatchAllArgs = valueArgsModel([
 ]);
 
 
-// Helper te re-compile regex with the global flag and cache
+// Helper to re-compile a regex with the global flag, cached per regex object
 function regexEnsureGlobal(regex) {
-    let regexGlobal = regex;
-    const {source, flags} = regex;
-    if (flags.indexOf('g') === -1) {
-        let sourceCache = regexGlobalCache[source] ?? null;
-        if (sourceCache === null) {
-            sourceCache = {};
-            regexGlobalCache[source] = sourceCache;
-        }
-        let flagsCache = sourceCache[flags] ?? null;
-        if (flagsCache === null) {
-            flagsCache = {};
-            sourceCache[flags] = flagsCache;
-        }
-        regexGlobal = flagsCache[flags] ?? null;
-        if (regexGlobal === null) {
-            regexGlobal = new RegExp(source, `${flags}g`);
-            flagsCache[flags] = regexGlobal;
-        }
+    if (regex.global) {
+        return regex;
+    }
+    let regexGlobal = regexGlobalCache.get(regex) ?? null;
+    if (regexGlobal === null) {
+        regexGlobal = new RegExp(regex.source, `${regex.flags}g`);
+        regexGlobalCache.set(regex, regexGlobal);
     }
     return regexGlobal;
 }
 
-const regexGlobalCache = {};
+const regexGlobalCache = new WeakMap();
 
 
 // Helper function to create a match model from a metch object
@@ -1373,8 +1372,7 @@ const regexNewArgs = valueArgsModel([
 // $return: The updated string
 function regexReplace(args) {
     const [regex, string, substr] = valueArgsValidate(regexReplaceArgs, args);
-    const regexGlobal = regexEnsureGlobal(regex);
-    return string.replaceAll(regexGlobal, substr);
+    return string.replaceAll(regexEnsureGlobal(regex), substr);
 }
 
 const regexReplaceArgs = valueArgsModel([
@@ -1476,13 +1474,14 @@ const stringDecodeDecoder = new TextDecoder('utf-8', {'fatal': true});
 // $return: The UTF-8 byte array
 function stringEncode(args) {
     const [string] = valueArgsValidate(stringEncodeArgs, args);
-    const utf8Encoder = new TextEncoder();
-    return [...utf8Encoder.encode(string)];
+    return [...stringEncodeEncoder.encode(string)];
 }
 
 const stringEncodeArgs = valueArgsModel([
     {'name': 'string', 'type': 'string'}
 ]);
+
+const stringEncodeEncoder = new TextEncoder();
 
 
 // $function: stringEndsWith
@@ -1830,8 +1829,9 @@ async function systemFetch([url = null], options) {
         throw new ValueArgsError('url', url);
     }
 
-    // Fetch in parallel
-    const fetchResponses = await Promise.all(requests.map(async (request) => {
+    // Fetch in parallel - a fetch error, a non-OK response, or a response text error yields null
+    const responses = await Promise.all(requests.map(async (request) => {
+        let response;
         try {
             const fetchURL = urlFn !== null ? urlFn(request.url) : request.url;
             const fetchOptions = {};
@@ -1842,23 +1842,15 @@ async function systemFetch([url = null], options) {
             if ((request.headers ?? null) !== null) {
                 fetchOptions.headers = request.headers;
             }
-            return fetchFn !== null ? await fetchFn(fetchURL, fetchOptions) : null;
-        } catch {
-            return null;
-        }
-    }));
-    const responses = await Promise.all(fetchResponses.map(async (fetchResponse, ixResponse) => {
-        let response;
-        try {
-            response = fetchResponse !== null && fetchResponse.ok ? await fetchResponse.text() : null;
+            const fetchResponse = (fetchFn !== null ? await fetchFn(fetchURL, fetchOptions) : null);
+            response = (fetchResponse !== null && fetchResponse.ok ? await fetchResponse.text() : null);
         } catch {
             response = null;
         }
 
         // Log failure
         if (response === null && logFn !== null) {
-            const errorURL = requests[ixResponse].url;
-            logFn(`BareScript: Function "systemFetch" failed for resource "${errorURL}"`);
+            logFn(`BareScript: Function "systemFetch" failed for resource "${request.url}"`);
         }
 
         return response;
@@ -1975,7 +1967,7 @@ function systemPartial(args) {
         throw new ValueArgsError('args', funcArgs);
     }
 
-    if (func.constructor.name === 'AsyncFunction') {
+    if (func.constructor === AsyncFunction) {
         // eslint-disable-next-line require-await
         return async (argsExtra, options) => func([...funcArgs, ...argsExtra], options);
     }
@@ -2180,5 +2172,6 @@ export const intrinsics = new Set([
     scriptFunctions.objectHas,
     scriptFunctions.objectKeys,
     scriptFunctions.objectSet,
-    scriptFunctions.stringLength
+    scriptFunctions.stringLength,
+    scriptFunctions.systemType
 ]);
