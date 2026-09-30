@@ -705,6 +705,51 @@ test('script library, windowClipboardWrite SVG', async () => {
 });
 
 
+test('script library, windowClipboardWrite binary', async () => {
+    const runtime = testRuntime();
+    const writeCalls = [];
+    runtime.options.window.navigator.clipboard = {
+        'write': (clipboardItems) => {
+            writeCalls.push(clipboardItems[0].data);
+        }
+    };
+
+    class MockClipboardItem {
+        constructor(data) {
+            this.data = data;
+        }
+    };
+    runtime.options.window.ClipboardItem = MockClipboardItem;
+
+    // Byte value array
+    assert.equal(await markdownScriptFunctions.windowClipboardWrite([[0, 128, 255], 'image/png'], runtime.options), undefined);
+    assert.equal(writeCalls.length, 1);
+    let blob = writeCalls[0]['image/png'];
+    assert.deepEqual([...new Uint8Array(await blob.arrayBuffer())], [0, 128, 255]);
+    assert.equal(blob.type, 'image/png');
+
+    // Text is written unchanged
+    assert.equal(await markdownScriptFunctions.windowClipboardWrite(['Hello!'], runtime.options), undefined);
+    blob = writeCalls[1]['text/plain'];
+    assert.equal(await blob.text(), 'Hello!');
+
+    // Invalid data
+    for (const text of [null, 7, {}, [256], [-1], [1.5], ['x'], [null], [true]]) {
+        await assert.rejects(
+            async () => {
+                await markdownScriptFunctions.windowClipboardWrite([text], runtime.options);
+                /* c8 ignore next */
+            },
+            {
+                'name': 'ValueArgsError',
+                'message': `Invalid "text" argument value, ${JSON.stringify(text)}`
+            }
+        );
+    }
+    assert.equal(writeCalls.length, 2);
+});
+
+
 test('script library, windowHeight', () => {
     const runtime = testRuntime();
     assert.equal(markdownScriptFunctions.windowHeight([], runtime.options), 768);
@@ -1103,6 +1148,30 @@ test('script library, windowURLObject', async () => {
     [blob] = createObjectURLCalls;
     assert.equal(await blob.text(), 'The file text');
     assert.equal(await blob.type, 'text/markdown');
+
+    // Byte value array
+    assert.equal(markdownScriptFunctions.windowURLObject([[0, 128, 255], 'application/octet-stream'], runtime.options), '<obj>');
+    [blob] = createObjectURLCalls;
+    assert.deepEqual([...new Uint8Array(await blob.arrayBuffer())], [0, 128, 255]);
+    assert.equal(await blob.type, 'application/octet-stream');
+
+    // Empty byte value array
+    assert.equal(markdownScriptFunctions.windowURLObject([[]], runtime.options), '<obj>');
+    [blob] = createObjectURLCalls;
+    assert.equal(blob.size, 0);
+
+    // Invalid data
+    for (const data of [null, 7, {}, [256], [-1], [1.5], ['x'], [null], [true]]) {
+        assert.throws(
+            () => {
+                markdownScriptFunctions.windowURLObject([data], runtime.options);
+            },
+            {
+                'name': 'ValueArgsError',
+                'message': `Invalid "data" argument value, ${JSON.stringify(data)}`
+            }
+        );
+    }
 });
 
 
