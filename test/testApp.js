@@ -782,10 +782,6 @@ test('MarkdownUp, render timeout', async () => {
     // Patch window.setTimeout and window.clearTimeout
     const windowTimeout = {'id': 0};
     window.setTimeout = (callback, delay) => {
-        if (delay === 0) {
-            // Ignore JSDOM call?
-            return 0;
-        }
         windowTimeout.callback = callback;
         windowTimeout.delay = delay;
         windowTimeout.id += 1;
@@ -1021,10 +1017,6 @@ test('MarkdownUp, render document reset ID', async () => {
     // Patch window.setTimeout and window.clearTimeout
     const windowTimeout = {'id': 0};
     window.setTimeout = (callback, delay) => {
-        if (delay === 0) {
-            // Ignore JSDOM call?
-            return 0;
-        }
         windowTimeout.callback = callback;
         windowTimeout.delay = delay;
         windowTimeout.id += 1;
