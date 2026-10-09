@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.2.0 (2026-10-09)
+
+- [c18d5a0](https://github.com/craigahobbs/markdown-up/commit/c18d5a0) - bare-script 5.2
+
+- [0ce5e77](https://github.com/craigahobbs/markdown-up/commit/0ce5e77) - windowURLObject and windowClipboardWrite - accept a byte value array
+
+- [a5a6e9e](https://github.com/craigahobbs/markdown-up/commit/a5a6e9e) - support multi-line imports in the app/tarball import rewrites - merge the duplicate include.js imports in app.js
+
 ## 5.1.0 (2026-08-04)
 
 - [1162e38](https://github.com/craigahobbs/markdown-up/commit/1162e38) - bare-script 5.1
