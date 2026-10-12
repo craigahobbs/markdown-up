@@ -1,4 +1,4 @@
-# MarkdownUp
+# markdown-up
 
 [![npm](https://img.shields.io/npm/v/markdown-up)](https://www.npmjs.com/package/markdown-up)
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up)](https://github.com/craigahobbs/markdown-up/blob/main/LICENSE)
@@ -82,9 +82,10 @@ To view a different Markdown resource, set the application's "url" hash paramete
 
 ## MarkdownUp Applications
 
-With MarkdownUp, you can write client-rendered frontend applications using
-[BareScript](https://craigahobbs.github.io/bare-script/language/).
-These applications are called *MarkdownUp Applications*. You can learn more from the
+MarkdownUp applications are Markdown files that contain code. Add a `markdown-script` fenced code
+block of [BareScript](https://craigahobbs.github.io/bare-script/language/) to any Markdown file, and
+when MarkdownUp renders the file, it runs the script and renders its output in place of the code
+block. You can learn more from the
 [MarkdownUp backend application's README](https://craigahobbs.github.io/markdown-up-py/#markdownup-applications).
 
 
