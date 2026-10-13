@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.2.1 (2026-10-13)
+
+- [2ed11e3](https://github.com/craigahobbs/markdown-up/commit/2ed11e3) - update readme
+
+- [0cc2fa0](https://github.com/craigahobbs/markdown-up/commit/0cc2fa0) - README: align with markdown-up-py
+
+- [6c5da67](https://github.com/craigahobbs/markdown-up/commit/6c5da67) - README: remove mention of removed markdown-up-py backend APIs
+
 ## 5.2.0 (2026-10-09)
 
 - [c18d5a0](https://github.com/craigahobbs/markdown-up/commit/c18d5a0) - bare-script 5.2
