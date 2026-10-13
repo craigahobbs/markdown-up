@@ -97,14 +97,6 @@ code analysis on your code and reports warnings for any issues found.
 To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.
 
 
-## The MarkdownUp Package
-
-The [markdown-up package](https://www.npmjs.com/package/markdown-up)
-exposes various functionality of the MarkdownUp application, such as rendering data tables and
-charts. For more information, refer to the
-[MarkdownUp package documentation](https://craigahobbs.github.io/markdown-up/doc/).
-
-
 ## Development
 
 This package is developed using [javascript-build](https://github.com/craigahobbs/javascript-build#readme).
