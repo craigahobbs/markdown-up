@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.2 (2026-11-24)
+
+- [8caa8c7](https://github.com/craigahobbs/markdown-up/commit/8caa8c7) - restrict the "url" hash parameter to same-origin URLs by default
+
 ## 5.2.1 (2026-10-13)
 
 - [2ed11e3](https://github.com/craigahobbs/markdown-up/commit/2ed11e3) - update readme
