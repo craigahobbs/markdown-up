@@ -367,6 +367,7 @@ test('MarkdownUp, constructor', () => {
     assert.equal(app.window, window);
     assert.equal(app.params, null);
     assert.equal(app.fontSize, 12);
+    assert.equal(app.hashURL, 'sameOrigin');
     assert.equal(app.lineHeight, 1.3);
     assert.equal(app.menu, true);
     assert.equal(app.url, 'README.md');
@@ -377,6 +378,7 @@ test('MarkdownUp, constructor options', () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
     const app = new MarkdownUp(window, {
         'fontSize': 14,
+        'hashURL': 'any',
         'lineHeight': 1.6,
         'menu': false,
         'url': 'CHANGELOG.md'
@@ -384,6 +386,7 @@ test('MarkdownUp, constructor options', () => {
     assert.equal(app.window, window);
     assert.equal(app.params, null);
     assert.equal(app.fontSize, 14);
+    assert.equal(app.hashURL, 'any');
     assert.equal(app.lineHeight, 1.6);
     assert.equal(app.menu, false);
     assert.equal(app.url, 'CHANGELOG.md');
@@ -1426,6 +1429,130 @@ test('MarkdownUp.main, markdownText url override empty', async () => {
             ]
         }
     );
+});
+
+
+// Helper function to create the "url" hash parameter not-allowed error result
+function hashURLErrorResult(url) {
+    return {
+        'title': 'MarkdownUp',
+        'elements': {'html': 'p', 'elem': {'text': `Error: The "url" hash parameter resource URL "${url}" is not allowed`}}
+    };
+}
+
+
+// Helper function to create a MarkdownUp application that tracks its fetched URLs
+function hashURLApp(options = null, responseURL = null) {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const fetchURLs = [];
+    window.fetch = (url) => new Promise((resolve) => {
+        fetchURLs.push(url);
+        const response = {'ok': true, 'text': () => new Promise((resolveText) => {
+            resolveText('# Hello');
+        })};
+        if (responseURL !== null) {
+            response.url = responseURL;
+        }
+        resolve(response);
+    });
+    return [new MarkdownUp(window, options), fetchURLs];
+}
+
+
+test('MarkdownUp.main, url same-origin', async () => {
+    for (const url of ['other.md', '../other.md', '/other.md', 'https://github.com/other.md', '//github.com/other.md']) {
+        const [app, fetchURLs] = hashURLApp();
+        app.updateParams(`url=${encodeURIComponent(url)}`);
+        assert.equal((await app.main()).title, 'Hello');
+        assert.deepEqual(fetchURLs, [url]);
+    }
+});
+
+
+test('MarkdownUp.main, url cross-origin', async () => {
+    const urls = [
+        'https://other.com/other.md',
+        'http://github.com/other.md',
+        'https://github.com:8080/other.md',
+        'https://github.com.other.com/other.md',
+        '//other.com/other.md',
+        '\\\\other.com\\other.md',
+        'data:text/markdown,%23%20Hello',
+        'blob:https://github.com/5b0f4c0c-7b0a-4c0e-8a53-1c9d1f0c3a11',
+        'https://'
+    ];
+    for (const url of urls) {
+        const [app, fetchURLs] = hashURLApp();
+        app.updateParams(`url=${encodeURIComponent(url)}`);
+        assert.deepEqual(await app.main(), hashURLErrorResult(url));
+        assert.deepEqual(fetchURLs, []);
+    }
+});
+
+
+test('MarkdownUp.main, url cross-origin markdownText', async () => {
+    const [app, fetchURLs] = hashURLApp({'markdownText': '# Goodbye'});
+    app.updateParams('url=https%3A%2F%2Fother.com%2Fother.md');
+    assert.deepEqual(await app.main(), hashURLErrorResult('https://other.com/other.md'));
+    assert.deepEqual(fetchURLs, []);
+});
+
+
+test('MarkdownUp.main, url cross-origin view markdown', async () => {
+    const [app, fetchURLs] = hashURLApp();
+    app.updateParams('url=https%3A%2F%2Fother.com%2Fother.md&view=markdown');
+    assert.deepEqual(await app.main(), hashURLErrorResult('https://other.com/other.md'));
+    assert.deepEqual(fetchURLs, []);
+});
+
+
+test('MarkdownUp.main, url cross-origin option url', async () => {
+    // The application's "url" option is not subject to the "url" hash parameter policy
+    for (const hashURL of ['sameOrigin', 'none']) {
+        const [app, fetchURLs] = hashURLApp({hashURL, 'url': 'https://other.com/other.md'});
+        app.updateParams('');
+        assert.equal((await app.main()).title, 'Hello');
+        assert.deepEqual(fetchURLs, ['https://other.com/other.md']);
+    }
+});
+
+
+test('MarkdownUp.main, url redirect same-origin', async () => {
+    const [app, fetchURLs] = hashURLApp(null, 'https://github.com/redirect.md');
+    app.updateParams('url=other.md');
+    assert.equal((await app.main()).title, 'Hello');
+    assert.deepEqual(fetchURLs, ['other.md']);
+});
+
+
+test('MarkdownUp.main, url redirect cross-origin', async () => {
+    const [app, fetchURLs] = hashURLApp(null, 'https://other.com/redirect.md');
+    app.updateParams('url=other.md');
+    assert.deepEqual(await app.main(), hashURLErrorResult('https://other.com/redirect.md'));
+    assert.deepEqual(fetchURLs, ['other.md']);
+});
+
+
+test('MarkdownUp.main, url hashURL any', async () => {
+    const [app, fetchURLs] = hashURLApp({'hashURL': 'any'}, 'https://another.com/redirect.md');
+    app.updateParams('url=https%3A%2F%2Fother.com%2Fother.md');
+    assert.equal((await app.main()).title, 'Hello');
+    assert.deepEqual(fetchURLs, ['https://other.com/other.md']);
+});
+
+
+test('MarkdownUp.main, url hashURL none', async () => {
+    for (const hashURL of ['none', 'unknown']) {
+        const [app, fetchURLs] = hashURLApp({hashURL});
+        app.updateParams('url=other.md');
+        assert.deepEqual(await app.main(), hashURLErrorResult('other.md'));
+        assert.deepEqual(fetchURLs, []);
+
+        // The empty "url" hash parameter is no "url" hash parameter
+        app.updateParams('url=');
+        assert.equal((await app.main()).title, 'Hello');
+        assert.deepEqual(fetchURLs, ['README.md']);
+    }
 });
 
 
