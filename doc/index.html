@@ -103,6 +103,24 @@ application stub file, index.html. For example:</p>
 </code></pre>
 <p>To view a different Markdown resource, set the application's &quot;url&quot; hash parameter (i.e.,
 &quot;http://127.0.0.1:8000#url=other.md&quot;).</p>
+<p>A Markdown resource's scripts run with the page's origin access (e.g., they can fetch same-origin
+resources and read local storage). For this reason, the &quot;url&quot; hash parameter only allows same-origin
+resource URLs by default. To change this, set the application's &quot;hashURL&quot; option to one of the
+following:</p>
+<ul>
+<li>
+<p><code>'sameOrigin'</code> - only same-origin resource URLs are allowed (the default)</p>
+</li>
+<li>
+<p><code>'any'</code> - any resource URL is allowed. Only use this on an origin where there is nothing to protect -
+the option applies to the page, but a script's access applies to the page's entire origin.</p>
+</li>
+<li>
+<p><code>'none'</code> - the &quot;url&quot; hash parameter is not allowed</p>
+</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>const app = new MarkdownUp(window, {'hashURL': 'none'});
+</code></pre>
 <h2>MarkdownUp Applications</h2>
 <p>MarkdownUp applications are Markdown files that contain code. Add a <code>markdown-script</code> fenced code
 block of <a href="https://craigahobbs.github.io/bare-script/language/">BareScript</a> to any Markdown file, and

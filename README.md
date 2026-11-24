@@ -79,6 +79,22 @@ application stub file, index.html. For example:
 To view a different Markdown resource, set the application's "url" hash parameter (i.e.,
 "http://127.0.0.1:8000#url=other.md").
 
+A Markdown resource's scripts run with the page's origin access (e.g., they can fetch same-origin
+resources and read local storage). For this reason, the "url" hash parameter only allows same-origin
+resource URLs by default. To change this, set the application's "hashURL" option to one of the
+following:
+
+- `'sameOrigin'` - only same-origin resource URLs are allowed (the default)
+
+- `'any'` - any resource URL is allowed. Only use this on an origin where there is nothing to protect -
+  the option applies to the page, but a script's access applies to the page's entire origin.
+
+- `'none'` - the "url" hash parameter is not allowed
+
+~~~ javascript
+const app = new MarkdownUp(window, {'hashURL': 'none'});
+~~~
+
 
 ## MarkdownUp Applications
 
