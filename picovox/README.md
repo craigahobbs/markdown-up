@@ -1,0 +1,912 @@
+# PicoVox
+
+[![npm](https://img.shields.io/npm/v/picovox)](https://www.npmjs.com/package/picovox)
+[![GitHub](https://img.shields.io/github/license/craigahobbs/picovox)](https://github.com/craigahobbs/picovox/blob/main/LICENSE)
+
+**PicoVox - realistic speech synthesis in pure JavaScript, under 1 MB.**
+
+**The paper:** [PicoVox: Realistic Neural Speech Synthesis in Under 1 MB of JavaScript](https://craigahobbs.github.io/picovox/paper/) -
+how PicoVox's networks are designed, trained, and evaluated.
+
+PicoVox speaks English text with twelve natural-sounding male and female voices, entirely on your device - in the
+browser or in Node. There is no recorded speech, no server, no WebAssembly, and no runtime dependencies: a small
+grapheme-to-phoneme network pronounces every word, a small neural network (283K parameters) predicts interpretable
+source-filter synthesizer parameters every 5 ms, and a JavaScript synthesizer with an LF glottal source renders them.
+The whole package - code and both networks - is under 1 MB.
+
+[PicoShelf](https://craigahobbs.github.io/picoshelf/), every public-domain book read aloud right in your browser, is
+built on PicoVox.
+
+
+## Installation
+
+```sh
+npm install picovox
+```
+
+PicoVox is ESM-only. It runs in current browsers (Chrome, Edge, Firefox, and Safari 16.4 or later) and in Node 22 or
+later.
+
+
+## Quick start
+
+In the browser - speak text aloud with Web Audio (call it from a click, so the browser lets the audio start):
+
+```html
+<button id="speak">Speak</button>
+<script type="module">
+    import {speak} from './node_modules/picovox/lib/index.js';
+
+    document.getElementById('speak').onclick = () => {
+        speak('It was the best of times, it was the worst of times.', {'voice': 'female'});
+    };
+</script>
+```
+
+(With a bundler or an import map, import from `'picovox'`.)
+
+In Node - synthesize speech and write a WAV file:
+
+```js
+import {synthesize, toWav} from 'picovox';
+import {writeFileSync} from 'node:fs';
+
+const {samples, sampleRate} = await synthesize('Call me Ishmael.', {'voice': 'male'});
+writeFileSync('ishmael.wav', toWav(samples, sampleRate));
+```
+
+Streaming - a sentence and a fraction of a second at a time, the first speech in about 70 ms (M3 Max):
+
+```js
+import {stream} from 'picovox';
+
+for await (const block of stream(longText, {'voice': 'female', 'rate': 1.2})) {
+    // block is a Float32Array of 24 kHz samples - play it, or post it from a Web Worker
+}
+```
+
+
+## API
+
+### `synthesize(text, options)`
+
+Synthesize speech. Returns a Promise of `{samples, sampleRate}` - `samples` is a `Float32Array` of mono samples (-1 to
+1) at `sampleRate` Hz.
+
+### `stream(text, options)`
+
+Synthesize speech as a stream - an async iterable of `Float32Array` blocks of samples, made as they're taken. The text
+is spoken a sentence at a time, each sentence a fraction of a second at a time, so the first audio comes almost at once.
+The blocks, concatenated, are exactly `synthesize`'s samples. Synthesis runs on the calling thread as each block is
+taken - in a browser, take the blocks in a Web Worker to keep the page responsive.
+
+### `speak(text, options)`
+
+Speak text aloud in a browser, with Web Audio. Returns a playback, `{stop(), finished}` - `stop()` stops it, and
+`finished` is a Promise that resolves when the playback ends or is stopped (and rejects if synthesis fails). Playback
+starts with the first blocks while the rest are synthesized, a few seconds ahead. Synthesis runs on the main thread, a
+block at a time between the page's other work; for long texts, use `stream` in a Web Worker and play its blocks.
+`options.context` is an `AudioContext` to play in (by default, a new one at the sample rate, closed when the playback
+ends). Play blocks in a context at their sample rate (`new AudioContext({'sampleRate': 24000})`): a context at another
+rate resamples each block apart, and the blocks' joins click. Under Node,
+`speak` throws an error - there is no Web Audio; use `synthesize` and `toWav`.
+
+### `voices()`
+
+The built-in voices - `[{key, label, sex, description}]`, the default first:
+
+| Key | Label | Sex | Character |
+| --- | --- | --- | --- |
+| `male` (the default) | Male | male | A warm, buoyant male voice over a resonant mid-low core - the default. |
+| `female` | Female | female | A modern, confident, and friendly female voice. |
+| `sarah` | Sarah | female | A cheerful female voice with real resonance under it, personable and decisive. |
+| `helen` | Helen | female | A low, grounded female voice, quick to the point, with a sincere tone. |
+| `amy` | Amy | female | A young, playful, and upbeat female voice. |
+| `kate` | Kate | female | A settled, even-toned, and kind female voice with crisp consonants. |
+| `grace` | Grace | female | A rounded, soft-edged female voice with an easy, relaxed delivery. |
+| `james` | James | male | A resonant, decisive male voice with a wide dynamic range. |
+| `robert` | Robert | male | A trim, focused male voice with a steady, low-set core. |
+| `michael` | Michael | male | A buoyant, energetic male voice with a playful lift at the ends of phrases. |
+| `david` | David | male | A punchy, close male voice with crisp consonants and a pitch that lifts across each line. |
+| `thomas` | Thomas | male | A high-energy, encouraging male voice. |
+
+Each voice is one row of the voice model's speaker table, learned from one voice of the local TTS model that speaks
+make train's training speech (`train/data/train.json`'s `tts` voices - see [the training speech](#the-training-speech));
+`test/voices.json` is their design record. The voices are the model's speakers as it speaks them - no blends, and no
+pitch, tract, or rate adjustments of their own - except that every voice's source is 5 dB darker than the network
+predicts it (`lib/synthesis.js` `sourceShelf`): in blind A/B listening (1.6.6) the network's source sounded tinny, and
+darker it was less tinny and never less natural. On the listener panel's texts the voices have a Whisper word error
+rate of 0.9-1.2% (1.06% over the twelve) and a gap to their TTS source of 2,054 (fdL12 - the listener panel) - the same
+within a training seed's spread as 2.0.1's, which they replaced (0.98% and 2,068; a blind A/B heard no difference in 6
+trials of 6). 2.0.1's scored a mean UTMOS of 4.42, 2.0.0's 4.31 (and 1.13%), and the voices before 2.0 4.13 and 1.36%
+(a blind A/B preferred 2.0's voices in all 15 trials).
+
+### `styles()`
+
+The speaking styles - `[{key, label, kind, description}]`, neutral (the default) first. Any style goes with any voice:
+
+| Key | Kind | |
+| --- | --- | --- |
+| `neutral` (the default) | emotion | The voice as designed - plain narration |
+| `angry` | emotion | A pressed, raised, louder voice |
+| `happy` | emotion | A brighter, much higher voice |
+| `sad` | emotion | A quieter, lower, flatter, and slower voice |
+| `fearful` | emotion | A breathy, quieter, much higher, and quicker voice |
+| `disgusted` | emotion | A pressed, quieter, lower, and much slower voice |
+| `whisper` | mode | No voicing - the breath only |
+| `soft` | mode | A quieter voice, a little slower |
+| `shouting` | mode | A pressed, bright, raised voice, a little louder |
+| `dialogue` | mode | Neutral dialogue - a little higher, brighter, and quicker than the narration |
+| `exclaim` | mode | An exclamation - the dialogue style livelier: louder, wider in pitch, and quicker |
+
+Every style transforms the synthesizer's parameters (`lib/transforms.js` - a pressed or relaxed glottal pulse, pitch and
+pitch range, whisper, level, frication) and the pace; the voice model has no style input. The emotions' transforms are
+measured: before 2.0 the voice model had emotion embeddings learned from CREMA-D's actors, and happy, sad, fearful, and
+disgusted are those embeddings' effects on the parameter frames (pitch, pitch range, pulse, voicing, frication, level,
+and duration, over the panel texts in every voice), less the breathiness they added; angry was transforms alone already.
+On the listener panel's texts, in the female and male voices, every style stays intelligible (Whisper's word error
+rate 0.6-3.0%, whispering 2.4-3.9%); UTMOS - a judge of plain read speech - scores every voiced style within 0.05 of
+neutral's (4.40 and 4.26) but fearful (0.08 and 0.15 below), and can't score a whisper; and every style but whisper
+(6.5-9.7 dB quieter) and soft (5 dB) is within 4.1 dB of neutral's loudness - angry 3.3-3.8 dB louder, sad 3.4-3.6
+quieter.
+
+### Expressive reading: `style: 'auto'`
+
+Style `'auto'` reads a text's dialogue as a narrator does - its delivery follows the text's quotations:
+
+- **The dialogue beat.** The quotations (between double quotation marks) are read in the `dialogue` style - a little
+  higher, brighter, and quicker than the narration (pitch +7%, pace +5%) - and the narration neutral.
+- **The exclamation beat.** A quoted sentence ending in "!" is read in the `exclaim` style - livelier than the
+  dialogue beat: 3 dB louder, its pitch range 20% wider, a little more pressed and quicker - excited, not shouted.
+
+Style `'auto'` needs no model - it reads the text's quotation marks and exclamation marks. (A small network that would read a
+quotation angry, shouting, or fearful was tried and dropped: even a classifier on a 4-billion-parameter embedding model
+couldn't choose those styles reliably enough - see the paper's Section 12.7.)
+
+On the listener panel's texts the beats keep the voices intelligible and natural: in all twelve voices style
+`'auto'`'s UTMOS was within 0.04 of neutral's and its word error rate at most 2.4% (neutral's 0.6-1.8%) - measured with
+the paragraph beat it had through 2.0.1 (each paragraph read as one arc - its first sentence lifted, its pitch settling;
+removed in 2.0.2: blind, it was heard as no different, and in a book it sounded like the voice changing for no reason).
+The output is deterministic, as every style's; without `'auto'` the audio is the same as before, bit for bit.
+
+### `toWav(samples, sampleRate)`
+
+Encode samples (a `Float32Array`, or an array of numbers, -1 to 1 - values beyond are clipped) as a 16-bit PCM mono WAV
+file - a `Uint8Array` of the file's bytes.
+
+### Options
+
+`synthesize`, `stream`, and `speak` take the same options:
+
+| Option | Default | |
+| --- | --- | --- |
+| `voice` | `'male'` | The voice's key - see `voices()` |
+| `style` | `'neutral'` | The speaking style's key - see `styles()` - or `'auto'`, expressive reading (below) |
+| `rate` | `1` | The speaking speed, from 0.5 to 2 (1.2 is 20% faster) |
+| `seed` | `1000` | The noise seed (an integer) - sentence *i* of the text is rendered with seed + *i* |
+| `sampleRate` | `24000` | The output sample rate (Hz), from 8000 to 96000 - 24 kHz is the voices' own rate |
+
+The text is split into sentences (and paragraphs, at blank lines); each sentence starts with a short pause - 0.24
+seconds, or 0.4 before a paragraph (so the text's first sentence starts with one). Numbers (four-digit numbers as years,
+1972 as "nineteen seventy-two"; ordinals, 1st; decades, 1970s; percentages; money, $1.50 and $5 million; times, 10:30
+a.m.), units after a number (5 km as "five kilometers", 93,000 sq mi, 90 km/h, 240,000 km2, −5 °C), common symbols (&,
++, =, ×), common abbreviations, dashes, ellipses, and Roman numerals (Chapter IV, World War II) are spoken as words, and
+an aside's parentheses pause as a comma does. An initial (Dr. A. B. Jones) or a dotted abbreviation (the U.S., a Ph.D.,
+a.k.a.) is its letters' names - "i.e." is "that is", "e.g." "for example" - and ends a sentence only before a word
+that starts one ("in the U.S. The law", not "the U.S. Army"); a word in capitals is spelled when the G2P network finds
+it an acronym (AI, TOC, FBI; with its -s - CEOs, IBM's) and read when it finds it a word (NOT, STOP, NASA). An invalid text or option throws a `TypeError` or a
+`RangeError` with a message saying what's wrong (`stream` and `speak` throw at once; `synthesize` rejects).
+
+The output is bit-for-bit deterministic: the same text and options give the same samples, in the browser and in Node.
+
+### The modules
+
+The package's modules are importable too (`picovox/lib/<module>.js`) - the pieces the API is built from, for an app
+that runs its own synthesis loop (PicoShelf's worker does):
+
+| Module | |
+| --- | --- |
+| `lib/index.js` | The API |
+| `lib/synthesis.js` | The pipeline - the voices, a sentence's blocks (`sentenceBlocks`), a text's (`textBlocks`), the gain and limiter |
+| `lib/sentences.js` | Text to sentences (`splitSentences`), their quotations (`quoteSpans`), and their speakable text (`speechText`) |
+| `lib/style.js` | Style `'auto'` - a text's quotations in the dialogue style (`autoStyles`) |
+| `lib/lexicon.js` | Normalization and phrasing (`textToPhrases`), every word pronounced by the pronouncer (`setPronouncer`) |
+| `lib/g2p.js` | The grapheme-to-phoneme network's inference (`loadG2p`) - heteronyms read from their context |
+| `lib/tokens.js` | Phrases to the voice network's tokens |
+| `lib/model.js` | The voice network - text to parameter frames (`speakFrames`, `streamFrames`) in a speaker's voice |
+| `lib/render.js` | The source-filter synthesizer - parameter frames to samples, streaming (`createRenderer`, `render`) |
+| `lib/lf.js`, `lib/rng.js`, `lib/fft.js`, `lib/params.js` | The LF glottal pulse, the counter-based noise, the FFT, the parameter set |
+| `lib/transforms.js` | Voice and style transforms of parameter frames (pitch, pitch range, whisper, press, level, source shelf, frication) |
+| `lib/package.js` | The generated model modules' loader (`loadPackagedModel`) |
+| `lib/wav.js` | WAV encoding (`encodeWav`) |
+| `lib/models/g2pModel.js`, `lib/models/voiceModel.js` | The generated models (`make train`) |
+
+
+## Size and speed
+
+| | |
+| --- | --- |
+| The package (`npm pack`) | 996 KB packed, 1.5 MB unpacked - the G2P network 788 KB and the voice network 421 KB of it, as base64 |
+| The voice network | 282,627 parameters, 7-bit weights (GPTQ) - 311 KB gzipped |
+| The G2P network | 660,714 parameters (with its spelled head's 24,866; and the heteronym context network's 47,779), 7-bit weights (GPTQ) - 596 KB gzipped |
+| Speed, Apple M3 Max (Node) | The voice network about 127x real time, the renderer about 97x; synthesis end to end (24 kHz) about 55x |
+| Speed without a JIT, Apple M3 Max | About 2.8x real time in one thread in JavaScriptCore (`jsc --useJIT=false` - Safari's engine; 2.2x in picovox 2.0.4), 2.5x in Node (`--jitless`; 2.2x); a 23-word sentence's new words 0.7 s (1.3 s) |
+| Speed, iPhone without a JIT (Safari over plain http, or in Lockdown Mode; picovox 1.2.0) | About 2.6x real time in one worker; about 3.1-3.4x with the network and the renderer in two workers (`sentenceFrames` and `createSentenceRenderer`) |
+| Startup | About 0.1 s to load both networks (Node, M3 Max) |
+
+The voices have a Whisper word error rate of 1.06% on the listener panel's texts, and a gap to their TTS source of
+2,054 (fdL12) - see [the listener panel](#the-listener-panel).
+
+
+## How the models are trained
+
+Both networks are trained from scratch by `make train`, which rebuilds `lib/models/g2pModel.js` and
+`lib/models/voiceModel.js` from a clean checkout. The voice network learns from training speech that make train
+generates: Project Gutenberg sentences spoken by a local TTS model (Gradium's Phonon, through Ollama - one of its voices
+for each of the package's twelve), aligned and checked with our own phoneme recognizer, then the small model that ships
+trained through a differentiable copy of the synthesizer. The G2P network
+learns from the CMU Pronouncing Dictionary (downloaded, pinned; it is not used at runtime), its heteronyms' readings
+measured in the training speech. The whole run takes about 85 minutes on an M3 Max (the training speech generated once,
+then cached - generating and aligning it the first time adds about an hour and a half). See [make train](#make-train)
+below, and the paper, [PicoVox: Realistic Neural Speech Synthesis in Under 1 MB of
+JavaScript](paper/paper.md), for the methods and results.
+
+
+## PicoShelf
+
+[PicoShelf](https://craigahobbs.github.io/picoshelf/) is the showcase app - an audiobook player for every public-domain
+book (Project Gutenberg and Standard Ebooks), read aloud by PicoVox in the browser, in a Web Worker
+([source](https://github.com/craigahobbs/picoshelf)).
+
+
+## Development
+
+This repository is the package (`lib/`, `test/`) and the training pipeline that makes its models (`train/`,
+`tools/`, the paper in `paper/`). The package is developed with
+[javascript-build](https://github.com/craigahobbs/javascript-build#readme), and the training's Python code with
+[python-build](https://github.com/craigahobbs/python-build#readme):
+
+```sh
+make commit      # the package's unit tests (100% coverage), lint, and API documentation (jsdoc) - and the training's gate
+make test        # the package's unit tests (TEST='name' runs one)
+make -C train commit      # the training's gate alone - its unit tests, pylint, and 100% branch coverage
+make -C train test TEST=tests.test_params    # one test module of the training's
+make -j train             # train both models - the G2P and the voice - each gated, in build/train/, then a report (see below)
+make train-check          # the package's tests with the trained models, then the blind A/B of the trained voice
+make train-install        # the trained models that differ into lib/models/ (train-install-voice, -g2p: one model)
+make -j train-voice       # the voice alone; make -j train-g2p - the G2P alone, on every core
+```
+
+The training pipeline is a Python package, `picovox_train` (`train/src/picovox_train/` - `picovox_train/<module>.py`
+below), and Node scripts (`tools/`); they use the package's modules but aren't part of it. `train/` is a python-build
+package of its own: its unit tests (`train/src/tests/`) run on the CPU in a few minutes, with tiny synthetic data and no
+network, in python-build's environment (`train/build/venv/`), which installs the package with the training's pinned
+PyTorch and numpy (`train/pyproject.toml`, the same versions as `train/requirements.txt`). `make train` runs the package
+from its source (`PYTHONPATH=train/src`) in its environment, `build/venv-train` from `train/requirements.txt` - the
+training (PyTorch, numpy, and Praat) and spaCy
+(`picovox_train/corpora.py`'s downloads need only the standard library). A training module runs the same way by hand:
+
+```sh
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.smoke   # every training entry point, a few steps on the CPU
+```
+
+
+## Command-line tools
+
+```sh
+node tools/unpack.js lib/models/voiceModel.js build/voice                 # a packaged model back to its export
+node tools/speak.js -m build/voice "Hello, world." -o build/hello.wav     # an exported model (<voice>.json and .bin)
+node tools/packagecheck.js build/train/voiceModel.js build/train/eval/voice/multi  # a packaged model against its export (make train's)
+node tools/heteronyms.js                                                # the heteronym, names, and capitals regression sets
+```
+
+The performance lab, `tools/perf/`, times the playback pipeline on a phone: `node tools/perf/server.js` serves the
+repository on the local network (open the printed URL on the phone, which then polls for commands), and `node
+tools/perf/send.js COMMAND '{options}'` runs one there and prints its result - `timing` (the network, the renderer, and
+the streaming pipeline, stage by stage, in a worker as an app runs them), `parallel` and `pipeline` (several workers, or
+network and render workers in pairs, at once), `bench` (fixed workloads - whether the JavaScript engine compiles them;
+an iPhone's Safari interprets JavaScript on a page served over plain http, as the lab's is - so the lab measures that
+case; over https it compiles), and `reload`. A variant of `lib/` to try a change in is
+`tools/perf/variant.sh NAME` (`build/perf/variants/NAME/lib`, which the lab's commands take as `lib`);
+`tools/perf/compare.js NAME` compares its output with `lib/`'s (identical, else the SNR), and `tools/perf/speed.js lib
+NAME` times each under Node without a JIT (`--jitless` - the phone's speed within about 20%) - its new words (the G2P),
+the network, and the renderer; `--jsc` times them in JavaScriptCore without a JIT (macOS's `jsc` shell - Safari's
+engine), and `--jit` with one. The two interpreters weigh a change differently, and a JIT differently again (a layer
+computed in blocks is faster interpreted, and slower compiled by JavaScriptCore), so a change is timed in all four. `--root DIR` serves
+another app (PicoShelf, with its `?timing&log=URL` timeline posted to `build/perf/devlog.jsonl`).
+
+`tools/speak.js` speaks with an exported model (`picovox_train.export CHECKPOINT --voice NAME` writes
+`build/export/NAME.json` and `.bin`, or in `--out DIR`; `tools/unpack.js` makes one of the package's multi-speaker model), every word pronounced by the
+G2P network as the package pronounces (`-r` rate, `-s` seed, `--params` the parameter frames, `--rate` the duration
+multiplier, `--batch` a list of items); `-m` also takes a packaged module (`lib/models/voiceModel.js`). The
+multi-speaker model takes a speaker (`--speaker`, an id of its manifest's speakers - one per voice, in `voices()`'s
+order: 0 is male, the default); the voices' source shelf and the styles are `lib/synthesis.js`'s, not the tool's.
+
+The training dashboard, `tools/dashboard/`, follows `make train` as it runs: serve the repository (`python3 -m
+http.server`) and open http://localhost:8000/tools/dashboard/ (with `?train=DIR` for a run in another `TRAIN_DIR` -
+another checkout's or worktree's; default `build/train`). It has three tabs (each linkable, e.g. `#listen`): Train,
+Listen, and Logs. Train is the `make train` run (the default tab while it runs): the run's state, its ETA and critical
+path; the CPU and GPU utilization over the run with each stage as a band (the GPU's idle time shaded,
+the forecast faded); every stage of `train/data/train-stages.json` in collapsible groups - its state (waiting, queued for
+the GPU, running, done, failed, stopped, or not in the run's make target, from `TRAIN_DIR/stages.jsonl`), its start,
+end, and time against the expected time, and its mean CPU and GPU use; the training runs (`TRAIN_DIR/runs/`, their
+`log.jsonl`, and their stages' logs) with charts of all their measurements - losses, validation, pitch error, and step
+times; and the gates (the heteronym and G2P checks, the listener panel's scores, and the pick). Listen plays the `make train`
+run's listening samples (each training stage's final model beside the shipped model - see make train, below; the
+stages not rendered yet listed as waiting), and marks new samples until they're heard. Logs has the tails of `make
+train`'s 12 most recently updated logs (all of them with "Show older logs", only those updated in the last 3 minutes
+with "Active only"; "Expand" shows a log's last 500 lines, the full width). It refreshes every second, read-only,
+re-fetching only what changed, and reloads itself when its own code changes.
+
+
+## The listener panel
+
+Two measures judge a voice model, repeatably, the way listeners would - one of how close it sounds to its source, one
+of how intelligible it is. They run in a Python environment of their own (PyTorch), used only by the tools - the
+package has no dependencies.
+
+| Measure | Model | Measures |
+| --- | --- | --- |
+| The gap to the source | The pinned wav2vec2 phoneme recognizer (`facebook/wav2vec2-lv-60-espeak-cv-ft` at a fixed revision, its weights' SHA-256 checked - the training speech's aligner, `picovox_train/ctc.py`, run by `picovox_train/wav2vec2.py` in plain PyTorch) | fdL12 - each voice's Frechet distance between its synthesized clips' frames and its source clips' in the recognizer's layer 12; lower is closer |
+| Intelligibility | Whisper `base.en` (whisper.cpp's `whisper-cli` - installed separately, e.g. `brew install whisper-cpp`; the model downloaded, pinned, into `downloads/whisper/` - `picovox_train/corpora.py`) | Word error rate against the text |
+
+**The gap to the source** (`picovox_train.quality gap [--model MODULE]`) speaks 40 held-out clips a voice with the
+package (`tools/renderLines.js` - the voices, gain, and limiter as the package speaks) and gives each voice's Frechet
+distance to its source clips - the training speech's, the same texts - in the recognizer's layer 12 (and layer 6). A
+second take of the engine's own clips measures about 1,500, 2.0.0's voices about 2,500, 2.0.1's about 2,050. It was
+chosen from twenty candidates by checks written first - and it ranks 2.0.0's voice closer than the simpler recipe's
+retrained voice in all twelve voices, as blind listening did (the paper's Section 13.9). It decides between recipes;
+the seeds' spread is about 1.3% of it.
+
+**Intelligibility.** `picovox_train/panel.py` is the panel's scoring and make train's gate (`picovox_train.panel eval`
+and `gate`): an exported model speaks a fixed evaluation set, `tools/panel-texts.json` - six Harvard sentences, six narrative
+passages from public-domain books with dialogue (Austen, Melville, Dickens, Doyle, Potter, Grahame), two questions, and
+two exclamations - through `tools/speak.js` (every word pronounced by the G2P network, as the package pronounces), and
+Whisper transcribes the renderings. Whisper is the one judge independent of the recognizer the perceptual loss trains
+against. (The UTMOS naturalness predictor and the ECAPA speaker similarity, the panel's listener models through 2.0.2,
+are in git history: UTMOS rated voices level with their source that listening heard behind, and the similarity to the
+shipped voices stood in the way of a voice moving toward its source.)
+
+The environment is built with `python3` (3.14 here; 3.12 also works - `make build/venv-train.build
+PYTHON_VENV=python3.12`). Its packages are pinned in `train/requirements.txt`: PyTorch 2.14 and numpy (the networks,
+the differentiable synthesizer, the recognizer - `picovox_train/wav2vec2.py`, its 1.3 GB checkpoint downloaded once and
+pinned into `downloads/wav2vec2/` by `picovox_train/corpora.py` - and resampling, `picovox_train/wav.py`; WAV files are
+read with the standard library), Praat (parselmouth) for the training data's pitch tracks, and spaCy for
+the heteronym labels' part-of-speech tags.
+
+Calibration of Whisper's word error rate (the evaluation set, or 16 recordings of each human speaker - measured in
+October 2026, on the human corpora the voice model trained on before 2.0):
+
+| Speech | WER |
+| --- | --- |
+| Human - CMU ARCTIC bdl, rms, aew (men), slt, clb (women) | 2.7-4.7% |
+| Human - CMU ARCTIC eey (woman) | 4.0% |
+| Human - LibriTTS-R dev-clean audiobook readers 174, 251, 1272 (men), 1462, 1673, 2035 (women) | 2.6-8.2% |
+| Apple Samantha (unit selection) | 3.9% |
+| Apple Daniel (unit selection, British) | 5.7% |
+| Apple Fred (1980s formant synthesis) | 10.6% |
+| The training speech - the local TTS model's twelve voices (16 held-out book sentences each) | 2.2-6.9% |
+
+## make train
+
+`make train` recreates the generated models - `lib/models/g2pModel.js` and `lib/models/voiceModel.js` - from a clean
+checkout, by one recipe, `train/data/train.json` (every stage's settings and seeds): `make train-g2p` and `make
+train-voice` at once. Each model's training ends in its gate, with its module in `build/train/` (`g2pModel.js`,
+`voiceModel.js`) - `lib/models/` unchanged. The G2P is deterministic, so its gate is that it reproduces the committed
+module (identical below the comment header, else within the recipe's tolerances); the voice's gate is the listener
+panel against the shipped model. The voice data is built with the committed G2P (a G2P installed that differs makes the
+next `make train` rebuild the voice).
+
+The prerequisites: [Ollama](https://ollama.com/) and its TTS model, the first time - make train's training speech is
+spoken by a local TTS model (`train/data/train.json`'s `tts.engine` - `phonon`, pinned by digest; see
+[the training speech](#the-training-speech)), so the first run needs Ollama running at the recipe's URL
+(`http://localhost:11434` - the app, or `ollama serve`); the model is pulled if it's missing, and a model of another
+digest fails the stage (a new model is a new corpus). Once the corpus is generated (`downloads/tts/`), later runs -
+`make train-clean` too - need no Ollama. The listener panel needs whisper.cpp's `whisper-cli` (`brew install
+whisper-cpp`); everything else is downloaded, pinned - the CMU Pronouncing Dictionary and the panel's Whisper model by
+their own rules (`picovox_train/corpora.py` - the CMU Pronouncing Dictionary, the wav2vec2 phoneme recognizer, and
+the panel's Whisper model, each at a fixed revision and checked against its SHA-256).
+
+The flow:
+
+1. `make -j train` - both models, then a report (`picovox_train.trained report`): each model's size, the voice's
+   listener-panel scores against the shipped model's, and whether each module differs from the committed one.
+2. The training dashboard (below) - the gates and the listening samples.
+3. `make train-check` - the package's tests with the trained models in place of `lib/models/`'s
+   (`tools/trainmodels.js`, a module hook), then the blind A/B of the trained voice against the shipped one, in your
+   browser (`tools/trainab.js` serves the voice lab locally, with the trained voice in `build/voicelab/trained/`; both
+   sides speak with the shipped G2P, so the A/B is the voice's alone): each of the package's voices speaks the one of
+   its candidate texts (the panel's Harvard sentences and the recipe's listening samples texts) where the two voices
+   differ most - the distance of their parameter frames (pitch, voicing, pulse shape, tilt, the noises, the lower
+   formants and bandwidths, each scaled to its range), aligned by dynamic time warping - so an audible difference is
+   heard if there is one. The trials are shuffled, with 3 repeats - 15 forced choices (or Same), about 4 minutes; after
+   6 Same answers in a row the page offers to finish early (no audible difference). The answers are saved as you go
+   (`build/train/listen/` - a rerun resumes; a rerun after a finished round starts another, and the report counts every
+   round). At the end it prints the report (`tools/trainabreport.js`): the trained voice's win rate over the decided
+   trials with its 95% interval and sign test, the repeats' agreement, each voice's counts, the panel's scores, and a
+   recommendation - no audible difference when at most a fifth of the answers chose a voice (keep the shipped voice:
+   installing changes nothing you can hear), keep the shipped voice when it's significantly preferred, install the
+   trained voice when it's preferred at least as often, else too close to call. A retrain of an unchanged recipe is
+   usually no audible difference - the A/B is its guardrail against a bad run; a recipe change is where it decides.
+4. `make train-install` - the trained modules that differ into `lib/models/` (the G2P when it differs below its
+   comment header, the voice but its manifest's provenance; `picovox_train.trained install`) - or one model, `make train-install-voice` or `make
+   train-install-g2p`; then `make commit` and commit them.
+
+The `train-*` targets run their commands - none decides on another's results. `make train-check` and `make
+train-install` fail until `make train` has trained both models (`train-install-voice` and `-g2p`, their
+model). Each stage is a
+stamp in `build/train/` (`TRAIN_DIR`), so `make -j train` runs independent stages at once; the GPU stages run one at a
+time (`picovox_train/gpulock.py` - two at once each run at about half speed) while the CPU stages run beside them:
+
+| Stage | Runs on | Needs |
+| --- | --- | --- |
+| tts-corpus - the training speech: the local TTS model's clips (`picovox_train.tts generate` - Ollama) and their CTC alignment (`tts align`), in `downloads/tts/` | GPU - about 40 and 26 minutes the first time, a minute cached | `lib/models/g2pModel.js`, the dictionary, the recognizer |
+| tts-readings - the heteronym tokens' readings measured (`picovox_train.measure`), and the clips whose tokens they change aligned again | GPU - a minute cached | tts-corpus |
+| data-tts - the voices' training data (`picovox_train.tts build`, `build/train/data/tts/` - the clips' checks): built once for its inputs and cached with the training speech (`downloads/tts/.../build-KEY/` - the key a hash of the selection, the alignments, the readings, the recipe's `tts`, the G2P module, and the build's own code - not the trainer's), hard-linked into the run | CPU (every core) - ~9 min to build, seconds cached | tts-readings |
+| voice-a, voice-b - the voice's two training stages (`picovox_train.trainmulti --recipe voice.a`, `voice.b`) | GPU | data-tts (after baseline-eval) |
+| baseline-eval - the shipped model through the listener panel: its word error rate, and its gap to the training speech (the recognizer on the GPU) - once per shipped model, its result cached with the training speech; stage A starts after it | GPU - a few minutes once | data-tts |
+| voice-eval - the voice through the panel, and the gate (`picovox_train.panel gate voice --against baseline`: no worse than the shipped model) | GPU - a few minutes | voice-b, baseline-eval |
+| package - the voice's module, `build/train/voiceModel.js`, with its provenance | CPU | voice-eval |
+| heteronyms - the relabeled words from the measured readings, checked to reproduce `train/data/g2p-relabel.json`'s words - a word the corpus adds is reported, not failed (the G2P network's input) | CPU, ~1 min | tts-readings (after data-tts) |
+| g2p-network, context-labels, context-network, g2p-reading, g2p - the G2P (the network; the heteronym labels from the pinned books; the context network and its cross-validation; beside it, the reading stage; the export and the gate) | CPU - the network one core, ~30 min | the labels: tts-readings (after data-tts) |
+| samples-reference, samples-voice-b - the listening samples | CPU, under a minute each | the shipped model (after data-tts); the voice's evaluation |
+
+The critical path - the training speech (generated and aligned once - about an hour and a half the first time, a minute
+or two cached), the voices' data (9 minutes), stage A (30) and B (23), the gate, the package - took 69 minutes on
+an M3 Max on full power (94 W; the training speech cached; 2026-11-03), with the G2P chain beside it - the voice's
+stages 63 minutes from the data build to the gate, against the distillation's 71 the day before (see [Training the voice
+model](#training-the-voice-model); a GPU step's time varies with the machine's heat - stage A's steps took 0.112-0.120 s
+that day, the teacher A's 0.086 the day before); the voices' data is now cached - built only when its inputs change -
+which takes its 9 minutes off the next run. With the perceptual loss (2.0.1), stage A takes about 46 minutes and B 37
+(2026-11-05). On the reviewed pipeline (2026-11-08 - the paper's Section 13.11), the path from the readings to the
+gate took 84 minutes: the readings 8, the data 2, the shipped model's evaluation 2, stage A 38 and B 33, the gate 2 -
+the voice's stages beside the whole G2P chain (its cross-validation 20 minutes, from 55). (Before 2.0, on the human
+corpora, it took 71 minutes.) The package's manifest records its provenance: the commit, the recipe's and the training
+data's hashes, and the gate's scores. `python -m picovox_train.smoke` runs every stage's entry point for a few steps on
+the CPU.
+
+The trained voice - the module the gate scored, stage B's last checkpoint exported and packaged as the package stage
+ships it - is rendered for listening when its evaluation finishes, in its own CPU stage (`tools/trainsamples.js`): it
+speaks `train/data/train.json`'s `samples` texts (Moby-Dick's opening, a dialogue, and heteronyms) in six of the
+package's voices (three female, three male) exactly as the package speaks a sentence (`lib/synthesis.js`, every word
+pronounced by the G2P network). The shipped `lib/models/voiceModel.js` is rendered the same way, as the reference. The
+WAV files are
+`TRAIN_DIR/samples/STAGE-SPEAKER-TEXT.wav`, listed in `TRAIN_DIR/samples/index.json`; the dashboard's Listen tab plays
+them, each beside the shipped model's.
+
+`make train` keeps a record for the training dashboard (`tools/dashboard/`): each stage's start, end, and failure in
+`TRAIN_DIR/stages.jsonl` and each command's output also in `TRAIN_DIR/logs/STAGE.log` (`tools/trainstage.sh`), and
+every 20 seconds, for the life of `make train`, the CPU busy %, the GPU utilization %, the memory used %, and the
+running stages in `TRAIN_DIR/util.log` (`tools/trainutil.sh`). The stages, their dependencies, and their expected
+times are `train/data/train-stages.json` (`test/testTrainStages.js` keeps it in step with the Makefile). `make train`
+never removes anything; `make train-clean` removes `TRAIN_DIR` for a run from scratch.
+
+The books make train reads - the heteronym labels' 132 Project Gutenberg books and the training speech's fill, 22 more
+(the recipe's `tts` `fill`) - are pinned:
+`train/data/books.json` records each text (by its name in `build/nn/books/`, the recipe's `texts`) with its Gutenberg id
+and source URL, the SHA-256 and size of its bytes as fetched, the date it was pinned, its Gutenberg revision, and a
+[Wayback Machine](https://web.archive.org/) capture of the source URL with the same bytes, where one exists. Project
+Gutenberg revises its books in place and keeps no old revisions (pg2554 changed on 2026-10-16 and moved the context
+labels by one example), so the pins are the texts the shipped models were trained on - the G2P's labels' copies (fetched
+2026-10-15) and the first full make train's copies of the fill's books (2026-10-16, whose pg2554 is already the revision:
+`pg2554-2026-10-16`). A text is fetched once (`picovox_train/books.py` - its Gutenberg URL, else its archived copy: the
+first with the pinned hash) and verified on every use. A text whose hash doesn't match is never used: the stage fails
+with the book, the expected and actual hashes, and how to proceed - restore the pinned copy (an earlier run's
+`build/nn/books/NAME.txt`; a mismatched download is kept beside it as `NAME.txt.unpinned`), or re-pin deliberately and
+retrain (`python -m picovox_train.books pin NAME` records the new text's hash and looks up an archived copy; the labels
+or the training speech change with it, so make train no longer reproduces the committed models byte for byte). The
+fetch alone, for every pinned text: `python -m picovox_train.books fetch`.
+
+`make -j train-g2p` runs the G2P alone - its stages (with the training speech's readings, tts-corpus and tts-readings),
+without the voice stages or make train's ordering after the voices' data build - for G2P work. The chain's independent
+parts run in worker processes - the context labels' part-of-speech tags (by book) in `G2P_JOBS`, and the context
+network's trainings and its cross-validation's other nine folds' (each one thread) in `CONTEXT_JOBS`, every fold's
+teachers in one pool, then every fold's network - and the context network and its cross-validation run beside the G2P
+network; every output is the same for any count. Inside make train the chain runs
+beside the GPU stages, which CPU work slows (the Makefile's `BESIDE`), so `G2P_JOBS` is 2 and `CONTEXT_JOBS` 6 there;
+`make train-g2p` runs `G2P_STANDALONE_JOBS` (10) for both at the default QoS. Measured at the background QoS (the
+efficiency cores only, beside another job's load - October 2026): the context labels took 36 minutes (65 before: the
+tags are made by book in worker processes, not by spaCy's worker pool for each book), and the ten folds 54 minutes at
+once (one fold alone, two threads, took 134). On a quiet M3 Max the chain was 59 minutes - the G2P network 30, then the
+reading stage, the context network, and the folds one after another (23 minutes) - and is now about the network's 30
+plus the reading stage and the check (the labels, the context network, and the folds finish beside the network - with
+the context network's four teachers, each fold's too, they took 26 minutes standalone).
+
+`make train` first checks the power (`tools/trainpower.sh`, macOS laptops): the run keeps the GPU busy for hours, and
+an M3 Max under it draws about 85 W, so on battery or an adapter under 90 W (`TRAIN_MIN_WATTS`) it says so and, at a
+terminal, waits for Enter - plug in a bigger adapter first (Apple's 96 W or 140 W - a 14-inch MacBook Pro negotiates
+about 94 W from either). `TRAIN_POWER_CHECK=0` skips it. Even on full power, a 14-inch M3 Max throttles: about 2.5
+minutes into a GPU stage at about 70 W, macOS's thermal pressure reaches moderate, then heavy, the system is held near
+40 W, and a training step takes about 0.12 s instead of 0.078 (October 2026 - every stage A, both seeds, from step
+about 2,000). `TRAIN_DIR/util.log` records the system's power and the thermal pressure, and the dashboard shows the time
+throttled. `make train` and its targets (`train-voice`, `train-g2p`, and their `-check`s) keep the Mac awake
+until they exit (`caffeinate -i -s` - on AC power, with the lid closed too): idle sleep once paused a run's stage B
+for 28 minutes.
+
+
+## Training the voice model
+
+The voice network ships at the size the student ladder below chose - d64: an 80-wide encoder of 3 layers and a 64-wide
+decoder of 4 (282,627 parameters, 311 KB gzipped). make train trains it directly on the training speech
+(`picovox_train/trainmulti.py`, the recipe's `voice` - its `defaults.config` the size), in two stages:
+
+1. **Stage A** - the spectral loss through the differentiable synthesizer on the clips (and the duration and F0
+   losses), the first 15,000 steps of a 30,000-step cosine schedule (10,000 for a week of November 2026 -
+   each seed scored within the seeds' spread, but with the distillation's removal the voices averaged 0.03 UTMOS below
+   the shipped voice, and the blind A/B leaned to it).
+2. **Stage B** - from A's last checkpoint, with the adversarial critic and feature matching against the over-smoothing,
+   10,000 steps of a warmup-stable-decay schedule (constant, then the last 25% cooled down by 1 - sqrt -
+   `picovox_train/optim.py`); its last checkpoint is the voice (the validation loss doesn't pick the better voice -
+   the paper's Sections 7.3 and 11.4 - so no best checkpoint is kept).
+
+Both stages add the perceptual loss (`picovox_train/perceptual.py`, weight 5): each step's first 4 rendered crops
+against their recordings in the pinned wav2vec2 phoneme recognizer's layers 3 and 6 (frozen), the mean cosine distance
+of their frames. Chosen by the gap measure (`picovox_train.quality gap`) and checked by listener models it never
+trained against, it brought the voices a fifth closer to their source (fd L12 2,051, against 2.0.0's distilled voice's
+2,522 and 2,700-2,730 without it), as close in the speaker embedding (0.278 against 0.277), and the panel's UTMOS from
+4.31 to 4.42 - two seeds alike (paper Section 13.10). It makes a step about 1.6 times as long; in blind A/B listening
+against 2.0.0's voice, no audible difference (6 of 6 trials Same).
+
+The recipe's other parts were put to the same test in November 2026 (the paper's Section 13.11), each retrained against
+seed controls and judged by the gap: the critic earns its time (stage B without it measured 2,104 and 2,135 against the
+controls' 2,067 and 2,093, for a step 31% faster); the perceptual loss's recognizer in bfloat16 gained nothing and ran
+slower; and the formant guide - log F1-F3 against Praat's, faded over stage A - made no difference (both stages without
+it 2,046 and 2,082 against 2,067 and 2,068), so it is gone, and with it Praat's formant analysis of the training speech
+(the data's tracks are F0 and voicing).
+
+The gate (`picovox_train/panel.py`): the shipped model (`panel eval baseline=lib/models/voiceModel.js` - the packaged
+module spoken as the package loads it, `tools/unpack.js`; evaluated once per shipped model, its result cached with the
+training speech) and the voice (`panel eval voice=CHECKPOINT` - exported, packaged, and spoken by `tools/speak.js` on
+`tools/panel-texts.json` in the twelve voices, and by the package on 40 held-out clips a voice for the gap) through the
+listener panel, then `panel gate voice --against baseline`: the voice's WER at most 1 point worse than the shipped
+model's, and its mean gap to the source (fdL12) at most 2% above the shipped model's - about one and a half times the
+seeds' spread (the recipe's `panel` `tolerance`) - `build/train/eval/summary.json`, the exit status 1 if not.
+
+Until November 2026 make train trained a large teacher (931,619 parameters) and distilled it into the d64 student:
+the teacher's parameter frames for 280,602 sentence-voice pairs, the student trained on them (Muon, 12,000 steps), then
+a short polish on the real audio with the critic - three more GPU stages, about 15 minutes of each run. Trained directly
+by the same two stages, the d64 model matched it: on the panel, UTMOS 4.287 and 4.303 for two seeds (4.313 distilled)
+and WER 1.21% and 1.38% (1.31%), and in blind A/B listening against the distilled voice, no audible difference (every
+trial of two rounds - the trials where the two voices' frames differ most). So the distillation - its targets, the
+student, the polish, and `distill.py` with them - was removed. Its record, which chose the size:
+
+The distillation of 2.0, the first voices trained on the training speech: 280,602 sentence-voice pairs - 26,536 of the
+training speech's utterances and 254,066 book sentences - 377 hours of teacher speech, 17.6 GB, made in 7 minutes on an
+M3 Max's GPU; the student trained in 5 minutes and its polish in 5. Twelve voices by 16 panel texts, against 1.6.8's
+model (the gate's basis):
+
+| Model | Parameters | Module (gzip) | UTMOS | WER | Similarity | Real time (network / total) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Teacher | 931,619 | 1,333 KB (1,003 KB) | 4.327 | 1.59% | 1 | 32x / 20x |
+| **d64 student + polish - chosen** | 282,627 | 451 KB (334 KB) | 4.311 | 1.13% | 0.983 | 99x / 36x |
+| 1.6.8's model (trained on human recordings) | 305,035 | 554 KB (385 KB) | 4.131 | 1.36% | - | - |
+
+The measurements below are of the models trained on human recordings before 2.0 (CMU ARCTIC and LibriTTS-R readers, and
+CREMA-D's actors - their speaker and style tables larger), kept as the ladder's record. The first distillation (October
+2026), from stage B's best checkpoint (`multi-b` step 19,000): 294,678 sentence-speaker pairs - 40,624 training
+utterances and 254,054 book sentences - 397 hours of teacher speech, 18.5 GB, made in 9 minutes on an M3 Max's GPU. Each
+student trained 20,000 steps (16-35 minutes); polish is 2,000 steps (28-46 minutes, the GPU shared). Six speakers by 16
+panel texts; the real-time factor is `tools/speak.js`'s at 44.1 kHz (the best of three, about +/-15%):
+
+| Model | Parameters | Module (gzip) | UTMOS | WER | Similarity | Real time (network / total) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Teacher (dim 128, 3 + 6 layers) | 965,803 | 1,447 KB (1,062 KB) | 4.144 | 2.37% | 1 | 18x / 8.4x |
+| s96 (dim 96, 3 + 6) | 570,987 | 925 KB (666 KB) | 4.147 | 1.86% | 0.978 | 24x / 8.8x |
+| **s80 + polish (dim 80, 3 + 4) - chosen** | 349,547 | 614 KB (431 KB) | 4.130 | 1.71% | 0.969 | 50x / 12.1x |
+| s80 | 349,547 | 613 KB (431 KB) | 4.096 | 1.91% | 0.966 | 48x / 11.5x |
+| s64 + feature matching + polish | 238,251 | 459 KB (313 KB) | 4.076 | 1.76% | 0.959 | 73x / 13.6x |
+| s64 + polish | 238,251 | 459 KB (313 KB) | 4.070 | 1.86% | 0.956 | 67x / 12.9x |
+| s64 + feature matching | 238,251 | 457 KB (312 KB) | 4.065 | 1.61% | 0.952 | 60x / 11.5x |
+| s64 (dim 64, 3 + 4) | 238,251 | 457 KB (312 KB) | 4.045 | 2.17% | 0.949 | 73x / 13.0x |
+| s48 (dim 48, 2 + 4) | 127,035 | 302 KB (196 KB) | 3.935 | 2.32% | 0.924 | 147x / 17.6x |
+| s32 (dim 32, 2 + 3) | 64,683 | 209 KB (125 KB) | 3.593 | 2.72% | 0.831 | 220x / 16.8x |
+
+The polish added 0.025-0.034 UTMOS, most of it to the package's two voices of the time (CMU ARCTIC's bdl and slt), which
+pure distillation lost most; intermediate-feature matching (weight 0.05) added about 0.02, and the two barely stacked.
+
+The decoder rung (October 2026, picovox 1.2.0): on a phone without a JIT the decoder, per frame, was over half the voice
+network's time, so students that shrink only it - s80's encoder - were trained on one teacher, polished, and scored:
+
+| Student | Parameters | Module (gzip) | UTMOS | WER | Similarity |
+| --- | --- | --- | --- | --- | --- |
+| s80 - decoder 80 wide, 4 layers (two seeds) | 349,547 | 432 KB | 4.144, 4.165 | 1.46%, 1.26% | 0.977, 0.973 |
+| **d64 - decoder 64 wide, 4 layers (three runs) - chosen** | 305,035 | 385 KB | 4.147, 4.126, 4.135 | 1.06%, 1.41%, 1.26% | 0.972, 0.968, 0.972 |
+| L3 - decoder 80 wide, 3 layers | 317,947 | 397 KB | 4.136 | 1.56% | 0.974 |
+| d64-L3 - decoder 64 wide, 3 layers | 283,851 | 361 KB | 4.095 | 1.76% | 0.964 |
+
+d64 is about 0.02 UTMOS below s80 on average (the seed spread) with a lower WER, and its network is 1.24x faster on an
+iPhone without a JIT. The voice's training on the GPU isn't bit-reproducible - the recipe's d64, retrained, matched its losses but not
+its weights bitwise - though its export and packaging from a checkpoint are.
+
+The export (`picovox_train.export`) quantizes the voice's matrices, kernels, and embedding table to 7 bits with a
+float32 scale per row (the biases and norms stay float32), the matrices and kernels rounded by GPTQ - each layer's
+inputs measured on 256 training utterances (a fixed draw), each row rounded a weight at a time with the error carried
+into its later weights - and `lib/model.js` unpacks them. On three trained seeds the 7-bit voice was indistinguishable
+from the float network on every measure of the quantization study (UTMOS and Whisper's WER over three noise seeds, the
+recordings' spectra and pitch, and its own frames' drift against the spread between seeds); nearest rounding at 7 bits
+had drifted the pitch three times as far, and 6 bits, or the encoder at 5 or 4, changed the durations beyond the seeds'
+spread. Both networks share the method - see the paper's Section 13.8.
+
+
+## Training the G2P model
+
+PicoVox pronounces every word with one small network, `lib/models/g2pModel.js` (`lib/g2p.js` runs it;
+`picovox_train/g2pmodel.py` is its bit-exact Python port, which pronounces the voice model's training data).
+`picovox_train/g2p.py` trains it, with the recipe in `train/data/train.json`'s `g2p` settings, and `picovox_train.context
+export` writes the module, with its context network (below):
+
+```sh
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.heteronyms --out build/nn/heteronyms --keep train/data/g2p-relabel.json  # its words (optional)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.g2p train --out build/nn/g2p-train      # four stages, about 50 minutes on one CPU core
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.g2p evaluate                            # the book-token error of lib/models/g2pModel.js
+```
+
+The network is an autoregressive encoder-decoder (embedding 32, a bidirectional GRU of 128 over the letters, a GRU
+decoder of 256 with attention; 631,207 parameters). It trains on every word of the CMU Pronouncing Dictionary (its
+first pronunciation) but a 2,000-word monitoring set, sampled half uniformly and half by the square root of the word's
+count in the texts listeners hear - 128 Project Gutenberg books, the listeners' books, and 784 Wikipedia articles
+(`train/data/g2p-books.json`: a book's counts join the weights, times its `weight` - Wikipedia's 2.7, so its 5.9
+million tokens weigh as the books' 16 million do; `python -m picovox_train.g2p book` counts a text) - plus - 30% of the samples - 100,812 words the dictionary lacks, labeled by
+the spelling and `-s` rules where they apply, else by Wiktionary where it has the word (9,332), else by a large teacher
+ensemble (`train/data/g2p-words.json`); Wiktionary also labels 7,499 of the articles' words outside the dictionary, and
+911 of the most frequent of the rest are labeled by hand - names and terms (Quran, Mughal, eukaryotes)
+(`train/data/g2p-books.json`'s labels - dictionary words in training). A base stage
+(20,000 steps of 512 at learning rate 3e-3) is polished twice with more of the samples on the most frequent words
+(5,000 steps at 1e-3 over the top 20,000 words, then 5,000 at 5e-4 over the top 12,000). The last stage (focus, 13,000
+steps at 5e-4, sampled as the base stage is - at that length a share on the most frequent words only costs the rest)
+also teaches the spoken pronunciations of 56 words whose dictionary-first pronunciation isn't the usual reading
+(lead L IY1 D, live L IH1 V, wind W IH1 N D, ... - `train/data/g2p-relabel.json`; a stage's `relabel` replaces those
+words' targets, the rule-labeled words derived from them follow, and `focusBoost` gives them 2% of the samples). The
+export quantizes to 7 bits per weight, rounding each matrix by GPTQ - error-aware: a row is rounded a weight at a time,
+each weight's rounding error compensated in the row's later weights through the layer's input covariance (8,192
+training words, a fixed draw) - so the layers' outputs, not the weights, stay close: on four seeds the export reads 23
+more of 2.4 million book words wrong than the float network, and the seeds bracket zero. Training on the CPU with one
+thread is deterministic: the recipe reproduces the shipped model's weights bit for bit.
+
+The measures (`python -m picovox_train.g2p evaluate`, and make train's gate): the book-token error - the 22 evaluation
+books' dictionary-word tokens pronounced differently from the label - the top 10,000 book words wrong, the monitoring
+set's word error, the held-out words' error (`train/data/g2p-books.json`'s `heldOut` - 507 of Wikipedia's words that
+never train, with Wiktionary's pronunciations; the two dictionaries' conventions aside - not gated), and each
+evaluation text's token error (the file's `eval` - 215 Wikipedia articles held out of the weights; `g2p book --eval`
+adds one). The network of 128 units with Wikipedia in its weights and Wiktionary's and the hand labels (2026-11-11)
+against 2.0.3's of 96 with the books alone: the books 0.008% (0.049%), top-10K wrong 0 (3), held-out WER 55.4% (61.5%),
+monitoring WER 42.1% (41.1% - a seed's draw: four seeds of the recipe ended at 41.9% to 43.0%, so the gate's tolerance
+is 1.5 points), and Wikipedia 0.090% (0.286% before the hand labels, whose words the measure counts; before them
+0.078%, against 2.0.3's 1.87%) - at 596 KB gzipped (360 KB), and 1.7 ms for a word it hasn't yet pronounced (1.6 ms; in
+Node without a JIT, a 23-word sentence's words 0.70 s, 0.74 s - once a word; as 2.0.4 shipped, before its kernels read
+their arrays less, 2.9 ms and 1.29 s).
+
+`picovox_train/heteronyms.py` chooses the relabeled words from the training speech's measured readings
+(`picovox_train/measure.py` - below): for each word with several dictionary readings, the reading the voices used; a
+word is relabeled when the voices' majority isn't the first (significant - the Wilson 95% lower bound above one half,
+from 3 or more books, the independent unit: the voices share one front end), the difference is lexical (a stressed
+vowel's quality, or the primary stress moving with it - not vowel reduction or stress alone), and it isn't a function
+word. The committed words were chosen from the LibriTTS-R readers' usage before 2.0 (their evidence is in the file);
+with `--keep` (make train's heteronyms stage), a committed word the training speech can't judge - its readings
+unmeasured, or no significant majority either way - is kept, and one whose first reading the voices significantly
+prefer is dropped, and the stage checks the result reproduces `train/data/g2p-relabel.json`.
+
+The measured readings (`python -m picovox_train.measure`, make train's tts-readings stage, on the GPU - in the corpus's
+`readings/`): each heteronym token in the training speech (a measured word, by its clip's alignment) is measured by the
+kind of difference between its readings - where they differ in a full vowel's quality or a consonant, the phoneme
+recognizer's vote (`picovox_train/ctc.py` - each reading's CTC likelihood, with the neighboring words' phones, on the
+word's segment; S against Z with each only its own token); where the recognizer can't tell them apart (a reduced vowel
+against a full one, the vowels it merges), the vowel's formants (F1 and F2, normalized per voice, nearest of the
+voice's own reference vowels); the noun/verb stress pairs aren't measured. Each method is gated by controls - words of
+one pronunciation with a phone swapped, whose votes are the method's false votes: a method's readings are used only
+when at most 3% of 100 or more control votes are wrong. The measured readings are the G2P's heteronym evidence - the
+relabeled words and the context labels (below) - and the voice's training tokens take the measured reading where the
+recognizer's vote differs from the front end's.
+
+### The dictionary audit
+
+The network learns the dictionary's errors too (HOBBES HH AA1 B IY0 Z - "hobbies" - and, from it, "mobbes" M AA1 B
+IY2 Z), so `train/data/g2p-fixes.json` corrects the dictionary's labels where the evidence says they're wrong; `g2p.py`
+applies it in every stage, before the relabeled words (the rule-labeled words derived from a fixed word follow - HOBBES'S
+HH AA1 B Z IH0 Z). The fixes are committed data, from a one-off audit before 2.0 (its tool, `picovox_train/g2paudit.py`,
+is in git history - commits 1e86148 and 6cec8e3).
+
+Two partitions of the dictionary into five folds (a word's possessives in its fold) trained ten screening models (the
+recipe's network and sampling, 6,000 steps, no rule- or teacher-labeled words), so every word was held out by two of
+them (held-out accuracy 62% - any pronunciation, stress included; the dictionary is mostly names). A word was a suspect
+when both its models' phones differed from its label (not by stress alone) by a log-probability margin of 3, or both
+preferred another of its variants by that margin: 12,750 of 124,101 words - mostly legitimate irregulars (of, colonel)
+and foreign names. Where the LibriTTS-R readers spoke a suspect, the CTC phoneme recognizer (`picovox_train/ctc.py`)
+scored the label and each alternative (the models' predictions, the dictionary's variants - those that would be a
+lexical correction: not stress or reduction alone, not a consonant dropped, not a merger's vowels, not a function word
+or a one- or two-letter word) on up to 12 of its aligned tokens with their neighbors; a token voted for a candidate 2
+(log) more likely than the rest, and a confirmed error needed the votes' Wilson 95% lower bound above one half from 3
+or more speakers. Control words (both models agree with the label, against a model's second guess) measured the method:
+140 control words, no false errors and 1.5% of the tokens' votes for the wrong candidate. The audio confirmed 13 errors
+and 143 labels, the rest without audio evidence.
+
+The names regression set (`train/data/names-test.json`, run by `tools/heteronyms.js` as kind `names`): surnames, first
+names, and place names with verified pronunciations - HOBBES first (the dictionary's own evidence: its second variant,
+HOBBS, and every other -bes word), the audio's confirmed errors and labels, and well-established names. Its minimum is
+the shipped module's score when it was added (63/73), so it can only go up.
+
+The probes (kind `probe` in `train/data/heteronyms-test.json`): both readings of the context network's thin words -
+polish, contract, winds, bass, minute, and invalid - in 38 sentences written apart from the labels' seeds and
+collocations, so the context set's few sentences aren't the only measure of how the network generalizes (the regression
+set's sentences, the probes too, are never training examples). 1.6.8's module scores 26 of 38, 2.0's 34, 2.0.1's 32, 2.0.3's 29, 2.0.4's 33; the minimum is
+0.7, a guard against a collapse below the seeds' spread (the context network's seed alone moves the thin words' readings - four
+seeds on the same labels scored 29 to 34), and make train's check doesn't compare the probes with the committed module's (the
+recipe's `heteronymKindDrop` has no drop for them - two draws of that spread differ by more than the other kinds' 2).
+Nor the context set (2026-11-11): its draws on one recipe in two days, the labels a few examples apart, were 52, 51, 54,
+51, and 50 of 54 - against a committed 54, a drop of 2 failed half of them; its minimum (0.85, 46 of 54) is its guard.
+
+The capitals regression set (`train/data/capitals-test.json`, kinds `acronym` and `shouted`): 42 sentences with a word
+in capitals that is spelled (AI, TOC, FBI, HTTPS - the letters' names) and 42 with one that is read (an emphasized word
+- NOT, NEVER; a heading - THE END; an acronym said as a word - NASA, UNESCO). Their minimums are 0.9 and 0.95 (see
+[Words in capitals](#words-in-capitals)).
+
+### Heteronyms
+
+Some words have readings their neighbors decide - "I read it yesterday" and "I will read it", "their lives" and "she
+lives", "a lead pipe", the noun/verb stress pairs. The G2P module also holds two small pieces for them (no word list or
+rule at runtime): the G2P takes a reading index (a learned vector added to its decoder's first state; reading 0 is the
+default) and has an ambiguity head (whether the word's reading depends on its context); for an ambiguous word, a context
+network (`picovox_train/context.py`: a character GRU over the three words and phrase-end marks each side, a
+bidirectional GRU, and a layer gated by the word itself - 47,779 parameters at 7 bits) chooses the reading. The G2P
+learns the reading input and the ambiguity head in a last stage (`picovox_train.context train-g2p`, from the trained
+G2P).
+
+The context network is distilled from an ensemble, for steadiness: one network's choices where its labels are thin
+depend on its seed (October 2026: five seeds of the same labels differed on 14% of unlabeled book windows and 9 of the
+regression set's cases a pair, and adding a few seeds for one word flipped others). So four teacher networks (their
+own seeds) are trained first, and the shipped network - the same size - is trained toward their mean probabilities on
+its examples and on unlabeled transfer windows (the ambiguous words' other windows in the books), with context words
+dropped at random (`itemDropout`).
+
+```sh
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.contextlabels books                                 # the recipe's books (pinned texts)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.contextlabels aligned --out build/train/context    # the training speech's measured readings
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.contextlabels tag --out build/train/context        # part-of-speech tags (spaCy)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.contextlabels labels --out build/train/context     # the ambiguous words and examples
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.context train-g2p --labels build/train/context/labels.json --init build/train/g2p/focus.pt \
+    --out build/train/context/g2p.pt                                                # the reading input and ambiguity head
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.context train-context --labels build/train/context/labels.json \
+    --out build/train/context/context.pt --folds build/train/context/folds -j 10    # the context network and its cross-validation
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.context folds build/train/context/folds --labels build/train/context/labels.json
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.context export --g2p build/train/context/g2p.pt --context build/train/context/context.pt
+node tools/heteronyms.js                                                            # the regression set (exit 1 below the gate)
+```
+
+(`tag` and `train-context` take `-j`, their worker processes - the results are the same for any count.
+`train-context` trains every fold's teachers at once, then every fold's network - fold 0, the labels' own held-out
+books, is the context network itself - and keeps a fold's results only when they are from the same labels and
+settings; `folds` is the cross-validated gate over them.)
+
+The settings are `train/data/train.json`'s `context` section. `make train-g2p` runs all of it (the voice stages use the
+committed `lib/models/g2pModel.js`) and gates its module with `picovox_train.context check`: identical to the
+committed module below the comment header (the stages are deterministic on the same inputs), else within the recipe's
+tolerances (the regression set, the book error, the top-10K, the monitoring WER) - then `make train-install` replaces
+the committed module only when it differs. The books are pinned (`train/data/books.json` - see make train), so a clean run reproduces the committed module.
+
+The labels (`picovox_train/contextlabels.py`, with the curated part in `train/data/context-labels.json`) come from three
+sources: the training speech's measured readings (each candidate word's token whose reading the recognizer's CTC or
+voicing vote measured - the voice's reading, heard in the audio); part-of-speech tags over the Project Gutenberg books
+(spaCy, training time only - `train/requirements.txt`), mapped to readings only for words whose mapping agrees with the
+measured readings on 95% of 10 or more tokens (a stress-pair or other family word of too few, by its family's mapping
+on 200 or more); and hand-written seed sentences and reviewed collocations for the readings the tags can't separate
+(lead the metal, bass, bow, row, does the deer, house the verb) and the pairs the audio doesn't validate - a
+collocation's token is its example, not a measured one, and the corpus's disagreements with the collocations (the TTS
+model's own reading errors) are reported. Two books and the regression set's sentences are held out - every source's
+examples of them, the book the independent unit - and the held-out accuracy gate (`picovox_train.context folds`)
+is cross-validated by book.
+
+### Words in capitals
+
+A word in capitals is an acronym, spelled - "AI", "TOC", "FBI" - or a word, read - "I did NOT", "THE END", "NASA" - and
+which it is depends on whether its letters are a word: what the G2P network knows, and no rule does. So the front end
+keeps a word's capitals (`lib/lexicon.js` - two letters or more, all capitals) and asks the G2P's spelled head: a
+96-unit layer and two logits on the encoder's final states (`lib/g2p.js` `pronounce.spelled` - 24,866 parameters).
+The two logits are a word's two places: alone among lowercase words ("the US government", "500 AD" - spelled), and
+beside words in capitals that are read ("LEAVE US ALONE", a heading - read: its neighbors in its phrase, both if it
+has two - not "the US NATO allies"). A spelled word is its letters' names, each pronounced by the network ("a" as "ay"); a
+lowercase or capitalized word is never asked, and a word in capitals with an -s ("CEOs", "IBM's") is asked of its
+capitals - spelled, its last letter takes the -s (the network's "o's", "m's"). An initial - a capital letter with its
+period ("Dr. A. B. Jones") - is its letter's name too, as a dotted abbreviation's letters are ("the U.S.", "a Ph.D."),
+and their periods don't end a phrase; the sentence splitter (`lib/sentences.js`) ends a sentence at one only before a
+word that starts a sentence, or after the pronoun ("said I.").
+
+The head's labels (`picovox_train/spelled.py`, the recipe's `context.g2p.spelled`) are of letter strings, from the
+G2P's own data: every string of two or three letters (18,252) - read when it is a common word (in the books 20 times
+for two letters, once for three), unless the dictionary's first pronunciation spells it (TV), and otherwise spelled;
+the longer known words (208,562) - spelled when the dictionary's first pronunciation is the letters' names (HTML), or
+another of its pronunciations is and the word isn't in the books (NOAA), and otherwise read; and 6,000 synthetic
+strings of four or five consonants, spelled (the dictionary has only 57 longer spelled words). Those are the labels
+beside a word in capitals; alone, the same - but four common words that, alone in capitals, are acronyms (US, AD, UN,
+CO: `train/data/g2p-capitals.json` - in capitals with no neighbor in capitals in a twentieth of 999 Wikipedia articles
+or more, at 20 times their rate in the books) are spelled. The file's other evidence is Wiktionary's: its 96 words in
+capitals pronounced as their letters (UCLA) are spelled, but a common word of two or three letters (PIE). The labels'
+word counts are the 128 books' alone: Wikipedia writes its acronyms in capitals, and by its lowercased counts "AI" and
+"GPS" are common words. The head trains in the
+G2P's reading stage on its own batches, and - the encoder frozen there, its gradient clipped alone - changes nothing
+else: a module trained with it is the module trained without it, weight for weight, plus the head.
+
+The trained head (2026-11-11) finds none of the 23,202 spelled strings read and 182 of the 210,037 words spelled
+(0.1% - "clio", "aeon", "angst": rare four- and five-letter words), and 6 of 1,461 monitoring-set words it never saw
+(0.4%). On the capitals regression set it spells all 42 acronyms (the module without a head 27 - those the G2P spells
+in any case) and reads all 42 shouted words. What it can't know: an acronym that looks like a word and is in no
+dictionary or list, and a common word that is also an acronym beyond its four - "WHO" and "IT" are read.
+
+
+## The training speech
+
+The voice network's training speech isn't downloaded - make train makes it: `picovox_train/tts.py` has a local TTS
+model speak sentences of the pinned Project Gutenberg books through Ollama's speech endpoint (`POST /v1/audio/speech` -
+24 kHz WAV), one of the model's voices for each of the package's voices, then measures the clips with our own tools. Its
+settings are `train/data/train.json`'s `tts` section: the engine (its URL, model, and pinned digest), the voices, the
+corpus's size, the coverage quotas, the split, and the checks.
+
+```sh
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.tts generate             # the selection and the clips (Ollama - resumable)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.tts align                # the clips' CTC alignment (GPU - the changed clips only)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.measure                  # the heteronym tokens' readings (GPU)
+PYTHONPATH=train/src build/venv-train/bin/python -B -m picovox_train.tts build --out DIR      # the voices' training data
+```
+
+The engine is Gradium's [Phonon](https://ollama.com/library/phonon) (`phonon`, digest `58f58601e4e8`), and the
+package's voices are its Trevor (`male`), Harper (`female`), Juniper (`sarah`), Delia (`helen`), Zoey (`amy`), Hadley
+(`kate`), Everly (`grace`), Miles (`james`), Preston (`robert`), Micah (`michael`), Easton (`david`), and Russell
+(`thomas`).
+
+- **The selection** - book sentences through our front end, each sentence's text its normalized words and phrase marks,
+  so the engine speaks exactly the words the voice network's tokens spell (the panel's and the listening samples' texts
+  excluded). First the heteronym coverage - the context gate's words, the context labels' candidate words, and the
+  other measured words, each in up to its quota of sentences (200, 24, and 12) from the context labels' books, the
+  rarest word first - then sentences at random from the fill's books, to 4 hours of speech a voice (about 48
+  hours). Each clip's voice and split (5% test, 5% validation) are by a hash of its text.
+- **The alignment** - a wav2vec2 phoneme recognizer
+  ([facebook/wav2vec2-lv-60-espeak-cv-ft](https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft) - espeak IPA,
+  20 ms frames; `picovox_train/ctc.py`) force-aligns our phones to each clip (each phone the sum of the IPA tokens it
+  may be heard as, a Viterbi pass over the CTC topology). Checked against CMU ARCTIC's EHMM phone labels (300
+  utterances of slt and bdl - the check is in git history), its phone onsets were within 20 ms 68% of the time and
+  within 40 ms 93%, a mean absolute error of 18 ms.
+- **The checks** - the recognizer's greedy phones against the sentence's: a clip cut short (its last phones missing) or
+  garbled (a phone error above 35% - a misread or hallucinated clip) is left out of the training data, as is one
+  clipped at full scale or with a phone of no frames.
+- **The readings** - each heteronym token's reading, measured (`picovox_train/measure.py` - see
+  [Training the G2P model](#training-the-g2p-model)).
+
+The corpus is cached in `downloads/tts/<model>-<digest>/` - the selection, the clips (`wav/<voice>/<id>.wav`), their
+alignments, and the measured readings - so it is generated once: with it there, make train needs no Ollama, and the
+tts-corpus and tts-readings stages take a minute. A clip's id is a hash of its engine voice and text, so a bigger corpus
+or another selection only adds clips. `make clean` keeps it; `make superclean` removes it with the rest of
+`downloads/` (about 10 GB in all) - and since the engine isn't deterministic, a corpus generated again is new speech, and make
+train no longer reproduces the committed voice model.
+
+Another local TTS model is a change of the recipe alone: set `tts.engine` (the model, its digest - the first 12 hex
+digits of its digest in `ollama list` - and the URL) and `tts.voices` (an engine voice and its sex for each of the
+package's voice keys, the default first), and the next make train generates a new corpus (a new model or digest is a new
+directory) and retrains the voice from it; the voices' descriptions (`lib/synthesis.js`, `test/voices.json`) follow
+what they sound like. The engine is reached through Ollama's API alone - its model list and pull, and the speech
+endpoint (a model, a voice, and text in; a WAV out).
+
+Phonon's English checkpoint and its voices are under the Apache License 2.0
+([ollama.com/library/phonon](https://ollama.com/library/phonon),
+[huggingface.co/gradium/phonon-voices](https://huggingface.co/gradium/phonon-voices)); its training data is
+undocumented. The training speech is used locally, at train time - it isn't distributed; the package holds only the
+voice network trained on it.
+
+make train's other downloads are pinned files, fetched by `picovox_train/corpora.py` - idempotently and sequentially,
+each checked against its SHA-256: the CMU Pronouncing Dictionary (`downloads/cmudict/`) and the listener panel's Whisper
+model (`downloads/whisper/`):
+
+```sh
+make build/venv-train.build                                         # build/venv-train (corpora.py needs only the standard library)
+build/venv-train/bin/python -I train/src/picovox_train/corpora.py   # the dictionary and the Whisper model into downloads/
+```
+
+(The human speech corpora the voice model was trained on before 2.0 - CMU ARCTIC, LibriTTS-R with LibriTTSLabel's
+alignments, and CREMA-D - and the speaker pool, `train/data/speakers.json`, are in git history.)
+
+
+## License
+
+PicoVox is distributed under the [MIT License](LICENSE). The CMU Pronouncing Dictionary, the G2P network's training
+labels, isn't distributed with PicoVox: make train downloads it, pinned, from
+[cmusphinx/cmudict](https://github.com/cmusphinx/cmudict) (its own BSD-style license) into `downloads/cmudict/`. Nor is
+the voice network's training speech: make train generates it with a local TTS model, Gradium's Phonon (its checkpoint
+and voices under the Apache License 2.0 - see [the training speech](#the-training-speech)).

@@ -32,10 +32,12 @@
 /** @module lib/app */
 
 import {MarkdownScriptRuntime, markdownScriptCodeBlock} from './script.js';
+import {MarkdownUpVoice, voiceElementsParagraphs} from './voice.js';
 import {barescriptParseExpression, evaluateExpression} from 'bare-script/lib/runtime.js';
 import {elementModelWrapCallbacks, markdownScriptFunctions} from './scriptLibrary.js';
 import {
-    markdownElementsAsync, markdownParse, markdownTitle, schemaParse, schemaValidate, urlDecodeQueryString, urlEncodeQueryString
+    markdownElements, markdownElementsAsync, markdownParse, markdownTitle, schemaParse, schemaValidate, urlDecodeQueryString,
+    urlEncodeQueryString
 } from 'bare-script/lib/include.js';
 import {renderElements} from 'element-model/lib/elementModel.js';
 import {valueJSON} from 'bare-script/lib/value.js';
@@ -67,6 +69,12 @@ struct MarkdownUpLocal
 
     # The line height
     optional float(>= 1, &lt;= 10) lineHeight
+
+    # The voice playback voice
+    optional string(len > 0) voice
+
+    # The voice playback speaking rate
+    optional float(>= 0.5, &lt;= 2) voiceRate
 
 
 # The MarkdownUp session storage JSON schema
@@ -112,6 +120,38 @@ enum MarkdownUpView
 const defaultHelpURL = 'https://craigahobbs.github.io/markdown-up-py/';
 
 
+// The menu's font sizes (pt) and line heights (em)
+const menuFontSizes = [8, 10, 12, 14, 18, 24];
+const menuLineHeights = [1.2, 1.3, 1.5, 1.7, 2];
+
+
+// The ID of the element the voice playback bar is rendered in, if the page has one - otherwise, the bar is rendered in
+// its own element (with the default ID) at the bottom of the window
+const voiceBarId = 'markdownUpVoice';
+const voiceBarDefaultId = 'markdownUpVoiceDefault';
+
+
+// The menu and voice playback bar icon paths (24 x 24)
+const icons = {
+    'burger': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19',
+    'close': 'M7,7 L17,17 M17,7 L7,17',
+    'darkMode': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3 Z',
+    'debug': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
+        'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18',
+    'fontSize': 'M4,21 L12,3 L20,21 M7.5,14 L16.5,14',
+    'help': 'M12,2 A10,10,0,1,0,12,22 A10,10,0,1,0,12,2 M9,9.5 A3,3,0,1,1,12,12.5 L12,14.5 M12,17.5 L12,18',
+    'lineHeight': 'M11,5 L21,5 M11,12 L21,12 M11,19 L21,19 M5,4 L5,20 M2.5,6.5 L5,4 L7.5,6.5 M2.5,17.5 L5,20 L7.5,17.5',
+    'link': 'M9,5 L19,5 L19,15 M19,5 L6,18',
+    'markdown': 'M5,2 L19,2 L19,22 L5,22 Z M8,7.5 L16,7.5 M8,12 L16,12 M8,16.5 L16,16.5',
+    'pause': 'M8,6 H11 V18 H8 Z M13,6 H16 V18 H13 Z',
+    'play': 'M9,6 L18,12 L9,18 Z',
+    'readAloud': 'M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M16,9 A4,4,0,0,1,16,15 M18.5,6 A8,8,0,0,1,18.5,18',
+    'rewind': 'M5,6 H8 V18 H5 Z M19,6 L10,12 L19,18 Z',
+    'skipBack': 'M12,6 L3,12 L12,18 Z M21,6 L12,12 L21,18 Z',
+    'skipForward': 'M3,6 L12,12 L3,18 Z M12,6 L21,12 L12,18 Z'
+};
+
+
 /**
  * The MarkdownUp application
  */
@@ -143,6 +183,18 @@ export class MarkdownUp {
         this.runtimeTimeoutId = null;
         this.runtimeCount = 0;
 
+        // The page's content element model, as last rendered (for reading the page aloud)
+        this.pageElements = null;
+
+        // The voice playback. It's either the page read aloud (the menu's "Read aloud") or a script's (voiceSpeak) -
+        // voiceScript is the script's Markdown text and final arguments.
+        this.voice = new MarkdownUpVoice(window, () => this.renderVoice(true));
+        this.voiceReadAloud = false;
+        this.voiceScript = null;
+
+        // The voice playback bar's own element, if any (the page has no voice playback bar element)
+        this.voiceBar = null;
+
         // The shared Web Audio state (for windowPlaySound), created on first use. The noise buffer is
         // a one-second white-noise buffer reused for drum and explosion sounds.
         this.audioContext = null;
@@ -156,6 +208,13 @@ export class MarkdownUp {
         this.window.addEventListener('blur', () => {
             for (const code of Object.keys(this.keyState)) {
                 this.keyState[code] = false;
+            }
+        });
+
+        // The escape key closes the menu
+        this.window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' &amp;&amp; this.menu &amp;&amp; this.paramsSession !== null &amp;&amp; 'menu' in this.paramsSession) {
+                this.menuSessionToggle('menu');
             }
         });
     }
@@ -208,6 +267,7 @@ export class MarkdownUp {
         // Parse the hash parameters and render the application element model
         let result;
         let isError = false;
+        const urlPrev = this.params !== null ? (this.params.url ?? null) : null;
         try {
             // Validate hash parameters
             const paramsPrev = this.params;
@@ -225,6 +285,14 @@ export class MarkdownUp {
             isError = true;
         }
 
+        // A new page ends the reading of the page aloud, a new document ends a script's voice playback, and rendering
+        // the page anew ends its voice lines
+        const url = this.params !== null ? (this.params.url ?? null) : null;
+        if (!forceRender &amp;&amp; (this.voiceReadAloud || url !== urlPrev)) {
+            this.voice.close();
+        }
+        this.voice.sayStop();
+
         // Set the colors
         const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
         this.window.document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
@@ -240,6 +308,7 @@ export class MarkdownUp {
         // Call the application main and validate the result
         this.runtimeCount += 1;
         this.clearRuntimeCallbacks();
+        this.pageElements = null;
         if (!isError) {
             result = await this.main();
         }
@@ -261,10 +330,9 @@ export class MarkdownUp {
             this.window.addEventListener('resize', result.resize);
         }
 
-        // Set the document keydown handler?
+        // Set the document keydown handler? (clearRuntimeCallbacks removes it)
         if ('keyDown' in result) {
-            this.runtimeDocumentKeyDown = result.keyDown;
-            this.window.document.addEventListener('keydown', async (event) => {
+            this.runtimeDocumentKeyDown = async (event) => {
                 // Is the active element something that wants this event?
                 const {activeElement} = this.window.document;
                 if (activeElement instanceof this.window.HTMLElement &amp;&amp;
@@ -282,11 +350,13 @@ export class MarkdownUp {
 
                 // Call the document keydown handler
                 await result.keyDown(event);
-            });
+            };
+            this.window.document.addEventListener('keydown', this.runtimeDocumentKeyDown);
         }
 
         // Render the element model
-        renderElements(this.window.document.body, result.elements);
+        this.renderPage(result.elements);
+        this.renderVoice();
 
         // Navigate?
         // Note: This is done after render since it may have no effect (in which case we need to render)
@@ -443,6 +513,7 @@ export class MarkdownUp {
 
         // Display the Markdown?
         if (this.params.view === 'markdown') {
+            this.pageElements = markdownElements(markdownModel);
             return {
                 'title': title,
                 'elements': [
@@ -460,6 +531,7 @@ export class MarkdownUp {
         // Render the Markdown
         const contentElements = await markdownElementsAsync(markdownModel, scriptMarkdownOptions);
         elementModelWrapCallbacks(contentElements, scriptOptions);
+        this.pageElements = contentElements;
         const result = {
             'title': title,
             'elements': [
@@ -556,6 +628,15 @@ export class MarkdownUp {
             markdownOptions,
             'params': this.params,
             'urlFn': (url) => this.modifyURL(url),
+            'voice': {
+                'close': () => this.voiceScriptClose(),
+                'load': () => this.voice.prepare(),
+                'ready': () => this.voice.ready(),
+                'say': (text, voice, style, rate) => this.voice.say(text, voice, style, rate),
+                'setText': (text, final) => this.voiceScriptSetText(text, final),
+                'speak': (text, final, key) => this.voiceScriptSpeak(text, final, key),
+                'state': () => this.voiceScriptState()
+            },
             'window': this.window
         };
 
@@ -605,13 +686,16 @@ export class MarkdownUp {
             if (elements !== null) {
                 const {body} = this.window.document;
                 if (runtime.documentReset === null) {
-                    renderElements(body, [this.burgerElements(), elements]);
+                    this.renderPage([this.burgerElements(), elements]);
+                    this.pageElements = elements;
                 } else {
-                    while (body.lastChild !== null &amp;&amp; body.lastChild.id !== runtime.documentReset) {
+                    while (body.lastChild !== null &amp;&amp; body.lastChild !== this.voiceBar &amp;&amp; body.lastChild.id !== runtime.documentReset) {
                         body.lastChild.remove();
                     }
                     renderElements(body, [elements], false);
+                    this.pageElements = [pageElementsReset(this.pageElements, runtime.documentReset), elements];
                 }
+                this.renderVoice();
             }
 
             // Navigate?
@@ -662,46 +746,56 @@ export class MarkdownUp {
     burgerElements() {
         const paramString = urlEncodeQueryString(this.params);
         const topHeaderId = `${paramString}${paramString !== '' ? '&amp;' : ''}_top`;
+        const isMenu = 'menu' in this.paramsSession;
         return [
             !this.menu ? null : [
+                // Menu "burger" button
                 {
                     'html': 'div',
                     'attr': {'class': 'menu-burger'},
-                    'elem': this.menuValueToggle('menu', {
-                        'size': 32,
-                        'noCheck': true,
-                        'path': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
-                    })
+                    'elem': {
+                        'html': 'button',
+                        'attr': {'type': 'button', 'class': 'menu-button', 'aria-label': 'Menu', 'aria-expanded': `${isMenu}`},
+                        'elem': iconElements(icons.burger, 22),
+                        'callback': clickCallback(() => this.menuSessionToggle('menu'))
+                    }
                 },
 
-                // Popup menu
-                !('menu' in this.paramsSession) ? null : {
-                    'html': 'div',
-                    'attr': {'class': 'menu'},
-                    'elem': [
-                        this.menuViewToggle('markdown', {
-                            'path': 'M4,2 L20,2 L20,22 L4,22 Z',
-                            'path2': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
-                        }),
-                        this.menuDarkModeToggle({
-                            'path': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
-                        }),
-                        this.menuValueCycle('fontSize', 12, [8, 10, 12, 14, 18, 24], (value) => `${value}pt`, {
-                            'path': 'M4,22 L10,2 L14,2 L20,22 M6,12.5 L18,12.5',
-                            'strokeWidth': 4
-                        }),
-                        this.menuValueCycle('lineHeight', 1.3, [1.2, 1.3, 1.5, 1.7, 2.0], null, {
-                            'path2': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
-                        }),
-                        this.menuValueToggle('debug', {
-                            'path': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
-                                'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
-                        }),
-                        this.menuLink(this.helpURL, {
-                            'path': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
-                        })
-                    ]
-                }
+                // Popup menu - a click outside of it (on its backdrop) closes it
+                !isMenu ? null : [
+                    {
+                        'html': 'div',
+                        'attr': {'class': 'menu-backdrop'},
+                        'callback': clickCallback(() => this.menuSessionToggle('menu'))
+                    },
+                    {
+                        'html': 'div',
+                        'attr': {'class': 'menu', 'role': 'menu'},
+                        'elem': [
+                            menuItemElements('Read aloud', icons.readAloud, null, () => this.menuReadAloud()),
+                            menuSeparatorElements(),
+                            menuItemElements(
+                                'Dark mode', icons.darkMode, !!(this.paramsLocal.darkMode ?? this.darkMode), () => this.menuDarkModeToggle()
+                            ),
+                            this.menuStepperElements('Font size', icons.fontSize, 'fontSize', this.fontSize, menuFontSizes, 'pt'),
+                            this.menuStepperElements('Line height', icons.lineHeight, 'lineHeight', this.lineHeight, menuLineHeights, ''),
+                            menuSeparatorElements(),
+                            menuItemElements(
+                                'Markdown source', icons.markdown, this.params.view === 'markdown', () => this.menuViewToggle('markdown')
+                            ),
+                            menuItemElements('Debug', icons.debug, 'debug' in this.paramsSession, () => this.menuSessionToggle('debug')),
+                            {
+                                'html': 'a',
+                                'attr': {'class': 'menu-item', 'role': 'menuitem', 'href': this.helpURL},
+                                'elem': [
+                                    iconElements(icons.help),
+                                    {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': 'Help'}},
+                                    iconElements(icons.link, 14)
+                                ]
+                            }
+                        ]
+                    }
+                ]
             ],
 
             // The top header ID
@@ -710,165 +804,306 @@ export class MarkdownUp {
     }
 
 
-    menuLink(url, icon) {
-        return this.menuButton(
-            () => {
-                this.window.location.href = url;
+    // Create a menu stepper's element model - a local storage value with buttons to step it down and up through its values
+    menuStepperElements(label, icon, valueName, valueDefault, values, unit) {
+        const value = this.paramsLocal[valueName] ?? valueDefault;
+        const stepElements = (stepLabel, stepText, valueNew) => ({
+            'html': 'button',
+            'attr': {
+                'type': 'button',
+                'class': 'menu-step',
+                'aria-label': `${label} ${stepLabel}`,
+                'disabled': valueNew === null ? 'disabled' : null
             },
-            icon
-        );
-    }
-
-
-    menuValueToggle(valueName, icon) {
-        icon.checked = valueName in this.paramsSession;
-        return this.menuButton(
-            () => {
-                if (valueName in this.paramsSession) {
-                    delete this.paramsSession[valueName];
+            'elem': {'text': stepText},
+            'callback': valueNew === null ? null : clickCallback(() => {
+                if (valueNew === valueDefault) {
+                    delete this.paramsLocal[valueName];
                 } else {
-                    this.paramsSession[valueName] = 1;
-                }
-                this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
-                this.render(true);
-            },
-            icon
-        );
-    }
-
-
-    menuViewToggle(viewValue, icon) {
-        icon.checked = this.params.view === viewValue;
-        return this.menuButton(
-            () => {
-                const params = {...this.params};
-                if (params.view === viewValue) {
-                    delete params.view;
-                } else {
-                    params.view = viewValue;
-                }
-                this.window.location.href = `#${urlEncodeQueryString(params)}`;
-            },
-            icon
-        );
-    }
-
-
-    menuDarkModeToggle(icon) {
-        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
-        icon.checked = isDarkMode;
-        return this.menuButton(
-            () => {
-                if (isDarkMode !== this.darkMode) {
-                    delete this.paramsLocal.darkMode;
-                } else {
-                    this.paramsLocal.darkMode = !isDarkMode;
+                    this.paramsLocal[valueName] = valueNew;
                 }
                 this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
                 this.render(true);
-            },
-            icon
-        );
-    }
-
-
-    menuValueCycle(valueName, valueDefault, values, textFn, icon) {
-        const valueCurrent = this.paramsLocal[valueName] ?? valueDefault;
-        let ixNew = values.indexOf(valueCurrent) + 1;
-        if (ixNew >= values.length) {
-            ixNew = 0;
-        }
-        const valueNew = values[ixNew];
-        icon.text = (textFn !== null ? textFn(valueCurrent) : valueCurrent);
-        return this.menuButton(
-            () => {
-                this.paramsLocal[valueName] = valueNew;
-                this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
-                this.render(true);
-            },
-            icon
-        );
-    }
-
-
-    menuButton(onClick, {checked = false, noCheck = false, path = null, path2 = null, strokeWidth = 3, size = 48, text = null}) {
-        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
-        const stroke = (isDarkMode ? (checked &amp;&amp; !noCheck ? 'black' : 'white') : (checked &amp;&amp; !noCheck ? 'white' : 'black'));
-        const background = (stroke === 'black' ? 'white' : 'black');
-        const borderSize = (0.125 * size).toFixed(3);
-        const innerSize = (0.75 * size).toFixed(3);
-
-        // Compute the text block geometry
-        const textStrokeWidth = Math.round(1000 * 0.05 * size) / 1000;
-        const textLeft = 0.5 * textStrokeWidth;
-        const textRight = 12.5 * textStrokeWidth;
-        const textTop = size - 6.5 * textStrokeWidth;
-        const textBottom = size - 0.5 * textStrokeWidth;
-        const textBoxX = 0.5 * (textLeft + textRight);
-        const textBoxY = 0.5 * (textTop + textBottom);
-        const textBoxSize = (textBottom - textTop) - 1.75 * textStrokeWidth;
-
+            })
+        });
         return {
             'html': 'div',
-            'attr': {'style': 'cursor: pointer; user-select: none;'},
-            'elem': {
-                'svg': 'svg',
-                'attr': {'width': size, 'height': size},
-                'elem': [
-                    !checked || noCheck ? null : {
-                        'svg': 'rect',
-                        'attr': {'fill': (isDarkMode ? 'white' : 'black'), 'stroke': 'none', 'width': size, 'height': size}
-                    },
-                    {
-                        'svg': 'g',
-                        'attr': {'transform': `translate(${borderSize}, ${borderSize})`},
-                        'elem': {
-                            'svg': 'svg',
-                            'attr': {'width': innerSize, 'height': innerSize, 'viewBox': '0 0 24 24'},
-                            'elem': [
-                                path === null ? null : {
-                                    'svg': 'path',
-                                    'attr': {'fill': 'none', 'stroke': stroke, 'stroke-width': strokeWidth, 'd': path}
-                                },
-                                path2 === null ? null : {
-                                    'svg': 'path',
-                                    'attr': {'fill': 'none', 'stroke': stroke, 'stroke-width': strokeWidth - 1, 'd': path2}
-                                }
-                            ]
-                        }
-                    },
-                    (text === null ? null : {
-                        'svg': 'rect',
-                        'attr': {
-                            'fill': background,
-                            'stroke': stroke,
-                            'stroke-width': textStrokeWidth,
-                            'x': textLeft.toFixed(3),
-                            'y': textTop.toFixed(3),
-                            'width': (textRight - textLeft).toFixed(3),
-                            'height': (textBottom - textTop).toFixed(3)
-                        }
-                    }),
-                    (text === null ? null : {
-                        'svg': 'text',
-                        'attr': {
-                            'fill': stroke,
-                            'x': textBoxX.toFixed(3),
-                            'y': textBoxY.toFixed(3),
-                            'text-anchor': 'middle',
-                            'dominant-baseline': 'middle',
-                            'font-size': `${textBoxSize.toFixed(3)}px`,
-                            'font-weight': 'bold'
-                        },
-                        'elem': {'text': text}
-                    })
-                ]
-            },
-            'callback': (element) => {
-                element.addEventListener('click', onClick);
-            }
+            'attr': {'class': 'menu-item menu-stepper'},
+            'elem': [
+                iconElements(icon),
+                {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': label}},
+                stepElements('down', '−', values.findLast((valueOther) => valueOther &lt; value) ?? null),
+                {'html': 'span', 'attr': {'class': 'menu-value'}, 'elem': {'text': `${value}${unit}`}},
+                stepElements('up', '+', values.find((valueOther) => valueOther > value) ?? null)
+            ]
         };
     }
+
+
+    // Toggle a session storage value (e.g., the menu) and render
+    menuSessionToggle(valueName) {
+        if (valueName in this.paramsSession) {
+            delete this.paramsSession[valueName];
+        } else {
+            this.paramsSession[valueName] = 1;
+        }
+        this.window.sessionStorage.setItem('MarkdownUp', JSON.stringify(this.paramsSession));
+        this.render(true);
+    }
+
+
+    // Toggle a view (e.g., the Markdown text view)
+    menuViewToggle(viewValue) {
+        const params = {...this.params};
+        if (params.view === viewValue) {
+            delete params.view;
+        } else {
+            params.view = viewValue;
+        }
+        this.window.location.href = `#${urlEncodeQueryString(params)}`;
+    }
+
+
+    // Toggle dark mode and render
+    menuDarkModeToggle() {
+        const isDarkMode = this.paramsLocal.darkMode ?? this.darkMode;
+        if (isDarkMode !== this.darkMode) {
+            delete this.paramsLocal.darkMode;
+        } else {
+            this.paramsLocal.darkMode = !isDarkMode;
+        }
+        this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
+        this.render(true);
+    }
+
+
+    // Read the page aloud - the page as it's rendered now, if it has anything to read - and close the menu
+    menuReadAloud() {
+        const paragraphs = voiceElementsParagraphs(this.pageElements, true);
+        if (paragraphs.length !== 0) {
+            this.voiceReadAloud = true;
+            this.voiceScript = null;
+            this.voiceSettings();
+            this.voice.speak(paragraphs, true, null);
+        }
+        this.menuSessionToggle('menu');
+    }
+
+
+    // Set the voice playback's voice and speaking rate to the preferred voice and speaking rate
+    voiceSettings() {
+        this.voice.voice = this.paramsLocal.voice ?? null;
+        this.voice.rate = this.paramsLocal.voiceRate ?? 1;
+    }
+
+
+    // The script library's voiceSpeak - start reading Markdown text aloud
+    voiceScriptSpeak(text, final, key) {
+        this.voiceReadAloud = false;
+        this.voiceScript = [text, final];
+        this.voiceSettings();
+        this.voice.speak(voiceMarkdownParagraphs(text), final, key);
+    }
+
+
+    // The script library's voiceSetText - set the Markdown text of the script's voice playback, if any
+    voiceScriptSetText(text, final) {
+        if (this.voiceScriptState() !== null &amp;&amp; (text !== this.voiceScript[0] || final !== this.voiceScript[1])) {
+            this.voiceScript = [text, final];
+            this.voice.setText(voiceMarkdownParagraphs(text), final);
+        }
+    }
+
+
+    // The script library's voiceState - the state of the script's voice playback, if any (not the page read aloud)
+    voiceScriptState() {
+        return this.voiceReadAloud ? null : this.voice.state();
+    }
+
+
+    // The script library's voiceClose - close the script's voice playback, if any (not the page read aloud), and stop
+    // the voice lines
+    voiceScriptClose() {
+        this.voice.sayStop();
+        if (!this.voiceReadAloud) {
+            this.voice.close();
+        }
+    }
+
+
+    // Render the page's element model in the document body. The voice playback bar's own element, if any, is left in
+    // place (it's the body's first element) - an element that's replaced as it's clicked gets no click, so the bar's
+    // controls would fail while an application renders.
+    renderPage(elements) {
+        const {body} = this.window.document;
+        if (this.voiceBar === null) {
+            renderElements(body, elements);
+        } else {
+            while (body.lastChild !== this.voiceBar) {
+                body.lastChild.remove();
+            }
+            renderElements(body, elements, false);
+        }
+    }
+
+
+    // Render the voice playback bar, if there's a voice playback - in the page's voice playback bar element, if it has
+    // one, or in the bar's own element at the bottom of the window. Unless the playback changed, a rendered bar is left
+    // as it is.
+    renderVoice(changed = false) {
+        const {document} = this.window;
+        const isPlayback = this.voice.state() !== null;
+        const pageBar = document.getElementById(voiceBarId);
+
+        // Remove the bar's own element when it isn't needed
+        if (this.voiceBar !== null &amp;&amp; (pageBar !== null || !isPlayback)) {
+            this.voiceBar.remove();
+            this.voiceBar = null;
+        }
+
+        // No playback? Clear the page's voice playback bar element, if any.
+        if (!isPlayback) {
+            if (pageBar !== null &amp;&amp; pageBar.firstChild !== null) {
+                pageBar.replaceChildren();
+            }
+            return;
+        }
+
+        // Create the bar's own element, if necessary - the body's first element, where rendering the page leaves it
+        if (pageBar === null &amp;&amp; this.voiceBar === null) {
+            this.voiceBar = document.createElement('div');
+            this.voiceBar.id = voiceBarDefaultId;
+            this.voiceBar.className = 'voice-default';
+            document.body.prepend(this.voiceBar);
+        }
+
+        // Render the bar
+        const bar = pageBar ?? this.voiceBar;
+        if (changed || bar.firstChild === null) {
+            renderElements(bar, this.voiceElements());
+        }
+    }
+
+
+    // Create the voice playback bar's element model
+    voiceElements() {
+        const {voice} = this;
+        const {playing} = voice.state();
+        const textButtonElements = (label, text, onClick) => ({
+            'html': 'button',
+            'attr': {'type': 'button', 'class': 'voice-text', 'aria-label': label},
+            'elem': {'text': text},
+            'callback': clickCallback(onClick)
+        });
+        return {
+            'html': 'div',
+            'attr': {'class': 'voice', 'role': 'group', 'aria-label': 'Read aloud'},
+            'elem': [
+                voiceButtonElements('Rewind', icons.rewind, true, () => voice.rewind()),
+                voiceButtonElements('Skip back', icons.skipBack, true, () => voice.skipBack()),
+                (playing
+                    ? voiceButtonElements('Pause', icons.pause, true, () => voice.pause(), true)
+                    : voiceButtonElements('Play', icons.play, true, () => voice.play(), true)),
+                voiceButtonElements('Skip forward', icons.skipForward, true, () => voice.skipForward()),
+                textButtonElements('Voice', voice.voiceLabel(), () => {
+                    const voiceNext = voice.voiceNext();
+                    if (voiceNext !== null) {
+                        this.paramsLocal.voice = voiceNext;
+                        this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
+                        voice.setVoice(voiceNext);
+                    }
+                }),
+                {'html': 'span', 'attr': {'class': 'voice-separator'}, 'elem': {'text': '|'}},
+                textButtonElements('Speaking rate', `${voice.rate}x`, () => {
+                    const rateNext = voice.rateNext();
+                    this.paramsLocal.voiceRate = rateNext;
+                    this.window.localStorage.setItem('MarkdownUp', JSON.stringify(this.paramsLocal));
+                    voice.setRate(rateNext);
+                }),
+                voiceButtonElements('Close', icons.close, false, () => voice.close())
+            ]
+        };
+    }
+}
+
+
+// Create an element model callback that adds an element's click event handler
+function clickCallback(onClick) {
+    return (element) => {
+        element.addEventListener('click', onClick);
+    };
+}
+
+
+// Create an icon's element model - an icon is drawn with lines or filled
+function iconElements(path, size = 18, fill = false) {
+    return {
+        'svg': 'svg',
+        'attr': {'width': size, 'height': size, 'viewBox': '0 0 24 24', 'aria-hidden': 'true'},
+        'elem': {
+            'svg': 'path',
+            'attr': {
+                'fill': fill ? 'currentColor' : 'none',
+                'stroke': fill ? 'none' : 'currentColor',
+                'stroke-width': 2,
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'd': path
+            }
+        }
+    };
+}
+
+
+// Create a menu item's element model - if checked isn't null, the item is a toggle
+function menuItemElements(label, icon, checked, onClick) {
+    const isToggle = checked !== null;
+    return {
+        'html': 'button',
+        'attr': {
+            'type': 'button',
+            'class': 'menu-item',
+            'role': isToggle ? 'menuitemcheckbox' : 'menuitem',
+            'aria-checked': isToggle ? `${checked}` : null
+        },
+        'elem': [
+            iconElements(icon),
+            {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': label}},
+            !isToggle ? null : {'html': 'span', 'attr': {'class': 'menu-switch'}}
+        ],
+        'callback': clickCallback(onClick)
+    };
+}
+
+
+// Create a menu separator's element model
+function menuSeparatorElements() {
+    return {'html': 'div', 'attr': {'class': 'menu-separator', 'role': 'separator'}};
+}
+
+
+// Create a voice playback bar button's element model
+function voiceButtonElements(label, icon, fill, onClick, isPrimary = false) {
+    return {
+        'html': 'button',
+        'attr': {'type': 'button', 'class': `voice-button${isPrimary ? ' voice-primary' : ''}`, 'aria-label': label},
+        'elem': iconElements(icon, isPrimary ? 22 : 18, fill),
+        'callback': clickCallback(onClick)
+    };
+}
+
+
+// Get Markdown text's paragraphs to read aloud
+function voiceMarkdownParagraphs(text) {
+    return voiceElementsParagraphs(markdownElements(markdownParse(text)));
+}
+
+
+// Get the page elements that remain after a document reset - the top-level elements through the reset ID's element
+function pageElementsReset(pageElements, resetId) {
+    const elements = [pageElements].flat(Infinity).filter((element) => element !== null);
+    const ixReset = elements.findIndex((element) => (element.attr ?? null) !== null &amp;&amp; element.attr.id === resetId);
+    return elements.slice(0, ixReset + 1);
 }
 
 

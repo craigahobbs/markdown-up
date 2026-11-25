@@ -9,41 +9,229 @@
 
 /* Color variables */
 :root {
-    --markdown-up-menu-background: light-dark(rgb(245, 245, 245), rgb(0, 0, 0));
-    --markdown-up-menu-border: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));
+    --markdown-up-menu-background: light-dark(rgb(255, 255, 255), rgb(38, 38, 38));
+    --markdown-up-menu-hover: light-dark(rgb(0, 0, 0, 0.07), rgb(255, 255, 255, 0.1));
+    --markdown-up-menu-shadow: light-dark(rgb(0, 0, 0, 0.18), rgb(0, 0, 0, 0.6));
+    --markdown-up-menu-switch: light-dark(rgb(176, 176, 176), rgb(110, 110, 110));
+}
+
+
+/* Menu button */
+.menu-burger {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 30;
+}
+.menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--barescript-color-background) 80%, transparent);
+    color: var(--barescript-color-foreground);
+    cursor: pointer;
+}
+.menu-button:hover, .menu-button[aria-expanded="true"] {
+    border-color: var(--barescript-color-border);
+    background: var(--markdown-up-menu-background);
 }
 
 
 /* Menu */
-.menu-burger {
+.menu-backdrop {
     position: fixed;
-    top: 0;
-    right: 0;
-    margin: 6px;
+    inset: 0;
+    z-index: 20;
 }
 .menu {
     position: fixed;
     top: 50px;
-    right: 0;
+    right: 8px;
+    z-index: 30;
     display: flex;
     flex-direction: column;
-    max-width: max-content;
+    min-width: 230px;
+    padding: 6px;
+    border: 1px solid var(--barescript-color-border);
+    border-radius: 10px;
     background: var(--markdown-up-menu-background);
-    border: 2px solid var(--markdown-up-menu-border);
+    box-shadow: 0 6px 24px var(--markdown-up-menu-shadow);
+    color: var(--barescript-color-foreground);
+    font-size: 14px;
+    line-height: 1.2;
+    user-select: none;
 }
-.menu > div {
-    margin: 8px 6px 0 6px;
-    line-height: 0;
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
 }
-.menu > div:first-child {
-    margin-top: 10px;
+button.menu-item:hover, a.menu-item:hover {
+    background: var(--markdown-up-menu-hover);
 }
-.menu > div:last-child {
-    margin-bottom: 10px;
+.menu-item svg {
+    flex: none;
 }
+.menu-label {
+    flex: 1;
+    white-space: nowrap;
+}
+.menu-separator {
+    height: 1px;
+    margin: 6px 4px;
+    background: var(--barescript-color-border);
+}
+.menu-switch {
+    position: relative;
+    flex: none;
+    width: 30px;
+    height: 18px;
+    border-radius: 9px;
+    background: var(--markdown-up-menu-switch);
+}
+.menu-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background: rgb(255, 255, 255);
+    transition: left 0.1s;
+}
+.menu-item[aria-checked="true"] .menu-switch {
+    background: var(--barescript-color-link);
+}
+.menu-item[aria-checked="true"] .menu-switch::after {
+    left: 14px;
+}
+.menu-stepper {
+    gap: 6px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    cursor: default;
+}
+.menu-stepper .menu-label {
+    margin-left: 4px;
+}
+.menu-step {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--barescript-color-border);
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.menu-step:hover {
+    background: var(--markdown-up-menu-hover);
+}
+.menu-step:disabled {
+    opacity: 0.35;
+    background: none;
+    cursor: default;
+}
+.menu-value {
+    min-width: 38px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* Voice playback bar */
+.voice-default {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    z-index: 10;
+    transform: translateX(-50%);
+}
+.voice {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border: 1px solid var(--barescript-color-border);
+    border-radius: 10px;
+    background: var(--markdown-up-menu-background);
+    box-shadow: 0 6px 24px var(--markdown-up-menu-shadow);
+    color: var(--barescript-color-foreground);
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+    user-select: none;
+}
+.voice-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+.voice-primary {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--barescript-color-background-code);
+}
+.voice-text {
+    margin: 0;
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--barescript-color-link);
+    font: inherit;
+    cursor: pointer;
+}
+.voice-button:hover, .voice-text:hover {
+    background: var(--markdown-up-menu-hover);
+}
+.voice-primary:hover {
+    background: var(--barescript-color-border);
+}
+.voice-separator {
+    color: var(--barescript-color-border);
+}
+
+
+/* Menu and voice playback bar keyboard focus */
+.menu-button:focus-visible, .menu-item:focus-visible, .menu-step:focus-visible, .voice-button:focus-visible,
+.voice-text:focus-visible {
+    outline: 2px solid var(--barescript-color-link);
+    outline-offset: 1px;
+}
+
+
 @media print
 {
-    .menu, .menu-burger {
+    .menu, .menu-backdrop, .menu-burger, .voice, .voice-default {
         display: none;
     }
 }

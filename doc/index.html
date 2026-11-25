@@ -127,10 +127,24 @@ block of <a href="https://craigahobbs.github.io/bare-script/language/">BareScrip
 when MarkdownUp renders the file, it runs the script and renders its output in place of the code
 block. You can learn more from the
 <a href="https://craigahobbs.github.io/markdown-up-py/#markdownup-applications">MarkdownUp backend application's README</a>.</p>
+<h2>Read Aloud</h2>
+<p>MarkdownUp reads pages aloud with <a href="https://github.com/craigahobbs/picovox#readme">PicoVox</a> speech
+synthesis, which runs entirely in the browser. To read the page aloud, click &quot;Read aloud&quot; in the
+MarkdownUp menu in the upper-right of the page. The voice playback bar appears at the bottom of the
+window, with play/pause, rewind, skip back and forward by section (the page's top-level headers),
+voice, and speaking rate controls. Code blocks, images, and controls are not read. PicoVox speaks
+English text, and it is loaded when it is first used.</p>
+<p>MarkdownUp applications read their own Markdown text aloud with the <code>voiceSpeak</code>, <code>voiceSetText</code>,
+<code>voiceState</code>, and <code>voiceClose</code> functions. An application positions the voice playback bar by
+rendering an element with the ID &quot;markdownUpVoice&quot; - the bar is rendered in that element.</p>
+<p>Applications also say lines of text aloud with the <code>voiceSay</code> function - each in a voice and a
+speaking style, over any other lines, with no voice playback bar (for example, a film's dialogue).
+<code>voiceLoad</code> loads the speech synthesizer ahead of the first line, and <code>voiceReady</code> tests whether the
+browser has let the page's audio start (it may not until the user interacts with the page).</p>
 <h2>Debug Mode</h2>
 <p>Debug mode logs the script runtime duration and runs the BareScript linter, which performs static
 code analysis on your code and reports warnings for any issues found.</p>
-<p>To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.</p>
+<p>To turn on debug mode, click &quot;Debug&quot; in the MarkdownUp menu in the upper-right of the page.</p>
 <h2>Development</h2>
 <p>This package is developed using <a href="https://github.com/craigahobbs/javascript-build#readme">javascript-build</a>.
 It was started using <a href="https://github.com/craigahobbs/javascript-template#readme">javascript-template</a> as follows:</p>
