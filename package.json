@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "markdown-up",
-    "version": "5.2.2",
+    "version": "5.3.0",
     "description": "MarkdownUp is a Markdown viewer",
     "keywords": [
         "markdown",

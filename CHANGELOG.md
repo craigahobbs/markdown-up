@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.3.0 (2026-11-25)
+
+- [1c1119a](https://github.com/craigahobbs/markdown-up/commit/1c1119a) - add voice playback with PicoVox speech synthesis - the menu's "Read aloud" reads the page aloud, and the voiceSpeak, voiceSetText, voiceState, voiceClose, voiceSay, voiceLoad, and voiceReady library functions; redesign the menu; update to bare-script 5.3
+
+- [4edba28](https://github.com/craigahobbs/markdown-up/commit/4edba28) - fix the document keydown handler leak - each render's handler now replaces the last
+
+- [3c91dd7](https://github.com/craigahobbs/markdown-up/commit/3c91dd7) - allow any "url" hash parameter resource URL in the MarkdownUp application stub
+
 ## 5.2.2 (2026-11-24)
 
 - [8caa8c7](https://github.com/craigahobbs/markdown-up/commit/8caa8c7) - restrict the "url" hash parameter to same-origin URLs by default
