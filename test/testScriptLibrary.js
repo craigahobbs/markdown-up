@@ -650,6 +650,158 @@ test('script library, sessionStorageRemove', () => {
 
 
 //
+// Voice functions
+//
+
+
+// Helper to create test runtime options with a mock voice playback that records its calls
+function testVoiceRuntime(state = null) {
+    const runtime = testRuntime();
+    const calls = [];
+    runtime.options.voice = {
+        'close': (...args) => {
+            calls.push(['close', ...args]);
+        },
+        'load': (...args) => {
+            calls.push(['load', ...args]);
+        },
+        'ready': (...args) => {
+            calls.push(['ready', ...args]);
+            return state !== null;
+        },
+        'say': (...args) => {
+            calls.push(['say', ...args]);
+        },
+        'setText': (...args) => {
+            calls.push(['setText', ...args]);
+        },
+        'speak': (...args) => {
+            calls.push(['speak', ...args]);
+        },
+        'state': (...args) => {
+            calls.push(['state', ...args]);
+            return state;
+        }
+    };
+    return [runtime, calls];
+}
+
+
+test('script library, voiceClose', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceClose([], runtime.options), undefined);
+    assert.deepEqual(calls, [['close']]);
+});
+
+
+test('script library, voiceLoad', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceLoad([], runtime.options), undefined);
+    assert.deepEqual(calls, [['load']]);
+});
+
+
+test('script library, voiceReady', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceReady([], runtime.options), false);
+    assert.deepEqual(calls, [['ready']]);
+
+    const [runtime2, calls2] = testVoiceRuntime({'key': null, 'playing': true});
+    assert.equal(markdownScriptFunctions.voiceReady([], runtime2.options), true);
+    assert.deepEqual(calls2, [['ready']]);
+});
+
+
+test('script library, voiceSay', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceSay(['Hello!'], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.voiceSay(['Go!', 'james', 'shouting', 1.2], runtime.options), undefined);
+    assert.deepEqual(calls, [
+        ['say', 'Hello!', null, 'neutral', 1],
+        ['say', 'Go!', 'james', 'shouting', 1.2]
+    ]);
+});
+
+
+test('script library, voiceSay invalid', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.throws(
+        () => {
+            markdownScriptFunctions.voiceSay(['Hello!', null, 'neutral', 3], runtime.options);
+        },
+        {
+            'name': 'ValueArgsError',
+            'message': 'Invalid "rate" argument value, 3'
+        }
+    );
+    assert.deepEqual(calls, []);
+});
+
+
+test('script library, voiceSetText', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceSetText(['Hello!'], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.voiceSetText(['Hello! Bye', false], runtime.options), undefined);
+    assert.deepEqual(calls, [
+        ['setText', 'Hello!', true],
+        ['setText', 'Hello! Bye', false]
+    ]);
+});
+
+
+test('script library, voiceSetText invalid', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.throws(
+        () => {
+            markdownScriptFunctions.voiceSetText([null], runtime.options);
+        },
+        {
+            'name': 'ValueArgsError',
+            'message': 'Invalid "text" argument value, null'
+        }
+    );
+    assert.deepEqual(calls, []);
+});
+
+
+test('script library, voiceSpeak', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceSpeak(['Hello!'], runtime.options), undefined);
+    assert.equal(markdownScriptFunctions.voiceSpeak(['Hello! Bye', false, {'id': 1}], runtime.options), undefined);
+    assert.deepEqual(calls, [
+        ['speak', 'Hello!', true, null],
+        ['speak', 'Hello! Bye', false, {'id': 1}]
+    ]);
+});
+
+
+test('script library, voiceSpeak invalid', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.throws(
+        () => {
+            markdownScriptFunctions.voiceSpeak([7], runtime.options);
+        },
+        {
+            'name': 'ValueArgsError',
+            'message': 'Invalid "text" argument value, 7'
+        }
+    );
+    assert.deepEqual(calls, []);
+});
+
+
+test('script library, voiceState', () => {
+    const [runtime, calls] = testVoiceRuntime();
+    assert.equal(markdownScriptFunctions.voiceState([], runtime.options), null);
+    assert.deepEqual(calls, [['state']]);
+
+    const [runtime2, calls2] = testVoiceRuntime({'key': 'a', 'playing': true});
+    assert.deepEqual(markdownScriptFunctions.voiceState([], runtime2.options), {'key': 'a', 'playing': true});
+    assert.deepEqual(calls2, [['state']]);
+});
+
+
+//
 // Window functions
 //
 

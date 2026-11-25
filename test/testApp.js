@@ -7,325 +7,136 @@ import '../lib/appImports.js';
 
 
 import {} from 'bare-script/lib/options.js';
+import {MockAudioContext, flushTasks, mockPicovox} from './voiceMock.js';
 import {JSDOM} from 'jsdom/lib/api.js';
 import {MarkdownUp} from '../lib/app.js';
 import {strict as assert} from 'node:assert';
 import test from 'node:test';
+import {voiceElementsParagraphs} from '../lib/voice.js';
 
 
 // The JSDOM URL
 const jsdomURL = 'https://github.com/craigahobbs/markdown-up';
 
 
-// Helper function to create the menu burger elements
-function menuBurgerElements({darkMode = false} = {}) {
+// Helper function to create an icon's elements
+function iconElements(path, size = 18, fill = false) {
     return {
-        'html': 'div',
-        'attr': {'class': 'menu-burger'},
+        'svg': 'svg',
+        'attr': {'width': size, 'height': size, 'viewBox': '0 0 24 24', 'aria-hidden': 'true'},
         'elem': {
-            'html': 'div',
-            'attr': {'style': 'cursor: pointer; user-select: none;'},
-            'elem': {
-                'svg': 'svg',
-                'attr': {'width': 32, 'height': 32},
-                'elem': [
-                    null,
-                    {
-                        'svg': 'g',
-                        'attr': {'transform': 'translate(4.000, 4.000)'},
-                        'elem': {
-                            'svg': 'svg',
-                            'attr': {'width': '24.000', 'height': '24.000', 'viewBox': '0 0 24 24'},
-                            'elem': [
-                                {
-                                    'svg': 'path',
-                                    'attr': {
-                                        'fill': 'none',
-                                        'stroke': (darkMode ? 'white' : 'black'),
-                                        'stroke-width': 3,
-                                        'd': 'M3,5 L21,5 M3,12 L21,12 M3,19 L21,19'
-                                    }
-                                },
-                                null
-                            ]
-                        }
-                    },
-                    null,
-                    null
-                ]
+            'svg': 'path',
+            'attr': {
+                'fill': fill ? 'currentColor' : 'none',
+                'stroke': fill ? 'none' : 'currentColor',
+                'stroke-width': 2,
+                'stroke-linecap': 'round',
+                'stroke-linejoin': 'round',
+                'd': path
             }
         }
     };
 }
 
 
-// Helper function to create the menu elements
-function menuElements({darkMode = false, fontSizeText = null, viewMarkdown = false} = {}) {
+// Helper function to create the menu burger elements
+function menuBurgerElements({menu = false} = {}) {
     return {
         'html': 'div',
-        'attr': {'class': 'menu'},
+        'attr': {'class': 'menu-burger'},
+        'elem': {
+            'html': 'button',
+            'attr': {'type': 'button', 'class': 'menu-button', 'aria-label': 'Menu', 'aria-expanded': `${menu}`},
+            'elem': iconElements('M3,5 L21,5 M3,12 L21,12 M3,19 L21,19', 22)
+        }
+    };
+}
+
+
+// Helper function to create the menu elements
+function menuElements({
+    darkMode = false, debug = false, fontSize = 12, fontSizeDown = true, fontSizeUp = true,
+    helpURL = 'https://craigahobbs.github.io/markdown-up-py/', lineHeight = 1.3, viewMarkdown = false
+} = {}) {
+    const itemElements = (label, path, checked = null) => ({
+        'html': 'button',
+        'attr': {
+            'type': 'button',
+            'class': 'menu-item',
+            'role': checked !== null ? 'menuitemcheckbox' : 'menuitem',
+            'aria-checked': checked !== null ? `${checked}` : null
+        },
         'elem': [
+            iconElements(path),
+            {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': label}},
+            checked !== null ? {'html': 'span', 'attr': {'class': 'menu-switch'}} : null
+        ]
+    });
+    const stepperElements = (label, path, text, down, up) => ({
+        'html': 'div',
+        'attr': {'class': 'menu-item menu-stepper'},
+        'elem': [
+            iconElements(path),
+            {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': label}},
             {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        !viewMarkdown ? null : {
-                            'svg': 'rect',
-                            'attr': {'fill': 'black', 'height': 48, 'stroke': 'none', 'width': 48}
-                        },
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode || viewMarkdown ? 'white' : 'black'),
-                                            'stroke-width': 3,
-                                            'd': 'M4,2 L20,2 L20,22 L4,22 Z'
-                                        }
-                                    },
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode || viewMarkdown ? 'white' : 'black'),
-                                            'stroke-width': 2,
-                                            'd': 'M7,7.5 L17,7.5 M7,12 L17,12 M7,16.5 L17,16.5'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        null,
-                        null
-                    ]
-                }
+                'html': 'button',
+                'attr': {'type': 'button', 'class': 'menu-step', 'aria-label': `${label} down`, 'disabled': down ? null : 'disabled'},
+                'elem': {'text': '−'}
             },
+            {'html': 'span', 'attr': {'class': 'menu-value'}, 'elem': {'text': text}},
             {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        !darkMode ? null : {
-                            'svg': 'rect',
-                            'attr': {'fill': 'white', 'height': 48, 'stroke': 'none', 'width': 48}
-                        },
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': 'black',
-                                            'stroke-width': 3,
-                                            'd': 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3'
-                                        }
-                                    },
-                                    null
-                                ]
-                            }
-                        },
-                        null,
-                        null
-                    ]
-                }
-            },
-            {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        null,
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode ? 'white' : 'black'),
-                                            'stroke-width': 4,
-                                            'd': 'M4,22 L10,2 L14,2 L20,22 M6,12.5 L18,12.5'
-                                        }
-                                    },
-                                    null
-                                ]
-                            }
-                        },
-                        {
-                            'attr': {
-                                'stroke-width': 2.4,
-                                'fill': (darkMode ? 'black' : 'white'),
-                                'height': '14.400',
-                                'stroke': (darkMode ? 'white' : 'black'),
-                                'width': '28.800',
-                                'x': '1.200',
-                                'y': '32.400'
-                            },
-                            'svg': 'rect'
-                        },
-                        {
-                            'attr': {
-                                'dominant-baseline': 'middle',
-                                'font-size': '10.200px',
-                                'font-weight': 'bold',
-                                'text-anchor': 'middle',
-                                'fill': (darkMode ? 'white' : 'black'),
-                                'x': '15.600',
-                                'y': '39.600'
-                            },
-                            'elem': {'text': (fontSizeText !== null ? fontSizeText : '12pt')},
-                            'svg': 'text'
-                        }
-                    ]
-                }
-            },
-            {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        null,
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    null,
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode ? 'white' : 'black'),
-                                            'stroke-width': 2,
-                                            'd': 'M2,3 L22,3 M2,9 L22,9 M2,15 L22,15 M2,21 L22,21'
-                                        }
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            'attr': {
-                                'stroke-width': 2.4,
-                                'fill': (darkMode ? 'black' : 'white'),
-                                'height': '14.400',
-                                'stroke': (darkMode ? 'white' : 'black'),
-                                'width': '28.800',
-                                'x': '1.200',
-                                'y': '32.400'
-                            },
-                            'svg': 'rect'
-                        },
-                        {
-                            'attr': {
-                                'dominant-baseline': 'middle',
-                                'font-size': '10.200px',
-                                'font-weight': 'bold',
-                                'text-anchor': 'middle',
-                                'fill': (darkMode ? 'white' : 'black'),
-                                'x': '15.600',
-                                'y': '39.600'
-                            },
-                            'elem': {'text': 1.3},
-                            'svg': 'text'
-                        }
-                    ]
-                }
-            },
-            {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        null,
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode ? 'white' : 'black'),
-                                            'stroke-width': 3,
-                                            // eslint-disable-next-line max-len
-                                            'd': 'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 M15,9 L20,6 M15,12 L21,12 M15,15 L20,18'
-                                        }
-                                    },
-                                    null
-                                ]
-                            }
-                        },
-                        null,
-                        null
-                    ]
-                }
-            },
-            {
-                'html': 'div',
-                'attr': {'style': 'cursor: pointer; user-select: none;'},
-                'elem': {
-                    'svg': 'svg',
-                    'attr': {'width': 48, 'height': 48},
-                    'elem': [
-                        null,
-                        {
-                            'svg': 'g',
-                            'attr': {'transform': 'translate(6.000, 6.000)'},
-                            'elem': {
-                                'svg': 'svg',
-                                'attr': {'width': '36.000', 'height': '36.000', 'viewBox': '0 0 24 24'},
-                                'elem': [
-                                    {
-                                        'svg': 'path',
-                                        'attr': {
-                                            'fill': 'none',
-                                            'stroke': (darkMode ? 'white' : 'black'),
-                                            'stroke-width': 3,
-                                            'd': 'M7,9 L7,4 L17,4 L17,12 L12,12 L12,16 M12,19 L12,22'
-                                        }
-                                    },
-                                    null
-                                ]
-                            }
-                        },
-                        null,
-                        null
-                    ]
-                }
+                'html': 'button',
+                'attr': {'type': 'button', 'class': 'menu-step', 'aria-label': `${label} up`, 'disabled': up ? null : 'disabled'},
+                'elem': {'text': '+'}
             }
         ]
-    };
+    });
+    const separatorElements = {'html': 'div', 'attr': {'class': 'menu-separator', 'role': 'separator'}};
+    return [
+        {'html': 'div', 'attr': {'class': 'menu-backdrop'}},
+        {
+            'html': 'div',
+            'attr': {'class': 'menu', 'role': 'menu'},
+            'elem': [
+                itemElements('Read aloud', 'M3,9 L7,9 L12,5 L12,19 L7,15 L3,15 Z M16,9 A4,4,0,0,1,16,15 M18.5,6 A8,8,0,0,1,18.5,18'),
+                separatorElements,
+                itemElements('Dark mode', 'M16,3 A10,10,0,1,1,3,18 A14,14,0,0,0,17,3 Z', darkMode),
+                stepperElements('Font size', 'M4,21 L12,3 L20,21 M7.5,14 L16.5,14', `${fontSize}pt`, fontSizeDown, fontSizeUp),
+                stepperElements(
+                    'Line height',
+                    'M11,5 L21,5 M11,12 L21,12 M11,19 L21,19 M5,4 L5,20 M2.5,6.5 L5,4 L7.5,6.5 M2.5,17.5 L5,20 L7.5,17.5',
+                    `${lineHeight}`,
+                    true,
+                    true
+                ),
+                separatorElements,
+                itemElements('Markdown source', 'M5,2 L19,2 L19,22 L5,22 Z M8,7.5 L16,7.5 M8,12 L16,12 M8,16.5 L16,16.5', viewMarkdown),
+                itemElements(
+                    'Debug',
+                    'M12,5 A4,7,0,1,0,12,19 A4,7,0,1,0,12,5 M9,9 L15,9 M9,9 L4,6 M9,12 L3,12 M9,15 L4,18 ' +
+                        'M15,9 L20,6 M15,12 L21,12 M15,15 L20,18',
+                    debug
+                ),
+                {
+                    'html': 'a',
+                    'attr': {'class': 'menu-item', 'role': 'menuitem', 'href': helpURL},
+                    'elem': [
+                        iconElements('M12,2 A10,10,0,1,0,12,22 A10,10,0,1,0,12,2 M9,9.5 A3,3,0,1,1,12,12.5 L12,14.5 M12,17.5 L12,18'),
+                        {'html': 'span', 'attr': {'class': 'menu-label'}, 'elem': {'text': 'Help'}},
+                        iconElements('M9,5 L19,5 L19,15 M19,5 L6,18', 14)
+                    ]
+                }
+            ]
+        }
+    ];
+}
+
+
+// Helper function to get a menu item's element
+function menuItem(window, label) {
+    return Array.from(window.document.querySelectorAll('.menu-item')).find(
+        (element) => element.querySelector('.menu-label').textContent === label
+    );
 }
 
 
@@ -476,7 +287,7 @@ test('MarkdownUp, render menu toggle', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
 
     // Click the menu button and wait for the render
-    let [, menuButton] = window.document.getElementsByTagName('div');
+    let menuButton = window.document.querySelector('.menu-button');
     window.document.body.innerHTML = '';
     menuButton.click();
     await flushPromises();
@@ -485,7 +296,7 @@ test('MarkdownUp, render menu toggle', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
 
     // Click the menu button again
-    [, menuButton] = window.document.getElementsByTagName('div');
+    menuButton = window.document.querySelector('.menu-button');
     window.document.body.innerHTML = '';
     menuButton.click();
     await flushPromises();
@@ -515,7 +326,7 @@ test('MarkdownUp, render menu view toggle', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button and wait for the render
-    let [, , , markdownButton] = window.document.getElementsByTagName('div');
+    let markdownButton = menuItem(window, 'Markdown source');
     window.document.title = '';
     window.document.body.innerHTML = '';
     markdownButton.click();
@@ -532,7 +343,7 @@ test('MarkdownUp, render menu view toggle', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the Markdown menu button again
-    [, , , markdownButton] = window.document.getElementsByTagName('div');
+    markdownButton = menuItem(window, 'Markdown source');
     window.document.title = '';
     window.document.body.innerHTML = '';
     markdownButton.click();
@@ -579,7 +390,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button and wait for the render
-    let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    let darkModeButton = menuItem(window, 'Dark mode');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
@@ -595,7 +406,7 @@ test('MarkdownUp, render menu dark mode toggle, system light mode', async () => 
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button again
-    [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    darkModeButton = menuItem(window, 'Dark mode');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
@@ -641,7 +452,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button and wait for the render
-    let [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    let darkModeButton = menuItem(window, 'Dark mode');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
@@ -657,7 +468,7 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
     // Click the dark mode menu button again
-    [, , , , darkModeButton] = window.document.getElementsByTagName('div');
+    darkModeButton = menuItem(window, 'Dark mode');
     window.document.body.innerHTML = '';
     documentElementStyleSetPropertyCalls.length = 0;
     windowMatchMediaCalls.length = 0;
@@ -674,7 +485,93 @@ test('MarkdownUp, render menu dark mode toggle, system dark mode', async () => {
 });
 
 
-test('MarkdownUp, render menu cycle', async () => {
+test('MarkdownUp, render menu close', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+
+    // The escape key does nothing before the first render
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'Escape'}));
+    await flushPromises();
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
+
+    // The escape key does nothing when the menu is closed
+    await app.render();
+    assert.equal(window.document.querySelector('.menu-button').getAttribute('aria-expanded'), 'false');
+    assert.equal(window.document.querySelector('.menu'), null);
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'Escape'}));
+    await flushPromises();
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), null);
+
+    // Open the menu
+    window.document.querySelector('.menu-button').click();
+    await flushPromises();
+    assert.equal(window.document.querySelector('.menu-button').getAttribute('aria-expanded'), 'true');
+    assert.notEqual(window.document.querySelector('.menu'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+
+    // Other keys don't close the menu
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'a'}));
+    await flushPromises();
+    assert.notEqual(window.document.querySelector('.menu'), null);
+
+    // The escape key closes the menu
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'Escape'}));
+    await flushPromises();
+    assert.equal(window.document.querySelector('.menu'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
+
+    // A click outside of the menu closes the menu
+    window.document.querySelector('.menu-button').click();
+    await flushPromises();
+    assert.notEqual(window.document.querySelector('.menu'), null);
+    window.document.querySelector('.menu-backdrop').click();
+    await flushPromises();
+    assert.equal(window.document.querySelector('.menu'), null);
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
+});
+
+
+test('MarkdownUp, render menu close, no menu', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!', 'menu': false});
+    await app.render();
+    assert.equal(window.document.querySelector('.menu-button'), null);
+    assert.equal(window.document.querySelector('.menu'), null);
+
+    // The escape key does nothing
+    window.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'Escape'}));
+    await flushPromises();
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+});
+
+
+test('MarkdownUp, render menu debug toggle', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.console.log = () => null;
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!'});
+    await app.render();
+    assert.equal(menuItem(window, 'Debug').getAttribute('aria-checked'), 'false');
+
+    // Click the debug menu item and wait for the render
+    menuItem(window, 'Debug').click();
+    await flushPromises();
+    assert.equal(menuItem(window, 'Debug').getAttribute('aria-checked'), 'true');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1,"debug":1}');
+
+    // Click the debug menu item again
+    menuItem(window, 'Debug').click();
+    await flushPromises();
+    assert.equal(menuItem(window, 'Debug').getAttribute('aria-checked'), 'false');
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu":1}');
+});
+
+
+test('MarkdownUp, render menu stepper', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -690,40 +587,62 @@ test('MarkdownUp, render menu cycle', async () => {
         ['--barescript-font-size', '12pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
+    assert.deepEqual(Array.from(window.document.querySelectorAll('.menu-value')).map((element) => element.textContent), ['12pt', '1.3']);
     assert.equal(window.localStorage.getItem('MarkdownUp'), null);
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the font-size menu button and wait for the render
-    let [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
-    window.document.body.innerHTML = '';
-    documentElementStyleSetPropertyCalls.length = 0;
-    fontSizeButton.click();
+    // Click the font size up button and wait for the render
+    documentElementStyleSetPropertyCalls.splice(0);
+    window.document.querySelector('[aria-label="Font size up"]').click();
     await flushPromises();
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-font-size', '14pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
+    assert.deepEqual(Array.from(window.document.querySelectorAll('.menu-value')).map((element) => element.textContent), ['14pt', '1.3']);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the font-size menu button again
-    [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
-    window.document.body.innerHTML = '';
-    documentElementStyleSetPropertyCalls.length = 0;
-    fontSizeButton.click();
+    // Click the font size up button again
+    documentElementStyleSetPropertyCalls.splice(0);
+    window.document.querySelector('[aria-label="Font size up"]').click();
     await flushPromises();
-    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
         ['--barescript-font-size', '18pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":18}');
-    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+
+    // Click the font size down button twice - the default font size isn't stored
+    window.document.querySelector('[aria-label="Font size down"]').click();
+    await flushPromises();
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
+    documentElementStyleSetPropertyCalls.splice(0);
+    window.document.querySelector('[aria-label="Font size down"]').click();
+    await flushPromises();
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.3em`]
+    ]);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{}');
+
+    // Click the line height down button
+    documentElementStyleSetPropertyCalls.splice(0);
+    window.document.querySelector('[aria-label="Line height down"]').click();
+    await flushPromises();
+    assert.deepEqual(documentElementStyleSetPropertyCalls, [
+        ['--barescript-font-size', '12pt'],
+        ['--barescript-line-height', `1.2em`]
+    ]);
+    assert.deepEqual(Array.from(window.document.querySelectorAll('.menu-value')).map((element) => element.textContent), ['12pt', '1.2']);
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"lineHeight":1.2}');
+    assert.equal(window.document.querySelector('[aria-label="Line height down"]').disabled, true);
+    assert.equal(window.document.querySelector('[aria-label="Line height up"]').disabled, false);
 });
 
 
-test('MarkdownUp, render menu cycle overflow', async () => {
+test('MarkdownUp, render menu stepper limit', async () => {
     const {window} = new JSDOM('', {'url': jsdomURL});
 
     const documentElementStyleSetPropertyCalls = [];
@@ -743,19 +662,43 @@ test('MarkdownUp, render menu cycle overflow', async () => {
     assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 24}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
 
-    // Click the font-size menu button and wait for the render
-    const [, , , , , fontSizeButton] = window.document.getElementsByTagName('div');
-    window.document.body.innerHTML = '';
-    documentElementStyleSetPropertyCalls.length = 0;
-    fontSizeButton.click();
+    // The font size up button is disabled - clicking it does nothing
+    const fontSizeUp = window.document.querySelector('[aria-label="Font size up"]');
+    assert.equal(fontSizeUp.disabled, true);
+    fontSizeUp.click();
     await flushPromises();
-    assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize": 24}');
+
+    // Click the font size down button and wait for the render
+    documentElementStyleSetPropertyCalls.splice(0);
+    window.document.querySelector('[aria-label="Font size down"]').click();
+    await flushPromises();
     assert.deepEqual(documentElementStyleSetPropertyCalls, [
-        ['--barescript-font-size', '8pt'],
+        ['--barescript-font-size', '18pt'],
         ['--barescript-line-height', `1.3em`]
     ]);
-    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":8}');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":18}');
     assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{"menu": 1}');
+});
+
+
+test('MarkdownUp, render menu stepper, value between steps', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const app = new MarkdownUp(window, {'markdownText': 'Hello!', 'fontSize': 13});
+    await app.render();
+    assert.deepEqual(Array.from(window.document.querySelectorAll('.menu-value')).map((element) => element.textContent), ['13pt', '1.3']);
+
+    // Click the font size up button and wait for the render
+    window.document.querySelector('[aria-label="Font size up"]').click();
+    await flushPromises();
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":14}');
+
+    // Click the font size down button twice
+    window.document.querySelector('[aria-label="Font size down"]').click();
+    await flushPromises();
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"fontSize":12}');
 });
 
 
@@ -769,13 +712,10 @@ test('MarkdownUp, render menu help', async () => {
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello!</p>'));
 
-    // Click the help menu button and wait for the render
-    const [, , , , , , , , helpButton] = window.document.getElementsByTagName('div');
-    window.document.body.innerHTML = '';
-    helpButton.click();
-    await flushPromises();
-    assert.equal(window.document.body.innerHTML, '');
-    assert.equal(window.location.href, 'https://github.com/craigahobbs/markdown-up#help');
+    // The help menu item is a link
+    const helpLink = menuItem(window, 'Help');
+    assert.equal(helpLink.tagName, 'A');
+    assert.equal(helpLink.href, 'https://github.com/craigahobbs/markdown-up#help');
 });
 
 
@@ -1828,7 +1768,7 @@ test('MarkdownUp.main, menu', async () => {
             'elements': [
                 [
                     [
-                        menuBurgerElements(),
+                        menuBurgerElements({'menu': true}),
                         menuElements()
                     ],
                     {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
@@ -1875,8 +1815,8 @@ test('MarkdownUp.main, menu cycle and toggle', async () => {
             'elements': [
                 [
                     [
-                        menuBurgerElements(),
-                        menuElements({'fontSizeText': '18pt', 'viewMarkdown': true})
+                        menuBurgerElements({'menu': true}),
+                        menuElements({'fontSize': 18, 'viewMarkdown': true})
                     ],
                     {'html': 'div', 'attr': {'id': 'view=markdown&_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
@@ -1921,8 +1861,8 @@ test('MarkdownUp.main, darkMode', async () => {
             'elements': [
                 [
                     [
-                        menuBurgerElements({'darkMode': 1}),
-                        menuElements({'darkMode': 1})
+                        menuBurgerElements({'menu': true}),
+                        menuElements({'darkMode': true})
                     ],
                     {'html': 'div', 'attr': {'id': '_top', 'style': 'display=none; position: absolute; top: 0;'}}
                 ],
@@ -2546,4 +2486,552 @@ foobar()
             ]
         }
     );
+});
+
+
+test('MarkdownUp.main, menu options', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.console.log = () => null;
+    const app = new MarkdownUp(window, {'markdownText': 'Hello', 'helpURL': '#help'});
+    app.updateParams('', '{"fontSize": 24, "lineHeight": 1.5}', '{"menu": 1, "debug": 1}');
+    assert.deepEqual(
+        deleteElementCallbacks(await app.main()).elements[0][0],
+        [
+            menuBurgerElements({'menu': true}),
+            menuElements({'debug': true, 'fontSize': 24, 'fontSizeUp': false, 'helpURL': '#help', 'lineHeight': 1.5})
+        ]
+    );
+
+    app.updateParams('', '{"fontSize": 8}', '{"menu": 1}');
+    assert.deepEqual(
+        deleteElementCallbacks(await app.main()).elements[0][0],
+        [
+            menuBurgerElements({'menu': true}),
+            menuElements({'fontSize': 8, 'fontSizeDown': false, 'helpURL': '#help'})
+        ]
+    );
+});
+
+
+//
+// Voice playback
+//
+
+
+// Helper to create an application with a mock audio context and a mock PicoVox
+function testVoiceApp(window, options) {
+    window.AudioContext = MockAudioContext;
+    const app = new MarkdownUp(window, options);
+    const picovox = mockPicovox();
+    app.voice.loadFn = () => Promise.resolve(picovox);
+    return [app, picovox];
+}
+
+
+// Helper to get the voice playback bar's button elements, by label
+function voiceButtons(bar) {
+    return Object.fromEntries(Array.from(bar.querySelectorAll('button')).map((button) => [button.getAttribute('aria-label'), button]));
+}
+
+
+// Helper function to create the voice playback bar elements
+function voiceElements({playing = true, rate = 1, voice = 'Michael'} = {}) {
+    const buttonElements = (label, path, fill = true, isPrimary = false) => ({
+        'html': 'button',
+        'attr': {'type': 'button', 'class': `voice-button${isPrimary ? ' voice-primary' : ''}`, 'aria-label': label},
+        'elem': iconElements(path, isPrimary ? 22 : 18, fill)
+    });
+    return {
+        'html': 'div',
+        'attr': {'class': 'voice', 'role': 'group', 'aria-label': 'Read aloud'},
+        'elem': [
+            buttonElements('Rewind', 'M5,6 H8 V18 H5 Z M19,6 L10,12 L19,18 Z'),
+            buttonElements('Skip back', 'M12,6 L3,12 L12,18 Z M21,6 L12,12 L21,18 Z'),
+            (playing
+                ? buttonElements('Pause', 'M8,6 H11 V18 H8 Z M13,6 H16 V18 H13 Z', true, true)
+                : buttonElements('Play', 'M9,6 L18,12 L9,18 Z', true, true)),
+            buttonElements('Skip forward', 'M3,6 L12,12 L3,18 Z M12,6 L21,12 L12,18 Z'),
+            {'html': 'button', 'attr': {'type': 'button', 'class': 'voice-text', 'aria-label': 'Voice'}, 'elem': {'text': voice}},
+            {'html': 'span', 'attr': {'class': 'voice-separator'}, 'elem': {'text': '|'}},
+            {
+                'html': 'button',
+                'attr': {'type': 'button', 'class': 'voice-text', 'aria-label': 'Speaking rate'},
+                'elem': {'text': `${rate}x`}
+            },
+            buttonElements('Close', 'M7,7 L17,17 M17,7 L7,17', false)
+        ]
+    };
+}
+
+
+test('MarkdownUp, read aloud', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const [app, picovox] = testVoiceApp(window, {'markdownText': `\
+[Home](#home) | [Docs](#docs)
+
+# The Title
+
+Hello there.
+
+~~~
+code block
+~~~
+
+## Section Two
+
+Goodbye.
+`});
+    await app.render();
+    assert.equal(app.voice.state(), null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+
+    // Click the read aloud menu item - the page is read aloud (without its navigation links) and the menu closes
+    menuItem(window, 'Read aloud').click();
+    await flushTasks();
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
+    assert.equal(window.document.querySelector('.menu'), null);
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+    assert.deepEqual(app.voice.audioContext.calls, ['resume']);
+    assert.deepEqual(picovox.calls.map(([text]) => text), ['The Title', 'Hello there.', 'Section Two', 'Goodbye.']);
+    assert.deepEqual(picovox.calls[0][1], {'voice': 'michael', 'rate': 1, 'seed': 1000, 'pause': 0, 'sampleRate': 24000});
+
+    // The voice playback bar is rendered in its own element
+    let bar = window.document.getElementById('markdownUpVoiceDefault');
+    assert.equal(bar, window.document.body.firstChild);
+    assert.equal(bar.className, 'voice-default');
+    assert.deepEqual(Object.keys(voiceButtons(bar)), ['Rewind', 'Skip back', 'Pause', 'Skip forward', 'Voice', 'Speaking rate', 'Close']);
+    assert.deepEqual(deleteElementCallbacks(app.voiceElements()), voiceElements());
+
+    // The page read aloud isn't a script's voice playback
+    const scriptOptions = app.createScriptOptions();
+    assert.equal(scriptOptions.voice.state(), null);
+    scriptOptions.voice.setText('Other text.', true);
+    scriptOptions.voice.close();
+    await flushTasks();
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+    assert.equal(picovox.calls.length, 4);
+
+    // An unchanged voice playback bar isn't rendered again
+    const barVoice = bar.firstChild;
+    app.renderVoice();
+    assert.equal(bar.firstChild, barVoice);
+
+    // Pause and play
+    voiceButtons(bar).Pause.click();
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': false});
+    assert.deepEqual(deleteElementCallbacks(app.voiceElements()), voiceElements({'playing': false}));
+    assert.notEqual(bar.firstChild, barVoice);
+    voiceButtons(bar).Play.click();
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+    assert.deepEqual(Object.keys(voiceButtons(bar)), ['Rewind', 'Skip back', 'Pause', 'Skip forward', 'Voice', 'Speaking rate', 'Close']);
+
+    // Skip forward, skip back, and rewind
+    voiceButtons(bar)['Skip forward'].click();
+    assert.equal(app.voice.playback.run.position, 2);
+    voiceButtons(bar)['Skip back'].click();
+    assert.equal(app.voice.playback.run.position, 0);
+    voiceButtons(bar)['Skip forward'].click();
+    voiceButtons(bar).Rewind.click();
+    assert.equal(app.voice.playback.run.position, 0);
+
+    // Change the voice and the speaking rate
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Michael');
+    voiceButtons(bar).Voice.click();
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Sarah');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"voice":"sarah"}');
+    assert.equal(voiceButtons(bar)['Speaking rate'].textContent, '1x');
+    voiceButtons(bar)['Speaking rate'].click();
+    assert.equal(voiceButtons(bar)['Speaking rate'].textContent, '1.1x');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), '{"voice":"sarah","voiceRate":1.1}');
+    assert.deepEqual(deleteElementCallbacks(app.voiceElements()), voiceElements({'rate': 1.1, 'voice': 'Sarah'}));
+    await flushTasks();
+    assert.deepEqual(
+        picovox.calls[picovox.calls.length - 1][1],
+        {'voice': 'sarah', 'rate': 1.1, 'seed': 1003, 'pause': 0.4, 'sampleRate': 24000}
+    );
+
+    // The page read aloud continues when the page is rendered again - and its voice playback bar is left in place
+    const barVoiceRendered = bar.firstChild;
+    await app.render(true);
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), bar);
+    assert.equal(bar, window.document.body.firstChild);
+    assert.equal(bar.firstChild, barVoiceRendered);
+    assert(window.document.body.innerHTML.endsWith('<p>Goodbye.</p>'));
+    assert.equal(window.document.querySelectorAll('.menu-burger').length, 1);
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Sarah');
+
+    // A new page ends the page read aloud
+    window.location.hash = '#var.vPage=2';
+    await app.render();
+    assert.equal(app.voice.state(), null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+
+    // Read aloud again, with the preferred voice and speaking rate
+    const callCount = picovox.calls.length;
+    window.document.querySelector('.menu-button').click();
+    await flushTasks();
+    menuItem(window, 'Read aloud').click();
+    await flushTasks();
+    assert.deepEqual(
+        picovox.calls[callCount],
+        ['The Title', {'voice': 'sarah', 'rate': 1.1, 'seed': 1000, 'pause': 0, 'sampleRate': 24000}]
+    );
+
+    // Close
+    bar = window.document.getElementById('markdownUpVoiceDefault');
+    voiceButtons(bar).Close.click();
+    assert.equal(app.voice.state(), null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    await flushTasks();
+});
+
+
+test('MarkdownUp, read aloud nothing', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const [app, picovox] = testVoiceApp(window, {'markdownText': '~~~\ncode block\n~~~\n'});
+    await app.render();
+
+    // Click the read aloud menu item - the page has nothing to read, so the menu just closes
+    menuItem(window, 'Read aloud').click();
+    await flushTasks();
+    assert.equal(window.sessionStorage.getItem('MarkdownUp'), '{}');
+    assert.equal(window.document.querySelector('.menu'), null);
+    assert.equal(app.voice.state(), null);
+    assert.equal(app.voice.audioContext, null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    assert.deepEqual(picovox.calls, []);
+});
+
+
+test('MarkdownUp, read aloud before PicoVox loads', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#view=markdown';
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const [app, picovox] = testVoiceApp(window, {'markdownText': '# The Title\n\nHello *there*.'});
+    let loadResolve;
+    app.voice.loadFn = () => new Promise((resolve) => {
+        loadResolve = resolve;
+    });
+    await app.render();
+    assert(window.document.body.innerHTML.endsWith('<div class="markdown"># The Title\n\nHello *there*.</div>'));
+
+    // Click the read aloud menu item
+    menuItem(window, 'Read aloud').click();
+    await flushTasks();
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+
+    // The voice can't be changed until PicoVox loads
+    const bar = window.document.getElementById('markdownUpVoiceDefault');
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Michael');
+    voiceButtons(bar).Voice.click();
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Michael');
+    assert.equal(window.localStorage.getItem('MarkdownUp'), null);
+
+    // PicoVox loads - the Markdown text view's text is read aloud as Markdown
+    loadResolve(picovox);
+    await flushTasks();
+    assert.deepEqual(picovox.calls.map(([text]) => text), ['The Title', 'Hello there.']);
+    voiceButtons(bar).Voice.click();
+    assert.equal(voiceButtons(bar).Voice.textContent, 'Sarah');
+    app.voice.close();
+    await flushTasks();
+});
+
+
+test('MarkdownUp, voice script', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    window.localStorage.setItem('MarkdownUp', '{"voice": "james", "voiceRate": 1.5}');
+    window.sessionStorage.setItem('MarkdownUp', '{"menu": 1}');
+    const [app, picovox] = testVoiceApp(window, {'markdownText': `\
+# The Title
+
+~~~ markdown-script
+if !systemGlobalGet('vPage'):
+    voiceSpeak('Hello there. More te', false, 'key1')
+endif
+markdownPrint('State: ' + jsonStringify(voiceState()))
+~~~
+`});
+    await app.render();
+    await flushTasks();
+    assert(window.document.body.innerHTML.includes('<p>State: {"key":"key1","playing":true}</p>'));
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), window.document.body.firstChild);
+    assert.deepEqual(app.voice.state(), {'key': 'key1', 'playing': true});
+    assert.deepEqual(picovox.calls, [
+        ['Hello there.', {'voice': 'james', 'rate': 1.5, 'seed': 1000, 'pause': 0, 'sampleRate': 24000}]
+    ]);
+
+    // Setting the same text does nothing
+    const scriptOptions = app.createScriptOptions();
+    const {sentences} = app.voice.playback;
+    scriptOptions.voice.setText('Hello there. More te', false);
+    assert.equal(app.voice.playback.sentences, sentences);
+
+    // The text grows
+    scriptOptions.voice.setText('Hello there. More text. And mo', false);
+    await flushTasks();
+    assert.deepEqual(picovox.calls.map(([text]) => text), ['Hello there.', 'More text.']);
+    scriptOptions.voice.setText('Hello there. More text. And mo', true);
+    await flushTasks();
+    assert.deepEqual(picovox.calls.map(([text]) => text), ['Hello there.', 'More text.', 'And mo']);
+
+    // A script's voice playback continues on a new page
+    window.location.hash = '#var.vPage=2';
+    await app.render();
+    await flushTasks();
+    assert.deepEqual(app.voice.state(), {'key': 'key1', 'playing': true});
+    assert.equal(picovox.calls.length, 3);
+
+    // Reading the page aloud replaces the script's voice playback
+    menuItem(window, 'Read aloud').click();
+    await flushTasks();
+    assert.deepEqual(app.voice.state(), {'key': null, 'playing': true});
+    assert.equal(scriptOptions.voice.state(), null);
+    assert.deepEqual(picovox.calls.slice(3).map(([text]) => text), ['The Title', 'State: {"key":"key1","playing":true}']);
+
+    // A script's voice playback replaces the page read aloud
+    scriptOptions.voice.speak('Bye.', true, null);
+    assert.deepEqual(scriptOptions.voice.state(), {'key': null, 'playing': true});
+    scriptOptions.voice.close();
+    assert.equal(scriptOptions.voice.state(), null);
+    assert.equal(app.voice.state(), null);
+    scriptOptions.voice.setText('Bye bye.', true);
+    assert.equal(app.voice.state(), null);
+    await flushTasks();
+});
+
+
+test('MarkdownUp, voice playback bar page element', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.setTimeout and window.clearTimeout
+    const windowTimeout = {};
+    window.setTimeout = (callback) => {
+        windowTimeout.callback = callback;
+        return 1;
+    };
+    window.clearTimeout = () => null;
+
+    window.location.hash = '#';
+    const [app] = testVoiceApp(window, {
+        'menu': false,
+        'markdownText': `\
+~~~ markdown-script
+function main(count):
+    markdownPrint('Count ' + count)
+    elementModelRender({'html': 'div', 'attr': {'id': 'markdownUpVoice'}})
+    windowSetTimeout(systemPartial(main, count + 1), 1000)
+endfunction
+
+markdownPrint('# Title')
+windowSetTimeout(systemPartial(main, 1), 1000)
+~~~
+`
+    });
+    await app.render();
+    assert.equal(
+        window.document.body.innerHTML,
+        '<div id="_top" style="display=none; position: absolute; top: 0;"></div><h1 id="title">Title</h1>'
+    );
+
+    // Start a voice playback - the page has no voice playback bar element, so the bar is rendered in its own element
+    const scriptOptions = app.createScriptOptions();
+    scriptOptions.voice.speak('Hello.', true, null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), window.document.body.firstChild);
+    assert.equal(window.document.querySelectorAll('.voice').length, 1);
+
+    // The page renders its voice playback bar element - the bar is rendered in it
+    await windowTimeout.callback();
+    assert.deepEqual(voiceElementsParagraphs(app.pageElements), [{'text': 'Count 1', 'section': false}]);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    let pageBar = window.document.getElementById('markdownUpVoice');
+    assert.equal(pageBar, window.document.body.lastChild);
+    assert.equal(window.document.querySelectorAll('.voice').length, 1);
+    assert.equal(pageBar.firstChild.className, 'voice');
+
+    // The page renders again
+    await windowTimeout.callback();
+    assert.notEqual(window.document.getElementById('markdownUpVoice'), pageBar);
+    pageBar = window.document.getElementById('markdownUpVoice');
+    assert.equal(pageBar.firstChild.className, 'voice');
+
+    // Close the voice playback - the page's voice playback bar element is cleared
+    voiceButtons(pageBar).Close.click();
+    assert.equal(app.voice.state(), null);
+    assert.equal(pageBar.firstChild, null);
+    app.renderVoice();
+    assert.equal(pageBar.firstChild, null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    await flushTasks();
+});
+
+
+test('MarkdownUp, voice playback bar document reset', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.setTimeout and window.clearTimeout
+    const windowTimeout = {};
+    window.setTimeout = (callback) => {
+        windowTimeout.callback = callback;
+        return 1;
+    };
+    window.clearTimeout = () => null;
+
+    window.location.hash = '#';
+    const [app] = testVoiceApp(window, {
+        'menu': false,
+        'markdownText': `\
+~~~ markdown-script
+function main(count):
+    markdownPrint('Hello ' + count)
+    windowSetTimeout(systemPartial(main, count + 1), 1000)
+    documentSetReset(if(count <= 2, 'resetID', 'unknownID'))
+endfunction
+
+elementModelRender({'html': 'div', 'attr': {'id': 'resetID'}})
+main(1)
+~~~
+`
+    });
+    await app.render();
+    const {body} = window.document;
+    assert(body.innerHTML.endsWith('<div id="resetID"></div><p>Hello 1</p>'));
+
+    // Start a voice playback - the voice playback bar's own element is the body's first element
+    app.createScriptOptions().voice.speak('Hello.', true, null);
+    await flushTasks();
+    const bar = window.document.getElementById('markdownUpVoiceDefault');
+    const barVoice = bar.firstChild;
+    assert.equal(bar, body.firstChild);
+    assert.equal(barVoice.className, 'voice');
+
+    // The page renders below its reset element - the voice playback bar is left in place
+    await windowTimeout.callback();
+    assert(body.innerHTML.endsWith('<div id="resetID"></div><p>Hello 2</p>'));
+    assert.equal(body.firstChild, bar);
+    assert.equal(bar.firstChild, barVoice);
+
+    // The reset ID is unknown, so the page's elements are all removed - the voice playback bar is still left in place
+    await windowTimeout.callback();
+    assert.equal(body.children.length, 2);
+    assert.equal(body.lastChild.outerHTML, '<p>Hello 3</p>');
+    assert.equal(body.firstChild, bar);
+    assert.equal(bar.firstChild, barVoice);
+    app.voice.close();
+    assert.equal(body.children.length, 1);
+    await flushTasks();
+});
+
+
+test('MarkdownUp, voice script new document', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.fetch = (url) => Promise.resolve({'ok': true, 'text': () => Promise.resolve(`# Document ${url}`)});
+    window.location.hash = '#url=one.md';
+    const [app] = testVoiceApp(window);
+    await app.render();
+    assert(window.document.body.innerHTML.endsWith('Document one.md</h1>'));
+
+    // A script's voice playback continues on a new page of the document
+    app.createScriptOptions().voice.speak('Hello.', true, 'key1');
+    window.location.hash = '#url=one.md&var.vPage=2';
+    await app.render();
+    assert.deepEqual(app.voice.state(), {'key': 'key1', 'playing': true});
+    assert.notEqual(window.document.getElementById('markdownUpVoiceDefault'), null);
+
+    // A new document ends it
+    window.location.hash = '#url=two.md&var.vPage=2';
+    await app.render();
+    assert(window.document.body.innerHTML.endsWith('Document two.md</h1>'));
+    assert.equal(app.voice.state(), null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    await flushTasks();
+});
+
+
+test('MarkdownUp, page elements document reset', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+
+    // Patch window.setTimeout and window.clearTimeout
+    const windowTimeout = {};
+    window.setTimeout = (callback) => {
+        windowTimeout.callback = callback;
+        return 1;
+    };
+    window.clearTimeout = () => null;
+
+    window.location.hash = '#';
+    const app = new MarkdownUp(window, {
+        'menu': false,
+        'markdownText': `\
+Intro
+
+~~~ markdown-script
+function main(count):
+    markdownPrint('Hello ' + count)
+    windowSetTimeout(systemPartial(main, count + 1), 1000)
+    documentSetReset(if(count <= 2, 'resetID', 'unknownID'))
+endfunction
+
+markdownPrint('# Title')
+elementModelRender({'html': 'div', 'attr': {'id': 'resetID'}})
+main(1)
+~~~
+`
+    });
+    await app.render();
+    assert.deepEqual(voiceElementsParagraphs(app.pageElements).map(({text}) => text), ['Intro', 'Title', 'Hello 1']);
+
+    // Call the timeout callback - the page elements are reset
+    await windowTimeout.callback();
+    assert.deepEqual(voiceElementsParagraphs(app.pageElements).map(({text}) => text), ['Intro', 'Title', 'Hello 2']);
+
+    // Call the timeout callback - the reset ID is unknown, so there are no page elements after the reset
+    await windowTimeout.callback();
+    assert.equal(window.document.body.innerHTML, '<p>Hello 3</p>');
+    assert.deepEqual(voiceElementsParagraphs(app.pageElements).map(({text}) => text), ['Hello 3']);
+});
+
+
+test('MarkdownUp, voice lines', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    window.location.hash = '#';
+    const [app, picovox] = testVoiceApp(window, {'markdownText': `\
+~~~ markdown-script
+voiceLoad()
+voiceSay('Go for ignition.', 'james', 'angry')
+markdownPrint('Ready: ' + voiceReady())
+markdownPrint('State: ' + jsonStringify(voiceState()))
+~~~
+`});
+    await app.render();
+    await flushTasks();
+
+    // The line is said - it isn't a voice playback, so there's no voice playback bar
+    const audioContext = app.voice.lineAudioContext;
+    assert.deepEqual(audioContext.calls, ['resume', 'resume']);
+    assert.deepEqual(picovox.calls, [
+        ['Go for ignition.', {'voice': 'james', 'style': 'angry', 'rate': 1, 'seed': 1000, 'pause': 0, 'sampleRate': 24000}]
+    ]);
+    assert(window.document.body.innerHTML.endsWith('<p>Ready: true\nState: null</p>'));
+    assert.equal(app.voice.state(), null);
+    assert.equal(window.document.getElementById('markdownUpVoiceDefault'), null);
+    assert.equal(app.voice.lines.size, 1);
+    assert.deepEqual(audioContext.sources.map((source) => source.stopped), [false]);
+
+    // Rendering the page anew stops its lines (and the page says its line again)
+    await app.render(true);
+    await flushTasks();
+    assert.deepEqual(audioContext.sources.map((source) => source.stopped), [true, false]);
+    assert.equal(app.voice.lines.size, 1);
+
+    // The script library's voiceClose stops the lines
+    app.createScriptOptions().voice.close();
+    assert.deepEqual(audioContext.sources.map((source) => source.stopped), [true, true]);
+    assert.equal(app.voice.lines.size, 0);
 });

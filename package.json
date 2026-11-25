@@ -22,8 +22,9 @@
         "test": "node --test test/"
     },
     "dependencies": {
-        "bare-script": "~5.2",
-        "element-model": "~1.2"
+        "bare-script": "~5.3",
+        "element-model": "~1.2",
+        "picovox": "~2.0"
     },
     "devDependencies": {
         "@eslint/js": "~10.0",

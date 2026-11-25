@@ -105,12 +105,31 @@ block. You can learn more from the
 [MarkdownUp backend application's README](https://craigahobbs.github.io/markdown-up-py/#markdownup-applications).
 
 
+## Read Aloud
+
+MarkdownUp reads pages aloud with [PicoVox](https://github.com/craigahobbs/picovox#readme) speech
+synthesis, which runs entirely in the browser. To read the page aloud, click "Read aloud" in the
+MarkdownUp menu in the upper-right of the page. The voice playback bar appears at the bottom of the
+window, with play/pause, rewind, skip back and forward by section (the page's top-level headers),
+voice, and speaking rate controls. Code blocks, images, and controls are not read. PicoVox speaks
+English text, and it is loaded when it is first used.
+
+MarkdownUp applications read their own Markdown text aloud with the `voiceSpeak`, `voiceSetText`,
+`voiceState`, and `voiceClose` functions. An application positions the voice playback bar by
+rendering an element with the ID "markdownUpVoice" - the bar is rendered in that element.
+
+Applications also say lines of text aloud with the `voiceSay` function - each in a voice and a
+speaking style, over any other lines, with no voice playback bar (for example, a film's dialogue).
+`voiceLoad` loads the speech synthesizer ahead of the first line, and `voiceReady` tests whether the
+browser has let the page's audio start (it may not until the user interacts with the page).
+
+
 ## Debug Mode
 
 Debug mode logs the script runtime duration and runs the BareScript linter, which performs static
 code analysis on your code and reports warnings for any issues found.
 
-To turn on debug mode, click the debug button in the MarkdownUp menu in the upper-right of the page.
+To turn on debug mode, click "Debug" in the MarkdownUp menu in the upper-right of the page.
 
 
 ## Development

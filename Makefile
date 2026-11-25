@@ -50,6 +50,7 @@ app: doc tarball build/markdown.css
 		lib \
 		node_modules/bare-script \
 		node_modules/element-model \
+		node_modules/picovox \
 		build/doc \
 		build/markdown-up.tar.gz \
 		build/app/
@@ -58,11 +59,13 @@ app: doc tarball build/markdown.css
 
     # Fix imports
 	for FILE in `find build/app/*/lib -name '*.js'`; do \
-		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" \
+			-e "s/import\('([^\.])/import('..\/..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/app/* -name '*.js'`; do \
-		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" \
+			-e "s/import\('([^\.])/import('..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 
@@ -90,13 +93,19 @@ tarball: build/npm.build build/markdown.css
 	mkdir -p build/markdown-up/element-model
 	cp -R node_modules/element-model/lib build/markdown-up/element-model
 
+    # picovox
+	mkdir -p build/markdown-up/picovox
+	cp -R node_modules/picovox/lib build/markdown-up/picovox
+
     # Fix imports
 	for FILE in `find build/markdown-up/*/lib -name '*.js'`; do \
-		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/..\/\1/" -e "s/ from '([^\.])/ from '..\/..\/\1/" \
+			-e "s/import\('([^\.])/import('..\/..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 	for FILE in `find build/markdown-up/* -name '*.js'`; do \
-		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" $$FILE > $$FILE.tmp && \
+		sed -E -e "s/^import '([^\.])/import '..\/\1/" -e "s/ from '([^\.])/ from '..\/\1/" \
+			-e "s/import\('([^\.])/import('..\/\1/" $$FILE > $$FILE.tmp && \
 		mv $$FILE.tmp $$FILE; \
 	done
 
