@@ -913,7 +913,7 @@ test('MarkdownUp, render keydown', async () => {
     };
     window.document.removeEventListener = (type, callback) => {
         assert.equal(type, 'keydown');
-        assert.equal(typeof callback, 'function');
+        assert.equal(callback, eventListener[type]);
         eventListener[type] = null;
     };
 
@@ -966,6 +966,36 @@ main({'key': 'A'})
     assert.equal(typeof app.runtimeDocumentKeyDown, 'function');
     assert.equal(window.document.title, '');
     assert(window.document.body.innerHTML.endsWith('<p>Hello 2 (key: B)</p>'));
+});
+
+
+test('MarkdownUp, render keydown once', async () => {
+    const {window} = new JSDOM('', {'url': jsdomURL});
+    const app = new MarkdownUp(window, {
+        'markdownText': `\
+~~~ markdown-script
+function onKeyDown(event):
+    sessionStorageSet('keys', sessionStorageGet('keys') + objectGet(event, 'key'))
+endfunction
+
+documentSetKeyDown(onKeyDown)
+markdownPrint('Hello')
+~~~
+`
+    });
+    window.location.hash = '#';
+    window.sessionStorage.setItem('keys', '');
+    await app.render();
+
+    // Render again, twice - each render's keydown handler replaces the last
+    await app.render(true);
+    await app.render(true);
+    window.document.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'a'}));
+    await flushPromises();
+    assert.equal(window.sessionStorage.getItem('keys'), 'a');
+    window.document.dispatchEvent(new window.KeyboardEvent('keydown', {'key': 'b'}));
+    await flushPromises();
+    assert.equal(window.sessionStorage.getItem('keys'), 'ab');
 });
 
 
