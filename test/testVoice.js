@@ -710,6 +710,33 @@ test('MarkdownUpVoice, PicoVox', async () => {
 });
 
 
+test('MarkdownUpVoice, audio session', async () => {
+    // Where the browser has audio sessions, the page's audio is playback audio (an iPhone in silent mode plays it)
+    const {voice} = testVoice();
+    const audioSession = {'type': 'auto'};
+    voice.window.navigator = {audioSession};
+    voice.speak([{'text': 'One.', 'section': false}], true, null);
+    assert.equal(audioSession.type, 'playback');
+    assert.deepEqual(voice.audioContext.options, {'sampleRate': 24000});
+    voice.close();
+
+    // The voice lines' audio is too
+    const {voice: voice2} = testVoice();
+    const audioSession2 = {'type': 'auto'};
+    voice2.window.navigator = {'audioSession': audioSession2};
+    voice2.prepare();
+    assert.equal(audioSession2.type, 'playback');
+    assert.deepEqual(voice2.lineAudioContext.options, {'sampleRate': 24000});
+
+    // A browser without audio sessions
+    const {voice: voice3} = testVoice();
+    voice3.window.navigator = {};
+    voice3.prepare();
+    assert.deepEqual(voice3.lineAudioContext.options, {'sampleRate': 24000});
+    await flushTasks();
+});
+
+
 //
 // MarkdownUpVoice voice lines
 //
